@@ -106,21 +106,42 @@ Se intentó el método recomendado por Railway (túnel SSH sin exponer la BD: `r
 
 ---
 
-## Próximo paso — Tarea 1.4 (pausada)
+## Tarea 1.4 — Motor de pagos: hallazgos y estado (PAUSADA)
 
-Quedamos en la **Tarea 1.4 — Motor de pagos: completar suscripciones**. Antes de escribir el webhook (`app/api/webhooks/pagos/route.ts`) necesitamos que Agustín aporte info sobre el **motor de pagos ya existente de Devalpo** (Flow + MercadoPago + PayPal):
+El repo del motor de pagos es privado: `https://github.com/Devalpo/DeValpo.PaymentEngine.git`. No se pudo clonar directamente porque la organización Devalpo tiene **OAuth App access restrictions** activadas (bloquea a Git Credential Manager aunque el usuario tenga permisos — error `403` con mensaje explícito de GitHub sobre esto, no era problema de permisos del repo). Se resolvió con Agustín descargando el ZIP manualmente a `C:\Users\agust\Documents\DeValpo.PaymentEngine-main`.
 
-- ¿Dónde está el código/repo de ese motor?
-- ¿Qué payload exacto manda al confirmar/fallar un pago? (el roadmap asume `{ clienteId, monto, estado, proveedor, referencia }`, pero hay que confirmarlo contra el sistema real)
-- ¿Ya soporta cobro recurrente mensual en Flow y MercadoPago, o hay que armarlo?
+### Qué es realmente (distinto de lo que asume el roadmap)
 
-**Alternativa si no hay info a mano todavía:** saltar a la **Tarea 1.5 — Middleware multitenant Next.js**, que es código puro (no depende de sistemas externos) y ya tenemos todo lo necesario (Prisma + tablas listas) para escribirla. Volver a la 1.4 cuando esté la info del motor de pagos.
+El roadmap asume que "el motor de pagos" simplemente manda un webhook a WebBot con `{ clienteId, monto, estado, proveedor, referencia }`. La realidad es otra: es un **microservicio FastAPI independiente y reutilizable** (`motor-de-pagos`), con su propia Postgres, pensado para que cualquier app de Devalpo lo consuma por API. Soporta Flow, Mercado Pago, PayPal y Stripe (pagos únicos y suscripciones).
+
+**Contrato de integración real** (`docs/integration-contract.md` del motor de pagos):
+
+- WebBot es el "consumer app". Flujo:
+  1. WebBot llama `POST /v1/subscriptions` con `{ gateway, external_order_id, amount, currency, description, customer: {email, name}, return_url, cancel_url, gateway_plan_id, metadata }` — header `X-API-Key`.
+  2. El motor devuelve `{ subscription_id, gateway, external_order_id, status, checkout_url }`.
+  3. WebBot redirige al cliente a `checkout_url`.
+  4. Cuando el cliente vuelve, WebBot debe consultar `GET /v1/subscriptions/{subscription_id}` para el estado real — **no confiar solo en el webhook**.
+  5. El motor también puede avisar de forma asíncrona pegándole a una URL propia (`PROJECT_WEBHOOK_URL`, configurada como env var **del motor de pagos**, no de WebBot) con body `{ "type": "subscription.active" | "subscription.past_due" | "subscription.cancelled" | "subscription.expired" | "payment.paid" | "payment.failed" | "payment.cancelled" | "payment.expired" | "payment.refunded", "data": {...} }`.
+  - **Ojo:** esos webhooks salientes del motor **no llevan firma/secreto** — cualquiera que conozca la URL podría pegarle. Por eso el propio motor recomienda tratarlos solo como "aviso para refrescar" y volver a pedir el estado real con `GET`, no confiar en el payload a ciegas. Así hay que implementar el receptor en WebBot.
+  - Enums reales de estado: `PaymentStatus` = created/pending/approved/pending_capture/processing/requires_action/paid/failed/cancelled/expired/refunded. `SubscriptionStatus` = created/pending/active/past_due/cancelled/expired. (El enum `Proveedor` que ya creamos en Prisma dice `MERCADOPAGO`, pero el motor usa el string `mercado_pago` con guion bajo — hay que mapear, no asumir que son el mismo string.)
+
+### Bloqueante real: el motor de pagos no está deployado en ningún lado
+
+Su propia doc dice explícito: *"This repository only builds and validates the service. It does not auto-deploy."* No hay URL productiva ni de staging. Para completar la Tarea 1.4 de verdad hace falta:
+
+1. Deployarlo como servicio nuevo en Railway (tiene `Dockerfile` listo) — sería un **4to servicio**, con su propia Postgres (o reusar la existente, a decidir).
+2. Cargar sus propios secrets (`FLOW_API_KEY`, `FLOW_SECRET_KEY`, `MERCADO_PAGO_ACCESS_TOKEN`, `PAYPAL_CLIENT_ID/SECRET`, `API_KEYS`, etc.) — Agustín los tiene que conseguir/generar.
+3. Crear los **planes recurrentes reales** en los dashboards de Flow y Mercado Pago para Starter/Pro/Agencia y conseguir sus `gateway_plan_id`.
+4. Agregar un campo a `Cliente` (o `Pago`) en el schema de Prisma para guardar el `subscription_id` que devuelve el motor — **no existe todavía**, hay que migrar.
+5. Setear `PROJECT_WEBHOOK_URL` del motor apuntando a un endpoint nuevo de WebBot (ej. `app/api/webhooks/pagos/route.ts`).
+
+**Decisión (2026-08-08):** se pausa la 1.4 acá. Se salta a la **Tarea 1.5 — Middleware multitenant**, que no depende de nada de esto. Se retoma la 1.4 cuando Agustín tenga tiempo/ganas de deployar el motor de pagos y conseguir credenciales/plan IDs reales.
 
 ---
 
 ## Cómo retomar
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
-2. Confirmar con Agustín si seguimos con 1.4 (con info del motor de pagos) o saltamos a 1.5.
-3. `git pull` para tener el estado más reciente del repo.
-4. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
+2. `git pull` para tener el estado más reciente del repo.
+3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
+4. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
