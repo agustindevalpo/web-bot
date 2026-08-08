@@ -12,7 +12,7 @@
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 
 ```
-FASE 1 — Fundaciones       [ ] 🟡 en progreso (5/7 tareas)
+FASE 1 — Fundaciones       [ ] 🟡 en progreso (6/7 tareas)
 FASE 2 — Bot & IA           [ ] 🔴 pendiente
 FASE 3 — Templates & Deploy [ ] 🔴 pendiente
 FASE 4 — Lanzamiento        [ ] 🔴 pendiente
@@ -26,8 +26,8 @@ FASE 4 — Lanzamiento        [ ] 🔴 pendiente
 [x] 1.3 — Todas las tablas en PostgreSQL creadas
 [ ] 1.4 — Webhook de pago activa/pausa cliente en BD   ← PAUSADA, ver sección propia más abajo
 [x] 1.5 — Middleware sirve rutas por subdominio
-[ ] 1.6 — Todos los secrets cargados en Railway         ← siguiente
-[ ] 1.7 — CI/CD auto-deploy funcionando
+[x] 1.6 — Todos los secrets cargados en Railway (adaptado, ver detalle)
+[ ] 1.7 — CI/CD auto-deploy funcionando                 ← siguiente
 ```
 
 ---
@@ -101,6 +101,14 @@ Se intentó el método recomendado por Railway (túnel SSH sin exponer la BD: `r
 - **Bug de deploy encontrado y arreglado:** el build en Railway fallaba (`Module '"@prisma/client"' has no exported member 'PrismaClient'`) porque el paso de generación del cliente Prisma no corría en un entorno de build limpio. Se agregó `"postinstall": "prisma generate"` a `package.json` — sin esto, cualquier deploy futuro con cambios de schema va a fallar en Railway aunque funcione local.
 - Se configuró `DATABASE_URL` en el servicio `web-bot` de Railway apuntando a la **URL interna** de Postgres vía referencia de variable (`${{Postgres.DATABASE_URL}}`), no a la pública — en producción ambos servicios están en la misma red privada de Railway, no hace falta exponer la BD.
 - Verificado en producción: `test.sitios.devalpo.cl` renderiza el sitio de prueba desde la BD; `noexiste.sitios.devalpo.cl` devuelve 404.
+
+## Tarea 1.6 — Variables de entorno y secrets ✅ (adaptada)
+
+- `.env.example` creado en el repo con todos los nombres de variables que anticipa el roadmap (sin valores).
+- `DATABASE_URL` y `NEXT_PUBLIC_BASE_DOMAIN` ya están cargadas en Railway (servicio `web-bot`).
+- **Decisión:** no se cargó ninguna key real todavía (Anthropic, Flow, Mercado Pago, PayPal, Unsplash, N8N) porque hoy no hay código que las consuma — se van a pedir y cargar recién en la tarea que las necesite (Fase 2 en adelante), para no acumular placeholders vacíos sin uso.
+- **Decisión:** el paso del roadmap de "crear documento en Notion con dónde encontrar cada key" se reemplaza por esta bitácora — no tiene sentido un doc de equipo para un desarrollador solo (ver `project-webbot-solo-dev` en memoria).
+- Done cumplido: Next.js sigue levantando en Railway sin errores de variables faltantes.
 
 ---
 
