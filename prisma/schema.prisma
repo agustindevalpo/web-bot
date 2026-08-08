@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cliente {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  nombre        String
+  telefono      String?
+  plan          Plan      @default(STARTER)
+  activo        Boolean   @default(false)
+  fechaCreacion DateTime  @default(now())
+  fechaPago     DateTime?
+  sitios        Sitio[]
+  pagos         Pago[]
+}
+
+model Sitio {
+  id            String   @id @default(cuid())
+  clienteId     String
+  cliente       Cliente  @relation(fields: [clienteId], references: [id])
+  subdominio    String   @unique
+  dominioPropio String?  @unique
+  template      Template
+  configJson    Json
+  activo        Boolean  @default(true)
+  fechaCreacion DateTime @default(now())
+  fechaUpdate   DateTime @updatedAt
+}
+
+model Pago {
+  id         String     @id @default(cuid())
+  clienteId  String
+  cliente    Cliente    @relation(fields: [clienteId], references: [id])
+  monto      Int
+  estado     EstadoPago
+  proveedor  Proveedor
+  referencia String?
+  fecha      DateTime   @default(now())
+}
+
+model Sesion {
+  id            String   @id @default(cuid())
+  sessionId     String   @unique
+  historial     Json     @default("[]")
+  datosJson     Json?
+  completada    Boolean  @default(false)
+  fechaCreacion DateTime @default(now())
+}
+
+enum Plan {
+  STARTER
+  PRO
+  AGENCIA
+}
+
+enum Template {
+  LANDING
+  SERVICIOS
+  PORTFOLIO
+  RESTAURANTE
+  TIENDA
+}
+
+enum EstadoPago {
+  PENDIENTE
+  CONFIRMADO
+  FALLIDO
+  REEMBOLSADO
+}
+
+enum Proveedor {
+  FLOW
+  MERCADOPAGO
+  PAYPAL
+  TRANSFERENCIA
+}
