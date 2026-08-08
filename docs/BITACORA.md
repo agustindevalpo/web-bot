@@ -12,7 +12,7 @@
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 
 ```
-FASE 1 — Fundaciones       [ ] 🟡 en progreso (6/7 tareas)
+FASE 1 — Fundaciones       [ ] 🟡 6/7 tareas (falta solo 1.4, bloqueada — ver abajo)
 FASE 2 — Bot & IA           [ ] 🔴 pendiente
 FASE 3 — Templates & Deploy [ ] 🔴 pendiente
 FASE 4 — Lanzamiento        [ ] 🔴 pendiente
@@ -24,10 +24,10 @@ FASE 4 — Lanzamiento        [ ] 🔴 pendiente
 [x] 1.1 — 3 servicios Railway en verde
 [x] 1.2 — *.sitios.devalpo.cl con HTTPS funcionando
 [x] 1.3 — Todas las tablas en PostgreSQL creadas
-[ ] 1.4 — Webhook de pago activa/pausa cliente en BD   ← PAUSADA, ver sección propia más abajo
+[ ] 1.4 — Webhook de pago activa/pausa cliente en BD   ← ÚNICA PENDIENTE, ver sección propia más abajo
 [x] 1.5 — Middleware sirve rutas por subdominio
 [x] 1.6 — Todos los secrets cargados en Railway (adaptado, ver detalle)
-[ ] 1.7 — CI/CD auto-deploy funcionando                 ← siguiente
+[x] 1.7 — CI/CD auto-deploy funcionando
 ```
 
 ---
@@ -35,7 +35,7 @@ FASE 4 — Lanzamiento        [ ] 🔴 pendiente
 ## Repositorio
 
 - **Repo:** https://github.com/agustindevalpo/web-bot.git
-- **Rama:** `main` (auto-deploy activado en Railway)
+- **Ramas:** `main` (Railway auto-deploya solo desde acá) y `develop` (integración). Convención: `feature/tarea-x` → merge a `develop` → merge a `main` cuando el trabajo está listo para producción. Como no hay ambiente de staging, mergear a `main` = deploy real.
 - Commits hechos esta sesión:
   1. Initial commit: README + roadmap
   2. Scaffold Next.js (App Router, TypeScript)
@@ -110,6 +110,15 @@ Se intentó el método recomendado por Railway (túnel SSH sin exponer la BD: `r
 - **Decisión:** el paso del roadmap de "crear documento en Notion con dónde encontrar cada key" se reemplaza por esta bitácora — no tiene sentido un doc de equipo para un desarrollador solo (ver `project-webbot-solo-dev` en memoria).
 - Done cumplido: Next.js sigue levantando en Railway sin errores de variables faltantes.
 
+## Tarea 1.7 — CI/CD básico ✅
+
+- Se creó la rama `develop` a partir de `main`.
+- Se probó en vivo el flujo `feature/tarea-1-7-cicd → develop → main` (esta misma tarea se hizo así, como ejemplo de la convención a futuro).
+- `.railwayignore` agregado (excluye `docs/`, `*.md`, `.git`, `node_modules`, `.next`, `.env*` del contexto de build).
+- Verificado: push a `main` disparó un deploy que terminó exitoso (`railway deployment list` lo confirma), bien por debajo de los 2 minutos que pide el Done. Sitio de prueba respondiendo 200 después del deploy.
+
+**Fase 1 queda 7/7 salvo la 1.4, que sigue bloqueada** (motor de pagos sin deployar — ver sección propia).
+
 ---
 
 ## Decisiones que se apartan del roadmap original
@@ -161,6 +170,7 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ## Cómo retomar
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
-2. `git pull` para tener el estado más reciente del repo.
+2. `git checkout develop && git pull` para tener el estado más reciente (a partir de la Tarea 1.7, el trabajo nuevo arranca en `develop` o en una rama `feature/tarea-x` desde `develop`, no directo en `main`).
 3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
 4. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
+5. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Próximo bloque grande si se sigue el roadmap en orden: **Fase 2 — Bot & IA**, que arranca con la Tarea 2.1 (Chat UI) y 2.2 (agente Claude de onboarding — necesita `ANTHROPIC_API_KEY`).
