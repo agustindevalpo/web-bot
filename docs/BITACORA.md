@@ -12,7 +12,7 @@
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 
 ```
-FASE 1 — Fundaciones       [ ] 🟡 en progreso (3/7 tareas)
+FASE 1 — Fundaciones       [ ] 🟡 en progreso (5/7 tareas)
 FASE 2 — Bot & IA           [ ] 🔴 pendiente
 FASE 3 — Templates & Deploy [ ] 🔴 pendiente
 FASE 4 — Lanzamiento        [ ] 🔴 pendiente
@@ -24,9 +24,9 @@ FASE 4 — Lanzamiento        [ ] 🔴 pendiente
 [x] 1.1 — 3 servicios Railway en verde
 [x] 1.2 — *.sitios.devalpo.cl con HTTPS funcionando
 [x] 1.3 — Todas las tablas en PostgreSQL creadas
-[ ] 1.4 — Webhook de pago activa/pausa cliente en BD   ← PAUSADA, ver "Próximo paso"
-[ ] 1.5 — Middleware sirve rutas por subdominio
-[ ] 1.6 — Todos los secrets cargados en Railway
+[ ] 1.4 — Webhook de pago activa/pausa cliente en BD   ← PAUSADA, ver sección propia más abajo
+[x] 1.5 — Middleware sirve rutas por subdominio
+[ ] 1.6 — Todos los secrets cargados en Railway         ← siguiente
 [ ] 1.7 — CI/CD auto-deploy funcionando
 ```
 
@@ -93,6 +93,15 @@ Se intentó el método recomendado por Railway (túnel SSH sin exponer la BD: `r
 - Se deja **activo a propósito** (no solo para la migración puntual) porque `npm run dev` local también la va a necesitar.
 - Tip para el futuro: usar `railway variables` (CLI, ya logueada y linkeada al proyecto) para ver valores reales de variables — es mucho más confiable que mirar la UI del dashboard, que varias veces mostró templates sin resolver (`${{PGUSER}}`, etc.) o cambios sin deployar.
 
+## Tarea 1.5 — Middleware multitenant Next.js ✅
+
+- `proxy.ts` en la raíz (Next.js 16 renombró la convención `middleware.ts` → `proxy.ts`; se migró a mano, la función exportada ahora se llama `proxy` en vez de `middleware`). Reescribe `*.sitios.devalpo.cl` → `/sites/[subdominio]`. Los hosts `localhost`, `webbot.devalpo.cl` (app principal, todavía no existe) y `*.up.railway.app` (dominio autogenerado de Railway) pasan directo sin rewrite.
+- `app/sites/[subdominio]/page.tsx`: busca el `Sitio` en Postgres por `subdominio`, `notFound()` si no existe o no está activo. El render real de templates es un stub (placeholder) hasta la Tarea 3.1.
+- `lib/db.ts`: cliente Prisma compartido (singleton, patrón estándar de Next.js) usando el driver adapter `PrismaPg` que exige Prisma 7.
+- **Bug de deploy encontrado y arreglado:** el build en Railway fallaba (`Module '"@prisma/client"' has no exported member 'PrismaClient'`) porque el paso de generación del cliente Prisma no corría en un entorno de build limpio. Se agregó `"postinstall": "prisma generate"` a `package.json` — sin esto, cualquier deploy futuro con cambios de schema va a fallar en Railway aunque funcione local.
+- Se configuró `DATABASE_URL` en el servicio `web-bot` de Railway apuntando a la **URL interna** de Postgres vía referencia de variable (`${{Postgres.DATABASE_URL}}`), no a la pública — en producción ambos servicios están en la misma red privada de Railway, no hace falta exponer la BD.
+- Verificado en producción: `test.sitios.devalpo.cl` renderiza el sitio de prueba desde la BD; `noexiste.sitios.devalpo.cl` devuelve 404.
+
 ---
 
 ## Decisiones que se apartan del roadmap original
@@ -103,6 +112,8 @@ Se intentó el método recomendado por Railway (túnel SSH sin exponer la BD: `r
 | DNS registro | A record con IP | **CNAME** | Railway no da IPs estáticas por servicio. |
 | Conexión Prisma | `new PrismaClient()` | **`PrismaPg` driver adapter** | Prisma 7 (instalado) lo exige. |
 | Conexión BD local | Túnel SSH Railway CLI | **Public Access + DATABASE_PUBLIC_URL** | Túnel SSH no funciona en este Windows (ver arriba). |
+| Archivo de middleware | `middleware.ts` | **`proxy.ts`** (función `proxy`) | Next.js 16 deprecó la convención `middleware.ts`. |
+| Generación de Prisma Client | Implícita | **`postinstall: prisma generate`** en `package.json` | Railway no la corría sola en build limpio; rompía el deploy. |
 
 ---
 
