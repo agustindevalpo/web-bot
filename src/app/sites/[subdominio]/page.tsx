@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/db'
+import { sitioRepo } from '@/infrastructure/container'
 
 export default async function SitioCliente({
   params,
@@ -8,11 +8,9 @@ export default async function SitioCliente({
 }) {
   const { subdominio } = await params
 
-  const sitio = await prisma.sitio.findUnique({
-    where: { subdominio },
-  })
+  const sitio = await sitioRepo.findBySubdominio(subdominio)
 
-  if (!sitio || !sitio.activo) return notFound()
+  if (!sitio || !sitio.estaActivo()) return notFound()
 
   // Los templates reales se conectan en la Tarea 3.1.
   return (

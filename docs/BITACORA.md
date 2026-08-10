@@ -7,8 +7,8 @@
 
 ## Estado general
 
-**Última sesión:** 2026-08-08
-**Fase actual:** FASE 1 — Fundaciones
+**Última sesión:** 2026-08-10 — migración de todo el código a arquitectura de 4 capas (Clean Architecture) bajo `src/`, ver sección [Migración a arquitectura de 4 capas](#migración-a-arquitectura-de-4-capas-clean-architecture) más abajo. Cambio estructural grande: no agrega funcionalidad nueva de Fase 2/3, reorganiza y pone tests a lo que ya existía de Fase 1.
+**Fase actual:** FASE 1 — Fundaciones (sin cambios de alcance, solo de estructura de código)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 
 ```
@@ -131,6 +131,40 @@ Se intentó el método recomendado por Railway (túnel SSH sin exponer la BD: `r
 | Conexión BD local | Túnel SSH Railway CLI | **Public Access + DATABASE_PUBLIC_URL** | Túnel SSH no funciona en este Windows (ver arriba). |
 | Archivo de middleware | `middleware.ts` | **`proxy.ts`** (función `proxy`) | Next.js 16 deprecó la convención `middleware.ts`. |
 | Generación de Prisma Client | Implícita | **`postinstall: prisma generate`** en `package.json` | Railway no la corría sola en build limpio; rompía el deploy. |
+
+---
+
+## Migración a arquitectura de 4 capas (Clean Architecture)
+
+**Fecha:** 2026-08-10. Se agregó `docs/WEBBOT_ARQUITECTURA.md` (Clean Architecture: `domain → application → infrastructure → presentation`, más pirámide de tests Jest + Playwright/Cucumber) y se migró todo el código existente de Fase 1 a esa estructura, bajo `src/`.
+
+**Qué quedó con código real** (tiene respaldo hoy): entidades de dominio (`Cliente`, `Sitio`, `Sesion`, `Pago`), sus value objects, interfaces de repos y excepciones; DTOs, interfaces de servicios de aplicación, mappers y los 5 use cases (`GenerarSitio`, `ActivarCliente`, `PausarSitio`, `ReactivarSitio`, `VerificarDominio`); los 4 repositorios Prisma; el contenedor DI (`src/infrastructure/container.ts`); y la página de sitio por subdominio (ahora usa `sitioRepo` del container en vez de Prisma directo).
+
+**Qué quedó como stub** (implementan la interfaz, lanzan `Error('no implementado')`): `ClaudeChatService`, `RailwayDeployService`, `PaymentEngineService`, `WhatsAppNotificacionService` — ninguno tiene su servicio externo real construido todavía (son trabajo de Fase 2/3, o dependen de la Tarea 1.4 bloqueada). Se hizo así para no inventar lógica de negocio de fases futuras, cumpliendo igual con "dejar la arquitectura lista".
+
+**Tests agregados:** unitarios para las 4 entidades y para los use cases con lógica de orquestación mockeable (`ActivarCliente`, `PausarSitio`, `ReactivarSitio`); mocks de los 4 repositorios en `tests/integration/mocks/`; un solo feature BDD e2e real (`tests/e2e/features/sitio_por_subdominio.feature`) que ejercita la página de sitio por subdominio contra la BD real — es la única funcionalidad end-to-end que ya existe y corre en producción (Tarea 1.5). No se crearon tests de integración/e2e para `/api/chat` ni `/api/webhooks/pagos` porque esas rutas no existen todavía.
+
+### Decisiones que se apartan de `docs/WEBBOT_ARQUITECTURA.md`
+
+| Tema | El documento dice | Se hizo | Por qué |
+|------|-------------------|---------|---------|
+| Presentation layer | `src/presentation/app/...` | **`src/app/...`** | Next.js solo reconoce el App Router en `app/` o `src/app/` — no en una ruta arbitraria. `domain/application/infrastructure` quedan como carpetas hermanas de `app/` bajo `src/`, no como padres de ella. |
+| Middleware | `middleware.ts`, función `middleware` | **`src/proxy.ts`, función `proxy`** | Next.js 16 renombró la convención (ya migrado en la Tarea 1.5, ver arriba). |
+| Versión Next.js | 14 | **16.3.0** | Ya era una decisión tomada (ver tabla de arriba); no tiene sentido retroceder. |
+| Schema Prisma | `url = env("DATABASE_URL")` dentro de `schema.prisma` | **Sin `url` en el schema** — se resuelve solo vía `prisma.config.ts` | Prisma 7 (instalado) usa `defineConfig({ datasource: { url } })` + adapter `PrismaPg`; poner `url` en el schema es el patrón viejo que ya sabíamos que rompe. |
+| `IPagoService` | `crearSuscripcion` / `procesarWebhook(payload)` / `cancelarSuscripcion` | **`crearSuscripcion` (devuelve `checkoutUrl`) / `consultarSuscripcion` (GET, fuente de verdad) / `cancelarSuscripcion`** — sin método que "confíe" en el payload del webhook | El motor de pagos real (Tarea 1.4) es un microservicio con checkout redirect y webhooks salientes **sin firma** — el contrato real exige siempre reconfirmar con GET, nunca activar algo directo desde el body de un webhook. |
+| Servicios de infraestructura externos | Implementaciones completas (`ClaudeChatService`, `FlowPagoService`, etc.) | **Stubs que lanzan error** (`PaymentEngineService` en vez de `FlowPagoService`, ya que el motor real no es solo Flow) | Esas integraciones son trabajo de Fase 2/3 o dependen de la Tarea 1.4 bloqueada; no se inventa su lógica todavía. |
+
+### Verificación (todo corrido de verdad, no solo revisado a ojo)
+
+`npx tsc --noEmit`, `npm run build`, `npm run lint`, `npm run test:unit` (7 suites / 22 tests) y `npm run test:e2e` (3 escenarios / 15 steps, contra `npm run dev` local + la Postgres real de Railway) corrieron limpios. El e2e crea y borra un `Cliente`+`Sitio` de prueba (`e2e-activo`/`e2e-pausado`); se confirmó después que no quedaron filas huérfanas.
+
+**Detalles menores encontrados y corregidos durante la verificación:**
+- `dotenv@17.4.2` imprime un "tip" promocional al azar en consola (uno de ellos apunta a `vestauth.com`, otro producto de los mismos autores) cada vez que corre `.config()`. No es nada del proyecto ni una inyección — está en el propio código fuente del paquete (`node_modules/dotenv/lib/main.js`, array `TIPS`). Se silenció con la opción `quiet: true` en los dos lugares donde lo usamos (`prisma.config.ts` y `tests/e2e/register.js`).
+- `next dev` (Next.js 16) generó automáticamente `AGENTS.md` y `CLAUDE.md` en la raíz la primera vez que corrió — es una feature nueva de Next 16, se puede desactivar con `agentRules: false` en `next.config.ts`. Quedaron sin trackear en git, sin decidir todavía si se commitean.
+- Se agregó `docs/COMANDOS.md` con todos los comandos (setup, tests, Prisma, Railway CLI, git) y URLs útiles del proyecto en un solo lugar, para no tener que ir a buscarlos por todo este documento.
+
+**Nada de esto se comiteó todavía** — el working tree quedó con los cambios listos para revisar (`git status` muestra los `R` de los archivos movidos y los `??` de lo nuevo).
 
 ---
 
