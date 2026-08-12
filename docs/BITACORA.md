@@ -7,15 +7,28 @@
 
 ## Estado general
 
-**Última sesión:** 2026-08-10 — migración de todo el código a arquitectura de 4 capas (Clean Architecture) bajo `src/`, ver sección [Migración a arquitectura de 4 capas](#migración-a-arquitectura-de-4-capas-clean-architecture) más abajo. Cambio estructural grande: no agrega funcionalidad nueva de Fase 2/3, reorganiza y pone tests a lo que ya existía de Fase 1.
-**Fase actual:** FASE 1 — Fundaciones (sin cambios de alcance, solo de estructura de código)
+**Última sesión:** 2026-08-12 — Chat UI (Tarea 2.1) mergeado a `main`, y en la rama `feature/auth-login` (sin mergear todavía) se armó el flujo **"chat limitado → cuenta (magic link) → pago"**: login sin contraseña, sesión JWT, y el envío real del email vía Gmail Workspace SMTP (en vez de Resend). Ver secciones [Tarea 2.1 — Chat UI](#tarea-21--chat-ui-en-nextjs-parcial) y [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login) más abajo.
+**Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 
 ```
 FASE 1 — Fundaciones       [ ] 🟡 6/7 tareas (falta solo 1.4, bloqueada — ver abajo)
-FASE 2 — Bot & IA           [ ] 🔴 pendiente
+FASE 2 — Bot & IA           [ ] 🟡 arrancada — UI + auth, falta el backend del chat (2.2-2.4)
 FASE 3 — Templates & Deploy [ ] 🔴 pendiente
 FASE 4 — Lanzamiento        [ ] 🔴 pendiente
+```
+
+### Checklist Fase 2
+
+```
+[~] 2.1 — Chat UI funciona en /chat        UI completa, pero no hay /api/chat real detrás (ver abajo)
+[ ] 2.2 — Bot hace 8 preguntas en orden correcto      bloqueada, depende de 2.4
+[ ] 2.3 — Extracción JSON válida para 10 rubros       bloqueada, depende de 2.4
+[ ] 2.4 — API /api/chat guarda historial en BD        no arrancada — agente Claude sigue stub
+[ ] 2.5 — Workflow N8N orquesta el flujo completo
+[ ] 2.6 — Tests con 10 rubros documentados
+[ ] 2.7 — WhatsApp (opcional)
+[+] extra no listada en el roadmap — Auth por magic link (chat limitado → cuenta → pago), en rama feature/auth-login sin mergear. Ver detalle abajo.
 ```
 
 ### Checklist Fase 1
@@ -121,6 +134,51 @@ Se intentó el método recomendado por Railway (túnel SSH sin exponer la BD: `r
 
 ---
 
+## Tarea 2.1 — Chat UI en Next.js (parcial ✅ UI, ❌ backend)
+
+Mergeado a `main` (`c5fef42` / `3195e30`).
+
+- `/chat` (público, sin login): `ChatWidget` con historial de mensajes, input, estado "escribiendo...", y un tope de **3 intercambios** (`MAX_INTERCAMBIOS_DEMO`) solo de UI — al llegar al límite muestra un CTA "Crear cuenta" que linkea a `/login`.
+- El widget ya llama a `POST /api/chat`, pero **ese endpoint todavía no existe** (Tareas 2.2/2.3/2.4, agente Claude de onboarding — sigue como stub en `ClaudeChatService`). Hoy cualquier mensaje enviado muestra el error "El backend del chat todavía no está implementado".
+- El tope de 3 intercambios tampoco se puede hacer cumplir en servidor todavía, porque no hay servidor — es puramente cosmético hasta que exista `/api/chat`.
+
+**Por qué se dio por "Tarea 2.1 lista" sin backend:** el objetivo de esta sesión era destrabar el flujo de negocio completo (demo → cuenta → pago) antes de meterse con el agente Claude, que es la pieza más grande de Fase 2. La UI del chat quedó reutilizada tal cual en `/onboarding` (mismo componente, con `clienteId` ya logueado) para no duplicar código cuando el backend exista.
+
+---
+
+## Auth: chat limitado → cuenta (magic link) → pago (en progreso, rama `feature/auth-login`)
+
+**Fecha:** 2026-08-12. Commit inicial `cc0e5c7` en `main`, desarrollo posterior sigue en la rama `feature/auth-login` (sin mergear). No es una tarea numerada del roadmap original — es una pieza de negocio que se decidió construir antes de 2.2, para no llegar al agente Claude sin manera de convertir el uso de la demo en cuenta y eventualmente en pago.
+
+**Qué hay, siguiendo Clean Architecture:**
+
+- **Dominio:** entidad `TokenAcceso` (hash SHA-256 del token, expira a los 15 min, de un solo uso) + excepción `TokenAccesoInvalidoException`.
+- **Aplicación:** use cases `SolicitarAcceso` (genera token, lo guarda, dispara el email) y `VerificarAcceso` (valida el token, crea el `Cliente` si es la primera vez — usando la parte local del email como nombre placeholder, no hay flujo de perfil todavía), ambos con tests unitarios.
+- **Infraestructura:** `PrismaTokenAccesoRepository`; `JwtSessionService` (JWT firmado con `jose`, HS256, cookie httpOnly de 30 días); rate limiting en memoria (`rateLimit.ts` — 10 intentos/hora por IP, 3/15min por email; aceptable para el deploy actual de una sola instancia, no sobrevive un restart ni escala a más de una instancia).
+- **Presentación:** `/login` (pide email, siempre responde éxito genérico para no filtrar si el email ya tenía cuenta), `POST /api/auth/solicitar-acceso`, `GET /api/auth/verificar` (valida y redirige a `/onboarding` con la cookie puesta), `POST /api/auth/logout`, y `/onboarding` (server component que valida la cookie y si no hay sesión redirige a `/login`).
+- Migración Prisma `20260812045232_add_token_acceso` aplicada.
+
+**Envío del magic link — decisión de proveedor (se apartó de lo que anticipaba `.env.example`):**
+
+| Tema | Se había anticipado | Se hizo | Por qué |
+|------|---------------------|---------|---------|
+| Proveedor de email | Resend (`RESEND_API_KEY`) | **Gmail Workspace SMTP** (`GMAIL_USER=team@devalpo.cl` + `GMAIL_APP_PASSWORD`, vía `nodemailer`) | Agustín ya tiene Workspace con dominio propio aprobado — evita dar de alta un proveedor nuevo y verificar dominio de nuevo en DNS cuando Gmail ya manda con la reputación del dominio `devalpo.cl`. |
+
+- Nuevo `GmailSmtpEmailService` (`src/infrastructure/email/GmailSmtpEmailService.ts`): manda por `smtp.gmail.com:465` autenticado con contraseña de aplicación (no la contraseña normal — requiere verificación en 2 pasos activada en `team@devalpo.cl`).
+- `DevEmailService` se mantiene como fallback: si `GMAIL_USER`/`GMAIL_APP_PASSWORD` no están cargadas, loguea el link a consola en dev y lanza error explícito en producción (en vez de fallar en silencio). `container.ts` elige automáticamente cuál usar según si esas dos variables están seteadas.
+- ✅ **Envío real verificado en vivo (2026-08-12):** Agustín activó verificación en 2 pasos en `team@devalpo.cl`, generó la contraseña de aplicación en `myaccount.google.com` y la cargó en `.env` local (`GMAIL_USER`/`GMAIL_APP_PASSWORD`). Con `npm run dev` corriendo, se disparó `POST /api/auth/solicitar-acceso` con `email=team@devalpo.cl` — la API respondió `200` y **el correo llegó de verdad** a la bandeja de `team@devalpo.cl`, confirmado por Agustín. `GmailSmtpEmailService` queda probado de punta a punta, ya no es solo teoría.
+- **Corrección de copy:** el template del email (y varios textos de `/login`, `/chat` y el mensaje de rate-limit) tenían voseo argentino ("Hacé click", "Ingresá tu email", "Probá de nuevo"). Agustín es chileno — se corrigió todo a español neutro ("Haz clic", "Ingresa tu email", "Inténtalo de nuevo").
+
+**Verificación corrida:** `npx tsc --noEmit`, `npm run lint` (0 errores, mismos warnings preexistentes de los stubs de Fase 2/3) y `npm run test:unit` (11 suites / 37 tests) limpios, más el envío real confirmado arriba. No hay tests e2e nuevos para este flujo — el único e2e real sigue siendo el de sitio-por-subdominio (Tarea 1.5).
+
+**Qué falta para considerar esto realmente cerrado:**
+1. Cargar `GMAIL_USER`/`GMAIL_APP_PASSWORD` también en Railway (servicio `web-bot`) para que el envío real funcione en producción, no solo en local.
+2. La parte de "pago" del flujo (mencionada en el mensaje del commit `cc0e5c7`) **no está implementada** — sigue bloqueada por la Tarea 1.4 (motor de pagos sin deployar).
+3. `/api/chat` real (Tareas 2.2–2.4) — sin esto, tanto el chat demo como el `/onboarding` logueado no hacen nada más que mostrar el error de "backend no implementado".
+4. Mergear `feature/auth-login` a `develop`/`main` cuando lo anterior esté resuelto (o decidir mergear solo la parte de auth y dejar pago documentado como pendiente, como se hizo con los stubs de Fase 2/3 en la migración a Clean Architecture).
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
@@ -204,7 +262,8 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ## Cómo retomar
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
-2. `git checkout develop && git pull` para tener el estado más reciente (a partir de la Tarea 1.7, el trabajo nuevo arranca en `develop` o en una rama `feature/tarea-x` desde `develop`, no directo en `main`).
+2. Estamos parados en la rama **`feature/auth-login`** (no mergeada a `develop`/`main` todavía) — `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
 3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
-4. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
-5. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Próximo bloque grande si se sigue el roadmap en orden: **Fase 2 — Bot & IA**, que arranca con la Tarea 2.1 (Chat UI) y 2.2 (agente Claude de onboarding — necesita `ANTHROPIC_API_KEY`).
+4. **Envío real del magic link ya probado en local** (Gmail Workspace SMTP, ver detalle arriba). Falta únicamente cargar `GMAIL_USER`/`GMAIL_APP_PASSWORD` en Railway (servicio `web-bot`) antes de que esto funcione en producción — sin esas variables ahí, producción cae al `DevEmailService` y tira error (no falla en silencio, pero tampoco manda el mail).
+5. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
+6. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Fase 2 arrancó parcial: Chat UI (2.1) mergeada pero sin backend, y auth por magic link en progreso (fuera del roadmap original, ver sección propia). El bloque grande que falta para que el chat sirva de algo es el **agente Claude de onboarding** (Tareas 2.2–2.4, `/api/chat` — necesita `ANTHROPIC_API_KEY`), del cual depende tanto la demo pública como `/onboarding`.

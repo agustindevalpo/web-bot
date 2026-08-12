@@ -59,6 +59,30 @@
   padding: 0.5rem 1rem;
 }
 
+.cta {
+  align-self: center;
+  max-width: 90%;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(21, 222, 250, 0.08);
+  border: 1px solid #15defa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.ctaBoton {
+  display: inline-block;
+  padding: 0.6rem 1.25rem;
+  border-radius: 0.75rem;
+  background: #15defa;
+  color: #080056;
+  font-weight: 700;
+  text-decoration: none;
+}
+
 .inputBar {
   display: flex;
   gap: 0.5rem;

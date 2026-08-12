@@ -52,6 +52,17 @@ model Sesion {
   fechaCreacion DateTime @default(now())
 }
 
+model TokenAcceso {
+  id            String    @id @default(cuid())
+  email         String
+  tokenHash     String    @unique
+  expiraEn      DateTime
+  usadoEn       DateTime?
+  fechaCreacion DateTime  @default(now())
+
+  @@index([email])
+}
+
 enum Plan {
   STARTER
   PRO
