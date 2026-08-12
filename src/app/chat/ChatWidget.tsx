@@ -116,7 +116,7 @@ export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetPro
 
         {limiteAlcanzado && (
           <div className={styles.cta}>
-            Llegaste al límite de la demo — creá tu cuenta gratis para seguir armando tu sitio.
+            Llegaste al límite de la demo — crea tu cuenta gratis para seguir armando tu sitio.
             <Link href="/login" className={styles.ctaBoton}>
               Crear cuenta
             </Link>
@@ -132,7 +132,7 @@ export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetPro
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
-          placeholder="Escribí tu respuesta..."
+          placeholder="Escribe tu respuesta..."
           disabled={enviando || limiteAlcanzado}
         />
         <button

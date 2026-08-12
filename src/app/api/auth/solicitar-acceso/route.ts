@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     excedeLimite(`email:${emailNormalizado}`, 3, 15 * 60 * 1000)
   ) {
     return NextResponse.json(
-      { error: 'Demasiados intentos, probá de nuevo más tarde' },
+      { error: 'Demasiados intentos, inténtalo de nuevo más tarde' },
       { status: 429 },
     )
   }

@@ -10,7 +10,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const errorInicial =
     searchParams.get('error') === 'token_invalido'
-      ? 'Ese link ya fue usado o expiró. Pedí uno nuevo.'
+      ? 'Ese link ya fue usado o expiró. Pide uno nuevo.'
       : null
 
   const [email, setEmail] = useState('')
@@ -32,7 +32,7 @@ function LoginForm() {
       })
 
       if (res.status === 429) {
-        setMensaje('Demasiados intentos — probá de nuevo en un rato.')
+        setMensaje('Demasiados intentos — inténtalo de nuevo en un rato.')
         return
       }
 
@@ -43,7 +43,7 @@ function LoginForm() {
 
       setEstado('enviado')
     } catch {
-      setMensaje('No se pudo conectar. Probá de nuevo.')
+      setMensaje('No se pudo conectar. Inténtalo de nuevo.')
     } finally {
       setEnviando(false)
     }
@@ -59,12 +59,12 @@ function LoginForm() {
 
       {estado === 'enviado' ? (
         <p className={styles.texto}>
-          Revisá tu email — te mandamos un link para entrar. Podés cerrar esta pestaña.
+          Revisa tu email — te enviamos un link para entrar. Puedes cerrar esta pestaña.
         </p>
       ) : (
         <>
           <p className={styles.texto}>
-            Ingresá tu email para crear tu cuenta y seguir armando tu sitio.
+            Ingresa tu email para crear tu cuenta y seguir armando tu sitio.
           </p>
           <input
             className={styles.input}

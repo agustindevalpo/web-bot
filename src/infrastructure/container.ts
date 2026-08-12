@@ -10,6 +10,7 @@ import { RailwayDeployService } from './railway/RailwayDeployService'
 import { PaymentEngineService } from './payments/PaymentEngineService'
 import { WhatsAppNotificacionService } from './notifications/WhatsAppNotificacionService'
 import { DevEmailService } from './email/DevEmailService'
+import { GmailSmtpEmailService } from './email/GmailSmtpEmailService'
 
 import { GenerarSitioUseCase } from '@/application/use-cases/GenerarSitio.usecase'
 import { ActivarClienteUseCase } from '@/application/use-cases/ActivarCliente.usecase'
@@ -31,7 +32,12 @@ const chatService = new ClaudeChatService()
 const deployService = new RailwayDeployService()
 const pagoService = new PaymentEngineService()
 const notificacionService = new WhatsAppNotificacionService()
-const emailService = new DevEmailService()
+// Envío real si hay credenciales de Gmail Workspace cargadas; si no, cae a
+// loguear el link a consola (dev local sin secrets).
+const emailService =
+  process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
+    ? new GmailSmtpEmailService()
+    : new DevEmailService()
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 

@@ -1,10 +1,11 @@
 import { IEmailService } from '@/application/services/IEmailService'
 
 /**
- * Único servicio de email hoy — no hay proveedor real contratado (Resend, etc.).
- * En dev/test loguea el link a consola para poder probar el flujo completo sin
- * cuenta de email. En producción, sin proveedor real configurado, lanza para
- * que la falla sea visible en vez de silenciosa (nadie recibiría el link).
+ * Fallback cuando no hay credenciales de Gmail configuradas (ver
+ * GmailSmtpEmailService, el envío real). Loguea el link a consola para poder
+ * probar el flujo completo en local sin mandar emails de verdad. En
+ * producción, sin proveedor real configurado, lanza para que la falla sea
+ * visible en vez de silenciosa (nadie recibiría el link).
  */
 export class DevEmailService implements IEmailService {
   async enviarMagicLink(email: string, url: string): Promise<void> {
@@ -13,6 +14,6 @@ export class DevEmailService implements IEmailService {
       return
     }
 
-    throw new Error('DevEmailService.enviarMagicLink no implementado — falta proveedor de email real (Resend)')
+    throw new Error('DevEmailService.enviarMagicLink no implementado — falta configurar GMAIL_USER / GMAIL_APP_PASSWORD')
   }
 }
