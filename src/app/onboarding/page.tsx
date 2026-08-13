@@ -12,5 +12,5 @@ export default async function OnboardingPage() {
     redirect('/login')
   }
 
-  return <ChatWidget clienteId={sesion.clienteId} />
+  return <ChatWidget />
 }

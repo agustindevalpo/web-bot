@@ -7,7 +7,7 @@
 
 ## Estado general
 
-**Última sesión:** 2026-08-12 — Chat UI (Tarea 2.1) mergeado a `main`, y en la rama `feature/auth-login` (sin mergear todavía) se armó el flujo **"chat limitado → cuenta (magic link) → pago"**: login sin contraseña, sesión JWT, y el envío real del email vía Gmail Workspace SMTP (en vez de Resend). Ver secciones [Tarea 2.1 — Chat UI](#tarea-21--chat-ui-en-nextjs-parcial) y [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login) más abajo.
+**Última sesión:** 2026-08-13 — `feature/auth-login` mergeado a `develop`; en la rama nueva `webot_demo` (sin mergear) se implementó el **Demo Mode completo**: chat de demo que genera un sitio real (contenido de la conversación + template/colores/fotos por rubro), persistido en BD y servido en `/sites/[subdominio]`, más la landing pública real en `/`. Ver secciones [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login) y [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) más abajo.
 **Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 
@@ -21,14 +21,14 @@ FASE 4 — Lanzamiento        [ ] 🔴 pendiente
 ### Checklist Fase 2
 
 ```
-[~] 2.1 — Chat UI funciona en /chat        UI completa, pero no hay /api/chat real detrás (ver abajo)
-[ ] 2.2 — Bot hace 8 preguntas en orden correcto      bloqueada, depende de 2.4
-[ ] 2.3 — Extracción JSON válida para 10 rubros       bloqueada, depende de 2.4
-[ ] 2.4 — API /api/chat guarda historial en BD        no arrancada — agente Claude sigue stub
+[x] 2.1 — Chat UI funciona en /chat        con /api/chat real detrás (modo demo, sin Claude — ver Demo Mode)
+[ ] 2.2 — Bot hace 8 preguntas en orden correcto      cumplido en modo demo (guion fijo); modo real bloqueado, depende de 2.4
+[ ] 2.3 — Extracción JSON válida para 10 rubros       cumplido en modo demo (parseo de texto); modo real bloqueado, depende de 2.4
+[ ] 2.4 — API /api/chat guarda historial en BD        /api/chat existe y guarda historial (demo y real) — agente Claude sigue stub
 [ ] 2.5 — Workflow N8N orquesta el flujo completo
 [ ] 2.6 — Tests con 10 rubros documentados
 [ ] 2.7 — WhatsApp (opcional)
-[+] extra no listada en el roadmap — Auth por magic link (chat limitado → cuenta → pago), en rama feature/auth-login sin mergear. Ver detalle abajo.
+[+] extra no listada en el roadmap — Auth por magic link, en develop (mergeado). Demo Mode + landing + template de sitio, en rama webot_demo sin mergear. Ver detalle abajo.
 ```
 
 ### Checklist Fase 1
@@ -179,6 +179,45 @@ Mergeado a `main` (`c5fef42` / `3195e30`).
 
 ---
 
+## Demo Mode + landing pública + template de sitio (rama `webot_demo`)
+
+**Fecha:** 2026-08-12/13. Rama `webot_demo`, creada desde `develop` (con `feature/auth-login` ya mergeado). Implementa `docs/WEBBOT_DEMO_MODE.md` — spec que Agustín dejó en `docs/` para separar el chat en modo demo (sin tokens de Claude) vs modo real (Claude, solo clientes con plan pagado). Esa spec y el HTML de referencia de la landing (`docs/WebBot Landing (standalone).html`) **se quedaron fuera del commit a propósito** — eran material de trabajo, no documentación del proyecto.
+
+### Qué hay
+
+- **`DemoChatService`** (`src/infrastructure/demo/`): guion fijo de 7 preguntas (+ la del nombre, que ya cubre el saludo estático del frontend — ver bug corregido abajo), $0 en tokens.
+- **`rubroDefaults.ts`**: detecta el rubro por palabras clave en el nombre del negocio, pero **solo para elegir el "kit visual" por defecto** (template SERVICIOS/RESTAURANTE/TIENDA, paleta de colores, 2 fotos stock de Unsplash). El resto del contenido del sitio (nombre, descripción, servicios, ciudad, contacto, redes, estilo, highlight) sale del **parseo de las respuestas reales del chat** — split de texto y regex simples (email, @handle), sin IA.
+  - **Esto fue un cambio de diseño pedido a mitad de sesión.** La spec original decía que el modo demo siempre muestra uno de 10 sitios prefabricados con datos de ejemplo, ignorando lo que el usuario escribe salvo el nombre (para detectar el rubro). Agustín lo corrigió: el valor del producto es que el demo se sienta "hecho para vos", no un ejemplo genérico ajeno — así que ahora se genera un sitio real con el contenido real de la conversación.
+- **`/api/chat`** (nuevo): decide demo vs real por JWT + `cliente.activo`; en demo, al completar las 8 respuestas, **persiste un `Sitio` real en la BD** (dueño: `cliente-demo-webbot-devalpo`, no factura) con `subdominio = demo-{primeros 8 caracteres del sessionId}` — determinístico, no hace falta guardarlo en ningún otro lado para recuperarlo.
+- **`/sites/[subdominio]`**: dejó de ser un stub (`<h1>subdominio</h1><p>Template: X</p>`) — ahora es un template real de una sola página (hero, highlight, servicios/menú/productos según el `template` del sitio, galería, footer), con **colores dinámicos por sitio** vía CSS custom properties (`--primario`, `--secundario`, `--acento`, `--texto` desde `configJson.colores`).
+- **`/` (landing pública)**: reemplaza el scaffold de `create-next-app` que seguía ahí desde el inicio del proyecto. Portada 1:1 desde el HTML que Agustín dejó en `docs/` — que resultó ser un *artifact empaquetado* (recursos comprimidos gzip+base64 embebidos, no HTML plano); se decodificó el bundle directamente para sacar el copy, CSS y el logo real de Devalpo (`public/devalpo-logo.png`) en vez de reconstruir a ojo desde capturas. Fuentes reales (Fredoka + Montserrat) vía `next/font/google`. Todos los CTA apuntan a `/chat`.
+- Rate limiting de demo (2 por IP/día) **se salta fuera de producción** (`NODE_ENV !== 'production'`) — si no, cualquiera se bloquea a sí mismo probando en local.
+- `DemoCTA` arma el link de preview con `NEXT_PUBLIC_APP_URL` cuando es local (`localhost:3000/sites/...`) en vez de siempre apuntar al subdominio real de producción — si no, el iframe/link en dev muestra lo último deployado en `main`, no lo que se está probando.
+- Precios de `DemoCTA` sincronizados con los de la landing: Presencia $29.990, Presencia Pro $49.990 (Popular), Agencia $149.990, Landing única $249.000 — antes tenía placeholders distintos (Starter/Pro/Agencia).
+
+### Bugs reales encontrados y corregidos (no solo del roadmap, del propio código)
+
+- **Pregunta duplicada:** `ChatWidget` ya muestra "¿Cómo se llama tu negocio?" como saludo estático antes de la primera llamada a la API; `DemoChatService` volvía a preguntarlo. Se sacó del guion del backend (ahora empieza en "¿A qué se dedica?").
+- **Rate limiter de la spec original contaba por mensaje, no por conversación** — con 8 mensajes por demo, habría bloqueado al segundo intercambio. Se corrigió para contar solo al *iniciar* una sesión nueva.
+- **Bug en el propio test unitario de la spec** — el fixture de "avanza al orden correcto de preguntas" no era alcanzable con ninguna fórmula de indexación consistente (verificado trazando las 8 rondas a mano). Corregido.
+- **Assets estáticos rotos por el middleware multitenant:** el logo de la landing devolvía 404 — el fetch interno de `next/image` para imágenes locales llega con header `Host` vacío, y `proxy.ts` lo trataba como un dominio custom desconocido, reescribiéndolo mal. Se corrigió el `matcher` para excluir archivos estáticos por extensión (patrón recomendado por Next.js, no un parche puntual).
+- **Voseo argentino** en el copy nuevo (misma corrección que ya se había hecho en auth, ver arriba) — Agustín es chileno.
+
+### Verificación
+
+`npx tsc --noEmit`, `npm run lint` (0 errores, mismos warnings preexistentes), `npm run build` y `npm run test:unit` (13 suites / 58 tests) limpios. Probado en vivo en el navegador de punta a punta varias veces: demo completa de 8 preguntas → sitio generado con paleta/fotos del rubro y contenido real → link de preview funcionando en local. Un intento de prueba vía clicks automatizados perdió un mensaje por timing (input todavía deshabilitado) — no era un bug del producto, se confirmó repitiendo la conversación por API directa.
+
+### Qué falta / pendiente
+
+1. **Deployar esta rama** — `main` sigue con el stub viejo de `/sites/[subdominio]` y el `globals.css` con auto dark-mode (ver el bug de "pantalla negra" que Agustín encontró probando `demo-veterinaria.sitios.devalpo.cl` en producción, ya arreglado acá pero no deployado).
+2. **Confirmar `NEXT_PUBLIC_APP_URL` en Railway** apuntando a la URL real de producción — la usa tanto el magic link (`container.ts`) como ahora la detección local/producción de `DemoCTA`. `NEXT_PUBLIC_*` se hornea en build time, así que un cambio ahí pide redeploy, no alcanza con reiniciar el servicio.
+3. **Sin límite de plan real** — el "rate limiting por cliente en modo real" (`sitiosGenerados`) que menciona la spec como protección adicional no se implementó; no estaba en los 6 pasos obligatorios del documento.
+4. Una foto del seed original (`prisma/seed-demo.ts`, galería de `demo-panaderia`) no corresponde al rubro (viene tal cual del documento de Agustín) — pendiente de decidir si se cambia.
+5. Los sitios demo generados (`demo-{sessionId}`) se acumulan en la tabla `Sitio` sin límite ni expiración — no hay barrido/TTL todavía.
+6. Sigue sin existir `/api/chat` real con Claude (Tareas 2.2–2.4) — el modo "real" del `/api/chat` ya está armado y a la espera, pero `ClaudeChatService` sigue siendo un stub que tira error.
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
@@ -262,8 +301,9 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ## Cómo retomar
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
-2. Estamos parados en la rama **`feature/auth-login`** (no mergeada a `develop`/`main` todavía) — `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
+2. Estamos parados en la rama **`webot_demo`** (creada desde `develop`, no mergeada todavía) — `feature/auth-login` ya está mergeado a `develop`. `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
 3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
 4. **Envío real del magic link ya probado en local** (Gmail Workspace SMTP, ver detalle arriba). Falta únicamente cargar `GMAIL_USER`/`GMAIL_APP_PASSWORD` en Railway (servicio `web-bot`) antes de que esto funcione en producción — sin esas variables ahí, producción cae al `DevEmailService` y tira error (no falla en silencio, pero tampoco manda el mail).
-5. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
-6. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Fase 2 arrancó parcial: Chat UI (2.1) mergeada pero sin backend, y auth por magic link en progreso (fuera del roadmap original, ver sección propia). El bloque grande que falta para que el chat sirva de algo es el **agente Claude de onboarding** (Tareas 2.2–2.4, `/api/chat` — necesita `ANTHROPIC_API_KEY`), del cual depende tanto la demo pública como `/onboarding`.
+5. **Demo Mode ya probado de punta a punta en local** (ver sección propia) — antes de deployar, confirmar `NEXT_PUBLIC_APP_URL` en Railway (afecta tanto el magic link como el link de preview del demo) y correr `npm run db:seed-demo` contra la BD de producción si no se hizo ya (crea el cliente demo y 10 sitios de ejemplo — el cliente demo además es dueño de los sitios que genera el Demo Mode real).
+6. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
+7. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Fase 2 arrancó fuerte: Chat UI + Demo Mode + landing funcionando de punta a punta en local, auth por magic link lista. El bloque grande que falta es el **agente Claude de onboarding** (Tareas 2.2–2.4 en modo real, necesita `ANTHROPIC_API_KEY`) — sin eso, el modo "real" de `/api/chat` está armado pero nadie puede llegar a usarlo (depende también de la Tarea 1.4, pago).
