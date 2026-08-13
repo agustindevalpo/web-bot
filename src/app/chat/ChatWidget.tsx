@@ -1,17 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import Link from 'next/link'
 import styles from './page.module.css'
+import { DemoCTA } from './DemoCTA'
 
 interface Mensaje {
   rol: 'user' | 'assistant'
   contenido: string
-}
-
-interface ChatWidgetProps {
-  clienteId?: string
-  maxIntercambios?: number
 }
 
 const COOKIE_NAME = 'webbot_session'
@@ -36,7 +31,7 @@ function obtenerSessionId(): string {
   return nuevo
 }
 
-export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetProps) {
+export default function ChatWidget() {
   const sessionIdRef = useRef<string | null>(null)
   const [mensajes, setMensajes] = useState<Mensaje[]>([
     { rol: 'assistant', contenido: MENSAJE_INICIAL },
@@ -44,12 +39,10 @@ export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetPro
   const [input, setInput] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [completada, setCompletada] = useState(false)
+  const [subdominioDemo, setSubdominioDemo] = useState<string | null>(null)
+  const [limiteAlcanzado, setLimiteAlcanzado] = useState(false)
   const finRef = useRef<HTMLDivElement>(null)
-
-  const intercambios = mensajes.filter((m) => m.rol === 'user').length
-  // Tope solo de UI: no hay /api/chat real todavía para hacerlo cumplir en el
-  // servidor — queda para la Tarea 2.3, cuando exista el endpoint real.
-  const limiteAlcanzado = maxIntercambios !== undefined && intercambios >= maxIntercambios
 
   useEffect(() => {
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -57,7 +50,7 @@ export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetPro
 
   async function enviarMensaje() {
     const texto = input.trim()
-    if (!texto || enviando || limiteAlcanzado) return
+    if (!texto || enviando || completada || limiteAlcanzado) return
 
     if (!sessionIdRef.current) sessionIdRef.current = obtenerSessionId()
     const sessionId = sessionIdRef.current
@@ -71,18 +64,31 @@ export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetPro
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, mensaje: texto, clienteId }),
+        body: JSON.stringify({ sessionId, mensaje: texto }),
       })
+
+      const data = await res.json()
+
+      if (res.status === 429) {
+        setLimiteAlcanzado(true)
+        setError(data.mensaje ?? 'Ya usaste tus demos gratuitos de hoy.')
+        return
+      }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
-      const data = await res.json()
-      setMensajes((prev) => [...prev, { rol: 'assistant', contenido: data.respuesta }])
+      if (data.respuesta) {
+        setMensajes((prev) => [...prev, { rol: 'assistant', contenido: data.respuesta }])
+      }
+
+      if (data.completada) {
+        setCompletada(true)
+        if (data.esDemo && data.subdominioDemo) {
+          setSubdominioDemo(data.subdominioDemo)
+        }
+      }
     } catch {
-      // El endpoint /api/chat todavía no existe (Tareas 2.2/2.3, agente Claude sin implementar).
-      setError(
-        'No se pudo conectar con el asistente. El backend del chat todavía no está implementado.'
-      )
+      setError('No se pudo conectar con el asistente. Inténtalo de nuevo en un momento.')
     } finally {
       setEnviando(false)
     }
@@ -114,14 +120,7 @@ export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetPro
 
         {error && <div className={styles.error}>{error}</div>}
 
-        {limiteAlcanzado && (
-          <div className={styles.cta}>
-            Llegaste al límite de la demo — crea tu cuenta gratis para seguir armando tu sitio.
-            <Link href="/login" className={styles.ctaBoton}>
-              Crear cuenta
-            </Link>
-          </div>
-        )}
+        {completada && subdominioDemo && <DemoCTA subdominioDemo={subdominioDemo} />}
 
         <div ref={finRef} />
       </main>
@@ -133,12 +132,12 @@ export default function ChatWidget({ clienteId, maxIntercambios }: ChatWidgetPro
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="Escribe tu respuesta..."
-          disabled={enviando || limiteAlcanzado}
+          disabled={enviando || completada || limiteAlcanzado}
         />
         <button
           className={styles.enviar}
           onClick={enviarMensaje}
-          disabled={enviando || !input.trim() || limiteAlcanzado}
+          disabled={enviando || !input.trim() || completada || limiteAlcanzado}
         >
           Enviar
         </button>
