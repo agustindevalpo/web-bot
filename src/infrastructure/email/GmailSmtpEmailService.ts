@@ -1,5 +1,4 @@
 import nodemailer, { type Transporter } from 'nodemailer'
-import type { ConnectionOptions } from 'tls'
 import { IEmailService } from '@/application/services/IEmailService'
 
 /**
@@ -23,14 +22,13 @@ export class GmailSmtpEmailService implements IEmailService {
     this.remitente = user
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      // El egress de Railway hacia smtp.gmail.com:465 (TLS implícito) se
+      // confirmó bloqueado a nivel de red (SYN retransmitidos sin respuesta,
+      // ver docs/BITACORA.md) — se usa 587 con STARTTLS en su lugar.
+      port: 587,
+      secure: false,
+      requireTLS: true,
       auth: { user, pass },
-      // Railway resuelve smtp.gmail.com priorizando IPv6, pero su egress a Gmail
-      // por IPv6 no completa el handshake (ETIMEDOUT) — se fuerza IPv4. `family`
-      // sí es una opción válida de tls.connect() en runtime (la reenvía a
-      // net.connect), pero @types/node no la declara en tls.ConnectionOptions.
-      tls: { family: 4 } as ConnectionOptions,
     })
   }
 
