@@ -11,6 +11,7 @@ import { PaymentEngineService } from './payments/PaymentEngineService'
 import { WhatsAppNotificacionService } from './notifications/WhatsAppNotificacionService'
 import { DevEmailService } from './email/DevEmailService'
 import { GmailSmtpEmailService } from './email/GmailSmtpEmailService'
+import { ResendEmailService } from './email/ResendEmailService'
 
 import { GenerarSitioUseCase } from '@/application/use-cases/GenerarSitio.usecase'
 import { ActivarClienteUseCase } from '@/application/use-cases/ActivarCliente.usecase'
@@ -32,10 +33,13 @@ const chatService = new ClaudeChatService()
 const deployService = new RailwayDeployService()
 const pagoService = new PaymentEngineService()
 const notificacionService = new WhatsAppNotificacionService()
-// Envío real si hay credenciales de Gmail Workspace cargadas; si no, cae a
-// loguear el link a consola (dev local sin secrets).
-const emailService =
-  process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
+// Resend (HTTP) es el envío real en producción — el SMTP de Gmail está
+// bloqueado en el egress de Railway (ver docs/BITACORA.md). Gmail SMTP queda
+// como opción para dev local, donde sí funciona. Sin ninguna credencial, cae
+// a loguear el link a consola.
+const emailService = process.env.RESEND_API_KEY
+  ? new ResendEmailService()
+  : process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD
     ? new GmailSmtpEmailService()
     : new DevEmailService()
 
