@@ -7,9 +7,10 @@
 
 ## Estado general
 
-**Última sesión:** 2026-08-13 — `feature/auth-login` mergeado a `develop`; en la rama nueva `webot_demo` (sin mergear) se implementó el **Demo Mode completo**: chat de demo que genera un sitio real (contenido de la conversación + template/colores/fotos por rubro), persistido en BD y servido en `/sites/[subdominio]`, más la landing pública real en `/`. Ver secciones [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login) y [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) más abajo.
+**Última sesión:** 2026-08-14 — **Deploy a producción de todo lo de Fase 2 pendiente** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública ya están en vivo en `web-bot-production-d190.up.railway.app`. Se cargaron en Railway las variables que faltaban (`AUTH_SECRET`, `NEXT_PUBLIC_APP_URL`, más las de email — ver abajo). **Hallazgo importante:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — el magic link no podía enviarse en producción. Se migró el envío a **Resend** (API HTTP), pero falta cargar `RESEND_API_KEY` real — ver sección propia más abajo. Sesión anterior (2026-08-13): `feature/auth-login` mergeado a `develop`; Demo Mode completo en `webot_demo` (ya mergeada también). Ver secciones [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway) más abajo.
 **Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
+**Seguimiento también en Jira:** proyecto **WB (Web-Bot)** en `devalpo-team.atlassian.net` — espejo del roadmap. Estaba desactualizado respecto a esta bitácora al empezar la sesión del 14/08 (varios tickets de Fase 2 seguían en "Tareas por hacer" ya terminados); si no se sincronizó todavía en esta sesión, hacerlo antes de dar por buena la vista de Jira.
 
 ```
 FASE 1 — Fundaciones       [ ] 🟡 6/7 tareas (falta solo 1.4, bloqueada — ver abajo)
@@ -28,7 +29,7 @@ FASE 4 — Lanzamiento        [ ] 🔴 pendiente
 [ ] 2.5 — Workflow N8N orquesta el flujo completo
 [ ] 2.6 — Tests con 10 rubros documentados
 [ ] 2.7 — WhatsApp (opcional)
-[+] extra no listada en el roadmap — Auth por magic link, en develop (mergeado). Demo Mode + landing + template de sitio, en rama webot_demo sin mergear. Ver detalle abajo.
+[+] extra no listada en el roadmap — Auth por magic link (código en producción, envío de email pendiente Resend), Demo Mode + landing + template de sitio (en producción desde 2026-08-14). Ver detalle abajo.
 ```
 
 ### Checklist Fase 1
@@ -218,6 +219,41 @@ Mergeado a `main` (`c5fef42` / `3195e30`).
 
 ---
 
+## Deploy a producción (2026-08-14) + bloqueo de SMTP en Railway
+
+**Contexto:** hasta esta sesión, `main` (la rama que deploya Railway) seguía parada en el commit de la migración a Clean Architecture — nada de Fase 2 (Chat UI, auth, Demo Mode, landing) estaba en producción, a pesar de estar mergeado y probado en `develop` desde el 13/08.
+
+### Qué se hizo
+
+1. **Variables cargadas en Railway** (servicio `web-bot`, no estaban): `AUTH_SECRET` (mismo valor que local — sin esto, `JwtSessionService` tira error y el login no funciona), `NEXT_PUBLIC_APP_URL=https://web-bot-production-d190.up.railway.app` (antes apuntaba a `localhost:3000` heredado del `.env` local; afecta el link del magic link y el preview del Demo Mode).
+2. **Merge `develop` → `main` y push** — disparó el deploy real. Verificado con `curl`: landing (`/`), `/login`, `/chat` y un sitio demo por subdominio (`demo-veterinaria.sitios.devalpo.cl`) responden 200 en producción.
+3. **`/api/auth/solicitar-acceso` devolvía 500 en producción** — investigado con `railway logs` (error `ETIMEDOUT` conectando a `smtp.gmail.com`).
+
+### El hallazgo real: Railway bloquea SMTP saliente hacia Gmail (465 y 587)
+
+Se probaron dos hipótesis, ambas con evidencia concreta vía `railway logs --network`:
+
+1. **Hipótesis IPv6 (descartada):** se pensó que Node resolvía `smtp.gmail.com` priorizando IPv6 y que el egress de Railway no completaba el handshake por esa vía. Se forzó IPv4 (`tls: { family: 4 }` en el transporte de `nodemailer` — no está tipado en `tls.ConnectionOptions` de `@types/node` pero sí es una opción válida en runtime, se pasa con `as ConnectionOptions`). **No arregló nada** — `railway logs --network --port 465` mostró que los paquetes SYN ya salían por IPv4 hacia la IP real de Google (`142.250.27.108:465`), se reintentaban con backoff exponencial, y nunca recibían respuesta (estado `ICMP_CSUM` en cada intento, cero paquetes de vuelta).
+2. **Hipótesis puerto específico (descartada):** se probó 587 con STARTTLS en vez de 465 con TLS implícito, por si Railway solo bloqueaba 465. **Mismo patrón exacto** (`railway logs --network --port 587`): SYN retransmitidos hacia `142.251.127.109:587`, `ICMP_CSUM`, cero respuesta.
+
+**Conclusión:** el egress de Railway bloquea SMTP saliente hacia Gmail en general, no es específico de puerto ni un problema de resolución DNS/IPv6. Es un patrón conocido en varios PaaS (bloqueo de puertos SMTP salientes por defecto, anti-abuso de spam).
+
+### Solución: migrar el envío real a Resend (API HTTP)
+
+Se creó `ResendEmailService` (`src/infrastructure/email/ResendEmailService.ts`) — envía vía `POST https://api.resend.com/emails` (HTTPS, no un socket SMTP crudo, así que no choca con el bloqueo). `container.ts` ahora prioriza `RESEND_API_KEY` si está cargada; si no, cae a `GmailSmtpEmailService` (que sigue sirviendo para dev local, donde el SMTP directo a Gmail sí funciona sin problema — se dejó el código, ahora en el puerto 587/STARTTLS tras el intento fallido de arreglo, no se revirtió a 465); sin ninguna de las dos, cae al log a consola de `DevEmailService`. Variables nuevas en `.env.example`: `RESEND_API_KEY`, `RESEND_FROM_EMAIL`.
+
+**Verificación corrida:** `npx tsc --noEmit`, `npm run lint` (0 errores, mismos warnings preexistentes), `npm run test:unit` (13 suites / 58 tests) y `npm run build` limpios. Mergeado a `develop` y pusheado (`c9e5d08`) — **todavía no mergeado a `main`**, porque falta la API key real de Resend (ver "Qué falta" abajo). Producción sigue en el deploy anterior (`d46e2f4`), con el login roto (cae a `DevEmailService`, que en producción tira error explícito en vez de fallar en silencio — no hay riesgo de que alguien reciba un link roto, simplemente no llega ningún link).
+
+### Qué falta para que el login funcione en producción
+
+1. **Crear cuenta en Resend** (resend.com) y generar un `RESEND_API_KEY` — paso manual de Agustín, no delegable.
+2. **Verificar el dominio `devalpo.cl` en Resend** (agrega registros DNS tipo TXT/CNAME en el Zone Editor de Bluehost, mismo lugar que el wildcard de `sitios.devalpo.cl` — ver [Tarea 1.2](#tarea-12--wildcard-dns--ssl-)) para poder mandar desde `team@devalpo.cl` en vez del remitente de pruebas `onboarding@resend.dev` (que solo entrega a la cuenta dueña del API key, no sirve para usuarios reales).
+3. Cargar `RESEND_API_KEY` y `RESEND_FROM_EMAIL` en Railway (servicio `web-bot`).
+4. Mergear `develop` → `main` y pushear (ya tiene el código listo, commit `c9e5d08`).
+5. Volver a probar `POST /api/auth/solicitar-acceso` en producción de punta a punta.
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
@@ -301,9 +337,10 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ## Cómo retomar
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
-2. Estamos parados en la rama **`webot_demo`** (creada desde `develop`, no mergeada todavía) — `feature/auth-login` ya está mergeado a `develop`. `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
+2. Estamos parados en `develop`, un commit adelante de `main` (`c9e5d08` vs `d46e2f4`) — el código de Resend está listo pero no deployado, a la espera del API key real (ver sección ["Deploy a producción + bloqueo de SMTP"](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway)). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
 3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
-4. **Envío real del magic link ya probado en local** (Gmail Workspace SMTP, ver detalle arriba). Falta únicamente cargar `GMAIL_USER`/`GMAIL_APP_PASSWORD` en Railway (servicio `web-bot`) antes de que esto funcione en producción — sin esas variables ahí, producción cae al `DevEmailService` y tira error (no falla en silencio, pero tampoco manda el mail).
-5. **Demo Mode ya probado de punta a punta en local** (ver sección propia) — antes de deployar, confirmar `NEXT_PUBLIC_APP_URL` en Railway (afecta tanto el magic link como el link de preview del demo) y correr `npm run db:seed-demo` contra la BD de producción si no se hizo ya (crea el cliente demo y 10 sitios de ejemplo — el cliente demo además es dueño de los sitios que genera el Demo Mode real).
+4. **Producción ya tiene desde el 14/08:** Chat UI, landing pública, Demo Mode (con sus 10 sitios de ejemplo — el seed ya corrió contra la BD real, verificado sirviendo `demo-veterinaria.sitios.devalpo.cl`) y las variables `AUTH_SECRET`/`NEXT_PUBLIC_APP_URL` cargadas en Railway.
+5. **Login por magic link sigue roto en producción** — falta: (a) crear cuenta en Resend y generar `RESEND_API_KEY`, (b) verificar `devalpo.cl` en Resend (DNS en Bluehost), (c) cargar `RESEND_API_KEY`/`RESEND_FROM_EMAIL` en Railway, (d) mergear `develop` → `main` y pushear. En local sigue funcionando por Gmail SMTP directo sin problema (el bloqueo es solo en el egress de Railway).
 6. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
-7. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Fase 2 arrancó fuerte: Chat UI + Demo Mode + landing funcionando de punta a punta en local, auth por magic link lista. El bloque grande que falta es el **agente Claude de onboarding** (Tareas 2.2–2.4 en modo real, necesita `ANTHROPIC_API_KEY`) — sin eso, el modo "real" de `/api/chat` está armado pero nadie puede llegar a usarlo (depende también de la Tarea 1.4, pago).
+7. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Fase 2 arrancó fuerte: Chat UI + Demo Mode + landing ya en producción, auth por magic link lista en código pero bloqueada por el envío de email (punto 5). El bloque grande que falta es el **agente Claude de onboarding** (Tareas 2.2–2.4 en modo real, necesita `ANTHROPIC_API_KEY`) — sin eso, el modo "real" de `/api/chat` está armado pero nadie puede llegar a usarlo (depende también de la Tarea 1.4, pago).
+8. Jira (proyecto **WB**, `devalpo-team.atlassian.net`) espeja el roadmap para seguimiento — confirmar que los tickets de Fase 2 (auth, Demo Mode, landing, deploy) reflejen el estado real antes de reportar avance ahí.
