@@ -1,4 +1,5 @@
 import nodemailer, { type Transporter } from 'nodemailer'
+import type { ConnectionOptions } from 'tls'
 import { IEmailService } from '@/application/services/IEmailService'
 
 /**
@@ -25,6 +26,11 @@ export class GmailSmtpEmailService implements IEmailService {
       port: 465,
       secure: true,
       auth: { user, pass },
+      // Railway resuelve smtp.gmail.com priorizando IPv6, pero su egress a Gmail
+      // por IPv6 no completa el handshake (ETIMEDOUT) — se fuerza IPv4. `family`
+      // sí es una opción válida de tls.connect() en runtime (la reenvía a
+      // net.connect), pero @types/node no la declara en tls.ConnectionOptions.
+      tls: { family: 4 } as ConnectionOptions,
     })
   }
 
