@@ -9,8 +9,14 @@ const config: Config = {
   collectCoverageFrom: [
     'src/domain/**/*.ts',
     'src/application/**/*.ts',
+    'src/infrastructure/claude/**/*.ts',
     '!**/*.d.ts',
     '!**/index.ts',
+    // Prompts pre-existentes de una migración anterior, nunca consumidos por
+    // ningún módulo (ClaudeChatService.ts porta sus propios prompts inline,
+    // ver design.md) — fuera de alcance de este cambio, no se tocan ni se
+    // les exige cobertura.
+    '!src/infrastructure/claude/prompts/**',
   ],
   coverageThreshold: {
     global: {
@@ -26,6 +32,12 @@ const config: Config = {
       statements: 90,
     },
     'src/application/use-cases/**/*.ts': {
+      branches: 70,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+    'src/infrastructure/claude/**/*.ts': {
       branches: 70,
       functions: 85,
       lines: 85,

@@ -17,6 +17,7 @@
     "test:watch": "jest --watch --selectProjects unit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "jose": "^5.10.0",

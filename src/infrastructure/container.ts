@@ -6,6 +6,7 @@ import { PrismaPagoRepository } from './db/repositories/PrismaPagoRepository'
 import { PrismaSesionRepository } from './db/repositories/PrismaSesionRepository'
 import { PrismaTokenAccesoRepository } from './db/repositories/PrismaTokenAccesoRepository'
 import { ClaudeChatService } from './claude/ClaudeChatService'
+import { IChatService } from '@/application/services/IChatService'
 import { RailwayDeployService } from './railway/RailwayDeployService'
 import { PaymentEngineService } from './payments/PaymentEngineService'
 import { WhatsAppNotificacionService } from './notifications/WhatsAppNotificacionService'
@@ -29,7 +30,6 @@ const sesionRepo = new PrismaSesionRepository()
 const tokenAccesoRepo = new PrismaTokenAccesoRepository()
 
 // Servicios externos (stubs hasta que sus fases correspondientes los implementen)
-const chatService = new ClaudeChatService()
 const deployService = new RailwayDeployService()
 const pagoService = new PaymentEngineService()
 const notificacionService = new WhatsAppNotificacionService()
@@ -55,4 +55,19 @@ export const solicitarAccesoUC = new SolicitarAccesoUseCase(tokenAccesoRepo, ema
 export const verificarAccesoUC = new VerificarAccesoUseCase(tokenAccesoRepo, clienteRepo)
 
 // Repos y servicios sueltos para controllers
-export { clienteRepo, sitioRepo, pagoRepo, sesionRepo, tokenAccesoRepo, chatService, deployService, pagoService, notificacionService, emailService }
+export { clienteRepo, sitioRepo, pagoRepo, sesionRepo, tokenAccesoRepo, deployService, pagoService, notificacionService, emailService }
+
+// ClaudeChatService real — construcción perezosa y memoizada (mismo patrón
+// que emailService, pero como getter en vez de ternario eager) porque su
+// constructor valida ANTHROPIC_API_KEY y tira si falta; instanciarlo eager
+// rompería el boot cuando solo se usa el modo demo (que no requiere la key).
+// route.ts y container.ts comparten esta única instancia — un solo lugar de
+// composición para el servicio real, ver Decisión D2 en design.md.
+let chatServiceReal: IChatService | null | undefined
+
+export function getChatServiceReal(): IChatService | null {
+  if (chatServiceReal !== undefined) return chatServiceReal
+
+  chatServiceReal = process.env.ANTHROPIC_API_KEY ? new ClaudeChatService() : null
+  return chatServiceReal
+}
