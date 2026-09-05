@@ -12,3 +12,10 @@ require('ts-node').register({
     moduleResolution: 'node',
   },
 })
+
+// seedDemoTemplates.ts importa src/infrastructure/templates/rubroTemplates.ts,
+// que usa el alias @/* — sin este registro Node no lo resuelve fuera de Next.js.
+require('tsconfig-paths').register({
+  baseUrl: '.',
+  paths: { '@/*': ['src/*'] },
+})

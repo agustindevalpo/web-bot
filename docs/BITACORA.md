@@ -332,12 +332,13 @@ Se creó `ResendEmailService` (`src/infrastructure/email/ResendEmailService.ts`)
 
 Ramas `feature/wb-22-site-templates-{1a,1b,2,3,4a,4b,5}`. Total: 50 archivos, +3.802 / −177. Verificación final: 259/259 unitarios, `tsc --noEmit` limpio, lint 0 errores (+2 avisos por los parámetros del stub `generarConfig`).
 
-### Qué falta
+### Cierre (2026-09-05)
 
-1. Mergear #1 → #7 en orden a `develop`, luego `develop` → `main` (auto-deploy).
-2. **Después del deploy a `main`, correr `npm run db:seed-demo` contra Railway** para que las filas demo de consultora y taller tomen su nuevo template. No se corrió en esta sesión a propósito: el `.env` local apunta a la base de producción. La lógica del seed está cubierta por 11 tests (`prisma/seedDemoTemplates.ts`).
-3. Jira WB-22 queda "En curso" hasta que los PRs se mergeen; ahí pasa a "Finalizada".
-4. Opcional: afirmar paleta e imágenes a nivel DOM en e2e (hoy se verifican en unitarios y por código).
+1. ✅ PRs #1 → #7 mergeados en orden a `develop` (merge commits) y `develop` → `main` (`9c19460`), deploy en Railway `SUCCESS`. **Gotcha de GitHub:** al mergear el PR #1 con `--delete-branch`, GitHub **cerró** el PR #2 en vez de reapuntarlo a `develop` (su base era la rama borrada). Se recuperó re-pusheando la rama base temporalmente, reabriendo el PR, cambiando la base y borrando la rama de nuevo. Para el resto de la cadena: mergear sin borrar, reapuntar el siguiente con `gh pr edit N --base develop`, y borrar las ramas al final.
+2. ✅ `npm run db:seed-demo` corrido contra Railway tras el deploy: consultora → LANDING, taller → PORTFOLIO, el resto sin cambios. **Bug encontrado:** `prisma/seed-register.js` no registraba `tsconfig-paths`, y `seedDemoTemplates.ts` → `rubroTemplates.ts` importa con alias `@/`, así que el seed fallaba con `Cannot find module '@/domain/value-objects/Template'`. Se agregó el mismo registro que ya usa `tests/e2e/register.js`.
+3. ✅ Verificado en producción con `curl`: cada demo responde 200 con su `data-template` correcto (consultora LANDING, taller PORTFOLIO, ferretería TIENDA, panadería RESTAURANTE, veterinaria SERVICIOS).
+4. ✅ Jira WB-22 → Finalizada.
+5. Opcional pendiente: afirmar paleta e imágenes a nivel DOM en e2e (hoy se verifican en unitarios y por código).
 
 ---
 
@@ -461,7 +462,7 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ## Cómo retomar
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
-2. `main` y `develop` están sincronizados en `cfa18b6` (Resend y ClaudeChatService, los dos ya en producción a nivel código — ver [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main)). **Hay 7 PRs encadenados abiertos (#1 a #7) con los 5 templates de sitio, pendientes de merge** — ver [5 templates de sitio](#5-templates-de-sitio-fase-3-tarea-31--wb-22--cadena-de-7-prs-2026-09-0405). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
+2. `main` y `develop` están sincronizados (2026-09-05): los 7 PRs de WB-22 ya están mergeados y en producción, con el seed demo corrido — ver [5 templates de sitio](#5-templates-de-sitio-fase-3-tarea-31--wb-22--cadena-de-7-prs-2026-09-0405). **El plan vigente es la FASE 5 (Jira WB-40)** — ver [Reposicionamiento](#reposicionamiento-fábrica-de-sitios-2026-09-05): lo siguiente es el dominio propio por sitio (WB-26). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
 3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
 4. **Producción ya tiene desde el 14/08:** Chat UI, landing pública, Demo Mode (con sus 10 sitios de ejemplo — el seed ya corrió contra la BD real, verificado sirviendo `demo-veterinaria.sitios.devalpo.cl`) y las variables `AUTH_SECRET`/`NEXT_PUBLIC_APP_URL` cargadas en Railway.
 5. **Login por magic link sigue roto en producción** — el código ya está en `main` (mergeado 2026-08-25), falta solo: (a) crear cuenta en Resend y generar `RESEND_API_KEY`, (b) verificar `devalpo.cl` en Resend (DNS en Bluehost), (c) cargar `RESEND_API_KEY`/`RESEND_FROM_EMAIL` en Railway. En local sigue funcionando por Gmail SMTP directo sin problema (el bloqueo es solo en el egress de Railway).
