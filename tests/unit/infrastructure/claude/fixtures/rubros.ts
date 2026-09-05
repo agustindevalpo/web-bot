@@ -147,7 +147,7 @@ export const RUBRO_FIXTURES: RubroFixture[] = [
     respuestaClaude: jsonConFence(
       baseDatos({ nombre: 'Asesorías Tributarias SA', rubro: 'consultora', ciudad: 'Providencia' }),
     ),
-    esperado: { nombre: 'Asesorías Tributarias SA', rubro: 'consultora', template: 'SERVICIOS' },
+    esperado: { nombre: 'Asesorías Tributarias SA', rubro: 'consultora', template: 'LANDING' },
   },
   {
     rubro: 'taller',
@@ -165,7 +165,7 @@ export const RUBRO_FIXTURES: RubroFixture[] = [
     respuestaClaude: jsonConProsa(
       baseDatos({ nombre: 'Taller Mecánico Don Pedro', rubro: 'taller', ciudad: 'Maipú', redes: { instagram: null, facebook: null } }),
     ),
-    esperado: { nombre: 'Taller Mecánico Don Pedro', rubro: 'taller', template: 'SERVICIOS' },
+    esperado: { nombre: 'Taller Mecánico Don Pedro', rubro: 'taller', template: 'PORTFOLIO' },
   },
   {
     rubro: 'yoga',

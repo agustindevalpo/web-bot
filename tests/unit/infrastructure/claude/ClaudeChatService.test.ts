@@ -231,6 +231,98 @@ describe('parseSiteConfig — normalización', () => {
   it('lanza claude_extraction_failed cuando rubro viene vacío', () => {
     expect(() => parseSiteConfig(jsonBase({ rubro: '' }))).toThrow(ClaudeServiceError)
   })
+
+  it('resuelve el template vía templateService.seleccionarTemplate (no un mapa independiente) — consultora → LANDING', () => {
+    const datos = parseSiteConfig(jsonBase({ rubro: 'consultora' }))
+    expect(datos.template).toBe('LANDING')
+  })
+
+  it('resuelve el template vía templateService.seleccionarTemplate (no un mapa independiente) — taller → PORTFOLIO', () => {
+    const datos = parseSiteConfig(jsonBase({ rubro: 'taller' }))
+    expect(datos.template).toBe('PORTFOLIO')
+  })
+})
+
+describe('parseSiteConfig — sobreNosotros', () => {
+  function jsonBase(overrides: Record<string, unknown> = {}): string {
+    return JSON.stringify({
+      nombre: 'Panadería El Trigal',
+      rubro: 'panaderia',
+      descripcion: 'Pan artesanal',
+      servicios: ['Pan', 'Tortas'],
+      ciudad: 'Viña del Mar',
+      contacto: { telefono: '+56911112222', email: 'a@a.cl' },
+      redes: { instagram: null, facebook: null },
+      estilo: 'moderno',
+      highlight: '20 años',
+      ...overrides,
+    })
+  }
+
+  it('normaliza sobreNosotros a "" cuando el raw no lo trae', () => {
+    const datos = parseSiteConfig(jsonBase())
+    expect(datos.sobreNosotros).toBe('')
+  })
+
+  it('preserva sobreNosotros verbatim cuando el raw lo trae', () => {
+    const datos = parseSiteConfig(jsonBase({ sobreNosotros: 'Más de 20 años sirviendo a la comunidad.' }))
+    expect(datos.sobreNosotros).toBe('Más de 20 años sirviendo a la comunidad.')
+  })
+
+  it('ignora sobreNosotros cuando no es string', () => {
+    const datos = parseSiteConfig(jsonBase({ sobreNosotros: 12345 }))
+    expect(datos.sobreNosotros).toBe('')
+  })
+})
+
+describe('parseSiteConfig — contacto.formulario', () => {
+  function jsonBase(overrides: Record<string, unknown> = {}): string {
+    return JSON.stringify({
+      nombre: 'Panadería El Trigal',
+      rubro: 'panaderia',
+      descripcion: 'Pan artesanal',
+      servicios: ['Pan', 'Tortas'],
+      ciudad: 'Viña del Mar',
+      contacto: { telefono: '+56911112222', email: 'a@a.cl' },
+      redes: { instagram: null, facebook: null },
+      estilo: 'moderno',
+      highlight: '20 años',
+      ...overrides,
+    })
+  }
+
+  it('no fabrica contacto.formulario cuando el raw no lo trae', () => {
+    const datos = parseSiteConfig(jsonBase())
+    expect(datos.contacto.formulario).toBeUndefined()
+    expect('formulario' in datos.contacto).toBe(false)
+  })
+
+  it('emite contacto.formulario cuando el raw trae habilitado boolean', () => {
+    const datos = parseSiteConfig(
+      jsonBase({ contacto: { telefono: '+56911112222', email: 'a@a.cl', formulario: { habilitado: true } } }),
+    )
+    expect(datos.contacto.formulario).toEqual({ habilitado: true })
+  })
+
+  it('preserva destinatarioEmail cuando viene junto a habilitado boolean', () => {
+    const datos = parseSiteConfig(
+      jsonBase({
+        contacto: {
+          telefono: '+56911112222',
+          email: 'a@a.cl',
+          formulario: { habilitado: true, destinatarioEmail: 'ventas@negocio.cl' },
+        },
+      }),
+    )
+    expect(datos.contacto.formulario).toEqual({ habilitado: true, destinatarioEmail: 'ventas@negocio.cl' })
+  })
+
+  it('no emite contacto.formulario cuando habilitado no es boolean', () => {
+    const datos = parseSiteConfig(
+      jsonBase({ contacto: { telefono: '+56911112222', email: 'a@a.cl', formulario: { habilitado: 'si' } } }),
+    )
+    expect(datos.contacto.formulario).toBeUndefined()
+  })
 })
 
 describe('ClaudeChatService — extraerDatos (10 rubros, describe.each)', () => {

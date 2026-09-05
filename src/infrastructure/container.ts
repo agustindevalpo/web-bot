@@ -13,6 +13,7 @@ import { WhatsAppNotificacionService } from './notifications/WhatsAppNotificacio
 import { DevEmailService } from './email/DevEmailService'
 import { GmailSmtpEmailService } from './email/GmailSmtpEmailService'
 import { ResendEmailService } from './email/ResendEmailService'
+import { TemplateService } from './templates/TemplateService'
 
 import { GenerarSitioUseCase } from '@/application/use-cases/GenerarSitio.usecase'
 import { ActivarClienteUseCase } from '@/application/use-cases/ActivarCliente.usecase'
@@ -33,6 +34,7 @@ const tokenAccesoRepo = new PrismaTokenAccesoRepository()
 const deployService = new RailwayDeployService()
 const pagoService = new PaymentEngineService()
 const notificacionService = new WhatsAppNotificacionService()
+export const templateService = new TemplateService()
 // Resend (HTTP) es el envío real en producción — el SMTP de Gmail está
 // bloqueado en el egress de Railway (ver docs/BITACORA.md). Gmail SMTP queda
 // como opción para dev local, donde sí funciona. Sin ninguna credencial, cae

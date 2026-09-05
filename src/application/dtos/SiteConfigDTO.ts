@@ -4,11 +4,13 @@ export interface SiteConfigDTO {
   nombre: string
   rubro: string
   descripcion: string
+  sobreNosotros?: string
   servicios: string[]
   ciudad: string
   contacto: {
     telefono: string
     email: string
+    formulario?: { habilitado: boolean; destinatarioEmail?: string }
   }
   redes: {
     instagram?: string
