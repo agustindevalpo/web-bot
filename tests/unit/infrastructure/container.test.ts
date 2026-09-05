@@ -51,6 +51,59 @@ describe('container — getChatServiceReal', () => {
   })
 })
 
+describe('container — getCustomHostnameService', () => {
+  it('devuelve el Noop cuando faltan las credenciales de Cloudflare', async () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV }
+    delete process.env.CLOUDFLARE_API_TOKEN
+    delete process.env.CLOUDFLARE_ZONE_ID
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCustomHostnameService } = require('@/infrastructure/container')
+
+    const resultado = await getCustomHostnameService().asegurarHostname('www.x.cl')
+
+    expect(resultado.estado).toBe('no_configurado')
+  })
+
+  it('devuelve el Noop si solo está una de las dos credenciales', async () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV, CLOUDFLARE_API_TOKEN: 'tok' }
+    delete process.env.CLOUDFLARE_ZONE_ID
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCustomHostnameService } = require('@/infrastructure/container')
+
+    const resultado = await getCustomHostnameService().asegurarHostname('www.x.cl')
+
+    expect(resultado.estado).toBe('no_configurado')
+  })
+
+  it('devuelve la implementación de Cloudflare (memoizada) con ambas credenciales', () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV, CLOUDFLARE_API_TOKEN: 'tok', CLOUDFLARE_ZONE_ID: 'zona' }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCustomHostnameService } = require('@/infrastructure/container')
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { CloudflareCustomHostnameService } = require('@/infrastructure/cloudflare/CloudflareCustomHostnameService')
+
+    const primera = getCustomHostnameService()
+
+    expect(primera).toBeInstanceOf(CloudflareCustomHostnameService)
+    expect(getCustomHostnameService()).toBe(primera)
+  })
+
+  it('exporta los use cases del panel interno', () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const container = require('@/infrastructure/container')
+
+    expect(container.listarSitiosUC).toBeDefined()
+    expect(container.cambiarEstadoSitioUC).toBeDefined()
+    expect(container.asignarDominioPropioUC).toBeDefined()
+    expect(container.actualizarConfigSitioUC).toBeDefined()
+  })
+})
+
 // Triangulation skipped: re-export estructural de un singleton sin ramas —
 // un solo resultado posible, cubierto en TemplateService.test.ts.
 describe('container — templateService', () => {
