@@ -178,6 +178,41 @@
   object-fit: cover;
 }
 
+/* ── CONTACTO ── */
+
+.contactoInfo {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 14.5px;
+  margin-bottom: 24px;
+}
+
+.contactoForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.contactoInput,
+.contactoTextarea {
+  background: color-mix(in srgb, var(--texto) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--texto) 20%, transparent);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--texto);
+  font-size: 14.5px;
+  font-family: inherit;
+}
+
+.contactoTextarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
 /* ── FOOTER ── */
 
 .footer {
