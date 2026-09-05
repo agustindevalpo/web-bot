@@ -379,6 +379,31 @@ WebBot es la **fábrica de sitios de Devalpo**, no un SaaS de autoservicio. Prom
 
 ---
 
+## Dominio propio por sitio (FASE 5, WB-26) — rama `feature/wb-26-dominio-propio` (2026-09-05)
+
+**Bloqueante encontrado antes de codear:** Railway limita los dominios custom por plan (Trial 1 en total, Hobby 2 por servicio, Pro 20 por servicio) y el único slot del trial ya lo usa el wildcard `*.sitios.devalpo.cl`. Para una fábrica de sitios no escala. **Decisión de Agustín:** Cloudflare for SaaS (plan gratis, 100 hostnames de clientes incluidos, USD 0,10/mes cada adicional) delante de Railway. Implica mover el DNS de `devalpo.cl` de Bluehost a Cloudflare (solo el DNS: el WordPress de Devalpo sigue alojado en Bluehost, el correo de Google Workspace no cambia). Agustín ya tiene cuenta en Cloudflare (zona de Serendipia Ediciones); `devalpo.cl` entra como zona adicional.
+
+### Arquitectura
+
+`panaderia.cl` → CNAME a `dominios.devalpo.cl` → Cloudflare termina TLS → Worker (fallback origin, ruta `*/*`) reenvía a `custom.sitios.devalpo.cl` (Railway) con `X-Forwarded-Host: panaderia.cl` y `X-WebBot-Worker-Secret` → `src/proxy.ts` valida el secreto y reescribe a `/sites/custom/panaderia.cl` → la página busca por `dominioPropio` (con reintento sin `www.`) y reutiliza el dispatcher de templates.
+
+### Qué hay
+
+- `src/infrastructure/routing/resolverDestino.ts`: clasificación pura del host (app / subdominio / dominio propio) con 31 tests. Si `WORKER_SHARED_SECRET` está configurado y el secreto no coincide, la cabecera se ignora por completo. La cabecera confiable pasa igual por las reglas de app/subdominio, así nunca convierte a la app en una búsqueda por dominio propio.
+- `src/proxy.ts` queda como adaptador delgado sobre `resolverDestino`; `src/app/sites/renderizarSitio.ts` comparte el render entre `[subdominio]` y `custom/[host]`.
+- `infra/cloudflare/worker/` (wrangler, `src/index.ts`): passthrough para la zona propia, reenvío con cabeceras para el resto, `redirect: 'manual'`. Excluido de `tsc`/eslint del root.
+- `docs/DOMINIO_PROPIO.md`: runbook de configuración única en Cloudflare, alta por cliente (API de custom hostnames) e instrucciones de DNS para el cliente.
+- E2E `sitio_por_dominio_propio.feature`: sitio servido por `X-Forwarded-Host` y 404 para dominio desconocido. Corrido contra `npm run dev` + Postgres de Railway: 10/10 escenarios, 60/60 pasos.
+- Verificación: 290 tests unitarios, `tsc --noEmit` limpio, lint 0 errores.
+
+### Qué falta
+
+1. Agregar `WORKER_SHARED_SECRET=` a `.env.example` a mano (el tooling no puede editar dotfiles).
+2. Pasos manuales de Agustín en Cloudflare (ver `docs/DOMINIO_PROPIO.md`): zona `devalpo.cl`, comparar registros con Bluehost, cambiar nameservers en NIC.cl, activar Cloudflare for SaaS, fallback origin + CNAME target, desplegar el Worker, cargar `WORKER_SHARED_SECRET` en wrangler y en Railway.
+3. Cablear el alta del custom hostname y la asignación de `dominioPropio` desde el panel interno (WB-27).
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |

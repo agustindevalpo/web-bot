@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Worker de Cloudflare: paquete independiente con su propio tsconfig y
+    // tipos (@cloudflare/workers-types), fuera del grafo de Next.
+    "infra/**",
   ]),
 ]);
 
