@@ -18,7 +18,7 @@ export default async function Portfolio({ config }: TemplateProps) {
   const footer = buildFooter(config)
 
   return (
-    <div className={styles.page} style={buildPaletteStyle(config)}>
+    <div className={styles.page} style={buildPaletteStyle(config)} data-template="PORTFOLIO">
       <section className={styles.hero}>
         <div className={styles.heroContenido}>
           {hero.rubro && <div className={styles.badge}>{hero.rubro}</div>}

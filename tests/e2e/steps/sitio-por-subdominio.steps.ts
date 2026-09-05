@@ -10,7 +10,11 @@ import { prisma } from '@/infrastructure/db'
 
 const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:3000'
 
-class SitioWorld extends World {
+// Exportada para que otros steps files (p. ej. templates-por-sitio.steps.ts)
+// puedan tipar `this` y reutilizar los mismos hooks Before/After — Cucumber
+// solo admite un World activo por corrida (setWorldConstructor es global),
+// así que no debe declararse de nuevo en otro archivo.
+export class SitioWorld extends World {
   browser!: Browser
   page!: Page
   response!: Response
@@ -47,12 +51,16 @@ async function crearSitioDePrueba(world: SitioWorld, subdominio: string, activo:
   await clienteRepo.save(cliente)
   world.clientesCreados.push(cliente.id)
 
+  // El nombre coincide con el subdominio: el step "la página muestra el
+  // subdominio" (línea 89) verifica el h1, y page.tsx renderiza
+  // config.nombre desde el commit fa1dcaf (Demo Mode) — ver bug documentado
+  // en sdd/site-templates, WB-22 Slice 5 tarea 6.2.
   const sitio = new Sitio(
     crypto.randomUUID(),
     cliente.id,
     subdominio,
     Template.LANDING,
-    { nombre: 'Sitio E2E' },
+    { nombre: subdominio },
     activo,
   )
   await sitioRepo.save(sitio)

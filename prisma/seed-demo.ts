@@ -6,27 +6,14 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 // Import relativo — este script corre fuera de Next (sin resolución de "@/",
-// ver Decisión D1 en design.md). Único mapa rubro→Template del sistema.
-import { RUBRO_TEMPLATES, TEMPLATE_FALLBACK } from '../src/infrastructure/templates/rubroTemplates'
-import type { Template } from '../src/domain/value-objects/Template'
+// ver Decisión D1 en design.md). WB-22 Tarea 6.1, Slice 5: reasignación de
+// demo-consultora→LANDING y demo-taller→PORTFOLIO completada — ya no hay
+// override temporal, resolverTemplateDemo lee directo del único mapa
+// rubro→Template del sistema (RUBRO_TEMPLATES/TEMPLATE_FALLBACK).
+import { resolverTemplateDemo } from './seedDemoTemplates'
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
-
-// WB-22 Tarea 3.1, Slice 1: RUBRO_TEMPLATES ya define consultora→LANDING y
-// taller→PORTFOLIO (la asignación correcta para sitios NUEVOS), pero los
-// sitios demo YA SEMBRADOS con esos dos rubros deben seguir en SERVICIOS
-// hasta el cutover coordinado de Slice 5 (WB-22 tarea 6.1), que también
-// añade su e2e por template. Sin este override, re-correr el seed
-// reasignaría demo-consultora/demo-taller antes de tiempo.
-const TEMPLATE_OVERRIDE_TEMPORAL: Partial<Record<string, Template>> = {
-  consultora: 'SERVICIOS',
-  taller: 'SERVICIOS',
-}
-
-function resolverTemplateDemo(rubro: string): Template {
-  return TEMPLATE_OVERRIDE_TEMPORAL[rubro] ?? RUBRO_TEMPLATES[rubro] ?? TEMPLATE_FALLBACK
-}
 
 const CLIENTE_DEMO_ID = 'cliente-demo-webbot-devalpo'
 const CLIENTE_DEMO_EMAIL = 'demo@webbot.devalpo.cl'
