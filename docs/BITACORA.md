@@ -379,6 +379,27 @@ WebBot es la **fábrica de sitios de Devalpo**, no un SaaS de autoservicio. Prom
 
 ---
 
+## Panel interno mínimo (FASE 5, WB-27) — rama `feature/wb-27-panel-interno` (2026-09-05)
+
+**Para qué:** el equipo de Devalpo necesita ver los sitios, pausarlos o reactivarlos, asignarles dominio propio y corregir contenido sin tocar la base a mano. No es para el cliente final (los clientes no editan; ver [Reposicionamiento](#reposicionamiento-fábrica-de-sitios-2026-09-05)).
+
+### Qué hay
+
+- **Acceso:** `/admin/login` con una sola contraseña (`ADMIN_SECRET`, comparación en tiempo constante), cookie `webbot_admin` (JWT firmado con `AUTH_SECRET`, 12 h), 5 intentos cada 15 min por IP. Separado del magic link a propósito (ese sigue bloqueado por Resend). Sin `ADMIN_SECRET` el login responde 503.
+- **`/admin`:** tabla de todos los sitios (nombre, subdominio con link de preview local/producción, template, estado, dominio propio, fecha) y cierre de sesión.
+- **`/admin/sitios/[id]`:** pausar/reactivar, asignar o quitar dominio propio (con instrucciones de DNS para el cliente y el resultado del custom hostname), editar `configJson` como JSON validado. Server Actions que exigen sesión admin y redirigen con `?ok=`/`?error=`.
+- **Aplicación:** use cases `ListarSitios`, `CambiarEstadoSitio` (por sitio, a diferencia de `PausarSitio` que es por cliente), `AsignarDominioPropio` (normaliza, valida, rechaza `*.devalpo.cl` y duplicados, luego llama al puerto `ICustomHostnameService`) y `ActualizarConfigSitio`. `ISitioRepository` suma `findById`.
+- **Cloudflare:** `CloudflareCustomHostnameService` crea el custom hostname vía API (`POST zones/{zone}/custom_hostnames`, duplicado → `existente`) y lo borra al quitar el dominio; nunca lanza ni loguea el token. Sin `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ZONE_ID` el contenedor usa un `Noop` que responde `no_configurado` (mismo patrón perezoso que `getChatServiceReal`).
+- **Docs:** `docs/PANEL_INTERNO.md`.
+- **Verificación:** 329 tests unitarios (70 nuevos), `tsc --noEmit` limpio, lint 0 errores. Smoke test contra `npm run dev` con `ADMIN_SECRET` temporal: `/admin` sin cookie → 307 a `/admin/login`; contraseña incorrecta → 401; correcta → 200 + cookie; `/admin` con cookie lista los 15 sitios de la base; detalle carga con sus tres acciones; detalle sin cookie → 307. Solo lectura, no se ejecutó ninguna acción contra la base de producción.
+
+### Qué falta
+
+1. Agregar a `.env.example` a mano (el tooling no edita dotfiles) y cargar en Railway: `ADMIN_SECRET`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID`.
+2. E2E del panel (login + listado) cuando se retome la tanda de e2e; hoy la cobertura es unitaria + smoke manual.
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
