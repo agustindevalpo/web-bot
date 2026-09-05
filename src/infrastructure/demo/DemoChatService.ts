@@ -3,6 +3,7 @@ import { MensajeDTO } from '@/application/dtos/MensajeDTO'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
 import { RUBRO_DEFAULTS, RUBRO_DEFAULT, detectarRubro } from '@/infrastructure/demo/rubroDefaults'
+import { RUBRO_TEMPLATES, TEMPLATE_FALLBACK } from '@/infrastructure/templates/rubroTemplates'
 
 // Las preguntas del bot que siguen a la pregunta 1 ("¿cómo se llama tu
 // negocio?"), idénticas a las que hace Claude en modo real. Esa primera
@@ -70,7 +71,9 @@ export class DemoChatService implements IChatService {
    * salen literalmente de lo que escribió en el chat (parseo de texto, no
    * IA — sigue costando $0 en tokens). Lo único que se toma "prestado" por
    * rubro detectado es lo puramente visual sin datos propios del negocio:
-   * template, paleta de colores y fotos stock (RUBRO_DEFAULTS).
+   * paleta de colores y fotos stock (RUBRO_DEFAULTS) más el template
+   * (RUBRO_TEMPLATES, único mapa del sistema — ver Requirement "Single
+   * Selection Code Path").
    */
   async extraerDatos(historial: MensajeDTO[]): Promise<SiteConfigDTO> {
     const respuestas = historial.filter((m) => m.rol === 'user').map((m) => m.contenido)
@@ -89,7 +92,7 @@ export class DemoChatService implements IChatService {
       redes: parseRedes(redesTexto ?? ''),
       estilo: parseEstilo(estiloTexto ?? ''),
       highlight: highlight ?? '',
-      template: defaults.template,
+      template: RUBRO_TEMPLATES[rubro] ?? TEMPLATE_FALLBACK,
       colores: defaults.colores,
       imagenes: defaults.imagenes,
     }

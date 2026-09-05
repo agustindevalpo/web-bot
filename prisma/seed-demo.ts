@@ -5,9 +5,28 @@
 // completa el chat de demo.
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
+// Import relativo — este script corre fuera de Next (sin resolución de "@/",
+// ver Decisión D1 en design.md). Único mapa rubro→Template del sistema.
+import { RUBRO_TEMPLATES, TEMPLATE_FALLBACK } from '../src/infrastructure/templates/rubroTemplates'
+import type { Template } from '../src/domain/value-objects/Template'
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
+
+// WB-22 Tarea 3.1, Slice 1: RUBRO_TEMPLATES ya define consultora→LANDING y
+// taller→PORTFOLIO (la asignación correcta para sitios NUEVOS), pero los
+// sitios demo YA SEMBRADOS con esos dos rubros deben seguir en SERVICIOS
+// hasta el cutover coordinado de Slice 5 (WB-22 tarea 6.1), que también
+// añade su e2e por template. Sin este override, re-correr el seed
+// reasignaría demo-consultora/demo-taller antes de tiempo.
+const TEMPLATE_OVERRIDE_TEMPORAL: Partial<Record<string, Template>> = {
+  consultora: 'SERVICIOS',
+  taller: 'SERVICIOS',
+}
+
+function resolverTemplateDemo(rubro: string): Template {
+  return TEMPLATE_OVERRIDE_TEMPORAL[rubro] ?? RUBRO_TEMPLATES[rubro] ?? TEMPLATE_FALLBACK
+}
 
 const CLIENTE_DEMO_ID = 'cliente-demo-webbot-devalpo'
 const CLIENTE_DEMO_EMAIL = 'demo@webbot.devalpo.cl'
@@ -15,7 +34,6 @@ const CLIENTE_DEMO_EMAIL = 'demo@webbot.devalpo.cl'
 const SITIOS_DEMO = [
   {
     subdominio: 'demo-panaderia',
-    template: 'RESTAURANTE' as const,
     rubro: 'panaderia',
     configJson: {
       nombre: 'Panadería El Trigal',
@@ -37,7 +55,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-peluqueria',
-    template: 'SERVICIOS' as const,
     rubro: 'peluqueria',
     configJson: {
       nombre: 'Estudio de Belleza Valeria',
@@ -58,7 +75,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-dentista',
-    template: 'SERVICIOS' as const,
     rubro: 'dentista',
     configJson: {
       nombre: 'Clínica Dental Sonrisas',
@@ -79,7 +95,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-restaurante',
-    template: 'RESTAURANTE' as const,
     rubro: 'restaurante',
     configJson: {
       nombre: 'El Rincón del Sabor',
@@ -100,7 +115,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-consultora',
-    template: 'SERVICIOS' as const,
     rubro: 'consultora',
     configJson: {
       nombre: 'Asesorías ContaExpert',
@@ -121,7 +135,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-taller',
-    template: 'SERVICIOS' as const,
     rubro: 'taller',
     configJson: {
       nombre: 'Taller Mecánico Don Pedro',
@@ -142,7 +155,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-yoga',
-    template: 'SERVICIOS' as const,
     rubro: 'yoga',
     configJson: {
       nombre: 'Centro de Yoga Serenidad',
@@ -163,7 +175,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-ferreteria',
-    template: 'TIENDA' as const,
     rubro: 'ferreteria',
     configJson: {
       nombre: 'Ferretería Los Maestros',
@@ -184,7 +195,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-veterinaria',
-    template: 'SERVICIOS' as const,
     rubro: 'veterinaria',
     configJson: {
       nombre: 'Clínica Veterinaria Huellitas',
@@ -205,7 +215,6 @@ const SITIOS_DEMO = [
   },
   {
     subdominio: 'demo-tienda',
-    template: 'TIENDA' as const,
     rubro: 'tienda',
     configJson: {
       nombre: 'Boutique Luna Nueva',
@@ -245,17 +254,20 @@ async function main() {
 
   for (const sitio of SITIOS_DEMO) {
     const { rubro, ...datosSitio } = sitio
+    const template = resolverTemplateDemo(rubro)
     await prisma.sitio.upsert({
       where: { subdominio: sitio.subdominio },
       create: {
         clienteId: CLIENTE_DEMO_ID,
         ...datosSitio,
+        template,
       },
       update: {
         configJson: datosSitio.configJson,
+        template,
       },
     })
-    console.log(`  ✓ demo-${rubro} → ${sitio.subdominio}.sitios.devalpo.cl`)
+    console.log(`  ✓ demo-${rubro} → ${sitio.subdominio}.sitios.devalpo.cl (${template})`)
   }
 
   console.log('Seed completado.')

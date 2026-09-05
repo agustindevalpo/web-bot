@@ -4,7 +4,10 @@ import { MensajeDTO } from '@/application/dtos/MensajeDTO'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
 import { RUBRO_DEFAULTS } from '@/infrastructure/demo/rubroDefaults'
+import { TemplateService } from '@/infrastructure/templates/TemplateService'
 import { ClaudeServiceError } from './claudeErrors'
+
+const templateService = new TemplateService()
 
 // Las 10 categorías de negocio soportadas por RUBRO_DEFAULTS (ver
 // rubroDefaults.ts) más "otro" como catch-all cuando Claude devuelve un
@@ -48,6 +51,22 @@ function normalizarRedes(valor: unknown): { instagram?: string; facebook?: strin
 function normalizarServicios(valor: unknown): string[] {
   if (!Array.isArray(valor)) return []
   return valor.filter((s): s is string => typeof s === 'string')
+}
+
+function normalizarSobreNosotros(valor: unknown): string {
+  return typeof valor === 'string' ? valor : ''
+}
+
+// Nunca fabrica el campo: solo lo emite cuando el raw trae `habilitado`
+// boolean explícito (ver Requirement "Optional About and Contact-Form
+// Fields" — el default "form habilitado" lo aplica el template al renderizar,
+// no esta normalización).
+function normalizarFormulario(valor: unknown): { habilitado: boolean; destinatarioEmail?: string } | undefined {
+  const raw = (valor ?? {}) as Record<string, unknown>
+  if (typeof raw.habilitado !== 'boolean') return undefined
+
+  const destinatarioEmail = typeof raw.destinatarioEmail === 'string' ? raw.destinatarioEmail : undefined
+  return destinatarioEmail ? { habilitado: raw.habilitado, destinatarioEmail } : { habilitado: raw.habilitado }
 }
 
 const MODELO_DEFAULT = 'claude-sonnet-4-6'
@@ -102,24 +121,28 @@ export function parseSiteConfig(textoCrudo: string): SiteConfigDTO {
   const defaults = RUBRO_DEFAULTS[rubro] ?? RUBRO_DEFAULTS[RUBRO_VISUAL_FALLBACK]
 
   const contactoRaw = (raw.contacto ?? {}) as Record<string, unknown>
+  const formulario = normalizarFormulario(contactoRaw.formulario)
 
-  return {
+  const config: SiteConfigDTO = {
     nombre,
     rubro,
     descripcion: typeof raw.descripcion === 'string' ? raw.descripcion : '',
+    sobreNosotros: normalizarSobreNosotros(raw.sobreNosotros),
     servicios: normalizarServicios(raw.servicios),
     ciudad: typeof raw.ciudad === 'string' ? raw.ciudad : '',
     contacto: {
       telefono: typeof contactoRaw.telefono === 'string' ? contactoRaw.telefono : '',
       email: typeof contactoRaw.email === 'string' ? contactoRaw.email : '',
+      ...(formulario ? { formulario } : {}),
     },
     redes: normalizarRedes(raw.redes),
     estilo: normalizarEstilo(raw.estilo),
     highlight: typeof raw.highlight === 'string' ? raw.highlight : '',
-    template: defaults.template,
     colores: defaults.colores,
     imagenes: defaults.imagenes,
   }
+
+  return { ...config, template: templateService.seleccionarTemplate(config) }
 }
 
 function logExtraccionFallida(textoCrudo: string): void {
@@ -156,8 +179,11 @@ TONO: amigable, directo, chileno. Nada de formalidades. Tutea al cliente.
 Cuando hayas recibido las 8 respuestas, confirma con un mensaje de que ya tienes todo y que vas a crear su sitio.
 NO hagas más de 8 preguntas. NO combines preguntas. NO des explicaciones largas.`
 
-// Ported verbatim from docs/WEBBOT_ROADMAP.md:550-570 — 10 rubros + "otro"
-// como catch-all (ver RUBROS_VALIDOS arriba).
+// Basado en docs/WEBBOT_ROADMAP.md:550-570 — 10 rubros + "otro" como
+// catch-all (ver RUBROS_VALIDOS arriba). Extendido en WB-22 (Tarea 3.1) con
+// "sobreNosotros" y "contacto.formulario" — ambos opcionales, tolerados
+// ausentes por parseSiteConfig (ver Requirement "Optional About and
+// Contact-Form Fields" en spec.md).
 const EXTRACTION_PROMPT = `Analiza esta conversación y extrae los datos del negocio en formato JSON.
 Devuelve SOLO el JSON, sin texto adicional, sin markdown, sin explicaciones.
 
@@ -166,11 +192,13 @@ FORMATO REQUERIDO:
   "nombre": "nombre exacto del negocio",
   "rubro": "categoría del negocio (panaderia|peluqueria|dentista|restaurante|consultora|taller|yoga|ferreteria|veterinaria|tienda|otro)",
   "descripcion": "descripción corta de 1-2 frases del negocio",
+  "sobreNosotros": "1-2 frases sobre la historia, misión o valores del negocio si se mencionaron, o null",
   "servicios": ["servicio 1", "servicio 2", "servicio 3"],
   "ciudad": "ciudad donde opera",
   "contacto": {
     "telefono": "número limpio sin espacios",
-    "email": "email@ejemplo.cl"
+    "email": "email@ejemplo.cl",
+    "formulario": { "habilitado": true }
   },
   "redes": {
     "instagram": "@usuario o null",

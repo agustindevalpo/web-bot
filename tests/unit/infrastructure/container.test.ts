@@ -50,3 +50,27 @@ describe('container — getChatServiceReal', () => {
     expect(container.chatService).toBeUndefined()
   })
 })
+
+// Triangulation skipped: re-export estructural de un singleton sin ramas —
+// un solo resultado posible, cubierto en TemplateService.test.ts.
+describe('container — templateService', () => {
+  it('exporta un templateService capaz de resolver un Template real', () => {
+    jest.resetModules()
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { templateService } = require('@/infrastructure/container')
+
+    expect(
+      templateService.seleccionarTemplate({
+        nombre: '',
+        rubro: 'panaderia',
+        descripcion: '',
+        servicios: [],
+        ciudad: '',
+        contacto: { telefono: '', email: '' },
+        redes: {},
+        estilo: 'moderno',
+        highlight: '',
+      }),
+    ).toBe('RESTAURANTE')
+  })
+})
