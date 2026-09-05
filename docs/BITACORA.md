@@ -7,7 +7,7 @@
 
 ## Estado general
 
-**Última sesión:** 2026-08-25 — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
+**Última sesión:** 2026-09-05 — **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
 **Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 **Seguimiento también en Jira:** proyecto **WB (Web-Bot)** en `devalpo-team.atlassian.net` — espejo del roadmap. Estaba desactualizado respecto a esta bitácora al empezar la sesión del 14/08 (varios tickets de Fase 2 seguían en "Tareas por hacer" ya terminados); si no se sincronizó todavía en esta sesión, hacerlo antes de dar por buena la vista de Jira.
@@ -338,6 +338,43 @@ Ramas `feature/wb-22-site-templates-{1a,1b,2,3,4a,4b,5}`. Total: 50 archivos, +3
 2. **Después del deploy a `main`, correr `npm run db:seed-demo` contra Railway** para que las filas demo de consultora y taller tomen su nuevo template. No se corrió en esta sesión a propósito: el `.env` local apunta a la base de producción. La lógica del seed está cubierta por 11 tests (`prisma/seedDemoTemplates.ts`).
 3. Jira WB-22 queda "En curso" hasta que los PRs se mergeen; ahí pasa a "Finalizada".
 4. Opcional: afirmar paleta e imágenes a nivel DOM en e2e (hoy se verifican en unitarios y por código).
+
+---
+
+## Reposicionamiento: fábrica de sitios (2026-09-05)
+
+**Contexto:** Agustín dudaba de si un SaaS de páginas web tiene sentido (mercado saturado por Wix/Hostinger/Durable, y las pymes chilenas no quieren pagar mantención). Al conversar salió el dato clave: **Devalpo ya vende sitios WordPress** (es su servicio más vendido), pero cada uno se hace a mano en Elementor.
+
+### Números reales de Devalpo
+
+| Concepto | Valor |
+|---|---|
+| Precio sitio de una página | USD 320 |
+| Precio sitio multipágina | USD 400 |
+| Costo programador por sitio | USD 180 |
+| Tiempo de entrega | hasta 15 días |
+| Volumen | ~2 sitios al mes, solo referidos y contactos |
+| Modelo | pago único, hosting incluido un año, el cliente casi nunca edita |
+
+Con WebBot (multitenant en un solo Railway) el costo marginal por sitio es casi cero y la entrega baja a 1–2 días. El margen sube de ~USD 120–200 a ~USD 280–360 al mismo precio, y sobre todo permite **bajar el precio y escalar volumen con marketing sin contratar más programadores**.
+
+### Decisión
+
+WebBot es la **fábrica de sitios de Devalpo**, no un SaaS de autoservicio. Promesa comercial: *"tu sitio web en un día, con dominio propio, pago único"*. El chat demo público es el imán de clientes; Devalpo cierra la venta y entrega.
+
+### Alcance de código (cerrado, en orden)
+
+1. Mergear los 7 PRs de WB-22 y cargar `RESEND_API_KEY` y `ANTHROPIC_API_KEY` en Railway.
+2. Dominio propio por sitio (WB-26): campo `dominio` en `Sitio`, resolución por host en `proxy.ts`, alta del dominio en Railway, instrucciones de DNS para el cliente.
+3. Panel interno mínimo para el equipo (WB-27): listar sitios, activar/pausar, asignar dominio, corregir `configJson`.
+4. Landing nueva: promesa de 1 día, precio único, sin planes mensuales.
+5. Link de pago Mercado Pago / Flow con activación manual.
+
+**Fuera de alcance:** motor de pagos por suscripción (Tarea 1.4 / WB-8, WB-30), N8N (WB-16), bot de WhatsApp (WB-18), edición para el cliente final, autoservicio completo.
+
+**Supuestos:** Devalpo compra y administra el dominio a nombre del cliente (si ya tiene uno, apunta el DNS); primer lanzamiento solo con sitios de una página (multipágina después); precio de referencia USD 150–200, se fija al armar la landing.
+
+**Regla:** después del punto 5, no se escribe más código hasta vender 5 sitios con WebBot.
 
 ---
 
