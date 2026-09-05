@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { TemplateProps } from '@/components/templates/shared/types'
 import { buildPaletteStyle } from '@/components/templates/shared/palette'
+import Footer from '@/components/templates/shared/Footer'
 import { buildHero, buildAbout, buildServicios, buildContacto, buildFooter } from './sections'
 import styles from './Servicios.module.css'
 
@@ -17,7 +18,7 @@ export default async function Servicios({ config }: TemplateProps) {
   const footer = buildFooter(config)
 
   return (
-    <div className={styles.page} style={buildPaletteStyle(config)}>
+    <div className={styles.page} style={buildPaletteStyle(config)} data-template="SERVICIOS">
       <section className={styles.hero}>
         <div className={styles.heroCopia}>
           {hero.rubro && <div className={styles.badge}>{hero.rubro}</div>}
@@ -95,22 +96,7 @@ export default async function Servicios({ config }: TemplateProps) {
         )}
       </section>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerInfo}>
-          {footer.ciudad && <span>{footer.ciudad}</span>}
-          {footer.telefono && <span>{footer.telefono}</span>}
-          {footer.email && <span>{footer.email}</span>}
-        </div>
-        <div className={styles.footerRedes}>
-          {footer.instagramUrl && (
-            <a href={footer.instagramUrl} target="_blank" rel="noopener noreferrer">
-              {footer.instagramHandle}
-            </a>
-          )}
-          {footer.facebook && <span>{footer.facebook}</span>}
-        </div>
-        <div className={styles.footerCredito}>Hecho con WebBot · Devalpo</div>
-      </footer>
+      <Footer footer={footer} />
     </div>
   )
 }
