@@ -5,6 +5,11 @@ import { Sitio } from '@/domain/entities/Sitio'
 import { SitioMapper } from '@/application/mappers/SitioMapper'
 
 export class PrismaSitioRepository implements ISitioRepository {
+  async findById(id: string): Promise<Sitio | null> {
+    const raw = await prisma.sitio.findUnique({ where: { id } })
+    return raw ? SitioMapper.toDomain(raw) : null
+  }
+
   async findBySubdominio(subdominio: string): Promise<Sitio | null> {
     const raw = await prisma.sitio.findUnique({ where: { subdominio } })
     return raw ? SitioMapper.toDomain(raw) : null

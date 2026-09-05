@@ -8,6 +8,10 @@ export class MockSitioRepository implements ISitioRepository {
     seedData.forEach((s) => this.store.set(s.id, s))
   }
 
+  async findById(id: string) {
+    return this.store.get(id) ?? null
+  }
+
   async findBySubdominio(subdominio: string) {
     return [...this.store.values()].find((s) => s.subdominio === subdominio) ?? null
   }
