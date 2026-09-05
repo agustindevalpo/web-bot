@@ -298,6 +298,49 @@ Se creó `ResendEmailService` (`src/infrastructure/email/ResendEmailService.ts`)
 
 ---
 
+## 5 templates de sitio (Fase 3, Tarea 3.1 / WB-22) — cadena de 7 PRs (2026-09-04/05)
+
+**Contexto:** hasta ahora había un solo layout en `src/app/sites/[subdominio]/page.tsx` que se adaptaba con datos y colores; el roadmap pide 5 diseños visualmente distintos elegidos por el `Template` del sitio. Se hizo con ciclo SDD completo (cambio `site-templates`, artefactos en Engram: explore → research → propose → spec → design → tasks → apply → verify → archive). Antes de empezar se cerraron en Jira los tickets que ya estaban hechos en código (WB-12, WB-15, WB-17, WB-32).
+
+### Decisiones de producto tomadas por Agustín
+
+- Sin dependencias de test nuevas (ni jsdom ni Testing Library): los tests unitarios van sobre funciones puras (selección de template y *section builders*) y el render se cubre con e2e.
+- `ITemplateService`, que existía sin usarse, se cablea como único punto de selección rubro→Template. Había **cuatro** mapas duplicados (`rubroDefaults`, `ClaudeChatService`, `DemoChatService` y el seed demo); ahora todos consumen `RUBRO_TEMPLATES` en `src/infrastructure/templates/rubroTemplates.ts`. `generarConfig` sigue sin implementar (es Tarea 3.2).
+- Dos demos existentes cambian de template: **consultora → LANDING** y **taller → PORTFOLIO** (las etiquetas "Qué ofrecemos" y "Trabajos" ya existían para esos valores). No se agregaron demos nuevos.
+- Entrega en **PRs encadenados** de menos de 800 líneas (presupuesto de revisión), cada uno apuntando al anterior. La tanda 1 salió en 1.178 líneas y se partió en 1a y 1b; 1b quedó en 825 con la etiqueta `size:exception` (creada en el repo).
+
+### Qué hay
+
+- **Arquitectura:** `ITemplateService.seleccionarTemplate` decide *qué* `Template` (capa aplicación/infra); `src/components/templates/registry.ts` + `resolver.ts` deciden *qué componente* lo renderiza (presentación). `page.tsx` es un dispatcher delgado que hace `await params`, carga el sitio y resuelve el componente con fallback a LANDING ante cualquier valor desconocido (lookup cerrado con `Object.hasOwn`, así claves de prototipo como `toString` tampoco escapan). Sin `next/dynamic` (los Server Components ya se dividen solos) ni `'use client'`.
+- **Los 5 templates** en `src/components/templates/<nombre>/{index.tsx, sections.ts, *.module.css}`: LANDING (el layout anterior migrado tal cual, CSS movido con `git mv`), SERVICIOS (hero dividido, lista numerada, CTA de reserva), RESTAURANTE (hero fotográfico, menú a dos columnas con guías punteadas, franja de galería), PORTFOLIO (hero editorial oscuro sin imagen, grilla masonry con CSS columns, footer mínimo) y TIENDA (cabecera compacta + banner, grilla de productos con WhatsApp por tarjeta, barra de contacto fija solo con CSS). Cada raíz expone `data-template`.
+- **DTO:** `SiteConfigDTO` suma `sobreNosotros?` y `contacto.formulario?` como opcionales; `parseSiteConfig` los normaliza sin fabricarlos. El formulario de contacto es solo presentación con `mailto:` (codificado); cablearlo a `IEmailService` queda para después.
+- **Footer compartido** en `shared/Footer.tsx` (idéntico en 4 templates, regla de tres del diseño). Helpers puros en `shared/{palette,enlaces,types}.ts`.
+- **Tests:** 104 → 259 unitarios. E2E: nuevo `templates_por_sitio.feature` con un escenario por template (8/8 escenarios, 50/50 pasos, corridos contra `npm run dev` local + la Postgres de Railway con fixtures que se limpian solos).
+- **Bug preexistente corregido:** el escenario e2e "sitio activo" estaba roto desde `fa1dcaf` (Demo Mode): el fixture ponía `nombre: 'Sitio E2E'` y el step buscaba el subdominio en el `h1`, que desde ese commit muestra `config.nombre`. Se arregló el fixture, no el template.
+
+### Cadena de PRs (mergear en orden, cada uno tiene como base el anterior)
+
+| PR | Tanda | Commit | Líneas |
+|---|---|---|---|
+| #1 | 1a servicio de selección + DTO | `6c797e7` | 365 |
+| #2 | 1b registry + resolver + LANDING + dispatcher (`size:exception`) | `6f7d69f` | 825 |
+| #3 | 2 SERVICIOS | `036a533` | 656 |
+| #4 | 3 RESTAURANTE | `38266ec` | 695 |
+| #5 | 4a PORTFOLIO | `f885f89` | 630 |
+| #6 | 4b TIENDA | `8b13828` | 749 |
+| #7 | 5 reasignación de demos + footer + e2e + fix fixture | `bb3abfe` | 499 |
+
+Ramas `feature/wb-22-site-templates-{1a,1b,2,3,4a,4b,5}`. Total: 50 archivos, +3.802 / −177. Verificación final: 259/259 unitarios, `tsc --noEmit` limpio, lint 0 errores (+2 avisos por los parámetros del stub `generarConfig`).
+
+### Qué falta
+
+1. Mergear #1 → #7 en orden a `develop`, luego `develop` → `main` (auto-deploy).
+2. **Después del deploy a `main`, correr `npm run db:seed-demo` contra Railway** para que las filas demo de consultora y taller tomen su nuevo template. No se corrió en esta sesión a propósito: el `.env` local apunta a la base de producción. La lógica del seed está cubierta por 11 tests (`prisma/seedDemoTemplates.ts`).
+3. Jira WB-22 queda "En curso" hasta que los PRs se mergeen; ahí pasa a "Finalizada".
+4. Opcional: afirmar paleta e imágenes a nivel DOM en e2e (hoy se verifican en unitarios y por código).
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
@@ -381,10 +424,11 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ## Cómo retomar
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
-2. `main` y `develop` están sincronizados en `40f7bf6` (Resend y ClaudeChatService, los dos ya en producción a nivel código — ver [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main)). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
+2. `main` y `develop` están sincronizados en `cfa18b6` (Resend y ClaudeChatService, los dos ya en producción a nivel código — ver [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main)). **Hay 7 PRs encadenados abiertos (#1 a #7) con los 5 templates de sitio, pendientes de merge** — ver [5 templates de sitio](#5-templates-de-sitio-fase-3-tarea-31--wb-22--cadena-de-7-prs-2026-09-0405). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
 3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
 4. **Producción ya tiene desde el 14/08:** Chat UI, landing pública, Demo Mode (con sus 10 sitios de ejemplo — el seed ya corrió contra la BD real, verificado sirviendo `demo-veterinaria.sitios.devalpo.cl`) y las variables `AUTH_SECRET`/`NEXT_PUBLIC_APP_URL` cargadas en Railway.
 5. **Login por magic link sigue roto en producción** — el código ya está en `main` (mergeado 2026-08-25), falta solo: (a) crear cuenta en Resend y generar `RESEND_API_KEY`, (b) verificar `devalpo.cl` en Resend (DNS en Bluehost), (c) cargar `RESEND_API_KEY`/`RESEND_FROM_EMAIL` en Railway. En local sigue funcionando por Gmail SMTP directo sin problema (el bloqueo es solo en el egress de Railway).
 6. Para retomar la Tarea 1.4: el código del motor de pagos está en `C:\Users\agust\Documents\DeValpo.PaymentEngine-main` (descargado por fuera del repo de WebBot, no es un submódulo ni está versionado acá). Repo real: `https://github.com/Devalpo/DeValpo.PaymentEngine.git` (privado, org con OAuth restrictions — si se necesita clonar de nuevo, mejor pedirle a Agustín el ZIP actualizado en vez de pelear con permisos OAuth).
 7. Fase 1 está prácticamente cerrada (6/7, solo falta 1.4 que depende de deployar el motor de pagos). Fase 2 arrancó fuerte: Chat UI + Demo Mode + landing ya en producción, auth por magic link con el código ya en `main` pero bloqueada por el envío de email (punto 5). **El agente Claude de onboarding (Tareas 2.2–2.4) tiene el backend real implementado y también ya está en `main`** (ver [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24) y [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main)) — falta cargar `ANTHROPIC_API_KEY` (ni local ni Railway la tienen todavía) para que deje de devolver `503 chat_no_configurado`, y sigue dependiendo también de la Tarea 1.4 (pago) para que un cliente real llegue a `activo: true`.
-8. Jira (proyecto **WB**, `devalpo-team.atlassian.net`) espeja el roadmap para seguimiento — confirmar que los tickets de Fase 2 (auth, Demo Mode, landing, deploy) reflejen el estado real antes de reportar avance ahí.
+8. Jira (proyecto **WB**, `devalpo-team.atlassian.net`) espeja el roadmap para seguimiento. El 2026-09-04 se sincronizó con el código: WB-12, WB-15, WB-17 y WB-32 pasaron a Finalizada; WB-22 (5 templates) está En curso con los 7 PRs abiertos.
+9. **Fase 3 arrancó con la Tarea 3.1 (WB-22) code-complete** en la cadena de PRs. Siguientes candidatas sin bloqueo externo: 3.2 template engine (`generarConfig` de `ITemplateService`, que hoy lanza `not_implemented`) y 3.6 panel básico de administración (WB-27).
