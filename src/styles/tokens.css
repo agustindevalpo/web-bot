@@ -1,0 +1,59 @@
+/*
+ * Tokens de diseño de la fábrica de sitios (WB-42).
+ *
+ * Solo custom properties dentro de `:root` — sin reset, sin selectores de
+ * componente. Este archivo se importa una vez en `src/app/layout.tsx`,
+ * antes de `./globals.css`, y no reemplaza nada de ese reset compartido
+ * (ver design D1/D2). Los templates de sitio inyectan su propia paleta con
+ * `--primario/--secundario/--acento/--texto` (src/components/templates/shared/palette.ts);
+ * el prefijo `--wb-` evita cualquier colisión con esas variables por sitio.
+ */
+
+:root {
+  /* Colores de marca */
+  --wb-color-primary: #080056;
+  --wb-color-secondary: #5b46f8;
+  --wb-color-accent: #ffaf4d;
+  --wb-color-highlight: #15defa;
+
+  /* Neutros con sesgo navy, derivados del primario */
+  --wb-color-ink: var(--wb-color-primary);
+  --wb-color-ink-soft: #2b2470;
+  --wb-color-surface: #ffffff;
+  --wb-color-surface-muted: #f4f3fc;
+  --wb-color-border: #dad7f2;
+  --wb-color-muted: #6b679a;
+
+  /* Escala de espaciado */
+  --wb-space-1: 0.25rem;
+  --wb-space-2: 0.5rem;
+  --wb-space-3: 0.75rem;
+  --wb-space-4: 1rem;
+  --wb-space-5: 1.5rem;
+  --wb-space-6: 2rem;
+  --wb-space-8: 3rem;
+  --wb-space-10: 4rem;
+
+  /* Radios */
+  --wb-radius-sm: 0.5rem;
+  --wb-radius-md: 0.75rem;
+  --wb-radius-lg: 1.25rem;
+  --wb-radius-pill: 999px;
+
+  /* Tipografía — Fredoka (display) / Montserrat (texto), mismas fuentes ya
+     cargadas en layout.tsx; este archivo no agrega ninguna fuente nueva. */
+  --wb-font-display: var(--font-fredoka), sans-serif;
+  --wb-font-body: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  --wb-text-xs: 0.75rem;
+  --wb-text-sm: 0.875rem;
+  --wb-text-base: 1rem;
+  --wb-text-lg: 1.125rem;
+  --wb-text-xl: 1.375rem;
+  --wb-text-2xl: 1.75rem;
+  --wb-text-3xl: 2.25rem;
+  --wb-text-4xl: 3rem;
+
+  /* Foco accesible — consumido solo desde `.page :focus-visible` en
+     page.module.css (slice 2), nunca desde globals.css. */
+  --wb-focus-ring: 0 0 0 3px color-mix(in srgb, var(--wb-color-secondary) 45%, transparent);
+}
