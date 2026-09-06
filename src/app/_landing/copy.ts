@@ -96,8 +96,8 @@ export const POR_QUE_DEVALPO = {
   titulo: 'Por qué trabajar con nosotros',
   puntos: [
     {
-      titulo: 'Somos de Valparaíso',
-      desc: 'Hablas con una persona, no con un ticket. Coordinamos por WhatsApp y respondemos el mismo día.',
+      titulo: '¿Quiénes somos?',
+      desc: 'Empresa chilena de transformación digital fundada en 2020 en Valparaíso. Hacemos la tecnología accesible para empresas que buscan optimizar operaciones. Hablas con una persona, no con un ticket.',
     },
     {
       titulo: 'Lo publicamos nosotros',
