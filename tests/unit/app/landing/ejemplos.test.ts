@@ -3,6 +3,11 @@
 // mismo patrón que tests/unit/infrastructure/container.test.ts.
 import type { EjemploReal } from '@/app/_landing/ejemplos'
 
+// `export {}` fuerza scope de módulo: con solo `import type` TypeScript trata
+// el archivo como script global y ORIGINAL_ENV choca con el de
+// tests/unit/infrastructure/container.test.ts.
+export {}
+
 const ORIGINAL_ENV = process.env
 
 afterEach(() => {

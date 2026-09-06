@@ -1,6 +1,10 @@
 // Aislado con jest.resetModules() + require() dinámico porque
 // getChatServiceReal() es un singleton memoizado a nivel de módulo — cada
 // caso necesita su propia carga limpia de container.ts con env distinto.
+// `export {}` aísla el scope del archivo (sin imports de nivel superior
+// TypeScript lo trataría como script global).
+export {}
+
 const ORIGINAL_ENV = process.env
 
 afterEach(() => {
