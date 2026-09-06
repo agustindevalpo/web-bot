@@ -2,37 +2,23 @@ import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { LandingFAQ } from './LandingFAQ'
+import { HeroDemo } from './_landing/HeroDemo'
+import { COMO_FUNCIONA, EJEMPLOS_INTRO, HERO, NAV } from './_landing/copy'
+import { EJEMPLOS } from './_landing/ejemplos'
+import { urlPreviewDesdeEnv } from './admin/_lib/urlPreview'
 
+// Usado todavía por PLANES/COMPARE/CTA final, que el slice 3 reemplaza por el
+// precio único de _landing/precios.ts (ver design, tabla "File Changes").
 const CTA_URL = '/chat'
 
-const MODELO = [
-  {
-    n: 1,
-    color: '#080056',
-    title: 'Prueba gratis, sin riesgo',
-    desc: 'Chatea con nosotros y mira un sitio de ejemplo de tu rubro. Sin costo, sin tarjeta, sin compromiso.',
-  },
-  {
-    n: 2,
-    color: '#5B46F8',
-    title: 'Al pagar, se hace realidad',
-    desc: 'Cuando decides suscribirte, la IA genera tu sitio real con tus datos, listo para mostrar al mundo.',
-  },
-  {
-    n: 3,
-    color: '#FFAF4D',
-    dark: true,
-    title: 'Siempre cuidado, siempre online',
-    desc: 'Hosting, seguridad, respaldos y soporte humano en español, todo incluido mientras tu plan esté activo.',
-  },
-]
-
-const FLUJO = [
-  { n: 1, color: '#080056', title: 'Cuéntanos de tu negocio', desc: 'Responde unas preguntas simples en el chat. Gratis, sin compromiso.' },
-  { n: 2, color: '#5B46F8', title: 'Mira tu sitio al instante', desc: 'Te mostramos cómo se vería tu sitio, con el estilo de tu rubro.' },
-  { n: 3, color: '#FFAF4D', title: 'Actívalo con tu pago', desc: 'Si te gusta, eliges un plan y listo. Sin contratos largos.' },
-  { n: 4, color: '#15DEFA', title: 'Tu sitio real, online', desc: 'La IA lo genera con tus datos reales y queda publicado en minutos.' },
-]
+// El poster viene de scripts/capturar-posters.ts (slice 1): viewport móvil
+// 390×844 con deviceScaleFactor 2 → PNG de 780×1688px.
+const HERO_DEMO_SUBDOMINIO = 'demo-restaurante'
+const HERO_DEMO_URL = urlPreviewDesdeEnv(HERO_DEMO_SUBDOMINIO)
+const HERO_DEMO_POSTER = '/demo-restaurante-poster.png'
+const HERO_DEMO_POSTER_ANCHO = 780
+const HERO_DEMO_POSTER_ALTO = 1688
+const HERO_DEMO_TITULO = 'Sitio real publicado — demo de restaurante'
 
 const PLANES = [
   {
@@ -126,83 +112,109 @@ const FAQS = [
   { q: '¿Qué incluye el plan Landing única?', a: 'Un sitio generado una sola vez, con el código fuente completo (Next.js) para que lo alojes donde quieras. No incluye hosting ni soporte continuo.' },
 ]
 
+// Componentes de sección a nivel de módulo (no dentro de LandingPage) para
+// cumplir react-hooks/static-components — ver design D3.
+
+function Nav() {
+  return (
+    <nav className={styles.nav}>
+      <Image src="/devalpo-logo.png" alt="Devalpo" width={120} height={44} className={styles.navLogo} priority />
+      <div className={styles.navLinks}>
+        <a href={NAV.ejemplos.href} className={styles.navLink}>{NAV.ejemplos.label}</a>
+        <a href={NAV.comoFunciona.href} className={styles.navLink}>{NAV.comoFunciona.label}</a>
+        <a href={NAV.precio.href} className={styles.navLink}>{NAV.precio.label}</a>
+        <a href={NAV.preguntas.href} className={styles.navLink}>{NAV.preguntas.label}</a>
+        <Link href={NAV.cta.href} className={styles.navCta}>{NAV.cta.label}</Link>
+      </div>
+    </nav>
+  )
+}
+
+function Hero() {
+  return (
+    <section className={styles.hero}>
+      <div className={styles.heroInner}>
+        <div className={styles.heroContent}>
+          <div className={styles.heroBadge}>{HERO.badge}</div>
+          <h1 className={styles.heroTitle}>{HERO.titulo}</h1>
+          <p className={styles.heroSubtitle}>{HERO.subtitulo}</p>
+          <div className={styles.heroCtas}>
+            <Link href={HERO.ctaPrimario.href} className={styles.ctaPrimary}>{HERO.ctaPrimario.label}</Link>
+            <a href={HERO.ctaSecundario.href} className={styles.ctaSecondary}>{HERO.ctaSecundario.label}</a>
+          </div>
+          <div className={styles.heroTrust}>
+            {HERO.confianza.map((linea) => (
+              <span key={linea}>✓ {linea}</span>
+            ))}
+          </div>
+        </div>
+        <div className={styles.heroDemoWrap}>
+          <span className={styles.heroDemoEtiqueta}>{HERO.demo.etiqueta}</span>
+          <HeroDemo
+            url={HERO_DEMO_URL}
+            poster={HERO_DEMO_POSTER}
+            posterAncho={HERO_DEMO_POSTER_ANCHO}
+            posterAlto={HERO_DEMO_POSTER_ALTO}
+            titulo={HERO_DEMO_TITULO}
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function EjemplosReales() {
+  return (
+    <section id="ejemplos" className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>{EJEMPLOS_INTRO.titulo}</h2>
+        <p className={styles.sectionSubtitle}>{EJEMPLOS_INTRO.subtitulo}</p>
+      </div>
+      <div className={styles.ejemplosGrid}>
+        {EJEMPLOS.map((ejemplo) => (
+          <a
+            key={ejemplo.subdominio}
+            href={ejemplo.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.ejemploCard}
+          >
+            <div className={styles.ejemploRubro}>{ejemplo.rubro}</div>
+            <p className={styles.ejemploDescripcion}>{ejemplo.descripcion}</p>
+            <span className={styles.ejemploLink}>{EJEMPLOS_INTRO.linkTarjeta}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function ComoFunciona() {
+  return (
+    <section id="como-funciona" className={`${styles.section} ${styles.sectionMuted}`}>
+      <div className={styles.sectionHeader}>
+        <h2 className={styles.sectionTitle}>{COMO_FUNCIONA.titulo}</h2>
+      </div>
+      <div className={styles.pasosGrid}>
+        {COMO_FUNCIONA.pasos.map((paso) => (
+          <div key={paso.n} className={styles.pasoCard}>
+            <div className={styles.pasoNumero}>{paso.n}</div>
+            <h3 className={styles.cardTitleSmall}>{paso.titulo}</h3>
+            <p className={styles.cardTextSmall}>{paso.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 export default function LandingPage() {
   return (
     <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Image src="/devalpo-logo.png" alt="Devalpo" width={120} height={44} className={styles.navLogo} priority />
-        <div className={styles.navLinks}>
-          <a href="#como-funciona" className={styles.navLink}>Cómo funciona</a>
-          <a href="#planes" className={styles.navLink}>Planes</a>
-          <a href="#faq" className={styles.navLink}>FAQ</a>
-          <Link href={CTA_URL} className={styles.navCta}>Probar demo gratis</Link>
-        </div>
-      </nav>
-
-      <section className={styles.hero}>
-        <div className={styles.heroBlobTop} />
-        <div className={styles.heroBlobBottom} />
-        <div className={styles.heroInner}>
-          <div className={styles.heroBadge}>WEBBOT · GENERADO POR IA</div>
-          <h1 className={styles.heroTitle}>Presencia digital activa para cada PyME chilena</h1>
-          <p className={styles.heroSubtitle}>
-            Un sitio generado por IA con tus datos reales, en menos de 3 minutos. Vivo mientras
-            pagas: hosting, soporte y actualizaciones incluidos.
-          </p>
-          <div className={styles.heroCtas}>
-            <Link href={CTA_URL} className={styles.ctaPrimary}>Probar demo gratis · $0</Link>
-            <a href="#planes" className={styles.ctaSecondary}>Ver planes</a>
-          </div>
-          <div className={styles.heroTrust}>
-            <span>✓ Sin tokens en la demo</span>
-            <span>✓ Sitio en menos de 3 min</span>
-            <span>✓ Soporte real en español</span>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionLabel}>EL MODELO</div>
-          <h2 className={styles.sectionTitle}>WebBot en tres líneas</h2>
-          <p className={styles.sectionSubtitle}>
-            No vendemos un sitio web que se hace una vez. Vendemos un servicio que existe, vive y
-            se actualiza mientras el cliente paga.
-          </p>
-        </div>
-        <div className={styles.modeloGrid}>
-          {MODELO.map((item) => (
-            <div key={item.n} className={styles.modeloCard}>
-              <div
-                className={styles.numberBadge}
-                style={{ background: item.color, color: item.dark ? '#080056' : '#ffffff' }}
-              >
-                {item.n}
-              </div>
-              <div className={styles.cardTitle}>{item.title}</div>
-              <div className={styles.cardText}>{item.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section id="como-funciona" className={`${styles.section} ${styles.sectionMuted}`}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionLabel}>EL FLUJO</div>
-          <h2 className={styles.sectionTitle}>Así de fácil es tener tu sitio online</h2>
-        </div>
-        <div className={styles.flujoGrid}>
-          {FLUJO.map((step) => (
-            <div key={step.n} className={styles.flujoCard}>
-              <div className={styles.numberBadgeSmall} style={{ background: step.color }}>
-                {step.n}
-              </div>
-              <div className={styles.cardTitleSmall}>{step.title}</div>
-              <div className={styles.cardTextSmall}>{step.desc}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Nav />
+      <Hero />
+      <EjemplosReales />
+      <ComoFunciona />
 
       <section id="planes" className={styles.section}>
         <div className={styles.sectionHeader}>

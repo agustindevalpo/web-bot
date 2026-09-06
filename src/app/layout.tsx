@@ -16,8 +16,9 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "WebBot — Devalpo",
-  description: "Presencia digital activa para cada PyME chilena, generada por IA.",
+  title: "Tu sitio web en 1 día, con tu dominio — Devalpo",
+  description:
+    "Sitio web profesional para tu negocio, publicado en tu propio dominio en 1 día hábil. Pago único, sin mensualidades.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
