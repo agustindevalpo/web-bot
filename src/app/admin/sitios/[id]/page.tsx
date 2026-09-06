@@ -5,6 +5,7 @@ import { urlPreviewDesdeEnv } from '../../_lib/urlPreview'
 import { sitioRepo, clienteRepo } from '@/infrastructure/container'
 import { CLIENTE_DEMO_ID } from '@/infrastructure/demo/rubroDefaults'
 import { estadoPromo, PRECIO_PROMO, PRECIO_SITIO } from '@/app/_landing/precios'
+import { esSitioDemo } from './formularioPago'
 import {
   cambiarEstadoSitioAction,
   guardarDominioAction,
@@ -56,7 +57,7 @@ export default async function AdminSitioPage({
   const cliente = await clienteRepo.findById(sitio.clienteId)
   // Sitios demo pertenecen al cliente compartido: todavía no tienen comprador
   // real, así que el formulario de pago siempre pide nombre/email (R5, R8, R10).
-  const esSitioDemo = sitio.clienteId === CLIENTE_DEMO_ID
+  const sitioEsDemo = esSitioDemo(sitio.clienteId, CLIENTE_DEMO_ID)
   // El monto sugerido sigue al precio vigente en la landing (promo mientras queden cupos).
   const montoSugerido = estadoPromo().agotada ? PRECIO_SITIO : PRECIO_PROMO
 
@@ -131,7 +132,7 @@ export default async function AdminSitioPage({
           <h2 className={styles.seccionTitulo}>Pago y activación</h2>
           {!cliente ? (
             <p className={styles.ayuda}>No se encontró el cliente asociado a este sitio.</p>
-          ) : esSitioDemo ? (
+          ) : sitioEsDemo ? (
             <>
               <p className={styles.ayuda}>
                 <span className={`${styles.badge} ${styles.badgePausado}`}>Sitio demo, sin comprador</span>

@@ -15,8 +15,7 @@ import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontrad
 import { ClienteNoEncontradoException } from '@/domain/exceptions/ClienteNoEncontradoException'
 import { CompradorInvalidoException } from '@/domain/exceptions/CompradorInvalidoException'
 import { etiquetaCliente } from './etiquetaCliente'
-
-const REFERENCIA_PAGO_MAX = 100
+import { parsearFormularioPago } from './formularioPago'
 
 // Todas las actions terminan en redirect (que lanza internamente), por eso
 // el try/catch solo envuelve el trabajo y el redirect queda afuera.
@@ -110,32 +109,31 @@ function revalidarDominio(sitioId: string, dominio: string | null): void {
 // El sitioId identifica al sitio; el dueño real (demo o cliente ya asignado)
 // se re-deriva siempre desde la base dentro del use case, nunca se confía en
 // un clienteId enviado por el formulario (D5).
+function campoTexto(valor: FormDataEntryValue | null): string | null {
+  return typeof valor === 'string' ? valor : null
+}
+
 export async function confirmarPagoAction(sitioId: string, formData: FormData): Promise<void> {
   await exigirAdmin()
 
-  const montoCrudo = formData.get('monto')
-  const referenciaCruda = formData.get('referencia')
-  const nombreCrudo = formData.get('nombre')
-  const emailCrudo = formData.get('email')
-
-  const monto = typeof montoCrudo === 'string' && /^\d+$/.test(montoCrudo.trim()) ? Number(montoCrudo.trim()) : NaN
-  const referencia = typeof referenciaCruda === 'string' ? referenciaCruda.trim() : ''
-  const nombre = typeof nombreCrudo === 'string' ? nombreCrudo : undefined
-  const email = typeof emailCrudo === 'string' ? emailCrudo : undefined
+  const resultadoForm = parsearFormularioPago({
+    monto: campoTexto(formData.get('monto')),
+    referencia: campoTexto(formData.get('referencia')),
+    nombre: campoTexto(formData.get('nombre')),
+    email: campoTexto(formData.get('email')),
+  })
 
   let params: Record<string, string>
-  if (!Number.isSafeInteger(monto) || monto <= 0) {
-    params = { error: 'El monto debe ser un número entero de pesos mayor que cero.' }
-  } else if (referencia.length > REFERENCIA_PAGO_MAX) {
-    params = { error: `La referencia no puede superar los ${REFERENCIA_PAGO_MAX} caracteres.` }
+  if (!resultadoForm.ok) {
+    params = { error: resultadoForm.error }
   } else {
     try {
       const resultado = await confirmarPagoSitioUC.execute({
         sitioId,
-        monto,
-        referencia: referencia || undefined,
-        nombre,
-        email,
+        monto: resultadoForm.monto,
+        referencia: resultadoForm.referencia,
+        nombre: resultadoForm.nombre,
+        email: resultadoForm.email,
       })
       revalidatePath('/admin')
       revalidatePath(`/admin/sitios/${sitioId}`)
