@@ -7,10 +7,15 @@ import {
   cambiarEstadoSitioUC,
   asignarDominioPropioUC,
   actualizarConfigSitioUC,
+  activarClienteUC,
 } from '@/infrastructure/container'
+import { Proveedor } from '@/domain/value-objects/Proveedor'
 import { DominioInvalidoException } from '@/domain/exceptions/DominioInvalidoException'
 import { ConfigSitioInvalidaException } from '@/domain/exceptions/ConfigSitioInvalidaException'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
+import { ClienteNoEncontradoException } from '@/domain/exceptions/ClienteNoEncontradoException'
+
+const REFERENCIA_PAGO_MAX = 100
 
 // Todas las actions terminan en redirect (que lanza internamente), por eso
 // el try/catch solo envuelve el trabajo y el redirect queda afuera.
@@ -31,7 +36,8 @@ function mensajeDeError(error: unknown): string {
   if (
     error instanceof DominioInvalidoException ||
     error instanceof ConfigSitioInvalidaException ||
-    error instanceof SitioNoEncontradoException
+    error instanceof SitioNoEncontradoException ||
+    error instanceof ClienteNoEncontradoException
   ) {
     return error.message
   }
@@ -95,6 +101,36 @@ function revalidarDominio(sitioId: string, dominio: string | null): void {
   revalidatePath('/admin')
   revalidatePath(`/admin/sitios/${sitioId}`)
   if (dominio) revalidatePath(`/sites/custom/${dominio}`)
+}
+
+// Confirmación manual del pago (WB-43): Devalpo verifica el pago en Mercado Pago
+// y activa al cliente desde el panel. No hay webhook ni conciliación automática.
+export async function confirmarPagoAction(sitioId: string, clienteId: string, formData: FormData): Promise<void> {
+  await exigirAdmin()
+
+  const montoCrudo = formData.get('monto')
+  const referenciaCruda = formData.get('referencia')
+
+  const monto = typeof montoCrudo === 'string' && /^\d+$/.test(montoCrudo.trim()) ? Number(montoCrudo.trim()) : NaN
+  const referencia = typeof referenciaCruda === 'string' ? referenciaCruda.trim() : ''
+
+  let params: Record<string, string>
+  if (!Number.isSafeInteger(monto) || monto <= 0) {
+    params = { error: 'El monto debe ser un número entero de pesos mayor que cero.' }
+  } else if (referencia.length > REFERENCIA_PAGO_MAX) {
+    params = { error: `La referencia no puede superar los ${REFERENCIA_PAGO_MAX} caracteres.` }
+  } else {
+    try {
+      await activarClienteUC.execute(clienteId, monto, Proveedor.MERCADOPAGO, referencia || undefined)
+      revalidatePath('/admin')
+      revalidatePath(`/admin/sitios/${sitioId}`)
+      params = { ok: 'pago_confirmado' }
+    } catch (error) {
+      params = { error: mensajeDeError(error) }
+    }
+  }
+
+  irA(sitioId, params)
 }
 
 export async function guardarContenidoAction(sitioId: string, formData: FormData): Promise<void> {

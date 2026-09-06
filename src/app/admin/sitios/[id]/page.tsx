@@ -2,12 +2,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requerirAdmin } from '../../_lib/requerirAdmin'
 import { urlPreviewDesdeEnv } from '../../_lib/urlPreview'
-import { sitioRepo } from '@/infrastructure/container'
+import { sitioRepo, clienteRepo } from '@/infrastructure/container'
+import { estadoPromo, PRECIO_PROMO, PRECIO_SITIO } from '@/app/_landing/precios'
 import {
   cambiarEstadoSitioAction,
   guardarDominioAction,
   quitarDominioAction,
   guardarContenidoAction,
+  confirmarPagoAction,
 } from './actions'
 import styles from '../../admin.module.css'
 
@@ -19,7 +21,10 @@ const MENSAJES_OK: Record<string, string> = {
   dominio: 'Dominio guardado.',
   dominio_quitado: 'Dominio propio quitado.',
   contenido: 'Contenido guardado.',
+  pago_confirmado: 'Pago confirmado. El cliente quedó activo.',
 }
+
+const FECHA_CL = new Intl.DateTimeFormat('es-CL', { dateStyle: 'long', timeZone: 'America/Santiago' })
 
 const ESTADOS_HOSTNAME: Record<string, string> = {
   creado: 'Registrado en Cloudflare (nuevo).',
@@ -46,6 +51,10 @@ export default async function AdminSitioPage({
 
   const sitio = await sitioRepo.findById(id)
   if (!sitio) return notFound()
+
+  const cliente = await clienteRepo.findById(sitio.clienteId)
+  // El monto sugerido sigue al precio vigente en la landing (promo mientras queden cupos).
+  const montoSugerido = estadoPromo().agotada ? PRECIO_SITIO : PRECIO_PROMO
 
   const ok = primero(query.ok)
   const error = primero(query.error)
@@ -106,6 +115,62 @@ export default async function AdminSitioPage({
               {sitio.activo ? 'Pausar sitio' : 'Reactivar sitio'}
             </button>
           </form>
+        </section>
+
+        <section className={styles.seccion}>
+          <h2 className={styles.seccionTitulo}>Pago y activación</h2>
+          {!cliente ? (
+            <p className={styles.ayuda}>No se encontró el cliente asociado a este sitio.</p>
+          ) : cliente.activo ? (
+            <p className={styles.ayuda}>
+              <span className={`${styles.badge} ${styles.badgeActivo}`}>Cliente activo</span>
+              {cliente.fechaPago ? ` desde ${FECHA_CL.format(cliente.fechaPago)}` : ''}
+              {' · '}
+              {cliente.nombre} ({cliente.email})
+            </p>
+          ) : (
+            <>
+              <p className={styles.ayuda}>
+                <span className={`${styles.badge} ${styles.badgePausado}`}>Cliente sin pago</span>
+                {' · '}
+                {cliente.nombre} ({cliente.email}). Verifica el pago en Mercado Pago (por nombre o correo del
+                pagador) y confírmalo aquí. No hay conciliación automática.
+              </p>
+              <form className={styles.form} action={confirmarPagoAction.bind(null, sitio.id, cliente.id)}>
+                <div className={styles.fila}>
+                  <label htmlFor="monto">Monto pagado (CLP)</label>
+                  <input
+                    id="monto"
+                    className={styles.input}
+                    type="number"
+                    name="monto"
+                    min={1}
+                    step={1}
+                    required
+                    defaultValue={montoSugerido}
+                  />
+                </div>
+                <div className={styles.fila}>
+                  <label htmlFor="referencia">Referencia de Mercado Pago (opcional)</label>
+                  <input
+                    id="referencia"
+                    className={styles.input}
+                    type="text"
+                    name="referencia"
+                    maxLength={100}
+                    placeholder="Número de operación"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className={styles.fila}>
+                  <button type="submit" className={styles.boton}>
+                    Confirmar pago y activar
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
         </section>
 
         <section className={styles.seccion}>

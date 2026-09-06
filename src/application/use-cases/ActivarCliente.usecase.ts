@@ -13,7 +13,9 @@ export class ActivarClienteUseCase {
     private notificacionService: INotificacionService,
   ) {}
 
-  async execute(clienteId: string, monto: number, proveedor: Proveedor): Promise<void> {
+  // `referencia` es el identificador del pago en el proveedor (p. ej. el número
+  // de operación de Mercado Pago que Devalpo copia a mano desde el panel, WB-43).
+  async execute(clienteId: string, monto: number, proveedor: Proveedor, referencia?: string): Promise<void> {
     const cliente = await this.clienteRepo.findById(clienteId)
     if (!cliente) throw new ClienteNoEncontradoException(clienteId)
 
@@ -24,7 +26,7 @@ export class ActivarClienteUseCase {
     })
 
     await this.pagoRepo.save(
-      new Pago(crypto.randomUUID(), clienteId, monto, EstadoPago.CONFIRMADO, proveedor),
+      new Pago(crypto.randomUUID(), clienteId, monto, EstadoPago.CONFIRMADO, proveedor, referencia ?? null),
     )
   }
 }
