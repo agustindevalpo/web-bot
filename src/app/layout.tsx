@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fredoka, Montserrat } from "next/font/google";
+import "../styles/tokens.css";
 import "./globals.css";
 
 const fredoka = Fredoka({
