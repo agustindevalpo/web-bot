@@ -1,5 +1,5 @@
 // Resuelve a dónde lleva el CTA "Quiero mi sitio real" (WB-43). Módulo puro,
-// sin leer env: DemoCTA.tsx le pasa MERCADOPAGO_LINK_URL. Mientras la variable
+// sin leer env: DemoCTA.tsx le pasa NEXT_PUBLIC_MERCADOPAGO_LINK_URL. Mientras la variable
 // no esté configurada, el CTA sigue llevando a /login como hasta ahora.
 
 export interface EnlacePago {

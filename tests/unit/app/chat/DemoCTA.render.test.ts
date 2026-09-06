@@ -28,11 +28,11 @@ function restaurarEnv(nombre: string, valor: string | undefined): void {
 
 describe('DemoCTA — render (R10/S10.1)', () => {
   const appUrlOriginal = process.env.NEXT_PUBLIC_APP_URL
-  const linkPagoOriginal = process.env.MERCADOPAGO_LINK_URL
+  const linkPagoOriginal = process.env.NEXT_PUBLIC_MERCADOPAGO_LINK_URL
 
   afterEach(() => {
     restaurarEnv('NEXT_PUBLIC_APP_URL', appUrlOriginal)
-    restaurarEnv('MERCADOPAGO_LINK_URL', linkPagoOriginal)
+    restaurarEnv('NEXT_PUBLIC_MERCADOPAGO_LINK_URL', linkPagoOriginal)
     jest.dontMock('@/app/_landing/precios')
   })
 
@@ -81,9 +81,9 @@ describe('DemoCTA — render (R10/S10.1)', () => {
   })
 
   describe('CTA "Quiero mi sitio real" — link de pago (WB-43)', () => {
-    it('apunta al link de Mercado Pago en pestaña nueva cuando MERCADOPAGO_LINK_URL está configurada', () => {
+    it('apunta al link de Mercado Pago en pestaña nueva cuando NEXT_PUBLIC_MERCADOPAGO_LINK_URL está configurada', () => {
       process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
-      process.env.MERCADOPAGO_LINK_URL = 'https://mpago.la/abc123'
+      process.env.NEXT_PUBLIC_MERCADOPAGO_LINK_URL = 'https://mpago.la/abc123'
       const DemoCTA = requerirDemoCTAFresco()
 
       const markup = renderToStaticMarkup(React.createElement(DemoCTA, { subdominioDemo: 'demo-e2e' }))
@@ -95,9 +95,9 @@ describe('DemoCTA — render (R10/S10.1)', () => {
       expect(markup).toContain('Pago único por Mercado Pago')
     })
 
-    it('cae a /login sin target=_blank cuando MERCADOPAGO_LINK_URL no está configurada', () => {
+    it('cae a /login sin target=_blank cuando NEXT_PUBLIC_MERCADOPAGO_LINK_URL no está configurada', () => {
       process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
-      delete process.env.MERCADOPAGO_LINK_URL
+      delete process.env.NEXT_PUBLIC_MERCADOPAGO_LINK_URL
       const DemoCTA = requerirDemoCTAFresco()
 
       const markup = renderToStaticMarkup(React.createElement(DemoCTA, { subdominioDemo: 'demo-e2e' }))
