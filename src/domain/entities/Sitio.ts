@@ -24,6 +24,10 @@ export class Sitio {
     this.dominioPropio = dominio
   }
 
+  transferirA(clienteId: string): void {
+    this.clienteId = clienteId
+  }
+
   estaActivo(): boolean {
     return this.activo
   }

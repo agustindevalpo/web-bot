@@ -29,4 +29,16 @@ describe('Sitio entity', () => {
     sitio.conectarDominio('www.testpyme.cl')
     expect(sitio.dominioPropio).toBe('www.testpyme.cl')
   })
+
+  it('transferirA() cambia el clienteId dueño del sitio', () => {
+    expect(sitio.clienteId).toBe('cliente-1')
+    sitio.transferirA('cliente-2')
+    expect(sitio.clienteId).toBe('cliente-2')
+  })
+
+  it('transferirA() reemplaza el clienteId anterior sin dejar rastro', () => {
+    sitio.transferirA('cliente-2')
+    sitio.transferirA('cliente-3')
+    expect(sitio.clienteId).toBe('cliente-3')
+  })
 })
