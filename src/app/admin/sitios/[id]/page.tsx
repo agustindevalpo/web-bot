@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { requerirAdmin } from '../../_lib/requerirAdmin'
 import { urlPreviewDesdeEnv } from '../../_lib/urlPreview'
 import { sitioRepo, clienteRepo } from '@/infrastructure/container'
+import { CLIENTE_DEMO_ID } from '@/infrastructure/demo/rubroDefaults'
 import { estadoPromo, PRECIO_PROMO, PRECIO_SITIO } from '@/app/_landing/precios'
 import {
   cambiarEstadoSitioAction,
@@ -53,11 +54,15 @@ export default async function AdminSitioPage({
   if (!sitio) return notFound()
 
   const cliente = await clienteRepo.findById(sitio.clienteId)
+  // Sitios demo pertenecen al cliente compartido: todavía no tienen comprador
+  // real, así que el formulario de pago siempre pide nombre/email (R5, R8, R10).
+  const esSitioDemo = sitio.clienteId === CLIENTE_DEMO_ID
   // El monto sugerido sigue al precio vigente en la landing (promo mientras queden cupos).
   const montoSugerido = estadoPromo().agotada ? PRECIO_SITIO : PRECIO_PROMO
 
   const ok = primero(query.ok)
   const error = primero(query.error)
+  const clienteConfirmado = primero(query.cliente)
   const hostnameEstado = primero(query.hostname)
   const sslEstado = primero(query.ssl)
   const hostnameDetalle = primero(query.detalle)
@@ -99,7 +104,12 @@ export default async function AdminSitioPage({
           </div>
         </header>
 
-        {ok && MENSAJES_OK[ok] && <p className={`${styles.aviso} ${styles.avisoOk}`}>{MENSAJES_OK[ok]}</p>}
+        {ok && MENSAJES_OK[ok] && (
+          <p className={`${styles.aviso} ${styles.avisoOk}`}>
+            {MENSAJES_OK[ok]}
+            {clienteConfirmado ? ` ${clienteConfirmado}.` : ''}
+          </p>
+        )}
         {error && <p className={`${styles.aviso} ${styles.avisoError}`}>{error}</p>}
 
         <section className={styles.seccion}>
@@ -121,6 +131,71 @@ export default async function AdminSitioPage({
           <h2 className={styles.seccionTitulo}>Pago y activación</h2>
           {!cliente ? (
             <p className={styles.ayuda}>No se encontró el cliente asociado a este sitio.</p>
+          ) : esSitioDemo ? (
+            <>
+              <p className={styles.ayuda}>
+                <span className={`${styles.badge} ${styles.badgePausado}`}>Sitio demo, sin comprador</span>
+                {' · '}
+                Verifica el pago en Mercado Pago (por nombre o correo del pagador), completa los datos del
+                comprador y confirma aquí. Se busca un cliente con ese email o se crea uno nuevo, y el sitio pasa
+                a ser suyo. No hay conciliación automática.
+              </p>
+              <form className={styles.form} action={confirmarPagoAction.bind(null, sitio.id)}>
+                <div className={styles.fila}>
+                  <label htmlFor="nombre">Nombre del comprador</label>
+                  <input
+                    id="nombre"
+                    className={styles.input}
+                    type="text"
+                    name="nombre"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+                <div className={styles.fila}>
+                  <label htmlFor="email">Email del comprador</label>
+                  <input
+                    id="email"
+                    className={styles.input}
+                    type="email"
+                    name="email"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+                <div className={styles.fila}>
+                  <label htmlFor="monto">Monto pagado (CLP)</label>
+                  <input
+                    id="monto"
+                    className={styles.input}
+                    type="number"
+                    name="monto"
+                    min={1}
+                    step={1}
+                    required
+                    defaultValue={montoSugerido}
+                  />
+                </div>
+                <div className={styles.fila}>
+                  <label htmlFor="referencia">Referencia de Mercado Pago (opcional)</label>
+                  <input
+                    id="referencia"
+                    className={styles.input}
+                    type="text"
+                    name="referencia"
+                    maxLength={100}
+                    placeholder="Número de operación"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className={styles.fila}>
+                  <button type="submit" className={styles.boton}>
+                    Confirmar pago y activar
+                  </button>
+                </div>
+              </form>
+            </>
           ) : cliente.activo ? (
             <p className={styles.ayuda}>
               <span className={`${styles.badge} ${styles.badgeActivo}`}>Cliente activo</span>
@@ -136,7 +211,7 @@ export default async function AdminSitioPage({
                 {cliente.nombre} ({cliente.email}). Verifica el pago en Mercado Pago (por nombre o correo del
                 pagador) y confírmalo aquí. No hay conciliación automática.
               </p>
-              <form className={styles.form} action={confirmarPagoAction.bind(null, sitio.id, cliente.id)}>
+              <form className={styles.form} action={confirmarPagoAction.bind(null, sitio.id)}>
                 <div className={styles.fila}>
                   <label htmlFor="monto">Monto pagado (CLP)</label>
                   <input
