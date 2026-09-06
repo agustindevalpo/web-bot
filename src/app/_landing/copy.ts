@@ -62,6 +62,93 @@ export const COMO_FUNCIONA = {
   ],
 }
 
+// Precio, "por qué Devalpo", FAQ y CTA final (slice 3) — ver design
+// Interfaces/Contracts y la sección "Copy" (obs #300 rev2). Los montos
+// dinámicos (precio de lanzamiento, cupos restantes) los calcula page.tsx a
+// partir de `_landing/precios.ts`; acá solo va el texto fijo.
+
+export const PRECIO = {
+  titulo: 'Un pago. Un sitio. Sin mensualidades.',
+  nombreTarjeta: 'Sitio web de una página',
+  etiquetaPagoUnico: 'pago único',
+  incluye: [
+    'Diseño con los datos de tu negocio',
+    'Tu dominio configurado (.cl o .com)',
+    'Hosting y certificado SSL el primer año',
+    'Textos e imágenes listos para publicar',
+    'Una ronda de ajustes antes de publicar',
+  ],
+  lanzamiento: {
+    prefijo: 'Precio de lanzamiento',
+    primeros: 'para los primeros 10',
+    cupos: (restantes: number) => `quedan ${restantes} cupos`,
+  },
+  agotado: {
+    etiqueta: 'Cupos agotados',
+    nota: (precioNormal: string) => `precio normal ${precioNormal}`,
+  },
+  letraChica:
+    'Sitio de varias páginas: $249.990. Renovación anual de dominio y hosting: $39.990 desde el segundo año.',
+  cta: { label: 'Ver mi sitio gratis', href: '/chat' } satisfies EnlaceCta,
+}
+
+export const POR_QUE_DEVALPO = {
+  titulo: 'Por qué trabajar con nosotros',
+  puntos: [
+    {
+      titulo: 'Somos de Valparaíso',
+      desc: 'Hablas con una persona, no con un ticket. Coordinamos por WhatsApp y respondemos el mismo día.',
+    },
+    {
+      titulo: 'Lo publicamos nosotros',
+      desc: 'Nos hacemos cargo del dominio, el hosting y el certificado. Tú revisas y apruebas.',
+    },
+    {
+      titulo: '¿Te piden un sitio web?',
+      desc: 'Si estás activando Webpay o Mercado Pago y te piden un sitio, te lo entregamos con lo que exige la ley chilena del consumidor: datos del negocio, contacto, descripción y precios, y tus términos y condiciones.',
+    },
+  ],
+}
+
+// Exactamente 6 preguntas (R9): cada tema requerido aparece una sola vez. El
+// orden prioriza al lector (una FAQ de landing no debería abrir con la
+// facturación del segundo año) — ver design, sección "FAQ".
+export const FAQ = {
+  titulo: 'Preguntas frecuentes',
+  items: [
+    {
+      q: '¿Qué incluye el precio?',
+      a: 'El diseño del sitio con los datos de tu negocio, tu dominio configurado, el hosting y el certificado SSL del primer año, los textos e imágenes listos para publicar y una ronda de ajustes antes de publicar. Es un pago único: no hay mensualidad.',
+    },
+    {
+      q: '¿Cuánto tarda?',
+      a: 'Un día hábil desde que recibimos tu pago, siempre que ya nos hayas entregado la información de tu negocio. Si el dominio es nuevo, su registro puede tardar algunas horas adicionales en propagarse.',
+    },
+    {
+      q: '¿Y si ya tengo dominio?',
+      a: 'Sirve igual. Si ya tienes un dominio registrado, lo configuramos para que apunte a tu sitio nuevo; solo necesitamos acceso al panel donde lo registraste. El dominio queda a nombre de tu negocio y sigue siendo tuyo, trabajes con nosotros o no.',
+    },
+    {
+      q: '¿Puedo pedir cambios?',
+      a: 'Sí. Antes de publicar tienes una ronda de ajustes incluida: si el sitio no te convence, lo corregimos. Después de publicado nos escribes los cambios de textos, fotos o datos de contacto y los aplicamos durante el primer año.',
+    },
+    {
+      q: '¿Necesito saber de tecnología?',
+      a: 'No. Conversas con el bot, revisas el sitio y nosotros nos encargamos del dominio, el hosting y el certificado. Si prefieres hablar con una persona, coordinamos por WhatsApp.',
+    },
+    {
+      q: '¿Qué pasa desde el segundo año?',
+      a: 'Desde el segundo año se cobra una renovación anual de $39.990 que cubre el hosting y el dominio por doce meses más. Es el único cobro recurrente y te avisamos antes de que venza.',
+    },
+  ],
+}
+
+export const CTA_FINAL = {
+  titulo: 'Tu sitio puede estar publicado mañana.',
+  subtitulo: 'Empieza la conversación ahora. No pagas nada hasta ver tu sitio listo.',
+  cta: { label: 'Ver mi sitio gratis', href: '/chat' } satisfies EnlaceCta,
+}
+
 // Unión de las 4 frases exigidas por R8 (spec obs #299) y las heredadas de la
 // revisión 1, ya en minúsculas y sin tildes — ver design D-copy (obs #300,
 // Interfaces/Contracts). `contieneFraseProhibida` normaliza ambos lados antes
