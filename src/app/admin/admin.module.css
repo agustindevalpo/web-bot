@@ -1,0 +1,253 @@
+/* Estilos compartidos del panel interno (/admin y /admin/sitios/[id]). */
+
+.page {
+  min-height: 100dvh;
+  background: #f4f5fa;
+  color: #14142b;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  padding: 1.5rem;
+}
+
+.contenedor {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.titulo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #080056;
+}
+
+.subtitulo {
+  font-size: 0.9rem;
+  color: #5a5a7a;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.link {
+  color: #0d0080;
+  text-decoration: underline;
+}
+
+.tablaWrap {
+  overflow-x: auto;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #e0e2ee;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #eef0f6;
+  white-space: nowrap;
+}
+
+.tabla th {
+  font-weight: 600;
+  color: #5a5a7a;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tabla tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badgeActivo {
+  background: #dff7e6;
+  color: #146c2e;
+}
+
+.badgePausado {
+  background: #fde8e8;
+  color: #a12626;
+}
+
+.vacio {
+  padding: 2rem;
+  text-align: center;
+  color: #5a5a7a;
+}
+
+.seccion {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #e0e2ee;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.seccionTitulo {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #080056;
+}
+
+.ayuda {
+  font-size: 0.85rem;
+  color: #5a5a7a;
+  line-height: 1.5;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fila {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  min-width: 240px;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid #c9cce0;
+  font-size: 0.95rem;
+  color: #14142b;
+  background: #ffffff;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 320px;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid #c9cce0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #14142b;
+  background: #fbfbfe;
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #0d0080;
+  box-shadow: 0 0 0 2px rgba(13, 0, 128, 0.15);
+}
+
+.boton {
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #0d0080;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.boton:hover {
+  background: #080056;
+}
+
+.botonSecundario {
+  background: #ffffff;
+  color: #0d0080;
+  border: 1px solid #0d0080;
+}
+
+.botonSecundario:hover {
+  background: #eef0f6;
+}
+
+.botonPeligro {
+  background: #ffffff;
+  color: #a12626;
+  border: 1px solid #a12626;
+}
+
+.botonPeligro:hover {
+  background: #fde8e8;
+}
+
+.aviso {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.avisoOk {
+  background: #dff7e6;
+  color: #146c2e;
+}
+
+.avisoError {
+  background: #fde8e8;
+  color: #a12626;
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  font-size: 0.9rem;
+}
+
+.dl dt {
+  color: #5a5a7a;
+}
+
+.dl dd {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.dns {
+  background: #f4f5fa;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.dns code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: #e8eaf4;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+}
