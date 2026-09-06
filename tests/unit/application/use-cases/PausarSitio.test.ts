@@ -21,6 +21,7 @@ describe('PausarSitio UseCase', () => {
   const mockSitioRepo = {
     findByClienteId: jest.fn().mockResolvedValue([sitioMock]),
     update: jest.fn().mockResolvedValue(sitioMock),
+    findById: jest.fn(),
     findBySubdominio: jest.fn(),
     findByDominioPropio: jest.fn(),
     save: jest.fn(),
