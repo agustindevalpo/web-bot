@@ -11,10 +11,10 @@ responde en el dominio de la app (`webbot.devalpo.cl`, `localhost` o
 |---|---|
 | `/admin/login` | Ingreso con la contraseña compartida del equipo. |
 | `/admin` | Lista todos los sitios (nombre, subdominio con link de vista previa, template, estado, dominio propio, fecha) y permite cerrar sesión. |
-| `/admin/sitios/[id]` | Gestiona un sitio: **pausar/reactivar**, **asignar o quitar dominio propio** (con registro en Cloudflare si está configurado) y **editar el contenido** (`configJson`) como JSON. |
+| `/admin/sitios/[id]` | Gestiona un sitio: **pausar/reactivar**, **confirmar el pago y activar al cliente**, **asignar o quitar dominio propio** (con registro en Cloudflare si está configurado) y **editar el contenido** (`configJson`) como JSON. |
 
 Toda la lógica de negocio está en use cases de `src/application/use-cases/`
-(`ListarSitios`, `CambiarEstadoSitio`, `AsignarDominioPropio`,
+(`ListarSitios`, `CambiarEstadoSitio`, `ActivarCliente`, `AsignarDominioPropio`,
 `ActualizarConfigSitio`); las páginas solo llaman a esos use cases desde
 Server Actions.
 
@@ -57,6 +57,28 @@ Protecciones del login (`/api/admin/login`):
   que el login de clientes).
 - Respuesta genérica `401` ante contraseña incorrecta; `503` si `ADMIN_SECRET`
   no está configurada.
+
+## Pago y activación (manual)
+
+El cobro es un link de pago único de Mercado Pago (`MERCADOPAGO_LINK_URL`,
+ver `docs/BITACORA.md`, sección WB-43). No hay webhook: el pago se confirma a
+mano desde el panel.
+
+1. Verifica el pago en la cuenta de Mercado Pago (Actividad) y ubica al
+   cliente por nombre o correo del pagador.
+2. Abre el sitio del cliente en `/admin/sitios/[id]`. La sección **Pago y
+   activación** muestra el nombre y el correo del cliente y su estado.
+3. Si el cliente no está activo, completa **Monto pagado (CLP)** (viene
+   precargado con el precio vigente de la landing) y, opcionalmente,
+   **Referencia de Mercado Pago** (el número de operación, hasta 100
+   caracteres), y haz clic en **Confirmar pago y activar**.
+4. El cliente queda activo con fecha de pago y se registra un `Pago`
+   `CONFIRMADO` con proveedor `MERCADOPAGO`. La sección pasa a mostrar
+   "Cliente activo desde <fecha>" y oculta el formulario.
+
+Validaciones: el monto debe ser un entero positivo; una referencia más larga
+que 100 caracteres se rechaza. Si el sitio apunta a un cliente inexistente, la
+sección lo indica y no muestra el formulario.
 
 ## Flujo de dominio propio
 

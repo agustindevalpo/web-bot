@@ -21,11 +21,18 @@ function requerirDemoCTAFresco(): DemoCTAComponent {
   return DemoCTA
 }
 
+function restaurarEnv(nombre: string, valor: string | undefined): void {
+  if (valor === undefined) delete process.env[nombre]
+  else process.env[nombre] = valor
+}
+
 describe('DemoCTA — render (R10/S10.1)', () => {
   const appUrlOriginal = process.env.NEXT_PUBLIC_APP_URL
+  const linkPagoOriginal = process.env.MERCADOPAGO_LINK_URL
 
   afterEach(() => {
-    process.env.NEXT_PUBLIC_APP_URL = appUrlOriginal
+    restaurarEnv('NEXT_PUBLIC_APP_URL', appUrlOriginal)
+    restaurarEnv('MERCADOPAGO_LINK_URL', linkPagoOriginal)
     jest.dontMock('@/app/_landing/precios')
   })
 
@@ -71,5 +78,33 @@ describe('DemoCTA — render (R10/S10.1)', () => {
     for (const frase of FRASES_PLAN_MENSUAL_LEGADO) {
       expect(markup).not.toContain(frase)
     }
+  })
+
+  describe('CTA "Quiero mi sitio real" — link de pago (WB-43)', () => {
+    it('apunta al link de Mercado Pago en pestaña nueva cuando MERCADOPAGO_LINK_URL está configurada', () => {
+      process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
+      process.env.MERCADOPAGO_LINK_URL = 'https://mpago.la/abc123'
+      const DemoCTA = requerirDemoCTAFresco()
+
+      const markup = renderToStaticMarkup(React.createElement(DemoCTA, { subdominioDemo: 'demo-e2e' }))
+
+      expect(markup).toMatch(
+        /<a href="https:\/\/mpago\.la\/abc123"[^>]*target="_blank"[^>]*rel="noopener noreferrer"[^>]*>Quiero mi sitio real/,
+      )
+      expect(markup).not.toContain('href="/login"')
+      expect(markup).toContain('Pago único por Mercado Pago')
+    })
+
+    it('cae a /login sin target=_blank cuando MERCADOPAGO_LINK_URL no está configurada', () => {
+      process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
+      delete process.env.MERCADOPAGO_LINK_URL
+      const DemoCTA = requerirDemoCTAFresco()
+
+      const markup = renderToStaticMarkup(React.createElement(DemoCTA, { subdominioDemo: 'demo-e2e' }))
+
+      expect(markup).toMatch(/<a href="\/login"[^>]*>Quiero mi sitio real/)
+      expect(markup).not.toMatch(/<a href="\/login"[^>]*target="_blank"/)
+      expect(markup).toContain('Pago único por Mercado Pago')
+    })
   })
 })
