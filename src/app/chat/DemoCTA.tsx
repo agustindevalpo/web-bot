@@ -1,9 +1,12 @@
 import styles from './DemoCTA.module.css'
 import { estadoPromo, formatCLP, PRECIO_PROMO, PRECIO_SITIO } from '@/app/_landing/precios'
+import { resolverEnlacePago } from './hrefPago'
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'sitios.devalpo.cl'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || ''
 const ES_LOCAL = APP_URL.includes('localhost')
+// Link de pago único de Mercado Pago (WB-43). Sin la variable, el CTA cae a /login.
+const ENLACE_PAGO = resolverEnlacePago(process.env.MERCADOPAGO_LINK_URL)
 
 export function DemoCTA({ subdominioDemo }: { subdominioDemo: string }) {
   // En local, sitios.devalpo.cl sirve lo que esté deployado en producción,
@@ -47,13 +50,17 @@ export function DemoCTA({ subdominioDemo }: { subdominioDemo: string }) {
           <span className={styles.precioDetalle}>Pago único</span>
         </div>
 
-        <a href="/login" className={styles.boton}>
+        <a
+          href={ENLACE_PAGO.href}
+          className={styles.boton}
+          {...(ENLACE_PAGO.externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
           Quiero mi sitio real →
         </a>
 
         <p className={styles.disclaimer}>
-          Pagas solo cuando ves tu sitio terminado y estás conforme. Sin contratos ni
-          permanencia mínima.
+          Pago único por Mercado Pago. Después del pago te contactamos para activar tu sitio en 1 día.
+          Sin contratos ni permanencia mínima.
         </p>
       </div>
     </div>
