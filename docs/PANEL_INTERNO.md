@@ -14,9 +14,9 @@ responde en el dominio de la app (`webbot.devalpo.cl`, `localhost` o
 | `/admin/sitios/[id]` | Gestiona un sitio: **pausar/reactivar**, **confirmar el pago y activar al cliente**, **asignar o quitar dominio propio** (con registro en Cloudflare si está configurado) y **editar el contenido** (`configJson`) como JSON. |
 
 Toda la lógica de negocio está en use cases de `src/application/use-cases/`
-(`ListarSitios`, `CambiarEstadoSitio`, `ActivarCliente`, `AsignarDominioPropio`,
-`ActualizarConfigSitio`); las páginas solo llaman a esos use cases desde
-Server Actions.
+(`ListarSitios`, `CambiarEstadoSitio`, `ActivarCliente`, `ConfirmarPagoSitio`,
+`AsignarDominioPropio`, `ActualizarConfigSitio`); las páginas solo llaman a
+esos use cases desde Server Actions.
 
 ## Variables de entorno
 
@@ -62,23 +62,46 @@ Protecciones del login (`/api/admin/login`):
 
 El cobro es un link de pago único de Mercado Pago (`MERCADOPAGO_LINK_URL`,
 ver `docs/BITACORA.md`, sección WB-43). No hay webhook: el pago se confirma a
-mano desde el panel.
+mano desde el panel. Los sitios generados en modo demo pertenecen todos a un
+único cliente compartido hasta que alguien paga; confirmar el pago es también
+el momento en que ese sitio pasa a ser del comprador real.
 
 1. Verifica el pago en la cuenta de Mercado Pago (Actividad) y ubica al
-   cliente por nombre o correo del pagador.
-2. Abre el sitio del cliente en `/admin/sitios/[id]`. La sección **Pago y
-   activación** muestra el nombre y el correo del cliente y su estado.
-3. Si el cliente no está activo, completa **Monto pagado (CLP)** (viene
-   precargado con el precio vigente de la landing) y, opcionalmente,
-   **Referencia de Mercado Pago** (el número de operación, hasta 100
-   caracteres), y haz clic en **Confirmar pago y activar**.
-4. El cliente queda activo con fecha de pago y se registra un `Pago`
-   `CONFIRMADO` con proveedor `MERCADOPAGO`. La sección pasa a mostrar
-   "Cliente activo desde <fecha>" y oculta el formulario.
+   comprador por nombre o correo del pagador.
+2. Abre el sitio en `/admin/sitios/[id]`. La sección **Pago y activación**
+   muestra uno de tres estados:
+   - **Sitio demo, sin comprador**: el sitio todavía es del cliente demo
+     compartido. El formulario pide, además de monto y referencia,
+     **Nombre del comprador** y **Email del comprador**.
+   - **Cliente sin pago**: el sitio ya tiene un cliente real asignado (por
+     ejemplo, de una sesión anterior). El formulario solo pide monto y
+     referencia.
+   - **Cliente activo**: ya se confirmó un pago antes; no se muestra
+     formulario.
+3. Completa **Monto pagado (CLP)** (viene precargado con el precio vigente de
+   la landing) y, opcionalmente, **Referencia de Mercado Pago** (el número de
+   operación, hasta 100 caracteres). En un sitio demo, completa también
+   nombre y email del comprador tal como quedaron en Mercado Pago. Haz clic
+   en **Confirmar pago y activar**.
+4. Si el sitio era demo: el panel busca un cliente con ese email exacto
+   (sin distinguir mayúsculas ni espacios); si no existe, crea uno nuevo. El
+   sitio pasa a pertenecer a ese cliente. En cualquier caso, el cliente queda
+   activo con fecha de pago y se registra un `Pago` `CONFIRMADO` con
+   proveedor `MERCADOPAGO`. El mensaje de éxito indica si el comprador era un
+   cliente nuevo ("Cliente creado: correo@ejemplo.cl"), uno ya existente
+   ("Cliente vinculado: correo@ejemplo.cl") o si no hubo comprador que
+   resolver ("Cliente activado", caso de un sitio ya no-demo).
 
 Validaciones: el monto debe ser un entero positivo; una referencia más larga
-que 100 caracteres se rechaza. Si el sitio apunta a un cliente inexistente, la
-sección lo indica y no muestra el formulario.
+que 100 caracteres se rechaza; en un sitio demo, nombre y email del comprador
+son obligatorios y el email debe tener formato válido. El comprador nunca
+puede terminar siendo el propio cliente demo compartido — si el email
+coincide, la confirmación se rechaza. Confirmar el pago dos veces con el
+mismo correo no crea un segundo cliente: reutiliza el mismo y registra un
+segundo `Pago` (compra repetida legítima). Si el sitio apunta a un cliente
+inexistente, la sección lo indica y no muestra el formulario. El sitio
+conserva su subdominio de demo después de la reasignación; renombrarlo queda
+fuera de este flujo.
 
 ## Flujo de dominio propio
 
