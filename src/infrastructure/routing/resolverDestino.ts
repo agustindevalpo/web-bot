@@ -4,7 +4,7 @@
 //
 // Flujo de dominio propio: `panaderia.cl` → Cloudflare for SaaS → Worker
 // (infra/cloudflare/worker) → `custom.sitios.devalpo.cl` (Railway) con las
-// cabeceras `X-Forwarded-Host: panaderia.cl` y `X-WebBot-Worker-Secret`.
+// cabeceras `X-WebBot-Forwarded-Host: panaderia.cl` y `X-WebBot-Worker-Secret`.
 // Aquí se decide si esa cabecera es confiable y a qué ruta interna se
 // reescribe la petición.
 
@@ -16,7 +16,7 @@ export type Destino =
 export interface EntradaDestino {
   /** Cabecera `Host` tal como llega (puede traer puerto o mayúsculas). */
   host: string | null | undefined
-  /** Cabecera `X-Forwarded-Host` que agrega el Worker de Cloudflare. */
+  /** Cabecera `X-WebBot-Forwarded-Host` que agrega el Worker de Cloudflare. */
   forwardedHost?: string | null
   /** Cabecera `X-WebBot-Worker-Secret` que agrega el Worker. */
   secretRecibido?: string | null
@@ -69,7 +69,7 @@ function cabeceraConfiable(entrada: EntradaDestino): boolean {
  * Decide a qué destino interno corresponde una petición.
  *
  * Reglas, en orden:
- *  (a) `X-Forwarded-Host` confiable → ese host reemplaza al `Host` real y
+ *  (a) `X-WebBot-Forwarded-Host` confiable → ese host reemplaza al `Host` real y
  *      pasa por las mismas reglas de abajo. Para un dominio de cliente
  *      real siempre termina en `dominioPropio`; el paso por (b) y (c)
  *      evita que una cabecera legítima convierta a la app o a un

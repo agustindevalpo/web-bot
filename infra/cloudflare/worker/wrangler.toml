@@ -19,4 +19,4 @@ ORIGIN_HOST = "custom.sitios.devalpo.cl"
 # WORKER_SHARED_SECRET NO va aquí: es un secreto y se carga con
 #   npx wrangler secret put WORKER_SHARED_SECRET
 # El mismo valor debe estar en la variable WORKER_SHARED_SECRET del servicio
-# web-bot en Railway, si no src/proxy.ts ignora la cabecera X-Forwarded-Host.
+# web-bot en Railway, si no src/proxy.ts ignora la cabecera X-WebBot-Forwarded-Host.

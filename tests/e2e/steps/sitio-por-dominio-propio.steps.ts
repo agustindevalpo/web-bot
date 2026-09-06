@@ -14,7 +14,7 @@ const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:3000'
 // Cucumber solo admite un World por corrida, así que este archivo NO declara
 // su propio setWorldConstructor/Before/After.
 //
-// En producción la cabecera X-Forwarded-Host la agrega el Worker de
+// En producción la cabecera X-WebBot-Forwarded-Host la agrega el Worker de
 // Cloudflare junto con X-WebBot-Worker-Secret. En dev local y en el e2e se
 // espera que WORKER_SHARED_SECRET esté vacío, por lo que src/proxy.ts confía
 // en la cabecera sin secreto (ver resolverDestino, regla (a)). Si el entorno
@@ -44,11 +44,11 @@ Given(
 )
 
 When(
-  'visito la raíz con la cabecera X-Forwarded-Host {string}',
+  'visito la raíz con la cabecera X-WebBot-Forwarded-Host {string}',
   async function (this: SitioWorld, dominio: string) {
-    await this.page.setExtraHTTPHeaders({ 'X-Forwarded-Host': dominio })
+    await this.page.setExtraHTTPHeaders({ 'X-WebBot-Forwarded-Host': dominio })
     const response = await this.page.goto(`${BASE_URL}/`)
-    if (!response) throw new Error(`No hubo respuesta al navegar a / con X-Forwarded-Host ${dominio}`)
+    if (!response) throw new Error(`No hubo respuesta al navegar a / con X-WebBot-Forwarded-Host ${dominio}`)
     this.response = response
   },
 )

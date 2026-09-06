@@ -9,7 +9,7 @@ Runbook para servir un sitio de WebBot desde el dominio del cliente
 visitante ─▶ panaderia.cl (CNAME → dominios.devalpo.cl)
           ─▶ Cloudflare for SaaS (termina TLS con certificado del cliente)
           ─▶ Worker webbot-dominio-propio-worker (fallback origin, ruta */*)
-                agrega X-Forwarded-Host: panaderia.cl
+                agrega X-WebBot-Forwarded-Host: panaderia.cl
                 agrega X-WebBot-Worker-Secret: <WORKER_SHARED_SECRET>
           ─▶ https://custom.sitios.devalpo.cl (wildcard de Railway)
           ─▶ src/proxy.ts valida el secreto y reescribe a /sites/custom/panaderia.cl
@@ -27,7 +27,7 @@ Piezas en el repo:
 | Variable de entorno | `WORKER_SHARED_SECRET` (Railway y `wrangler secret`) |
 
 Sin `WORKER_SHARED_SECRET` configurado, `src/proxy.ts` acepta cualquier
-`X-Forwarded-Host`. Eso es lo esperado en dev local y en el e2e; en Railway
+`X-WebBot-Forwarded-Host`. Eso es lo esperado en dev local y en el e2e; en Railway
 el secreto DEBE estar configurado, si no cualquier cliente podría forzar la
 búsqueda de un dominio arbitrario (no expone datos de otro sitio, pero
 permitiría servir el sitio de un cliente bajo un host ajeno).
@@ -165,7 +165,7 @@ Con `npm run dev` levantado y `WORKER_SHARED_SECRET` vacío en `.env`
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}\n" \
-  -H "X-Forwarded-Host: panaderia.cl" \
+  -H "X-WebBot-Forwarded-Host: panaderia.cl" \
   http://localhost:3000/
 ```
 
@@ -173,7 +173,7 @@ Con el secreto configurado en `.env`, hay que enviarlo también o el proxy
 ignora la cabecera y responde como si fuera `localhost`:
 
 ```bash
-curl -s -H "X-Forwarded-Host: panaderia.cl" \
+curl -s -H "X-WebBot-Forwarded-Host: panaderia.cl" \
   -H "X-WebBot-Worker-Secret: $WORKER_SHARED_SECRET" \
   http://localhost:3000/
 ```

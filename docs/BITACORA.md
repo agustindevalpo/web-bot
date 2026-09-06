@@ -405,7 +405,7 @@ WebBot es la **fábrica de sitios de Devalpo**, no un SaaS de autoservicio. Prom
 
 ### Arquitectura
 
-`panaderia.cl` → CNAME a `dominios.devalpo.cl` → Cloudflare termina TLS → Worker (fallback origin, ruta `*/*`) reenvía a `custom.sitios.devalpo.cl` (Railway) con `X-Forwarded-Host: panaderia.cl` y `X-WebBot-Worker-Secret` → `src/proxy.ts` valida el secreto y reescribe a `/sites/custom/panaderia.cl` → la página busca por `dominioPropio` (con reintento sin `www.`) y reutiliza el dispatcher de templates.
+`panaderia.cl` → CNAME a `dominios.devalpo.cl` → Cloudflare termina TLS → Worker (fallback origin, ruta `*/*`) reenvía a `custom.sitios.devalpo.cl` (Railway) con `X-WebBot-Forwarded-Host: panaderia.cl` y `X-WebBot-Worker-Secret` → `src/proxy.ts` valida el secreto y reescribe a `/sites/custom/panaderia.cl` → la página busca por `dominioPropio` (con reintento sin `www.`) y reutiliza el dispatcher de templates.
 
 ### Qué hay
 
@@ -413,8 +413,12 @@ WebBot es la **fábrica de sitios de Devalpo**, no un SaaS de autoservicio. Prom
 - `src/proxy.ts` queda como adaptador delgado sobre `resolverDestino`; `src/app/sites/renderizarSitio.ts` comparte el render entre `[subdominio]` y `custom/[host]`.
 - `infra/cloudflare/worker/` (wrangler, `src/index.ts`): passthrough para la zona propia, reenvío con cabeceras para el resto, `redirect: 'manual'`. Excluido de `tsc`/eslint del root.
 - `docs/DOMINIO_PROPIO.md`: runbook de configuración única en Cloudflare, alta por cliente (API de custom hostnames) e instrucciones de DNS para el cliente.
-- E2E `sitio_por_dominio_propio.feature`: sitio servido por `X-Forwarded-Host` y 404 para dominio desconocido. Corrido contra `npm run dev` + Postgres de Railway: 10/10 escenarios, 60/60 pasos.
+- E2E `sitio_por_dominio_propio.feature`: sitio servido por `X-WebBot-Forwarded-Host` y 404 para dominio desconocido. Corrido contra `npm run dev` + Postgres de Railway: 10/10 escenarios, 60/60 pasos.
 - Verificación: 290 tests unitarios, `tsc --noEmit` limpio, lint 0 errores.
+
+### Prueba real y hallazgo (2026-09-06)
+
+Con la zona en Cloudflare, Cloudflare for SaaS activo, el Worker desplegado y `prueba.serendipiaediciones.cl` (CNAME → `dominios.devalpo.cl`) dado de alta como custom hostname, HTTPS respondió con certificado válido y `x-powered-by: Next.js`, pero 404 incluso después de desplegar el código y asignar `dominioPropio` a `demo-consultora`. **Causa:** el proxy de Railway sobreescribe `X-Forwarded-Host` con el host real antes de que llegue a Next (comprobado: una petición a `demo-taller` con `X-Forwarded-Host: demo-consultora...` renderizó PORTFOLIO, es decir, ignoró el header). El e2e local no lo detectó porque no pasa por Railway. **Fix:** el Worker y el proxy usan un header propio, `X-WebBot-Forwarded-Host`, que ningún intermediario toca. Lección: nunca transportar información de enrutamiento en headers estándar `X-Forwarded-*` cuando hay un PaaS en el medio.
 
 ### Qué falta
 

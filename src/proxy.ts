@@ -5,14 +5,14 @@ const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'sitios.devalpo.cl'
 const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'webbot.devalpo.cl'
 
 // Adaptador delgado: toda la clasificación del host vive en resolverDestino
-// (pura, con tests unitarios). Las cabeceras X-Forwarded-Host y
+// (pura, con tests unitarios). Las cabeceras X-WebBot-Forwarded-Host y
 // X-WebBot-Worker-Secret las agrega el Worker de Cloudflare
 // (infra/cloudflare/worker) para los dominios propios de clientes (WB-26);
 // en dev local WORKER_SHARED_SECRET va vacío y la cabecera se acepta tal cual.
 export function proxy(req: NextRequest) {
   const destino = resolverDestino({
     host: req.headers.get('host'),
-    forwardedHost: req.headers.get('x-forwarded-host'),
+    forwardedHost: req.headers.get('x-webbot-forwarded-host'),
     secretRecibido: req.headers.get('x-webbot-worker-secret'),
     secretEsperado: process.env.WORKER_SHARED_SECRET,
     baseDomain: BASE_DOMAIN,

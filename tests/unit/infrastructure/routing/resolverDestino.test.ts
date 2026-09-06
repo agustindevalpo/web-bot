@@ -85,7 +85,7 @@ describe('resolverDestino', () => {
     })
   })
 
-  describe('regla (a): X-Forwarded-Host del Worker', () => {
+  describe('regla (a): X-WebBot-Forwarded-Host del Worker', () => {
     const hostRailway = 'custom.sitios.devalpo.cl'
 
     it('sin secreto configurado, confía en la cabecera', () => {
@@ -128,7 +128,7 @@ describe('resolverDestino', () => {
       ).toEqual({ tipo: 'subdominio', subdominio: 'custom', rutaInterna: '/sites/custom/' })
     })
 
-    it('con secreto configurado y sin cabecera de secreto, ignora X-Forwarded-Host', () => {
+    it('con secreto configurado y sin cabecera de secreto, ignora X-WebBot-Forwarded-Host', () => {
       expect(
         resolverDestino(
           entrada({ host: hostRailway, forwardedHost: 'panaderia.cl', secretEsperado: 's3cr3t' }),
