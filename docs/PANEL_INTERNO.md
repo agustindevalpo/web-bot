@@ -60,7 +60,7 @@ Protecciones del login (`/api/admin/login`):
 
 ## Pago y activación (manual)
 
-El cobro es un link de pago único de Mercado Pago (`MERCADOPAGO_LINK_URL`,
+El cobro es un link de pago único de Mercado Pago (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`,
 ver `docs/BITACORA.md`, sección WB-43). No hay webhook: el pago se confirma a
 mano desde el panel. Los sitios generados en modo demo pertenecen todos a un
 único cliente compartido hasta que alguien paga; confirmar el pago es también

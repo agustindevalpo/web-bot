@@ -5,8 +5,10 @@ import { resolverEnlacePago } from './hrefPago'
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'sitios.devalpo.cl'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || ''
 const ES_LOCAL = APP_URL.includes('localhost')
-// Link de pago único de Mercado Pago (WB-43). Sin la variable, el CTA cae a /login.
-const ENLACE_PAGO = resolverEnlacePago(process.env.MERCADOPAGO_LINK_URL)
+// Link de pago único de Mercado Pago (WB-43). Debe ser NEXT_PUBLIC_* porque este
+// componente se renderiza en el cliente (lo importa ChatWidget, 'use client').
+// Sin la variable, el CTA cae a /login.
+const ENLACE_PAGO = resolverEnlacePago(process.env.NEXT_PUBLIC_MERCADOPAGO_LINK_URL)
 
 export function DemoCTA({ subdominioDemo }: { subdominioDemo: string }) {
   // En local, sitios.devalpo.cl sirve lo que esté deployado en producción,
