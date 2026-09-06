@@ -3,7 +3,7 @@
 // Es el fallback origin de Cloudflare for SaaS en la zona devalpo.cl: cuando
 // un visitante entra a `panaderia.cl` (CNAME → dominios.devalpo.cl),
 // Cloudflare termina TLS y ejecuta este Worker, que reenvía la petición al
-// host wildcard de Railway (`ORIGIN_HOST`) indicando en `X-Forwarded-Host`
+// host wildcard de Railway (`ORIGIN_HOST`) indicando en `X-WebBot-Forwarded-Host`
 // cuál era el dominio original. `X-WebBot-Worker-Secret` permite que
 // src/proxy.ts distinga esta cabecera de una falsificada por un cliente.
 
@@ -36,9 +36,9 @@ export default {
     // `new Request(destino, request)` copia método, cabeceras y body. La
     // cabecera `Host` no se puede fijar desde un Worker (la define el runtime
     // a partir de la URL destino), por eso el host original viaja en
-    // X-Forwarded-Host.
+    // X-WebBot-Forwarded-Host.
     const reenvio = new Request(destino, request)
-    reenvio.headers.set('X-Forwarded-Host', url.host)
+    reenvio.headers.set('X-WebBot-Forwarded-Host', url.host)
 
     if (env.WORKER_SHARED_SECRET) {
       reenvio.headers.set('X-WebBot-Worker-Secret', env.WORKER_SHARED_SECRET)
