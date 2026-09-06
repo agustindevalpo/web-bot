@@ -14,8 +14,15 @@ import { DevEmailService } from './email/DevEmailService'
 import { GmailSmtpEmailService } from './email/GmailSmtpEmailService'
 import { ResendEmailService } from './email/ResendEmailService'
 import { TemplateService } from './templates/TemplateService'
+import { ICustomHostnameService } from '@/application/services/ICustomHostnameService'
+import { CloudflareCustomHostnameService } from './cloudflare/CloudflareCustomHostnameService'
+import { NoopCustomHostnameService } from './cloudflare/NoopCustomHostnameService'
 
 import { GenerarSitioUseCase } from '@/application/use-cases/GenerarSitio.usecase'
+import { ListarSitiosUseCase } from '@/application/use-cases/ListarSitios.usecase'
+import { CambiarEstadoSitioUseCase } from '@/application/use-cases/CambiarEstadoSitio.usecase'
+import { AsignarDominioPropioUseCase } from '@/application/use-cases/AsignarDominioPropio.usecase'
+import { ActualizarConfigSitioUseCase } from '@/application/use-cases/ActualizarConfigSitio.usecase'
 import { ActivarClienteUseCase } from '@/application/use-cases/ActivarCliente.usecase'
 import { PausarSitioUseCase } from '@/application/use-cases/PausarSitio.usecase'
 import { ReactivarSitioUseCase } from '@/application/use-cases/ReactivarSitio.usecase'
@@ -73,3 +80,31 @@ export function getChatServiceReal(): IChatService | null {
   chatServiceReal = process.env.ANTHROPIC_API_KEY ? new ClaudeChatService() : null
   return chatServiceReal
 }
+
+// Custom hostnames (dominio propio) — mismo patrón perezoso: Cloudflare solo
+// cuando están las dos credenciales, si no un Noop que deja el dominio
+// guardado en la base sin registrarlo en el edge.
+let customHostnameService: ICustomHostnameService | undefined
+
+export function getCustomHostnameService(): ICustomHostnameService {
+  if (customHostnameService !== undefined) return customHostnameService
+
+  const apiToken = process.env.CLOUDFLARE_API_TOKEN
+  const zoneId = process.env.CLOUDFLARE_ZONE_ID
+  customHostnameService =
+    apiToken && zoneId ? new CloudflareCustomHostnameService({ apiToken, zoneId }) : new NoopCustomHostnameService()
+  return customHostnameService
+}
+
+// Adaptador que difiere la resolución del servicio real a la primera llamada,
+// para que el use case se pueda construir eager sin leer el env al bootear.
+const customHostnameServiceDiferido: ICustomHostnameService = {
+  asegurarHostname: (dominio) => getCustomHostnameService().asegurarHostname(dominio),
+  eliminarHostname: (dominio) => getCustomHostnameService().eliminarHostname(dominio),
+}
+
+// Use Cases del panel interno (/admin)
+export const listarSitiosUC = new ListarSitiosUseCase(sitioRepo)
+export const cambiarEstadoSitioUC = new CambiarEstadoSitioUseCase(sitioRepo)
+export const asignarDominioPropioUC = new AsignarDominioPropioUseCase(sitioRepo, customHostnameServiceDiferido)
+export const actualizarConfigSitioUC = new ActualizarConfigSitioUseCase(sitioRepo)
