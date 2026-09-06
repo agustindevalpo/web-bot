@@ -1,6 +1,6 @@
 .page {
   font-family: var(--font-montserrat), sans-serif;
-  color: #080056;
+  color: var(--wb-color-ink);
   background: #ffffff;
   overflow-x: hidden;
 }
@@ -267,7 +267,7 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #5b46f8;
+  color: var(--wb-color-secondary);
   margin-bottom: 10px;
 }
 

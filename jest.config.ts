@@ -51,6 +51,16 @@ const config: Config = {
       displayName: 'unit',
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1',
+        // Componentes React importados por tests unitarios (p. ej. DemoCTA)
+        // traen CSS Modules — sin stub, ts-jest no sabe parsear .css.
+        '\\.module\\.css$': '<rootDir>/tests/unit/__mocks__/styleMock.ts',
+        '\\.css$': '<rootDir>/tests/unit/__mocks__/styleMock.ts',
+      },
+      transform: {
+        // Override puntual para permitir renderizar componentes .tsx (p. ej.
+        // DemoCTA vía react-dom/server) en el proyecto "unit" (testEnvironment
+        // node, sin JSX-renderer histórico — ver verify-report obs #304).
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { jsx: 'react-jsx' } }],
       },
       testMatch: ['<rootDir>/tests/unit/**/*.test.ts'],
     },
