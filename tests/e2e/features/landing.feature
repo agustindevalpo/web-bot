@@ -52,11 +52,21 @@ Feature: Landing pública de la fábrica de sitios
     Then el texto de la página no contiene "<frase>"
 
     Examples:
-      | frase                       |
-      | Agencia                     |
-      | /mes                        |
-      | $29.990                     |
-      | Presencia                   |
-      | te aprueban                 |
-      | garantizamos la aprobación  |
-      | integración con Webpay      |
+      | frase                                  |
+      | Agencia                                |
+      | /mes                                   |
+      | $29.990                                |
+      | Presencia                              |
+      | te aprueban                            |
+      | garantizamos la aprobación             |
+      | las páginas que te piden para aprobarte |
+      | integración con Webpay                 |
+
+  Scenario Outline: La página nunca usa voseo
+    Then el texto de la página no contiene "<forma>"
+
+    Examples:
+      | forma  |
+      | tenés  |
+      | podés  |
+      | querés |
