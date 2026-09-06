@@ -29,6 +29,8 @@ import { ReactivarSitioUseCase } from '@/application/use-cases/ReactivarSitio.us
 import { VerificarDominioUseCase } from '@/application/use-cases/VerificarDominio.usecase'
 import { SolicitarAccesoUseCase } from '@/application/use-cases/SolicitarAcceso.usecase'
 import { VerificarAccesoUseCase } from '@/application/use-cases/VerificarAcceso.usecase'
+import { ConfirmarPagoSitioUseCase } from '@/application/use-cases/ConfirmarPagoSitio.usecase'
+import { CLIENTE_DEMO_ID } from './demo/rubroDefaults'
 
 // Repositorios
 const clienteRepo = new PrismaClienteRepository()
@@ -108,3 +110,4 @@ export const listarSitiosUC = new ListarSitiosUseCase(sitioRepo)
 export const cambiarEstadoSitioUC = new CambiarEstadoSitioUseCase(sitioRepo)
 export const asignarDominioPropioUC = new AsignarDominioPropioUseCase(sitioRepo, customHostnameServiceDiferido)
 export const actualizarConfigSitioUC = new ActualizarConfigSitioUseCase(sitioRepo)
+export const confirmarPagoSitioUC = new ConfirmarPagoSitioUseCase(sitioRepo, clienteRepo, activarClienteUC, CLIENTE_DEMO_ID)

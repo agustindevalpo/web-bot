@@ -105,6 +105,21 @@ describe('container — getCustomHostnameService', () => {
     expect(container.cambiarEstadoSitioUC).toBeDefined()
     expect(container.asignarDominioPropioUC).toBeDefined()
     expect(container.actualizarConfigSitioUC).toBeDefined()
+    expect(container.confirmarPagoSitioUC).toBeDefined()
+  })
+
+  it('inyecta confirmarPagoSitioUC con el CLIENTE_DEMO_ID compartido (WB-43)', () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const container = require('@/infrastructure/container')
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { ConfirmarPagoSitioUseCase } = require('@/application/use-cases/ConfirmarPagoSitio.usecase')
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { CLIENTE_DEMO_ID } = require('@/infrastructure/demo/rubroDefaults')
+
+    expect(container.confirmarPagoSitioUC).toBeInstanceOf(ConfirmarPagoSitioUseCase)
+    expect((container.confirmarPagoSitioUC as { clienteDemoId: string }).clienteDemoId).toBe(CLIENTE_DEMO_ID)
   })
 })
 
