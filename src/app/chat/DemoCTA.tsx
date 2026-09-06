@@ -59,7 +59,9 @@ export function DemoCTA({ subdominioDemo }: { subdominioDemo: string }) {
         </a>
 
         <p className={styles.disclaimer}>
-          Pago único por Mercado Pago. Después del pago te contactamos para activar tu sitio en 1 día.
+          {ENLACE_PAGO.externo && (
+            <>Pago único por Mercado Pago. Después del pago te contactamos para activar tu sitio en 1 día. </>
+          )}
           Sin contratos ni permanencia mínima.
         </p>
       </div>

@@ -104,7 +104,8 @@ describe('DemoCTA — render (R10/S10.1)', () => {
 
       expect(markup).toMatch(/<a href="\/login"[^>]*>Quiero mi sitio real/)
       expect(markup).not.toMatch(/<a href="\/login"[^>]*target="_blank"/)
-      expect(markup).toContain('Pago único por Mercado Pago')
+      expect(markup).not.toContain('Pago único por Mercado Pago')
+      expect(markup).toContain('Sin contratos ni permanencia mínima.')
     })
   })
 })

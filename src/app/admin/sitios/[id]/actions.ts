@@ -7,15 +7,15 @@ import {
   cambiarEstadoSitioUC,
   asignarDominioPropioUC,
   actualizarConfigSitioUC,
-  activarClienteUC,
+  confirmarPagoSitioUC,
 } from '@/infrastructure/container'
-import { Proveedor } from '@/domain/value-objects/Proveedor'
 import { DominioInvalidoException } from '@/domain/exceptions/DominioInvalidoException'
 import { ConfigSitioInvalidaException } from '@/domain/exceptions/ConfigSitioInvalidaException'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
 import { ClienteNoEncontradoException } from '@/domain/exceptions/ClienteNoEncontradoException'
-
-const REFERENCIA_PAGO_MAX = 100
+import { CompradorInvalidoException } from '@/domain/exceptions/CompradorInvalidoException'
+import { etiquetaCliente } from './etiquetaCliente'
+import { parsearFormularioPago } from './formularioPago'
 
 // Todas las actions terminan en redirect (que lanza internamente), por eso
 // el try/catch solo envuelve el trabajo y el redirect queda afuera.
@@ -37,7 +37,8 @@ function mensajeDeError(error: unknown): string {
     error instanceof DominioInvalidoException ||
     error instanceof ConfigSitioInvalidaException ||
     error instanceof SitioNoEncontradoException ||
-    error instanceof ClienteNoEncontradoException
+    error instanceof ClienteNoEncontradoException ||
+    error instanceof CompradorInvalidoException
   ) {
     return error.message
   }
@@ -105,26 +106,38 @@ function revalidarDominio(sitioId: string, dominio: string | null): void {
 
 // Confirmación manual del pago (WB-43): Devalpo verifica el pago en Mercado Pago
 // y activa al cliente desde el panel. No hay webhook ni conciliación automática.
-export async function confirmarPagoAction(sitioId: string, clienteId: string, formData: FormData): Promise<void> {
+// El sitioId identifica al sitio; el dueño real (demo o cliente ya asignado)
+// se re-deriva siempre desde la base dentro del use case, nunca se confía en
+// un clienteId enviado por el formulario (D5).
+function campoTexto(valor: FormDataEntryValue | null): string | null {
+  return typeof valor === 'string' ? valor : null
+}
+
+export async function confirmarPagoAction(sitioId: string, formData: FormData): Promise<void> {
   await exigirAdmin()
 
-  const montoCrudo = formData.get('monto')
-  const referenciaCruda = formData.get('referencia')
-
-  const monto = typeof montoCrudo === 'string' && /^\d+$/.test(montoCrudo.trim()) ? Number(montoCrudo.trim()) : NaN
-  const referencia = typeof referenciaCruda === 'string' ? referenciaCruda.trim() : ''
+  const resultadoForm = parsearFormularioPago({
+    monto: campoTexto(formData.get('monto')),
+    referencia: campoTexto(formData.get('referencia')),
+    nombre: campoTexto(formData.get('nombre')),
+    email: campoTexto(formData.get('email')),
+  })
 
   let params: Record<string, string>
-  if (!Number.isSafeInteger(monto) || monto <= 0) {
-    params = { error: 'El monto debe ser un número entero de pesos mayor que cero.' }
-  } else if (referencia.length > REFERENCIA_PAGO_MAX) {
-    params = { error: `La referencia no puede superar los ${REFERENCIA_PAGO_MAX} caracteres.` }
+  if (!resultadoForm.ok) {
+    params = { error: resultadoForm.error }
   } else {
     try {
-      await activarClienteUC.execute(clienteId, monto, Proveedor.MERCADOPAGO, referencia || undefined)
+      const resultado = await confirmarPagoSitioUC.execute({
+        sitioId,
+        monto: resultadoForm.monto,
+        referencia: resultadoForm.referencia,
+        nombre: resultadoForm.nombre,
+        email: resultadoForm.email,
+      })
       revalidatePath('/admin')
       revalidatePath(`/admin/sitios/${sitioId}`)
-      params = { ok: 'pago_confirmado' }
+      params = { ok: 'pago_confirmado', cliente: etiquetaCliente(resultado) }
     } catch (error) {
       params = { error: mensajeDeError(error) }
     }
