@@ -1,0 +1,22 @@
+name = "webbot-dominio-propio-worker"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+# Ruta del Worker como fallback origin de Cloudflare for SaaS en la zona
+# devalpo.cl: `*/*` captura el tráfico de los custom hostnames de clientes
+# (ver "Worker as origin" en la documentación de Cloudflare for SaaS). Los
+# registros DNS-only de la zona (WordPress, Railway) nunca pasan por aquí.
+# Debe ir ANTES de [vars]: en TOML, toda clave bajo un encabezado de tabla
+# pertenece a esa tabla.
+routes = [
+  { pattern = "*/*", zone_name = "devalpo.cl" }
+]
+
+# Host wildcard de Railway que sirve los sitios (ver docs/DOMINIO_PROPIO.md).
+[vars]
+ORIGIN_HOST = "custom.sitios.devalpo.cl"
+
+# WORKER_SHARED_SECRET NO va aquí: es un secreto y se carga con
+#   npx wrangler secret put WORKER_SHARED_SECRET
+# El mismo valor debe estar en la variable WORKER_SHARED_SECRET del servicio
+# web-bot en Railway, si no src/proxy.ts ignora la cabecera X-Forwarded-Host.
