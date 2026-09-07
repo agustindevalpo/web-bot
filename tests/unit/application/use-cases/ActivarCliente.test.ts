@@ -16,6 +16,7 @@ describe('ActivarCliente UseCase', () => {
     save: jest.fn(),
     delete: jest.fn(),
     findAll: jest.fn(),
+    findOrCreateByEmail: jest.fn(),
   }
 
   const mockPagoRepo = {

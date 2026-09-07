@@ -7,8 +7,7 @@ import { Plan } from '@/domain/value-objects/Plan'
 import { Proveedor } from '@/domain/value-objects/Proveedor'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
 import { CompradorInvalidoException } from '@/domain/exceptions/CompradorInvalidoException'
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import { normalizarEmail } from '@/application/shared/email'
 
 export interface ConfirmarPagoSitioInput {
   sitioId: string
@@ -86,10 +85,13 @@ export class ConfirmarPagoSitioUseCase {
   }
 }
 
+// Wrapper delgado: mantiene nombre, firma y excepción originales para no
+// romper a sus callers/tests, delegando la normalización al helper
+// compartido en `@/application/shared/email`.
 export function normalizarEmailComprador(crudo: string): string {
-  const email = crudo.trim().toLowerCase()
-  if (!EMAIL_REGEX.test(email)) {
+  try {
+    return normalizarEmail(crudo)
+  } catch {
     throw new CompradorInvalidoException('Ingresa un email de comprador válido.')
   }
-  return email
 }

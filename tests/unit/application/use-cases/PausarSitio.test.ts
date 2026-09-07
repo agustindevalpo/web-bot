@@ -16,6 +16,7 @@ describe('PausarSitio UseCase', () => {
     save: jest.fn(),
     delete: jest.fn(),
     findAll: jest.fn(),
+    findOrCreateByEmail: jest.fn(),
   }
 
   const mockSitioRepo = {
