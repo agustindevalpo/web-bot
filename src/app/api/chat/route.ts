@@ -28,11 +28,6 @@ export async function POST(req: NextRequest) {
     const cliente = sesionAuth ? await clienteRepo.findById(sesionAuth.clienteId) : null
     const esDemo = !cliente || !cliente.activo
 
-    // Subdominio del sitio demo generado — derivado del sessionId, no de un
-    // sitio prefabricado. Siempre el mismo para la misma conversación, así
-    // que no hace falta guardarlo en ningún lado para recuperarlo después.
-    const subdominioDemo = esDemo ? `demo-${sessionId.slice(0, 8)}` : null
-
     // Composición root única del servicio real — construcción perezosa y
     // memoizada (ver Decisión D2 en design.md); null cuando ANTHROPIC_API_KEY
     // no está configurada, sin romper el boot ni el modo demo.
@@ -45,6 +40,32 @@ export async function POST(req: NextRequest) {
     const chatService: IChatService = esDemo ? new DemoChatService() : (chatServiceReal as IChatService)
 
     let sesion = await sesionRepo.findBySessionId(sessionId)
+
+    // Rotación de demo terminada. La cookie `webbot_session` dura un año, así
+    // que un visitante que ya completó una demo vuelve con el mismo sessionId
+    // y la UI —que siempre arranca del saludo estático— parece una
+    // conversación nueva. Antes se devolvía la demo vieja y el mensaje recién
+    // escrito se descartaba: se veía aparecer al instante un sitio que no
+    // tenía nada que ver con lo tipeado. Ahora se arranca una sesión nueva y
+    // se le avisa al cliente para que actualice su cookie.
+    //
+    // Solo en modo demo: para un cliente pagado la sesión completada ya
+    // disparó `generarSitioUC`, y rotarla generaría un segundo sitio sin que
+    // nadie lo haya pedido. Ese flujo conserva el corte de circuito de abajo.
+    let sessionIdEfectivo = sessionId
+    let sessionIdRotado: string | null = null
+
+    if (esDemo && sesion?.completada) {
+      sessionIdEfectivo = crypto.randomUUID()
+      sessionIdRotado = sessionIdEfectivo
+      sesion = null
+    }
+
+    // Subdominio del sitio demo generado — derivado del sessionId efectivo (el
+    // rotado, si hubo rotación), no de un sitio prefabricado. Siempre el mismo
+    // para la misma conversación, así que no hace falta guardarlo en ningún
+    // lado para recuperarlo después.
+    const subdominioDemo = esDemo ? `demo-${sessionIdEfectivo.slice(0, 8)}` : null
 
     if (!sesion) {
       // El límite de IP cuenta demos *iniciados* (una vez por conversación
@@ -70,11 +91,12 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      sesion = new Sesion(crypto.randomUUID(), sessionId)
+      sesion = new Sesion(crypto.randomUUID(), sessionIdEfectivo)
       await sesionRepo.save(sesion)
     }
 
-    // Conversación ya terminada — no reprocesar, devolver el resultado ya conocido.
+    // Conversación ya terminada de un cliente pagado — no reprocesar, devolver
+    // el resultado ya conocido. El modo demo nunca llega acá: rota arriba.
     if (sesion.completada) {
       return NextResponse.json({
         respuesta: null,
@@ -120,7 +142,7 @@ export async function POST(req: NextRequest) {
         const datosJson = await chatService.extraerDatos(sesion.historial)
         sesion.marcarCompletada(datosJson as unknown as Record<string, unknown>)
 
-        await sesionRepo.update(sessionId, {
+        await sesionRepo.update(sessionIdEfectivo, {
           historial: sesion.historial,
           datosJson: datosJson as unknown as Record<string, unknown>,
           completada: true,
@@ -152,7 +174,7 @@ export async function POST(req: NextRequest) {
         // Modo real: disparar la generación del sitio de forma async.
         if (!esDemo && cliente) {
           const { generarSitioUC } = await import('@/infrastructure/container')
-          generarSitioUC.execute(sessionId, cliente.id).catch(console.error)
+          generarSitioUC.execute(sessionIdEfectivo, cliente.id).catch(console.error)
         }
 
         return NextResponse.json({
@@ -160,19 +182,20 @@ export async function POST(req: NextRequest) {
           completada: true,
           esDemo,
           subdominioDemo,
+          sessionIdNuevo: sessionIdRotado,
         })
       }
 
-      await sesionRepo.update(sessionId, { historial: sesion.historial })
+      await sesionRepo.update(sessionIdEfectivo, { historial: sesion.historial })
 
-      return NextResponse.json({ respuesta, completada: false, esDemo })
+      return NextResponse.json({ respuesta, completada: false, esDemo, sessionIdNuevo: sessionIdRotado })
     } catch (error) {
       if (error instanceof ClaudeServiceError) {
         if (error.codigo === 'claude_extraction_failed') {
           // El historial (incluida la vuelta que recién se agregó, si la
           // hubo) se persiste igual — es lo que habilita el short-circuit de
           // reintento arriba en la próxima llamada, sin perder la conversación.
-          await sesionRepo.update(sessionId, { historial: sesion.historial })
+          await sesionRepo.update(sessionIdEfectivo, { historial: sesion.historial })
           return NextResponse.json({ error: 'extraccion_fallida' }, { status: 502 })
         }
 
