@@ -683,10 +683,12 @@ Datos para cuando se demuestre en vivo:
 - `verificarLimiteDemoIP` es un `Map` en memoria por proceso
   (`src/infrastructure/demo/demoRateLimit.ts`): un redeploy de Railway resetea el contador.
 
-**Estado:** bug de sesión completada **RESUELTO** (sin commitear todavía, sin ticket de
-Jira). Límite de IP: cerrado por decisión, no se toca.
+**Estado:** bug de sesión completada **RESUELTO** y commiteado en `cdf822d`, rama
+`fix/demo-sesion-completada` (sin ticket de Jira). Límite de IP: cerrado por decisión, no
+se toca.
 
 ---
+
 ## Captura de lead al final de la demo (demo-lead-capture) — ciclo SDD completo (2026-09-07)
 
 **Origen.** Salió del bug de la demo quemada del mismo día. Agustín planteó que el
