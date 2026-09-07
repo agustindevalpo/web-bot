@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sesionRepo, clienteRepo, sitioRepo, getChatServiceReal } from '@/infrastructure/container'
+import { sesionRepo, clienteRepo, getChatServiceReal } from '@/infrastructure/container'
 import { DemoChatService } from '@/infrastructure/demo/DemoChatService'
 import { verificarLimiteDemoIP } from '@/infrastructure/demo/demoRateLimit'
 import { verificarLimiteClaude } from '@/infrastructure/claude/claudeRateLimit'
 import { ClaudeServiceError } from '@/infrastructure/claude/claudeErrors'
-import { CLIENTE_DEMO_ID } from '@/infrastructure/demo/rubroDefaults'
 import { verificarSesionJWT, SESSION_COOKIE_NAME } from '@/infrastructure/auth/JwtSessionService'
+import { resolverModoChat } from '@/infrastructure/auth/modoChat'
 import { Sesion } from '@/domain/entities/Sesion'
-import { Sitio } from '@/domain/entities/Sitio'
-import type { Template } from '@/domain/value-objects/Template'
 import { IChatService } from '@/application/services/IChatService'
 
 export async function POST(req: NextRequest) {
@@ -22,11 +20,13 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Determinar modo: demo (sin tokens) vs real (Claude, solo clientes
-    // con suscripción activa y pagada) — ver docs/WEBBOT_DEMO_MODE.md.
+    // con suscripción activa y pagada) — ver docs/WEBBOT_DEMO_MODE.md. Misma
+    // derivación que usa POST /api/chat/lead (infrastructure/auth/modoChat.ts),
+    // para no mantener dos copias del criterio "quién es un visitante demo".
     const token = req.cookies.get(SESSION_COOKIE_NAME)?.value
+    const esDemo = await resolverModoChat(token, clienteRepo)
     const sesionAuth = token ? await verificarSesionJWT(token) : null
     const cliente = sesionAuth ? await clienteRepo.findById(sesionAuth.clienteId) : null
-    const esDemo = !cliente || !cliente.activo
 
     // Composición root única del servicio real — construcción perezosa y
     // memoizada (ver Decisión D2 en design.md); null cuando ANTHROPIC_API_KEY
@@ -60,12 +60,6 @@ export async function POST(req: NextRequest) {
       sessionIdRotado = sessionIdEfectivo
       sesion = null
     }
-
-    // Subdominio del sitio demo generado — derivado del sessionId efectivo (el
-    // rotado, si hubo rotación), no de un sitio prefabricado. Siempre el mismo
-    // para la misma conversación, así que no hace falta guardarlo en ningún
-    // lado para recuperarlo después.
-    const subdominioDemo = esDemo ? `demo-${sessionIdEfectivo.slice(0, 8)}` : null
 
     if (!sesion) {
       // El límite de IP cuenta demos *iniciados* (una vez por conversación
@@ -102,7 +96,7 @@ export async function POST(req: NextRequest) {
         respuesta: null,
         completada: true,
         esDemo,
-        subdominioDemo,
+        subdominioDemo: null,
       })
     }
 
@@ -148,40 +142,21 @@ export async function POST(req: NextRequest) {
           completada: true,
         })
 
-        // Modo demo: persistir el sitio generado con los datos reales del
-        // chat, dueño del cliente demo (no factura, no requiere pago) — así
-        // /sites/[subdominio] lo sirve igual que cualquier sitio real.
-        if (esDemo && subdominioDemo) {
-          const existente = await sitioRepo.findBySubdominio(subdominioDemo)
-          if (existente) {
-            await sitioRepo.update(existente.id, {
-              configJson: datosJson as unknown as Record<string, unknown>,
-            })
-          } else {
-            await sitioRepo.save(
-              new Sitio(
-                crypto.randomUUID(),
-                CLIENTE_DEMO_ID,
-                subdominioDemo,
-                datosJson.template as Template,
-                datosJson as unknown as Record<string, unknown>,
-                true,
-              ),
-            )
-          }
-        }
-
         // Modo real: disparar la generación del sitio de forma async.
         if (!esDemo && cliente) {
           const { generarSitioUC } = await import('@/infrastructure/container')
           generarSitioUC.execute(sessionIdEfectivo, cliente.id).catch(console.error)
         }
 
+        // Modo demo: el sitio ya NO se crea acá. La captura de lead
+        // (POST /api/chat/lead) es quien lo materializa, dueño del cliente
+        // demo, recién cuando el visitante deja nombre y correo — así el
+        // subdominio nunca queda expuesto en la respuesta antes de eso.
         return NextResponse.json({
           respuesta,
           completada: true,
           esDemo,
-          subdominioDemo,
+          requiereLead: esDemo,
           sessionIdNuevo: sessionIdRotado,
         })
       }

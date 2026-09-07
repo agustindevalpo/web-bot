@@ -26,12 +26,13 @@ jest.mock('@/infrastructure/auth/JwtSessionService', () => ({
 }))
 
 import { POST } from '@/app/api/chat/route'
-import { sesionRepo, clienteRepo, getChatServiceReal } from '@/infrastructure/container'
+import { sesionRepo, clienteRepo, sitioRepo, getChatServiceReal } from '@/infrastructure/container'
 import { verificarLimiteClaude } from '@/infrastructure/claude/claudeRateLimit'
 import { verificarSesionJWT } from '@/infrastructure/auth/JwtSessionService'
 
 const mockSesionRepo = sesionRepo as jest.Mocked<typeof sesionRepo>
 const mockClienteRepo = clienteRepo as jest.Mocked<typeof clienteRepo>
+const mockSitioRepo = sitioRepo as jest.Mocked<typeof sitioRepo>
 const mockGetChatServiceReal = getChatServiceReal as jest.Mock
 const mockVerificarLimiteClaude = verificarLimiteClaude as jest.Mock
 const mockVerificarSesionJWT = verificarSesionJWT as jest.Mock
@@ -280,5 +281,74 @@ describe('POST /api/chat — rotación de demo ya completada', () => {
     expect(body.respuesta).toBeNull()
     expect(chatService.procesarMensaje).not.toHaveBeenCalled()
     expect(mockSesionRepo.save).not.toHaveBeenCalled()
+    // El corte de circuito de un cliente pagado conserva subdominioDemo como
+    // `null` literal — nunca requiereLead, ese campo es exclusivo de demo.
+    expect(body.subdominioDemo).toBeNull()
+    expect(body.requiereLead).toBeUndefined()
+  })
+
+  it('al rotar una demo ya completada, no ejecuta lógica de gate de lead sobre la sesión vieja', async () => {
+    mockSesionRepo.findBySessionId.mockResolvedValue(sesionDemoCompletada('sess-vieja-gate'))
+
+    const req = buildRequest({ mensaje: 'Panadería El Trigal', sessionId: 'sess-vieja-gate' })
+    const res = await POST(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(typeof body.sessionIdNuevo).toBe('string')
+    // La sesión rotada recién arranca (un solo mensaje procesado): la
+    // conversación nueva no está completa, así que el gate de lead no aplica.
+    expect(body.completada).toBe(false)
+    expect(body.requiereLead).toBeUndefined()
+    expect(mockSitioRepo.save).not.toHaveBeenCalled()
+    expect(mockSitioRepo.findBySubdominio).not.toHaveBeenCalled()
+  })
+})
+
+describe('POST /api/chat — gate de captura de lead (demo)', () => {
+  it('la finalización de una demo no expone subdominioDemo, no crea Sitio y devuelve requiereLead:true', async () => {
+    const historialCompleto: MensajeDTO[] = Array.from({ length: 16 }, (_, i) => ({
+      rol: i % 2 === 0 ? 'assistant' : 'user',
+      contenido: `msg ${i}`,
+      timestamp: new Date(),
+    }))
+    const sesionExistente = new Sesion('sesion-lead-1', 'sess-lead-1')
+    sesionExistente.historial = historialCompleto
+    mockSesionRepo.findBySessionId.mockResolvedValue(sesionExistente)
+
+    const req = buildRequest({ mensaje: 'listo', sessionId: 'sess-lead-1' })
+    const res = await POST(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.completada).toBe(true)
+    expect(body.requiereLead).toBe(true)
+    expect(body).not.toHaveProperty('subdominioDemo')
+    // Ni siquiera indirectamente: el cuerpo crudo de la respuesta no contiene
+    // ningún valor con forma de subdominio demo.
+    expect(JSON.stringify(body)).not.toMatch(/demo-[a-z0-9-]+/i)
+    expect(mockSitioRepo.findBySubdominio).not.toHaveBeenCalled()
+    expect(mockSitioRepo.save).not.toHaveBeenCalled()
+  })
+
+  it('la finalización de una conversación real (cliente pagado) no requiere lead', async () => {
+    const chatService = fakeChatService({ conversacionCompleta: jest.fn().mockReturnValue(true) })
+    activatedClienteSetup(chatService)
+
+    const historialCompleto: MensajeDTO[] = Array.from({ length: 16 }, (_, i) => ({
+      rol: i % 2 === 0 ? 'assistant' : 'user',
+      contenido: `msg ${i}`,
+      timestamp: new Date(),
+    }))
+    const sesionExistente = new Sesion('sesion-lead-2', 'sess-lead-real')
+    sesionExistente.historial = historialCompleto
+    mockSesionRepo.findBySessionId.mockResolvedValue(sesionExistente)
+
+    const req = buildRequest({ mensaje: 'reintentar', sessionId: 'sess-lead-real' }, 'token-fake')
+    const body = await (await POST(req)).json()
+
+    expect(body.completada).toBe(true)
+    expect(body.requiereLead).toBe(false)
+    expect(mockSitioRepo.save).not.toHaveBeenCalled()
   })
 })
