@@ -687,6 +687,110 @@ Datos para cuando se demuestre en vivo:
 Jira). Límite de IP: cerrado por decisión, no se toca.
 
 ---
+## Captura de lead al final de la demo (demo-lead-capture) — ciclo SDD completo (2026-09-07)
+
+**Origen.** Salió del bug de la demo quemada del mismo día. Agustín planteó que el
+límite de 2 demos por IP era la herramienta equivocada para su problema real —no quería
+llenarse de registros basura— y propuso capturar el lead con un formulario. La
+conversación de diseño ajustó dos cosas de la idea original:
+
+- **El formulario va al FINAL, no al principio.** Razón de Agustín: quien contestó ocho
+  preguntas ya invirtió energía y quiere el resultado; ahí el correo le sale barato.
+- **Solo nombre y correo.** Se descartaron "apellido" y "nombre empresa": el segundo ya
+  es la pregunta 1 del chat, y el primero es fricción sin uso.
+
+**Corrección a una premisa inicial.** El miedo era ensuciar la tabla `Sitio`, pero esa
+fila ya solo se creaba tras las 8 respuestas — nadie contesta ocho preguntas por
+molestar. Lo que sí se llenaba era `Sesion`, que no cuesta nada. El valor real del
+formulario no era anti-spam sino capturar al que abandona.
+
+### Restricción dura encontrada (y preservada)
+
+Los sitios demo DEBEN seguir con `clienteId === CLIENTE_DEMO_ID`. Asignarlos al lead
+rompería `ConfirmarPagoSitioUseCase`, que ramifica en `sitio.clienteId !== clienteDemoId`
+para identificar al comprador real (WB-43), y dejaría al panel sin su badge de demo
+(`esSitioDemo`, `src/app/admin/sitios/[id]/formularioPago.ts:52`). Por eso el vínculo
+lead↔demo vive en una columna nueva `Sesion.clienteId`, no en el sitio.
+
+### Qué se construyó
+
+| PR | Rama | Contenido |
+|---|---|---|
+| 1 | `feature/demo-lead-capture-1-fundaciones` | Migración `Sesion.clienteId`, `findOrCreateByEmail`, helpers compartidos |
+| 2 | `feature/demo-lead-capture-2-usecase-endpoint` | `CapturarLeadDemoUseCase` + `POST /api/chat/lead` |
+| 3 | `feature/demo-lead-capture-3-gate-ui` | Gate en `/api/chat` + `LeadForm` en el widget |
+
+Encadenados sobre `cdf822d` (el fix de rotación), estrategia stacked-to-main.
+
+**El gate es del servidor, no cosmético.** `/api/chat` deja de crear el `Sitio` y de
+devolver `subdominioDemo` al completar; responde `requiereLead`. Un test escanea el
+cuerpo crudo del JSON con regex para probar que el subdominio no se filtra por ningún
+lado. El sitio se materializa dentro del caso de uso, recién con el correo en mano.
+
+### Decisiones de capas
+
+- **P2002 se maneja en el adaptador, no en el caso de uso.** Atraparlo en
+  `src/application` metería tipos de Prisma en la capa de aplicación. Vive en
+  `PrismaClienteRepository.findOrCreateByEmail`: crear, y si dos requests chocan,
+  re-leer la fila ganadora. La doc de Prisma es explícita en que `upsert` NO es seguro
+  ante esa carrera.
+- **`esDemo` lo deriva la ruta, no el caso de uso.** Derivarlo adentro obligaría a leer
+  cookies y JWT desde `src/application`. La ruta usa `resolverModoChat` y pasa un
+  booleano; el guard sigue siendo del servidor y el caso de uso se testea sin JWT.
+- **Un lead es un `Cliente` con `activo: false`.** No hizo falta modelo nuevo. Y como
+  `esDemo = !cliente || !cliente.activo`, capturar el lead no mete a nadie al flujo
+  pagado de Claude por accidente.
+
+### Migración contra la base de producción
+
+`DATABASE_URL` apunta a la Postgres de Railway y no hay staging. Procedimiento usado,
+verificado contra el CLI instalado (Prisma 7.9.1), que dice textual que `migrate diff`
+*"is a read-only command that does not write to your datasource(s)"*:
+
+1. Editar el schema.
+2. `npx prisma migrate diff --from-config-datasource --to-schema=<path> --script` para
+   revisar el SQL sin tocar la base.
+3. Escribir la migración a mano con ese SQL.
+4. `npx prisma migrate deploy` (sin shadow database).
+
+**`prisma migrate dev` no se corre nunca en este proyecto** — exige shadow database y la
+doc de Prisma dice explícitamente que no debe usarse contra producción. Ojo: los flags
+que se deducen de la doc web pueden estar mal; los reales son `--from-config-datasource`
+y `--to-schema`, confirmados con `--help` del CLI instalado.
+
+Aplicada el 2026-09-07: `All migrations have been successfully applied`.
+
+### Verificación
+
+`npx tsc --noEmit` en 0, `npm run lint` sin errores (21 warnings preexistentes de stubs),
+`npm run test:unit` **50 suites / 483 tests**, `npm run build` OK con `/api/chat` y
+`/api/chat/lead` como rutas desplegables.
+
+El verify independiente dio **PASS con advertencias, 0 críticas**. Sus dos brechas de
+cobertura se cerraron el mismo día:
+
+- El manejo de P2002 no tenía ningún test. Ahora tiene 5 casos, con
+  `Prisma.PrismaClientKnownRequestError` real para que el `instanceof` se cumpla — un
+  objeto plano con `code: 'P2002'` NO pasa esa comprobación. Se probó invirtiendo la
+  condición en el código: 2 de 5 tests se caen. El test sirve.
+- El rechazo del cliente pagado solo estaba probado a nivel de caso de uso. Ahora hay un
+  caso de ruta con `resolverModoChat` en `false`.
+
+### Pendientes conocidos
+
+- La sensibilidad del test del Gap 2 quedó **argumentada, no probada por ejecución**: el
+  sandbox bloqueó la prueba de mutación mientras estaba viva.
+- `route.ts` llama a `resolverModoChat` y además rehace `verificarSesionJWT` +
+  `clienteRepo.findById`, porque igual necesita la entidad `Cliente` para el rate limit.
+  Es una consulta de más en la ruta autenticada. No bloqueante; conviene colapsarlo.
+- La concurrencia real (el índice único de Postgres) no se puede probar con tests
+  unitarios. Se prueba el manejo, no la carrera.
+- Falta el click-through manual del flujo demo → lead → revelación. No hay jsdom ni RTL
+  en el repo para automatizarlo.
+- **Los 3 PRs están commiteados pero sin abrir ni mergear.**
+
+---
+
 
 ## Decisiones que se apartan del roadmap original
 
@@ -769,6 +873,9 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ---
 
 ## Cómo retomar
+
+**Estado al cierre del 2026-09-07.** La rama `feature/demo-lead-capture-3-gate-ui` tiene la cadena completa: `cdf822d` (fix de rotación) → `ee114aa` (fundaciones) → `bd1e7da` (caso de uso + endpoint) → `9d01db2` (gate + UI). **Ningún PR está abierto ni mergeado**, y `develop`/`main` siguen en `15e941d`. La migración `Sesion.clienteId` SÍ está aplicada en la Postgres de Railway, así que producción ya tiene la columna aunque el código que la usa no esté desplegado — eso es seguro porque la columna es nullable y nada la lee todavía. Lo primero al retomar es abrir los 3 PRs en orden y hacer el click-through manual del flujo demo → lead → revelación.
+
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
 2. `main` y `develop` están sincronizados (2026-09-05): los 7 PRs de WB-22 ya están mergeados y en producción, con el seed demo corrido — ver [5 templates de sitio](#5-templates-de-sitio-fase-3-tarea-31--wb-22--cadena-de-7-prs-2026-09-0405). **El plan vigente es la FASE 5 (Jira WB-40)** — ver [Reposicionamiento](#reposicionamiento-fábrica-de-sitios-2026-09-05): lo siguiente es el dominio propio por sitio (WB-26). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
