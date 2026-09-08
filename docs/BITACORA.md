@@ -789,7 +789,113 @@ cobertura se cerraron el mismo día:
   unitarios. Se prueba el manejo, no la carrera.
 - Falta el click-through manual del flujo demo → lead → revelación. No hay jsdom ni RTL
   en el repo para automatizarlo.
-- **Los 3 PRs están commiteados pero sin abrir ni mergear.**
+- **Los 3 PRs están commiteados pero sin abrir ni mergear.** → resuelto el 2026-09-08,
+  ver [Cierre de la cadena demo-lead-capture](#cierre-de-la-cadena-demo-lead-capture-y-click-through-en-local-2026-09-08).
+
+---
+
+
+## Cierre de la cadena demo-lead-capture y click-through en local (2026-09-08)
+
+### Los 3 PRs: abiertos, mergeados, y una trampa de GitHub
+
+Se abrieron y mergearon en orden. `develop` quedó en **d793f10**; `main` sigue en `15e941d`,
+así que **el gate de lead todavía no está en producción**.
+
+| PR | Rama | Base | Diff |
+|----|------|------|------|
+| #22 | `feature/demo-lead-capture-1-fundaciones` | `develop` | +435 / -17 |
+| #23 | `feature/demo-lead-capture-2-usecase-endpoint` | PR #22 | +477 |
+| #24 | `feature/demo-lead-capture-3-gate-ui` | PR #23 | +471 / -42 |
+
+`npm run test:unit` post-merge: 50 suites, 483 tests, todo en verde.
+
+**Trampa encontrada (importante para las próximas cadenas):** mergear el PR base con
+`gh pr merge --delete-branch` **no reapunta el PR hijo a `develop`, lo cierra**. El #23
+pasó a `CLOSED` tres segundos después de mergear el #22, y una vez cerrado GitHub no deja
+ni reabrirlo ni reapuntarlo mientras la rama base no exista
+(`Cannot change the base branch of a closed pull request`).
+
+Receta correcta para mergear una cadena stacked:
+
+1. Mergear el PR base **sin** `--delete-branch`.
+2. `gh pr edit <hijo> --base develop` — el diff sigue siendo solo su rebanada, porque
+   `develop` ya contiene al padre.
+3. Mergear el hijo. Repetir.
+4. Borrar las ramas al final, cuando ya no son base de nada.
+
+Recuperación si ya pasó: `git push origin <sha>:refs/heads/<rama-base-borrada>` para
+restaurar la ref, después `gh pr reopen`, después `gh pr edit --base develop`.
+
+### Producción caída (bloqueante, fuera del código)
+
+Al intentar el click-through, el chat local devolvió 500. No era el código: el proyecto de
+Railway `refreshing-communication` parece suspendido desde el **2026-09-06T17:35:26Z**.
+
+- `railway status` → servicio `web-bot`: **● Failed**.
+- `railway logs`: el contenedor arrancó bien (`Ready in 89ms`) y después `Stopping Container`
+  + `npm error signal SIGTERM`. No es un crash de la app; algo externo la paró.
+- `https://web-bot-production-d190.up.railway.app/` → 404. `demo-veterinaria.sitios.devalpo.cl` → 404.
+- Postgres pública `sakura.proxy.rlwy.net:21654`: el puerto TCP **abre**, pero Postgres corta
+  la conexión al instante → Prisma `P1017 ConnectionClosed`. Falla igual desde un script
+  suelto que desde el dev server (ambos usan esa misma `DATABASE_URL`).
+
+Hipótesis: se acabaron los créditos del plan trial. **No verificada** — la CLI de Railway no
+expone facturación, hay que mirar el dashboard.
+
+### Levantar todo en local sin Railway (receta probada)
+
+Como el `.env` local apunta a la Postgres de Railway, sin esa base no hay demo. El flujo
+demo → lead → revelación solo necesita **app + Postgres**; el Worker de Cloudflare y el
+motor de pagos no entran en este camino.
+
+```bash
+docker run -d --name webbot-pg \
+  -e POSTGRES_PASSWORD=webbot -e POSTGRES_USER=webbot -e POSTGRES_DB=webbot \
+  -p 5433:5432 postgres:16-alpine
+
+export DATABASE_URL="postgresql://webbot:webbot@localhost:5433/webbot"
+npx prisma migrate deploy   # aplica las 3 migraciones
+npm run db:seed-demo        # OBLIGATORIO, ver abajo
+npm run dev
+```
+
+Detalles que cuestan tiempo si no están escritos:
+
+- **`db:seed-demo` no es opcional, es precondición de arranque.** Crea el `Cliente` demo
+  compartido `cliente-demo-webbot-devalpo` (`CLIENTE_DEMO_ID` en
+  `src/infrastructure/demo/rubroDefaults.ts`). Sin esa fila, `POST /api/chat/lead` revienta
+  con **P2003 `ForeignKeyConstraintViolation` en `Sitio_clienteId_fkey`** y devuelve un 500
+  opaco, porque `CapturarLeadDemoUseCase` crea el `Sitio` a nombre de `clienteDemoId`
+  (Decisión D6). No es un bug del código: es una precondición de entorno no documentada.
+- La `DATABASE_URL` va **inline por entorno**, no en `.env.local`. Next.js no pisa una
+  variable ya definida en el proceso, así que gana sobre el `.env` que apunta a Railway.
+- El puerto 5433 evita chocar con cualquier Postgres local en el 5432.
+
+### Click-through del flujo demo → lead → revelación
+
+Corrido por HTTP contra el entorno local, con verificación directa en la base:
+
+| Paso | Resultado |
+|------|-----------|
+| 8 preguntas completadas | `completada:true`, `requiereLead:true`, campo `subdominioDemo` **ausente** |
+| Sitios en BD tras completar | 10 → 10 — **el gate no crea el sitio** |
+| Lead con nombre vacío | 400 `datos_invalidos` |
+| Lead con email inválido | 400 `datos_invalidos` |
+| Lead sobre sesión inexistente | 404 `sesion_no_encontrada` |
+| Lead válido | 200 `{"subdominioDemo":"demo-a82d05e9"}` |
+| Sitios en BD tras el lead | 10 → 11 — exactamente uno |
+| Fila creada | `Sitio` a nombre de `WebBot Demo`; `Sesion.clienteId` enlazado al `Cliente` nuevo del visitante (`activo=false`) |
+| `GET /sites/demo-a82d05e9` | 200, 24.627 bytes, con el nombre del negocio en el HTML |
+| Reenvío del mismo lead | 200 idempotente, siguen 11 sitios |
+
+**Lo que este click-through NO cubre:** la UI en un navegador real. La extensión de
+Claude-in-Chrome no se conectó, así que el `LeadForm` renderizado no se verificó a ojo —
+solo por sus tests de render y por el flujo HTTP.
+
+**Reconfirmado de paso:** el bug de metadata global sigue vivo. El sitio generado sirve
+`<title>Tu sitio web en 1 día, con tu dominio — Devalpo</title>` — ver
+[Pendiente: metadata por sitio](#pendiente-metadata-titledescription-por-sitio-detectado-2026-09-07).
 
 ---
 
@@ -876,7 +982,11 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 
 ## Cómo retomar
 
-**Estado al cierre del 2026-09-07.** La rama `feature/demo-lead-capture-3-gate-ui` tiene la cadena completa: `cdf822d` (fix de rotación) → `ee114aa` (fundaciones) → `bd1e7da` (caso de uso + endpoint) → `9d01db2` (gate + UI). **Ningún PR está abierto ni mergeado**, y `develop`/`main` siguen en `15e941d`. La migración `Sesion.clienteId` SÍ está aplicada en la Postgres de Railway, así que producción ya tiene la columna aunque el código que la usa no esté desplegado — eso es seguro porque la columna es nullable y nada la lee todavía. Lo primero al retomar es abrir los 3 PRs en orden y hacer el click-through manual del flujo demo → lead → revelación.
+**Estado al cierre del 2026-09-08.** La cadena `demo-lead-capture` está **mergeada en `develop`** (PRs #22 → #23 → #24, `develop` = `d793f10`, 483 tests en verde) y el flujo demo → lead → revelación quedó verificado end to end contra un entorno local — ver [Cierre de la cadena demo-lead-capture](#cierre-de-la-cadena-demo-lead-capture-y-click-through-en-local-2026-09-08). `main` sigue en `15e941d`: **el gate de lead todavía no está en producción**.
+
+**Lo primero al retomar es Railway.** Todo el proyecto parece suspendido desde el 2026-09-06 (servicio en `Failed`, Postgres rechazando conexiones, sitios en 404); mientras eso no se resuelva no hay producción a la que desplegar ni base a la que pegarle desde local con el `.env` del repo. Si hace falta trabajar igual, la receta de Docker + Postgres local está en esa misma sección y funciona sin Railway.
+
+Después de eso quedan: el click-through **visual** en navegador (el de esta sesión fue por HTTP; la extensión de Chrome no se conectó) y el merge de `develop` → `main`.
 
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
