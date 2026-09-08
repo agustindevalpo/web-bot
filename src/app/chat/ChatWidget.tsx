@@ -77,6 +77,14 @@ export default function ChatWidget() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
+      // El servidor rota la sesión cuando la cookie apuntaba a una demo ya
+      // terminada (dura un año). Se adopta el sessionId nuevo para que el
+      // resto de la conversación siga en esa sesión y no en la vieja.
+      if (typeof data.sessionIdNuevo === 'string') {
+        sessionIdRef.current = data.sessionIdNuevo
+        escribirCookie(COOKIE_NAME, data.sessionIdNuevo)
+      }
+
       if (data.respuesta) {
         setMensajes((prev) => [...prev, { rol: 'assistant', contenido: data.respuesta }])
       }

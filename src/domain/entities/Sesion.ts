@@ -8,6 +8,9 @@ export class Sesion {
   public historial: MensajeHistorial[] = []
   public datosJson: Record<string, unknown> | null = null
   public completada: boolean = false
+  // Cliente (lead o dueño) que ya capturó/reclamó esta sesión; null hasta la
+  // captura del lead.
+  public clienteId: string | null = null
 
   constructor(
     public readonly id: string,

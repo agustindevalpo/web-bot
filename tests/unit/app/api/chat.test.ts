@@ -214,3 +214,71 @@ describe('POST /api/chat — mapeo de errores de Claude a HTTP', () => {
     expect(mockSesionRepo.update.mock.calls[0][1]).toMatchObject({ historial: historialCompleto })
   })
 })
+
+describe('POST /api/chat — rotación de demo ya completada', () => {
+  // Regresión del bug de la mentoría (2026-09-07): la cookie `webbot_session`
+  // dura un año, así que un visitante que ya completó una demo volvía con el
+  // mismo sessionId. La ruta cortaba circuito y devolvía la demo vieja, y el
+  // mensaje recién escrito se descartaba: aparecía al instante un sitio que no
+  // tenía nada que ver con lo tipeado.
+
+  function sesionDemoCompletada(sessionId: string): Sesion {
+    const sesion = new Sesion('sesion-vieja', sessionId)
+    sesion.marcarCompletada({ nombre: 'Demo Vieja' })
+    return sesion
+  }
+
+  it('procesa el mensaje en una sesión nueva en vez de devolver la demo anterior', async () => {
+    mockSesionRepo.findBySessionId.mockResolvedValue(sesionDemoCompletada('sess-vieja'))
+
+    const req = buildRequest({ mensaje: 'Panadería El Trigal', sessionId: 'sess-vieja' })
+    const res = await POST(req)
+    const body = await res.json()
+
+    expect(res.status).toBe(200)
+    expect(body.completada).toBe(false)
+    // El guion demo responde con su segunda pregunta: el mensaje se procesó.
+    expect(body.respuesta).toContain('¿A qué se dedica tu negocio?')
+    expect(mockSesionRepo.save).toHaveBeenCalledTimes(1)
+  })
+
+  it('devuelve el sessionId rotado para que el cliente actualice su cookie', async () => {
+    mockSesionRepo.findBySessionId.mockResolvedValue(sesionDemoCompletada('sess-vieja'))
+
+    const req = buildRequest({ mensaje: 'Panadería El Trigal', sessionId: 'sess-vieja' })
+    const body = await (await POST(req)).json()
+
+    expect(typeof body.sessionIdNuevo).toBe('string')
+    expect(body.sessionIdNuevo).not.toBe('sess-vieja')
+    // La sesión persistida usa el sessionId rotado, no el de la cookie vieja.
+    expect(mockSesionRepo.save.mock.calls[0][0].sessionId).toBe(body.sessionIdNuevo)
+  })
+
+  it('no rota ni expone sessionIdNuevo en una conversación demo en curso', async () => {
+    const enCurso = new Sesion('sesion-en-curso', 'sess-en-curso')
+    enCurso.agregarMensaje('user', 'Panadería El Trigal')
+    enCurso.agregarMensaje('assistant', 'pregunta 2')
+    mockSesionRepo.findBySessionId.mockResolvedValue(enCurso)
+
+    const req = buildRequest({ mensaje: 'Vendemos pan', sessionId: 'sess-en-curso' })
+    const body = await (await POST(req)).json()
+
+    expect(body.sessionIdNuevo).toBeNull()
+    expect(mockSesionRepo.save).not.toHaveBeenCalled()
+    expect(mockSesionRepo.update).toHaveBeenCalledWith('sess-en-curso', expect.anything())
+  })
+
+  it('un cliente pagado con la sesión completada NO rota: conserva el corte de circuito', async () => {
+    const chatService = fakeChatService()
+    activatedClienteSetup(chatService)
+    mockSesionRepo.findBySessionId.mockResolvedValue(sesionDemoCompletada('sess-pagada'))
+
+    const req = buildRequest({ mensaje: 'hola de nuevo', sessionId: 'sess-pagada' }, 'token-fake')
+    const body = await (await POST(req)).json()
+
+    expect(body.completada).toBe(true)
+    expect(body.respuesta).toBeNull()
+    expect(chatService.procesarMensaje).not.toHaveBeenCalled()
+    expect(mockSesionRepo.save).not.toHaveBeenCalled()
+  })
+})

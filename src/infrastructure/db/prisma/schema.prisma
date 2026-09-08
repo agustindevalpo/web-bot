@@ -17,6 +17,7 @@ model Cliente {
   fechaPago     DateTime?
   sitios        Sitio[]
   pagos         Pago[]
+  sesiones      Sesion[]
 }
 
 model Sitio {
@@ -50,6 +51,8 @@ model Sesion {
   datosJson     Json?
   completada    Boolean  @default(false)
   fechaCreacion DateTime @default(now())
+  clienteId     String?
+  cliente       Cliente? @relation(fields: [clienteId], references: [id])
 }
 
 model TokenAcceso {

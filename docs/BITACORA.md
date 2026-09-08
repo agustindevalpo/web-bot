@@ -567,6 +567,127 @@ Pendiente manual de Agustín: agregar la línea a `.env.example` (la tooling de 
 
 ---
 
+## Pendiente: metadata (`<title>`/`description`) por sitio (detectado 2026-09-07)
+
+**Síntoma.** `https://prueba.serendipiaediciones.cl/` (dominio propio de un cliente) y
+`https://demo-consultora.sitios.devalpo.cl/` sirven el mismo `<title>`:
+`Tu sitio web en 1 día, con tu dominio — Devalpo`. Cualquier sitio de cliente muestra
+en la pestaña del navegador, en Google y en los previews de WhatsApp/Instagram el
+título y la descripción de la **landing comercial de Devalpo**, no los suyos.
+
+**Causa.** La única metadata del proyecto es la constante estática de
+`src/app/layout.tsx:18`. Ninguna de las dos rutas públicas de sitio
+(`src/app/sites/[subdominio]/page.tsx` y `src/app/sites/custom/[host]/page.tsx`)
+exporta `generateMetadata`, así que ambas heredan el root layout tal cual.
+
+**Aclaración de ruteo (no es bug).** Que ese dominio propio muestre el mismo contenido
+que `demo-consultora` es correcto: `prueba.serendipiaediciones.cl` está asignado como
+dominio propio de ese mismo Sitio. Un Sitio, N hostnames; las dos rutas convergen en
+`renderizarSitio`. Verificado en producción: DNS `CNAME → dominios.devalpo.cl`, respuesta
+con `x-middleware-rewrite: /sites/custom/prueba.serendipiaediciones.cl` y `200`. Como
+`buscarPorDominio` no tiene fallback (si no encuentra el Sitio, `renderizarSitio`
+responde `notFound()`), un `200` prueba que el registro existe.
+
+**Qué haría falta.** `generateMetadata` en ambas rutas de sitio, alimentada desde
+`SiteConfigDTO` (`nombre`, `rubro`, `ciudad`, `descripcion`), más `openGraph`/`twitter`
+y una `canonical` que apunte al hostname servido. Ojo: hoy `SiteConfigDTO` no tiene
+campos SEO propios (`metaTitle`/`metaDescription`/`ogImage`); hay que decidir si se
+derivan del contenido existente o se agregan al DTO y al panel interno.
+
+**Por qué importa para vender.** Es lo primero que ve un cliente al compartir su sitio,
+y es lo que indexa Google. Un sitio de pago que en el buscador dice "Devalpo" no se
+puede cobrar como sitio propio.
+
+**Estado:** anotado, sin ticket de Jira todavía, sin implementar.
+
+---
+
+## Demo del chat "quemada" por sesión completada — detectado y RESUELTO (2026-09-07)
+
+**Síntoma en vivo (mentoría, 2026-09-07).** Agustín abrió `/chat` para mostrar el
+producto, escribió el nombre de la empresa y apareció un sitio al instante, sin las 8
+preguntas. El sitio mostrado **no** correspondía al nombre recién escrito: era el sitio
+de una demo anterior hecha en ese mismo navegador.
+
+**Causa (cadena completa).**
+
+1. `src/app/chat/ChatWidget.tsx:12,22-32` — el `sessionId` se guarda en la cookie
+   `webbot_session` con `max-age` de un año. Una demo completada meses antes sigue
+   vigente en ese navegador.
+2. `ChatWidget.tsx:36-38` — la UI siempre inicializa con el saludo estático y nunca
+   rehidrata el historial del servidor. Visualmente parece una conversación nueva.
+3. `src/app/api/chat/route.ts:78-86` — con la sesión ya `completada`, la ruta corta
+   circuito y devuelve `{ respuesta: null, completada: true, esDemo, subdominioDemo }`
+   **antes** de procesar el mensaje. Lo que el usuario escribió se descarta: no se
+   guarda, no se procesa, no cambia nada.
+4. `route.ts:30` — `subdominioDemo` se deriva del sessionId
+   (`demo-${sessionId.slice(0, 8)}`), no de los datos. Mismo sessionId → mismo
+   subdominio → el sitio de la demo vieja.
+5. El front recibe `respuesta: null` (no agrega mensaje del bot) y `completada: true`
+   (muestra `DemoCTA`). De ahí la ilusión de "puse el nombre y salió el sitio".
+
+**El flujo demo en sí está bien.** `DemoChatService` pide 8 respuestas
+(`conversacionCompleta`: `historial.filter(rol === 'user').length >= 8`,
+`src/infrastructure/demo/DemoChatService.ts:104`) y arma el `SiteConfigDTO` con lo que
+el usuario escribió. Nunca se llegó a ejecutar.
+
+**Los dos defectos reales.**
+
+- **Callejón sin salida silencioso:** una vez completada la demo no hay forma de
+  empezar otra desde la UI, y la cookie dura un año.
+- **El corte de circuito miente:** devuelve `completada: true` sin distinguir "esta
+  conversación ya había terminado" de "acabás de terminarla", así que el front lo
+  trata como un final legítimo.
+
+### Arreglo aplicado (2026-09-07, mismo día)
+
+`src/app/api/chat/route.ts` — al encontrar una sesión demo ya `completada`, la ruta
+**rota**: genera un `sessionId` nuevo, descarta la sesión vieja y procesa el mensaje
+recién escrito en una sesión limpia. El mensaje ya no se pierde. El `subdominioDemo`
+pasa a derivarse del `sessionIdEfectivo`, así que la demo nueva escribe en su propio
+sitio y no pisa el anterior. Todas las escrituras (`sesionRepo.update`,
+`generarSitioUC.execute`) usan el `sessionIdEfectivo`.
+
+La rotación **solo aplica en modo demo**. Para un cliente pagado la sesión completada ya
+disparó `generarSitioUC`, y rotarla generaría un segundo sitio sin que nadie lo pida; ese
+flujo conserva el corte de circuito original.
+
+`src/app/chat/ChatWidget.tsx` — la respuesta trae `sessionIdNuevo` cuando hubo rotación;
+el widget lo adopta en su `ref` y reescribe la cookie `webbot_session`, así el resto de
+la conversación sigue en la sesión nueva.
+
+**Tests de regresión** en `tests/unit/app/api/chat.test.ts` (describe "rotación de demo ya
+completada"): procesa el mensaje en sesión nueva, devuelve el `sessionIdNuevo` y persiste
+con él, no rota una conversación en curso, y un cliente pagado NO rota.
+
+**Verificación:** `npx tsc --noEmit` limpio, `npm run build` OK, `npm run lint` sin
+errores nuevos (21 warnings preexistentes de stubs), `npm run test:unit` 46 suites / 453
+tests en verde.
+
+### Decisión sobre el límite de demos por IP (2026-09-07)
+
+**Se deja como está: 2 demos por IP cada 24h.** Decisión de Agustín. Se evaluó volverlo
+configurable por env var, subir la constante o sacarlo, y se optó por no tocarlo.
+
+Consecuencia a tener presente: con la rotación, **cada demo nueva cuenta como una demo
+iniciada** contra ese límite. Mostrar el chat tres veces seguidas desde la misma IP choca
+contra el muro en la tercera.
+
+Datos para cuando se demuestre en vivo:
+
+- El modo demo **no gasta tokens** (`DemoChatService` es un guion fijo, cero llamadas a
+  Claude). El límite no protege un costo variable; solo evita que llenen la tabla `Sitio`.
+- **Incógnito NO sirve** como escape: el conteo va por IP, no por cookie. Cambiar de red
+  (datos móviles) sí.
+- El límite **solo corre con `NODE_ENV === 'production'`** — en local no aplica.
+- `verificarLimiteDemoIP` es un `Map` en memoria por proceso
+  (`src/infrastructure/demo/demoRateLimit.ts`): un redeploy de Railway resetea el contador.
+
+**Estado:** bug de sesión completada **RESUELTO** (sin commitear todavía, sin ticket de
+Jira). Límite de IP: cerrado por decisión, no se toca.
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |

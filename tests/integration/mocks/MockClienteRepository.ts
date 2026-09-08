@@ -35,4 +35,11 @@ export class MockClienteRepository implements IClienteRepository {
   async findAll() {
     return [...this.store.values()]
   }
+
+  async findOrCreateByEmail(cliente: Cliente) {
+    const existente = await this.findByEmail(cliente.email)
+    if (existente) return existente
+    this.store.set(cliente.id, cliente)
+    return cliente
+  }
 }
