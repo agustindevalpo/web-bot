@@ -8,6 +8,7 @@ export class SesionMapper {
     sesion.historial = (raw.historial as unknown as MensajeHistorial[]) ?? []
     sesion.datosJson = raw.datosJson as Record<string, unknown> | null
     sesion.completada = raw.completada
+    sesion.clienteId = raw.clienteId
     return sesion
   }
 
@@ -18,6 +19,7 @@ export class SesionMapper {
       historial: sesion.historial as unknown as Prisma.InputJsonValue,
       datosJson: (sesion.datosJson as Prisma.InputJsonValue | null) ?? Prisma.JsonNull,
       completada: sesion.completada,
+      clienteId: sesion.clienteId,
     }
   }
 }

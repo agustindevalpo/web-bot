@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import styles from './page.module.css'
 import { DemoCTA } from './DemoCTA'
+import { LeadForm } from './LeadForm'
 
 interface Mensaje {
   rol: 'user' | 'assistant'
@@ -31,6 +32,24 @@ function obtenerSessionId(): string {
   return nuevo
 }
 
+// Mapea los códigos de error documentados de POST /api/chat/lead a un
+// mensaje legible; cualquier código no reconocido (o su ausencia) cae al
+// mensaje genérico.
+function mensajeErrorLead(codigo: unknown): string {
+  switch (codigo) {
+    case 'datos_invalidos':
+      return 'Revisa tu nombre y tu correo electrónico.'
+    case 'sesion_incompleta':
+      return 'Termina de responder todas las preguntas antes de continuar.'
+    case 'sesion_no_encontrada':
+      return 'Tu sesión expiró. Actualiza la página e inténtalo de nuevo.'
+    case 'sesion_no_demo':
+      return 'No pudimos verificar tu sesión de demo. Actualiza la página e inténtalo de nuevo.'
+    default:
+      return 'No se pudo procesar tu solicitud. Inténtalo de nuevo en un momento.'
+  }
+}
+
 export default function ChatWidget() {
   const sessionIdRef = useRef<string | null>(null)
   const [mensajes, setMensajes] = useState<Mensaje[]>([
@@ -42,6 +61,11 @@ export default function ChatWidget() {
   const [completada, setCompletada] = useState(false)
   const [subdominioDemo, setSubdominioDemo] = useState<string | null>(null)
   const [limiteAlcanzado, setLimiteAlcanzado] = useState(false)
+  const [requiereLead, setRequiereLead] = useState(false)
+  const [leadNombre, setLeadNombre] = useState('')
+  const [leadEmail, setLeadEmail] = useState('')
+  const [enviandoLead, setEnviandoLead] = useState(false)
+  const [leadError, setLeadError] = useState<string | null>(null)
   const finRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -77,20 +101,63 @@ export default function ChatWidget() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
+      // El servidor rota la sesión cuando la cookie apuntaba a una demo ya
+      // terminada (dura un año). Se adopta el sessionId nuevo para que el
+      // resto de la conversación siga en esa sesión y no en la vieja.
+      if (typeof data.sessionIdNuevo === 'string') {
+        sessionIdRef.current = data.sessionIdNuevo
+        escribirCookie(COOKIE_NAME, data.sessionIdNuevo)
+      }
+
       if (data.respuesta) {
         setMensajes((prev) => [...prev, { rol: 'assistant', contenido: data.respuesta }])
       }
 
       if (data.completada) {
         setCompletada(true)
-        if (data.esDemo && data.subdominioDemo) {
-          setSubdominioDemo(data.subdominioDemo)
+        // El servidor ya no revela subdominioDemo en esta respuesta: para
+        // demo, `requiereLead` pide nombre y correo antes de mostrar el sitio.
+        if (data.requiereLead) {
+          setRequiereLead(true)
         }
       }
     } catch {
       setError('No se pudo conectar con el asistente. Inténtalo de nuevo en un momento.')
     } finally {
       setEnviando(false)
+    }
+  }
+
+  async function enviarLead() {
+    const nombre = leadNombre.trim()
+    const email = leadEmail.trim()
+    if (!nombre || !email || enviandoLead) return
+
+    setEnviandoLead(true)
+    setLeadError(null)
+
+    try {
+      const res = await fetch('/api/chat/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sessionIdRef.current, nombre, email }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setLeadError(mensajeErrorLead(data.error))
+        return
+      }
+
+      // Recién acá se revela el sitio — el subdominio real solo llega en la
+      // respuesta de este endpoint, nunca antes.
+      setSubdominioDemo(data.subdominioDemo)
+      setRequiereLead(false)
+    } catch {
+      setLeadError('No se pudo conectar con el servidor. Inténtalo de nuevo en un momento.')
+    } finally {
+      setEnviandoLead(false)
     }
   }
 
@@ -119,6 +186,18 @@ export default function ChatWidget() {
         )}
 
         {error && <div className={styles.error}>{error}</div>}
+
+        {completada && requiereLead && (
+          <LeadForm
+            nombre={leadNombre}
+            email={leadEmail}
+            enviando={enviandoLead}
+            error={leadError}
+            onNombreChange={setLeadNombre}
+            onEmailChange={setLeadEmail}
+            onSubmit={enviarLead}
+          />
+        )}
 
         {completada && subdominioDemo && <DemoCTA subdominioDemo={subdominioDemo} />}
 

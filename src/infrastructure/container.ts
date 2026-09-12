@@ -30,6 +30,7 @@ import { VerificarDominioUseCase } from '@/application/use-cases/VerificarDomini
 import { SolicitarAccesoUseCase } from '@/application/use-cases/SolicitarAcceso.usecase'
 import { VerificarAccesoUseCase } from '@/application/use-cases/VerificarAcceso.usecase'
 import { ConfirmarPagoSitioUseCase } from '@/application/use-cases/ConfirmarPagoSitio.usecase'
+import { CapturarLeadDemoUseCase } from '@/application/use-cases/CapturarLeadDemo.usecase'
 import { CLIENTE_DEMO_ID } from './demo/rubroDefaults'
 
 // Repositorios
@@ -111,3 +112,4 @@ export const cambiarEstadoSitioUC = new CambiarEstadoSitioUseCase(sitioRepo)
 export const asignarDominioPropioUC = new AsignarDominioPropioUseCase(sitioRepo, customHostnameServiceDiferido)
 export const actualizarConfigSitioUC = new ActualizarConfigSitioUseCase(sitioRepo)
 export const confirmarPagoSitioUC = new ConfirmarPagoSitioUseCase(sitioRepo, clienteRepo, activarClienteUC, CLIENTE_DEMO_ID)
+export const capturarLeadDemoUC = new CapturarLeadDemoUseCase(sesionRepo, sitioRepo, clienteRepo, CLIENTE_DEMO_ID)

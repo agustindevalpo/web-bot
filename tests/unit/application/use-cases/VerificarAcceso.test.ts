@@ -21,6 +21,7 @@ describe('VerificarAcceso UseCase', () => {
     update: jest.fn(),
     delete: jest.fn(),
     findAll: jest.fn(),
+    findOrCreateByEmail: jest.fn(),
   }
 
   const useCase = new VerificarAccesoUseCase(mockTokenAccesoRepo, mockClienteRepo)

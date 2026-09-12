@@ -567,6 +567,339 @@ Pendiente manual de Agustín: agregar la línea a `.env.example` (la tooling de 
 
 ---
 
+## Pendiente: metadata (`<title>`/`description`) por sitio (detectado 2026-09-07)
+
+**Síntoma.** `https://prueba.serendipiaediciones.cl/` (dominio propio de un cliente) y
+`https://demo-consultora.sitios.devalpo.cl/` sirven el mismo `<title>`:
+`Tu sitio web en 1 día, con tu dominio — Devalpo`. Cualquier sitio de cliente muestra
+en la pestaña del navegador, en Google y en los previews de WhatsApp/Instagram el
+título y la descripción de la **landing comercial de Devalpo**, no los suyos.
+
+**Causa.** La única metadata del proyecto es la constante estática de
+`src/app/layout.tsx:18`. Ninguna de las dos rutas públicas de sitio
+(`src/app/sites/[subdominio]/page.tsx` y `src/app/sites/custom/[host]/page.tsx`)
+exporta `generateMetadata`, así que ambas heredan el root layout tal cual.
+
+**Aclaración de ruteo (no es bug).** Que ese dominio propio muestre el mismo contenido
+que `demo-consultora` es correcto: `prueba.serendipiaediciones.cl` está asignado como
+dominio propio de ese mismo Sitio. Un Sitio, N hostnames; las dos rutas convergen en
+`renderizarSitio`. Verificado en producción: DNS `CNAME → dominios.devalpo.cl`, respuesta
+con `x-middleware-rewrite: /sites/custom/prueba.serendipiaediciones.cl` y `200`. Como
+`buscarPorDominio` no tiene fallback (si no encuentra el Sitio, `renderizarSitio`
+responde `notFound()`), un `200` prueba que el registro existe.
+
+**Qué haría falta.** `generateMetadata` en ambas rutas de sitio, alimentada desde
+`SiteConfigDTO` (`nombre`, `rubro`, `ciudad`, `descripcion`), más `openGraph`/`twitter`
+y una `canonical` que apunte al hostname servido. Ojo: hoy `SiteConfigDTO` no tiene
+campos SEO propios (`metaTitle`/`metaDescription`/`ogImage`); hay que decidir si se
+derivan del contenido existente o se agregan al DTO y al panel interno.
+
+**Por qué importa para vender.** Es lo primero que ve un cliente al compartir su sitio,
+y es lo que indexa Google. Un sitio de pago que en el buscador dice "Devalpo" no se
+puede cobrar como sitio propio.
+
+**Estado:** anotado, sin ticket de Jira todavía, sin implementar.
+
+---
+
+## Demo del chat "quemada" por sesión completada — detectado y RESUELTO (2026-09-07)
+
+**Síntoma en vivo (mentoría, 2026-09-07).** Agustín abrió `/chat` para mostrar el
+producto, escribió el nombre de la empresa y apareció un sitio al instante, sin las 8
+preguntas. El sitio mostrado **no** correspondía al nombre recién escrito: era el sitio
+de una demo anterior hecha en ese mismo navegador.
+
+**Causa (cadena completa).**
+
+1. `src/app/chat/ChatWidget.tsx:12,22-32` — el `sessionId` se guarda en la cookie
+   `webbot_session` con `max-age` de un año. Una demo completada meses antes sigue
+   vigente en ese navegador.
+2. `ChatWidget.tsx:36-38` — la UI siempre inicializa con el saludo estático y nunca
+   rehidrata el historial del servidor. Visualmente parece una conversación nueva.
+3. `src/app/api/chat/route.ts:78-86` — con la sesión ya `completada`, la ruta corta
+   circuito y devuelve `{ respuesta: null, completada: true, esDemo, subdominioDemo }`
+   **antes** de procesar el mensaje. Lo que el usuario escribió se descarta: no se
+   guarda, no se procesa, no cambia nada.
+4. `route.ts:30` — `subdominioDemo` se deriva del sessionId
+   (`demo-${sessionId.slice(0, 8)}`), no de los datos. Mismo sessionId → mismo
+   subdominio → el sitio de la demo vieja.
+5. El front recibe `respuesta: null` (no agrega mensaje del bot) y `completada: true`
+   (muestra `DemoCTA`). De ahí la ilusión de "puse el nombre y salió el sitio".
+
+**El flujo demo en sí está bien.** `DemoChatService` pide 8 respuestas
+(`conversacionCompleta`: `historial.filter(rol === 'user').length >= 8`,
+`src/infrastructure/demo/DemoChatService.ts:104`) y arma el `SiteConfigDTO` con lo que
+el usuario escribió. Nunca se llegó a ejecutar.
+
+**Los dos defectos reales.**
+
+- **Callejón sin salida silencioso:** una vez completada la demo no hay forma de
+  empezar otra desde la UI, y la cookie dura un año.
+- **El corte de circuito miente:** devuelve `completada: true` sin distinguir "esta
+  conversación ya había terminado" de "acabás de terminarla", así que el front lo
+  trata como un final legítimo.
+
+### Arreglo aplicado (2026-09-07, mismo día)
+
+`src/app/api/chat/route.ts` — al encontrar una sesión demo ya `completada`, la ruta
+**rota**: genera un `sessionId` nuevo, descarta la sesión vieja y procesa el mensaje
+recién escrito en una sesión limpia. El mensaje ya no se pierde. El `subdominioDemo`
+pasa a derivarse del `sessionIdEfectivo`, así que la demo nueva escribe en su propio
+sitio y no pisa el anterior. Todas las escrituras (`sesionRepo.update`,
+`generarSitioUC.execute`) usan el `sessionIdEfectivo`.
+
+La rotación **solo aplica en modo demo**. Para un cliente pagado la sesión completada ya
+disparó `generarSitioUC`, y rotarla generaría un segundo sitio sin que nadie lo pida; ese
+flujo conserva el corte de circuito original.
+
+`src/app/chat/ChatWidget.tsx` — la respuesta trae `sessionIdNuevo` cuando hubo rotación;
+el widget lo adopta en su `ref` y reescribe la cookie `webbot_session`, así el resto de
+la conversación sigue en la sesión nueva.
+
+**Tests de regresión** en `tests/unit/app/api/chat.test.ts` (describe "rotación de demo ya
+completada"): procesa el mensaje en sesión nueva, devuelve el `sessionIdNuevo` y persiste
+con él, no rota una conversación en curso, y un cliente pagado NO rota.
+
+**Verificación:** `npx tsc --noEmit` limpio, `npm run build` OK, `npm run lint` sin
+errores nuevos (21 warnings preexistentes de stubs), `npm run test:unit` 46 suites / 453
+tests en verde.
+
+### Decisión sobre el límite de demos por IP (2026-09-07)
+
+**Se deja como está: 2 demos por IP cada 24h.** Decisión de Agustín. Se evaluó volverlo
+configurable por env var, subir la constante o sacarlo, y se optó por no tocarlo.
+
+Consecuencia a tener presente: con la rotación, **cada demo nueva cuenta como una demo
+iniciada** contra ese límite. Mostrar el chat tres veces seguidas desde la misma IP choca
+contra el muro en la tercera.
+
+Datos para cuando se demuestre en vivo:
+
+- El modo demo **no gasta tokens** (`DemoChatService` es un guion fijo, cero llamadas a
+  Claude). El límite no protege un costo variable; solo evita que llenen la tabla `Sitio`.
+- **Incógnito NO sirve** como escape: el conteo va por IP, no por cookie. Cambiar de red
+  (datos móviles) sí.
+- El límite **solo corre con `NODE_ENV === 'production'`** — en local no aplica.
+- `verificarLimiteDemoIP` es un `Map` en memoria por proceso
+  (`src/infrastructure/demo/demoRateLimit.ts`): un redeploy de Railway resetea el contador.
+
+**Estado:** bug de sesión completada **RESUELTO** y commiteado en `cdf822d`, rama
+`fix/demo-sesion-completada` (sin ticket de Jira). Límite de IP: cerrado por decisión, no
+se toca.
+
+---
+
+## Captura de lead al final de la demo (demo-lead-capture) — ciclo SDD completo (2026-09-07)
+
+**Origen.** Salió del bug de la demo quemada del mismo día. Agustín planteó que el
+límite de 2 demos por IP era la herramienta equivocada para su problema real —no quería
+llenarse de registros basura— y propuso capturar el lead con un formulario. La
+conversación de diseño ajustó dos cosas de la idea original:
+
+- **El formulario va al FINAL, no al principio.** Razón de Agustín: quien contestó ocho
+  preguntas ya invirtió energía y quiere el resultado; ahí el correo le sale barato.
+- **Solo nombre y correo.** Se descartaron "apellido" y "nombre empresa": el segundo ya
+  es la pregunta 1 del chat, y el primero es fricción sin uso.
+
+**Corrección a una premisa inicial.** El miedo era ensuciar la tabla `Sitio`, pero esa
+fila ya solo se creaba tras las 8 respuestas — nadie contesta ocho preguntas por
+molestar. Lo que sí se llenaba era `Sesion`, que no cuesta nada. El valor real del
+formulario no era anti-spam sino capturar al que abandona.
+
+### Restricción dura encontrada (y preservada)
+
+Los sitios demo DEBEN seguir con `clienteId === CLIENTE_DEMO_ID`. Asignarlos al lead
+rompería `ConfirmarPagoSitioUseCase`, que ramifica en `sitio.clienteId !== clienteDemoId`
+para identificar al comprador real (WB-43), y dejaría al panel sin su badge de demo
+(`esSitioDemo`, `src/app/admin/sitios/[id]/formularioPago.ts:52`). Por eso el vínculo
+lead↔demo vive en una columna nueva `Sesion.clienteId`, no en el sitio.
+
+### Qué se construyó
+
+| PR | Rama | Contenido |
+|---|---|---|
+| 1 | `feature/demo-lead-capture-1-fundaciones` | Migración `Sesion.clienteId`, `findOrCreateByEmail`, helpers compartidos |
+| 2 | `feature/demo-lead-capture-2-usecase-endpoint` | `CapturarLeadDemoUseCase` + `POST /api/chat/lead` |
+| 3 | `feature/demo-lead-capture-3-gate-ui` | Gate en `/api/chat` + `LeadForm` en el widget |
+
+Encadenados sobre `cdf822d` (el fix de rotación), estrategia stacked-to-main.
+
+**El gate es del servidor, no cosmético.** `/api/chat` deja de crear el `Sitio` y de
+devolver `subdominioDemo` al completar; responde `requiereLead`. Un test escanea el
+cuerpo crudo del JSON con regex para probar que el subdominio no se filtra por ningún
+lado. El sitio se materializa dentro del caso de uso, recién con el correo en mano.
+
+### Decisiones de capas
+
+- **P2002 se maneja en el adaptador, no en el caso de uso.** Atraparlo en
+  `src/application` metería tipos de Prisma en la capa de aplicación. Vive en
+  `PrismaClienteRepository.findOrCreateByEmail`: crear, y si dos requests chocan,
+  re-leer la fila ganadora. La doc de Prisma es explícita en que `upsert` NO es seguro
+  ante esa carrera.
+- **`esDemo` lo deriva la ruta, no el caso de uso.** Derivarlo adentro obligaría a leer
+  cookies y JWT desde `src/application`. La ruta usa `resolverModoChat` y pasa un
+  booleano; el guard sigue siendo del servidor y el caso de uso se testea sin JWT.
+- **Un lead es un `Cliente` con `activo: false`.** No hizo falta modelo nuevo. Y como
+  `esDemo = !cliente || !cliente.activo`, capturar el lead no mete a nadie al flujo
+  pagado de Claude por accidente.
+
+### Migración contra la base de producción
+
+`DATABASE_URL` apunta a la Postgres de Railway y no hay staging. Procedimiento usado,
+verificado contra el CLI instalado (Prisma 7.9.1), que dice textual que `migrate diff`
+*"is a read-only command that does not write to your datasource(s)"*:
+
+1. Editar el schema.
+2. `npx prisma migrate diff --from-config-datasource --to-schema=<path> --script` para
+   revisar el SQL sin tocar la base.
+3. Escribir la migración a mano con ese SQL.
+4. `npx prisma migrate deploy` (sin shadow database).
+
+**`prisma migrate dev` no se corre nunca en este proyecto** — exige shadow database y la
+doc de Prisma dice explícitamente que no debe usarse contra producción. Ojo: los flags
+que se deducen de la doc web pueden estar mal; los reales son `--from-config-datasource`
+y `--to-schema`, confirmados con `--help` del CLI instalado.
+
+Aplicada el 2026-09-07: `All migrations have been successfully applied`.
+
+### Verificación
+
+`npx tsc --noEmit` en 0, `npm run lint` sin errores (21 warnings preexistentes de stubs),
+`npm run test:unit` **50 suites / 483 tests**, `npm run build` OK con `/api/chat` y
+`/api/chat/lead` como rutas desplegables.
+
+El verify independiente dio **PASS con advertencias, 0 críticas**. Sus dos brechas de
+cobertura se cerraron el mismo día:
+
+- El manejo de P2002 no tenía ningún test. Ahora tiene 5 casos, con
+  `Prisma.PrismaClientKnownRequestError` real para que el `instanceof` se cumpla — un
+  objeto plano con `code: 'P2002'` NO pasa esa comprobación. Se probó invirtiendo la
+  condición en el código: 2 de 5 tests se caen. El test sirve.
+- El rechazo del cliente pagado solo estaba probado a nivel de caso de uso. Ahora hay un
+  caso de ruta con `resolverModoChat` en `false`.
+
+### Pendientes conocidos
+
+- La sensibilidad del test del Gap 2 quedó **argumentada, no probada por ejecución**: el
+  sandbox bloqueó la prueba de mutación mientras estaba viva.
+- `route.ts` llama a `resolverModoChat` y además rehace `verificarSesionJWT` +
+  `clienteRepo.findById`, porque igual necesita la entidad `Cliente` para el rate limit.
+  Es una consulta de más en la ruta autenticada. No bloqueante; conviene colapsarlo.
+- La concurrencia real (el índice único de Postgres) no se puede probar con tests
+  unitarios. Se prueba el manejo, no la carrera.
+- Falta el click-through manual del flujo demo → lead → revelación. No hay jsdom ni RTL
+  en el repo para automatizarlo.
+- **Los 3 PRs están commiteados pero sin abrir ni mergear.** → resuelto el 2026-09-08,
+  ver [Cierre de la cadena demo-lead-capture](#cierre-de-la-cadena-demo-lead-capture-y-click-through-en-local-2026-09-08).
+
+---
+
+
+## Cierre de la cadena demo-lead-capture y click-through en local (2026-09-08)
+
+### Los 3 PRs: abiertos, mergeados, y una trampa de GitHub
+
+Se abrieron y mergearon en orden. `develop` quedó en **d793f10**; `main` sigue en `15e941d`,
+así que **el gate de lead todavía no está en producción**.
+
+| PR | Rama | Base | Diff |
+|----|------|------|------|
+| #22 | `feature/demo-lead-capture-1-fundaciones` | `develop` | +435 / -17 |
+| #23 | `feature/demo-lead-capture-2-usecase-endpoint` | PR #22 | +477 |
+| #24 | `feature/demo-lead-capture-3-gate-ui` | PR #23 | +471 / -42 |
+
+`npm run test:unit` post-merge: 50 suites, 483 tests, todo en verde.
+
+**Trampa encontrada (importante para las próximas cadenas):** mergear el PR base con
+`gh pr merge --delete-branch` **no reapunta el PR hijo a `develop`, lo cierra**. El #23
+pasó a `CLOSED` tres segundos después de mergear el #22, y una vez cerrado GitHub no deja
+ni reabrirlo ni reapuntarlo mientras la rama base no exista
+(`Cannot change the base branch of a closed pull request`).
+
+Receta correcta para mergear una cadena stacked:
+
+1. Mergear el PR base **sin** `--delete-branch`.
+2. `gh pr edit <hijo> --base develop` — el diff sigue siendo solo su rebanada, porque
+   `develop` ya contiene al padre.
+3. Mergear el hijo. Repetir.
+4. Borrar las ramas al final, cuando ya no son base de nada.
+
+Recuperación si ya pasó: `git push origin <sha>:refs/heads/<rama-base-borrada>` para
+restaurar la ref, después `gh pr reopen`, después `gh pr edit --base develop`.
+
+### Producción caída (bloqueante, fuera del código)
+
+Al intentar el click-through, el chat local devolvió 500. No era el código: el proyecto de
+Railway `refreshing-communication` parece suspendido desde el **2026-09-06T17:35:26Z**.
+
+- `railway status` → servicio `web-bot`: **● Failed**.
+- `railway logs`: el contenedor arrancó bien (`Ready in 89ms`) y después `Stopping Container`
+  + `npm error signal SIGTERM`. No es un crash de la app; algo externo la paró.
+- `https://web-bot-production-d190.up.railway.app/` → 404. `demo-veterinaria.sitios.devalpo.cl` → 404.
+- Postgres pública `sakura.proxy.rlwy.net:21654`: el puerto TCP **abre**, pero Postgres corta
+  la conexión al instante → Prisma `P1017 ConnectionClosed`. Falla igual desde un script
+  suelto que desde el dev server (ambos usan esa misma `DATABASE_URL`).
+
+Hipótesis: se acabaron los créditos del plan trial. **No verificada** — la CLI de Railway no
+expone facturación, hay que mirar el dashboard.
+
+### Levantar todo en local sin Railway (receta probada)
+
+Como el `.env` local apunta a la Postgres de Railway, sin esa base no hay demo. El flujo
+demo → lead → revelación solo necesita **app + Postgres**; el Worker de Cloudflare y el
+motor de pagos no entran en este camino.
+
+```bash
+docker run -d --name webbot-pg \
+  -e POSTGRES_PASSWORD=webbot -e POSTGRES_USER=webbot -e POSTGRES_DB=webbot \
+  -p 5433:5432 postgres:16-alpine
+
+export DATABASE_URL="postgresql://webbot:webbot@localhost:5433/webbot"
+npx prisma migrate deploy   # aplica las 3 migraciones
+npm run db:seed-demo        # OBLIGATORIO, ver abajo
+npm run dev
+```
+
+Detalles que cuestan tiempo si no están escritos:
+
+- **`db:seed-demo` no es opcional, es precondición de arranque.** Crea el `Cliente` demo
+  compartido `cliente-demo-webbot-devalpo` (`CLIENTE_DEMO_ID` en
+  `src/infrastructure/demo/rubroDefaults.ts`). Sin esa fila, `POST /api/chat/lead` revienta
+  con **P2003 `ForeignKeyConstraintViolation` en `Sitio_clienteId_fkey`** y devuelve un 500
+  opaco, porque `CapturarLeadDemoUseCase` crea el `Sitio` a nombre de `clienteDemoId`
+  (Decisión D6). No es un bug del código: es una precondición de entorno no documentada.
+- La `DATABASE_URL` va **inline por entorno**, no en `.env.local`. Next.js no pisa una
+  variable ya definida en el proceso, así que gana sobre el `.env` que apunta a Railway.
+- El puerto 5433 evita chocar con cualquier Postgres local en el 5432.
+
+### Click-through del flujo demo → lead → revelación
+
+Corrido por HTTP contra el entorno local, con verificación directa en la base:
+
+| Paso | Resultado |
+|------|-----------|
+| 8 preguntas completadas | `completada:true`, `requiereLead:true`, campo `subdominioDemo` **ausente** |
+| Sitios en BD tras completar | 10 → 10 — **el gate no crea el sitio** |
+| Lead con nombre vacío | 400 `datos_invalidos` |
+| Lead con email inválido | 400 `datos_invalidos` |
+| Lead sobre sesión inexistente | 404 `sesion_no_encontrada` |
+| Lead válido | 200 `{"subdominioDemo":"demo-a82d05e9"}` |
+| Sitios en BD tras el lead | 10 → 11 — exactamente uno |
+| Fila creada | `Sitio` a nombre de `WebBot Demo`; `Sesion.clienteId` enlazado al `Cliente` nuevo del visitante (`activo=false`) |
+| `GET /sites/demo-a82d05e9` | 200, 24.627 bytes, con el nombre del negocio en el HTML |
+| Reenvío del mismo lead | 200 idempotente, siguen 11 sitios |
+
+**Lo que este click-through NO cubre:** la UI en un navegador real. La extensión de
+Claude-in-Chrome no se conectó, así que el `LeadForm` renderizado no se verificó a ojo —
+solo por sus tests de render y por el flujo HTTP.
+
+**Reconfirmado de paso:** el bug de metadata global sigue vivo. El sitio generado sirve
+`<title>Tu sitio web en 1 día, con tu dominio — Devalpo</title>` — ver
+[Pendiente: metadata por sitio](#pendiente-metadata-titledescription-por-sitio-detectado-2026-09-07).
+
+---
+
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
@@ -648,6 +981,13 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 ---
 
 ## Cómo retomar
+
+**Estado al cierre del 2026-09-08.** La cadena `demo-lead-capture` está **mergeada en `develop`** (PRs #22 → #23 → #24, `develop` = `d793f10`, 483 tests en verde) y el flujo demo → lead → revelación quedó verificado end to end contra un entorno local — ver [Cierre de la cadena demo-lead-capture](#cierre-de-la-cadena-demo-lead-capture-y-click-through-en-local-2026-09-08). `main` sigue en `15e941d`: **el gate de lead todavía no está en producción**.
+
+**Lo primero al retomar es Railway.** Todo el proyecto parece suspendido desde el 2026-09-06 (servicio en `Failed`, Postgres rechazando conexiones, sitios en 404); mientras eso no se resuelva no hay producción a la que desplegar ni base a la que pegarle desde local con el `.env` del repo. Si hace falta trabajar igual, la receta de Docker + Postgres local está en esa misma sección y funciona sin Railway.
+
+Después de eso quedan: el click-through **visual** en navegador (el de esta sesión fue por HTTP; la extensión de Chrome no se conectó) y el merge de `develop` → `main`.
+
 
 1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
 2. `main` y `develop` están sincronizados (2026-09-05): los 7 PRs de WB-22 ya están mergeados y en producción, con el seed demo corrido — ver [5 templates de sitio](#5-templates-de-sitio-fase-3-tarea-31--wb-22--cadena-de-7-prs-2026-09-0405). **El plan vigente es la FASE 5 (Jira WB-40)** — ver [Reposicionamiento](#reposicionamiento-fábrica-de-sitios-2026-09-05): lo siguiente es el dominio propio por sitio (WB-26). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
