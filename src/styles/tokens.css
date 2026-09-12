@@ -56,4 +56,27 @@
   /* Foco accesible — consumido solo desde `.page :focus-visible` en
      page.module.css (slice 2), nunca desde globals.css. */
   --wb-focus-ring: 0 0 0 3px color-mix(in srgb, var(--wb-color-secondary) 45%, transparent);
+
+  /* Neutros estructurales del rediseño de plantillas (WB-plantillas-fundaciones,
+     S0a). Fijos para las 6 plantillas SPA — no dependen del color de acento por
+     sitio ni de la marca Devalpo, por eso el prefijo distinto `--wb-tpl-*`: no
+     colisiona con `--wb-color-*` de arriba ni con `--primario/--secundario/
+     --acento/--texto` que palette.ts inyecta inline por sitio. Mapeo a los
+     nombres del handoff de diseño (docs/design_handoff_plantillas_webbot/README.md):
+       --wb-tpl-ink          → --ink
+       --wb-tpl-ink-muted    → --ink-muted
+       --wb-tpl-ink-faint    → --ink-faint
+       --wb-tpl-line         → --line
+       --wb-tpl-surface      → --surface
+       --wb-tpl-surface-soft → --surface-soft
+       --wb-tpl-whatsapp     → --whatsapp
+       --wb-tpl-placeholder  → --placeholder */
+  --wb-tpl-ink: #10131a;
+  --wb-tpl-ink-muted: #5a6270;
+  --wb-tpl-ink-faint: #8a909c;
+  --wb-tpl-line: #e3e5ea;
+  --wb-tpl-surface: #ffffff;
+  --wb-tpl-surface-soft: #f6f5f2;
+  --wb-tpl-whatsapp: #25d366;
+  --wb-tpl-placeholder: repeating-linear-gradient(135deg, #e7e5df 0 12px, #f1efe9 12px 24px);
 }

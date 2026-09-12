@@ -1,0 +1,81 @@
+/*
+ * Primitivas de movimiento del rediseño de plantillas (WB-plantillas-fundaciones,
+ * S0a). Hoja dedicada, deliberadamente separada de `globals.css` — ese archivo
+ * es un reset puro de 10 líneas y así se mantiene (ver tokens.css:1-10 y
+ * DECISIONES.md). Se importa una sola vez desde `src/app/layout.tsx`.
+ *
+ * Contrato `data-dv-anim` (design.md Q3/Q4): el atributo con su valor es el
+ * ÚNICO selector que enciende una animación. Un elemento sin este atributo no
+ * anima nunca, sea cual sea el CSS Module que lo declare. Esto es lo que
+ * permite auditar en review qué anima y qué no con un solo grep.
+ */
+
+@keyframes dvUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dvFade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Cambio de sección: dvFade corre de inmediato sobre el contenedor entrante. */
+[data-dv-anim='fade'] {
+  animation: dvFade 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--dv-delay, 0ms);
+}
+
+/* Revelado en cascada: oculto hasta que el IntersectionObserver del wrapper
+ * (SeccionesSPA.tsx) marca `data-dv-in` en el elemento. La ocultación está
+ * gateada en `data-dv-ready` (seteado solo en el mount effect del wrapper) —
+ * sin JS esta regla nunca aplica y el elemento queda visible desde el inicio.
+ */
+[data-dv-ready] [data-dv-anim='up']:not([data-dv-in]) {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+[data-dv-anim='up'][data-dv-in] {
+  animation: dvUp 0.62s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--dv-delay, 0ms);
+}
+
+/* Visibilidad de sección inactiva. Las 4 secciones de cada plantilla SIEMPRE
+ * se renderizan (nunca se desmontan) para no sacar contenido del HTML — un
+ * sitio que se vende como "tu sitio, en Google" no puede tener 3 de 4
+ * secciones ausentes del marcado. `display:none` → mostrado reinicia una
+ * animación CSS por spec, así que dvFade y la cascada de hijos corren de
+ * nuevo gratis en cada cambio de sección, sin lógica adicional.
+ * Gateado en `data-dv-ready`: sin JS, las 4 secciones quedan visibles como
+ * scroll largo y los enlaces del nav (`<a href="#id">`) siguen funcionando.
+ */
+[data-dv-ready] [data-dv-section]:not([data-dv-active]) {
+  display: none;
+}
+
+/* MUST — prefers-reduced-motion (spec.md, Requirement "Motion Primitives and
+ * Reduced-Motion Guard"). El `!important` es deliberado: el estado oculto de
+ * arriba, `[data-dv-ready] [data-dv-anim="up"]:not([data-dv-in])`, pesa
+ * (0,3,0); un guard sin `!important` a (0,1,0) perdería esa pulseada y el
+ * elemento quedaría oculto para siempre en vez de visible sin animar.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-dv-anim] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
