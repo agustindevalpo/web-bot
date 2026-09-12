@@ -446,3 +446,33 @@ verificable no entra.
 **Evidencia:** `CLAUDE.md` del proyecto, sección "Documentación viva"; auditoría en
 `docs/COMANDOS.md:72` (el `migrate dev` corregido) y `README.md` (reescrito), ambos en el
 commit `cd3932b`.
+
+## D-21 — Se documentan `Plan`, `PausarSitio` y `ReactivarSitio` en vez de eliminarlos; se retira el proyecto Jest `integration` vacío
+
+**Fecha:** 2026-09-12 · **Estado:** vigente
+**Contexto:** una auditoría de deuda técnica encontró tres vestigios candidatos a
+eliminar: el enum `Plan` y `Cliente.plan` (heredados de D-09), los casos de uso
+`PausarSitioUseCase` y `ReactivarSitioUseCase` (compuestos en el container pero sin ruta
+que los consuma), y el proyecto Jest `integration`, que solo contenía
+`tests/integration/mocks/` y cero archivos `*.test.ts`, por lo que `npm run
+test:integration` pasaba en verde sin haber ejecutado ninguna aserción propia.
+**Decisión:** se conservan `Plan`, `PausarSitioUseCase` y `ReactivarSitioUseCase`,
+documentando en el propio código por qué siguen ahí, y se retira el proyecto Jest
+`integration` (y el script `test:integration`) moviendo sus mocks a `tests/mocks/`, que sí
+usan seis tests unitarios.
+**Por qué:** `PausarSitioUseCase`/`ReactivarSitioUseCase` no son código muerto, son el
+flujo de suspensión por pago fallido bloqueado en que el motor de pagos de Devalpo no está
+deployado (docs/ESTADO.md, sección 4) — su composición explícita sigue en
+`src/infrastructure/container.ts:63-64`. Eliminar `Plan` costaría una migración contra la
+base de producción (D-09) sin ninguna ganancia funcional, porque ningún módulo lee
+`Cliente.plan` para decidir algo, verificado por grep. Un comando de test que no hace
+ninguna aserción es peor que no tener el comando, porque se lee como cobertura cuando no
+prueba nada: `tests/integration/` solo tenía `mocks/`, sin un solo `*.test.ts`.
+**Consecuencia:** `schema.prisma`, `PausarSitio.usecase.ts` y `ReactivarSitio.usecase.ts`
+llevan ahora un comentario que explica por qué siguen ahí. `jest.config.ts` solo declara
+el proyecto `unit`; `package.json` ya no tiene el script `test:integration` ni las
+dependencias `supertest`/`@types/supertest`, sin uso en ningún test del repositorio.
+**Evidencia:** `src/infrastructure/db/prisma/schema.prisma:19,78`;
+`src/infrastructure/container.ts:63-64`; `jest.config.ts:51` (único `displayName`
+restante); `package.json` (scripts `test:*`); `tests/mocks/` (los cuatro mocks movidos,
+antes en `tests/integration/mocks/`); rama `chore/deuda-tecnica`.

@@ -3,9 +3,9 @@ import {
   normalizarEmailComprador,
 } from '@/application/use-cases/ConfirmarPagoSitio.usecase'
 import { ActivarClienteUseCase } from '@/application/use-cases/ActivarCliente.usecase'
-import { MockSitioRepository } from '../../../integration/mocks/MockSitioRepository'
-import { MockClienteRepository } from '../../../integration/mocks/MockClienteRepository'
-import { MockPagoRepository } from '../../../integration/mocks/MockPagoRepository'
+import { MockSitioRepository } from '../../../mocks/MockSitioRepository'
+import { MockClienteRepository } from '../../../mocks/MockClienteRepository'
+import { MockPagoRepository } from '../../../mocks/MockPagoRepository'
 import { Sitio } from '@/domain/entities/Sitio'
 import { Cliente } from '@/domain/entities/Cliente'
 import { Template } from '@/domain/value-objects/Template'

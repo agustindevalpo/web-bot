@@ -39,7 +39,7 @@ promesa **"tu sitio web en un día, en producción, con tu propio dominio"**.
 | Auth | Magic link con `jose` (JWT), cookie `webbot_auth`; panel admin con cookie `webbot_admin` |
 | Correo | Resend (HTTP) en producción, Gmail SMTP en local, consola sin credenciales |
 | Dominios propios | Cloudflare for SaaS + Worker (`infra/cloudflare/worker`) delante de Railway |
-| Tests | Jest 30 + ts-jest (unit/integration) y Cucumber 13 + **Playwright** (e2e) |
+| Tests | Jest 30 + ts-jest (unit) y Cucumber 13 + **Playwright** (e2e) |
 | Deploy | Railway, plan Hobby, un solo servicio multitenant, auto-deploy desde `main` |
 
 No hay N8N, ni Python, ni Selenium: cero referencias en `src/`.
@@ -131,7 +131,6 @@ definida en el entorno).
 
 ```bash
 npm run test:unit          # Jest — 52 suites / 504 tests en verde
-npm run test:integration    # Jest — sin tests propios hoy, solo mocks en tests/integration/mocks
 npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
 npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
 npm run test:all            # jest + cucumber
@@ -139,8 +138,7 @@ npx tsc --noEmit             # no hay script de typecheck; se corre directo
 npm run lint
 ```
 
-No existe un script `test` a secas. `supertest` está instalado como dependencia de
-desarrollo pero no lo usa ningún test.
+No existe un script `test` a secas.
 
 ## 7. Trampas que costaron tiempo real
 
@@ -166,7 +164,8 @@ desarrollo pero no lo usa ningún test.
   actual. `README.md` y `docs/COMANDOS.md` estaban igual de desactualizados y se
   corrigieron el 2026-09-12 — `COMANDOS.md` llegó a recomendar `prisma migrate dev`, que
   D-17 prohíbe en este proyecto.
-- `.env.example` está incompleto: le faltan `ADMIN_SECRET`, `CLOUDFLARE_API_TOKEN`,
-  `CLOUDFLARE_ZONE_ID` y `WORKER_SHARED_SECRET`, y conserva variables muertas
-  (`N8N_WEBHOOK_URL`, `ADMIN_PASSWORD`, `FLOW_*`, `PAYPAL_*`, `UNSPLASH_ACCESS_KEY`,
-  `RAILWAY_*`) que ningún módulo de `src/` lee.
+- El panel `/admin` lee `ADMIN_SECRET`, no `ADMIN_PASSWORD`. Ese nombre viejo estuvo en
+  `.env.example` hasta el 2026-09-12 sin que ningún módulo lo leyera, y es el tipo de
+  variable fantasma que hace perder una tarde: se carga, no pasa nada, y no hay error.
+- Las credenciales del motor de pagos (`FLOW_*`, `MP_ACCESS_TOKEN`, `PAYPAL_*`) ya no
+  figuran en `.env.example`: vuelven cuando ese microservicio esté desplegado.

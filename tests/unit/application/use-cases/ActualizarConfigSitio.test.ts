@@ -3,7 +3,7 @@ import { Sitio } from '@/domain/entities/Sitio'
 import { Template } from '@/domain/value-objects/Template'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
 import { ConfigSitioInvalidaException } from '@/domain/exceptions/ConfigSitioInvalidaException'
-import { MockSitioRepository } from '../../../integration/mocks/MockSitioRepository'
+import { MockSitioRepository } from '../../../mocks/MockSitioRepository'
 
 describe('ActualizarConfigSitio UseCase', () => {
   let repo: MockSitioRepository
