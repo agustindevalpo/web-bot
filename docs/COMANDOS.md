@@ -47,8 +47,63 @@ Postgres propio (contenedor `webbot-pg-sandbox`, puerto 5435, distinto del de la
 de abajo), migra, siembra el cliente demo y arranca `next dev` ya apuntado al link de
 **pruebas** de Mercado Pago (`NEXT_PUBLIC_PAGOS_MODO=prueba`). Para pagar ahí hay que
 estar logueado en Mercado Pago como **comprador de prueba**, en una ventana de
-incógnito — nunca con la cuenta real de Devalpo. Tarjetas de prueba: guía Word, Parte
+incógnito — nunca con la cuenta real de Devalpo. Tarjetas de prueba: más abajo, y la
+misma tabla en la guía Word, Parte
 C2. `npm run dev:sandbox -- --down` baja y elimina el contenedor.
+
+### Tarjetas de prueba de Mercado Pago (Chile)
+
+> **Los rechazos forzados NO funcionan hoy. Probado el 2026-09-12: con `FUND` en el
+> nombre del titular, el pago se aprobó igual.** Mercado Pago cambió cómo se fuerza el
+> estado y su documentación no se pudo consultar (devuelve 403). La tabla de abajo queda
+> como referencia histórica, **no como instrucción**. Antes de volver a usarla hay que
+> verificar el método actual contra la documentación oficial de Mercado Pago para
+> Checkout Pro — que es un producto distinto de Checkout API y Bricks, y no
+> necesariamente se comporta igual.
+>
+> Lo que **sí** está verificado: `APRO` aprueba, y todo el flujo sandbox funciona de punta
+> a punta hasta `/congrats/approved/`.
+
+Método histórico (el resultado lo decidía el nombre del titular, no el número de tarjeta):
+
+| Titular | Resultado esperado | Estado |
+|---|---|---|
+| `APRO` | Aprobado | verificado el 2026-09-12 |
+| `OTHE` | Rechazado por error general | sin verificar |
+| `FUND` | Rechazado por fondos insuficientes | **NO funciona: aprobó igual** |
+
+Datos de la tarjeta, iguales en todos los casos:
+
+| Campo | Valor |
+|---|---|
+| Mastercard | `5416 7526 0258 2580` |
+| Visa | `4168 8188 4444 7115` |
+| CVV | `123` |
+| Vencimiento | `11/30` |
+| RUT | cualquiera, por ejemplo `12345678` |
+| Correo | el del comprador de prueba |
+
+Ver los rechazos seguiría valiendo la pena cuando se pueda: muestran lo que ve un cliente
+cuando la tarjeta rebota, que con pymes pasa seguido (tope, débito sin fondos), y eso
+cambia el mensaje de seguimiento por WhatsApp. Esa pantalla es de Mercado Pago y no se
+puede reemplazar. No es urgente: el lead ya queda capturado **antes** del pago, así que a
+quien no pudo pagar se lo puede contactar igual — esa era la pérdida cara y ya está
+resuelta.
+
+> **Si Mercado Pago corta con "Una de las partes con la que intentas hacer el pago es de
+> prueba"** (la URL termina en `/fatal/`): las dos partes tienen que ser de prueba, y la
+> que falta es la cuenta. Abrir una ventana de incógnito **nueva** y **loguearse ahí como
+> comprador de prueba** antes de pegar el link. Incógnito por sí solo no alcanza: sin
+> sesión, Mercado Pago toma la visita como invitado y da el mismo error. Verificado el
+> 2026-09-12: con el comprador de prueba logueado, el flujo termina en
+> `/congrats/approved/`.
+>
+> Ese mensaje no dice cuál de las dos partes es la de prueba. Para saber en qué ambiente
+> se está, comparar el `preference-id` de la barra de direcciones con la constante del
+> link sandbox en `scripts/dev-sandbox.mjs`: si coinciden, es el sandbox. **El dominio no
+> sirve como pista** — Mercado Pago sirve producción y pruebas desde `www.mercadopago.cl`,
+> y la URL se transforma durante el flujo (`pref_id` pasa a `preference-id`, cambia el
+> path), así que deja de parecerse al link original sin haber cambiado de ambiente.
 
 Regla del par de variables: `NEXT_PUBLIC_PAGOS_MODO` declara la intención
 (`produccion` / `prueba`); `NEXT_PUBLIC_MERCADOPAGO_LINK_URL` es la evidencia (a qué
@@ -61,7 +116,6 @@ fuerte que si solo faltara la declaración (ver D-22).
 
 ```bash
 npm run test:unit          # Jest — domain + application, rápido, sin BD
-npm run test:integration    # Jest — mocks de repos (crece cuando haya rutas API)
 npm run test:coverage       # Jest con reporte de cobertura
 npm run test:watch          # Jest en modo watch (solo unit)
 
@@ -139,5 +193,5 @@ git push -u origin feature/tarea-x
 | `npx tsc --noEmit` | sin salida |
 | `npm run build` | `✓ Compiled successfully` |
 | `npm run lint` | `0 errors` (warnings en los servicios stub son normales) |
-| `npm run test:unit` | `Test Suites: 52 passed`, `Tests: 504 passed` |
+| `npm run test:unit` | `Test Suites: 52 passed`, `Tests: 541 passed` |
 | `npm run test:e2e` | `3 scenarios (3 passed)`, `15 steps (15 passed)` |
