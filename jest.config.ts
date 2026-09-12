@@ -64,15 +64,6 @@ const config: Config = {
       },
       testMatch: ['<rootDir>/tests/unit/**/*.test.ts'],
     },
-    {
-      preset: 'ts-jest',
-      testEnvironment: 'node',
-      displayName: 'integration',
-      moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/src/$1',
-      },
-      testMatch: ['<rootDir>/tests/integration/**/*.test.ts'],
-    },
   ],
 }
 

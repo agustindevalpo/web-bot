@@ -1,7 +1,7 @@
 import { ListarSitiosUseCase } from '@/application/use-cases/ListarSitios.usecase'
 import { Sitio } from '@/domain/entities/Sitio'
 import { Template } from '@/domain/value-objects/Template'
-import { MockSitioRepository } from '../../../integration/mocks/MockSitioRepository'
+import { MockSitioRepository } from '../../../mocks/MockSitioRepository'
 
 function sitio(id: string, fecha: string): Sitio {
   return new Sitio(id, 'cliente-1', `sub-${id}`, Template.LANDING, { nombre: id }, true, null, new Date(fecha))

@@ -7,7 +7,7 @@ import { Sitio } from '@/domain/entities/Sitio'
 import { Template } from '@/domain/value-objects/Template'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
 import { DominioInvalidoException } from '@/domain/exceptions/DominioInvalidoException'
-import { MockSitioRepository } from '../../../integration/mocks/MockSitioRepository'
+import { MockSitioRepository } from '../../../mocks/MockSitioRepository'
 
 describe('normalizarDominio', () => {
   it.each([
