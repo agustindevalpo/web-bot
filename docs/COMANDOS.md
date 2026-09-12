@@ -1,6 +1,6 @@
 # WebBot — Comandos y URLs útiles
 
-> Referencia rápida para correr el proyecto solo. Para el detalle de decisiones y el estado de cada tarea, ver [`BITACORA.md`](./BITACORA.md). Para la arquitectura de 4 capas, ver [`WEBBOT_ARQUITECTURA.md`](./WEBBOT_ARQUITECTURA.md).
+> Referencia rápida para correr el proyecto solo. Para el detalle de decisiones y el estado de cada tarea, ver [`BITACORA.md`](./BITACORA.md). Para la arquitectura vigente, ver [`ESTADO.md`](./ESTADO.md); para el porqué de cada decisión, [`DECISIONES.md`](./DECISIONES.md).
 
 ---
 
@@ -68,8 +68,12 @@ El feature e2e (`tests/e2e/features/sitio_por_subdominio.feature`) crea y borra 
 
 ```bash
 npx prisma generate                          # regenera el cliente (schema en src/infrastructure/db/prisma/schema.prisma)
-npx prisma studio                              # UI para explorar/editar la BD — recordá cerrarla (queda escuchando en un puerto)
-npx prisma migrate dev --name <nombre>          # nueva migración en desarrollo
+npx prisma studio                              # UI para explorar/editar la BD — recuerde cerrarla (queda escuchando en un puerto)
+# NO usar `prisma migrate dev` en este proyecto (ver DECISIONES.md D-17): exige shadow
+# database y no hay staging. Para una migración nueva:
+#   1) npx prisma migrate diff --script ...   # previsualizar, solo lectura
+#   2) escribir prisma/migrations/<ts>_<nombre>/migration.sql a mano
+#   3) npx prisma migrate deploy               # aplicar
 npx prisma migrate deploy                       # aplica migraciones pendientes (producción/CI)
 ```
 
@@ -122,5 +126,5 @@ git push -u origin feature/tarea-x
 | `npx tsc --noEmit` | sin salida |
 | `npm run build` | `✓ Compiled successfully` |
 | `npm run lint` | `0 errors` (warnings en los servicios stub son normales) |
-| `npm run test:unit` | `Test Suites: 7 passed`, `Tests: 22 passed` |
+| `npm run test:unit` | `Test Suites: 52 passed`, `Tests: 504 passed` |
 | `npm run test:e2e` | `3 scenarios (3 passed)`, `15 steps (15 passed)` |

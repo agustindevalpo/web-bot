@@ -1,7 +1,7 @@
 # Bitácora de desarrollo — WebBot
 
 > Registro de avance para retomar el trabajo. Se actualiza cada vez que cerramos una tarea o pausamos sesión.
-> Roadmap completo: [`WEBBOT_ROADMAP.md`](./WEBBOT_ROADMAP.md)
+> Estado actual: [`ESTADO.md`](./ESTADO.md) · Decisiones vigentes: [`DECISIONES.md`](./DECISIONES.md) · Roadmap original (histórico): [`historico/WEBBOT_ROADMAP.md`](./historico/WEBBOT_ROADMAP.md)
 
 ---
 
@@ -989,7 +989,7 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 Después de eso quedan: el click-through **visual** en navegador (el de esta sesión fue por HTTP; la extensión de Chrome no se conectó) y el merge de `develop` → `main`.
 
 
-1. Leer esta bitácora + `WEBBOT_ROADMAP.md`.
+1. Leer `ESTADO.md` (qué es WebBot hoy) y `DECISIONES.md` (por qué). Esta bitácora es el registro cronológico, no el mapa.
 2. `main` y `develop` están sincronizados (2026-09-05): los 7 PRs de WB-22 ya están mergeados y en producción, con el seed demo corrido — ver [5 templates de sitio](#5-templates-de-sitio-fase-3-tarea-31--wb-22--cadena-de-7-prs-2026-09-0405). **El plan vigente es la FASE 5 (Jira WB-40)** — ver [Reposicionamiento](#reposicionamiento-fábrica-de-sitios-2026-09-05): lo siguiente es el dominio propio por sitio (WB-26). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.
 3. Verificar que el `.env` local sigue teniendo el `DATABASE_URL` público correcto (no se sube al repo, está en `.gitignore`).
 4. **Producción ya tiene desde el 14/08:** Chat UI, landing pública, Demo Mode (con sus 10 sitios de ejemplo — el seed ya corrió contra la BD real, verificado sirviendo `demo-veterinaria.sitios.devalpo.cl`) y las variables `AUTH_SECRET`/`NEXT_PUBLIC_APP_URL` cargadas en Railway.
