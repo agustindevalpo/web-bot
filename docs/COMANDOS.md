@@ -42,6 +42,19 @@ npm run build             # build de producción (falla si hay errores de tipos)
 npm run lint               # eslint
 ```
 
+**Sandbox de pagos** (ver `docs/DECISIONES.md` D-22): `npm run dev:sandbox` levanta un
+Postgres propio (contenedor `webbot-pg-sandbox`, puerto 5435, distinto del de la receta
+de abajo), migra, siembra el cliente demo y arranca `next dev` ya apuntado al link de
+**pruebas** de Mercado Pago (`NEXT_PUBLIC_PAGOS_MODO=prueba`). Para pagar ahí hay que
+estar logueado en Mercado Pago como **comprador de prueba**, en una ventana de
+incógnito — nunca con la cuenta real de Devalpo. Tarjetas de prueba: guía Word, Parte
+C2. `npm run dev:sandbox -- --down` baja y elimina el contenedor.
+
+Regla del par de variables: `NEXT_PUBLIC_PAGOS_MODO` declara la intención
+(`produccion` / `prueba`); `NEXT_PUBLIC_MERCADOPAGO_LINK_URL` es la evidencia (a qué
+apunta de verdad). El CTA de la demo contrasta ambas — si no coinciden, avisa más
+fuerte que si solo faltara la declaración (ver D-22).
+
 ---
 
 ## 3. Tests

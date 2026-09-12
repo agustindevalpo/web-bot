@@ -67,6 +67,33 @@
   line-height: 1.4;
 }
 
+.alertaSandbox {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 176, 32, 0.15);
+  border: 1px solid #ffb020;
+  color: #ffb020;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Discrepancia entre lo declarado (NEXT_PUBLIC_PAGOS_MODO) y la URL real: el
+   estado más peligroso del contraste, por eso un rojo más fuerte que el
+   amarillo de "sandbox tranquilo" — nunca se muestran los dos a la vez. */
+.alertaDiscrepancia {
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 59, 48, 0.18);
+  border: 2px solid #ff3b30;
+  color: #ff3b30;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .precio {
   display: flex;
   flex-direction: column;
