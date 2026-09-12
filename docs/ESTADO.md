@@ -161,8 +161,11 @@ desarrollo pero no lo usa ningún test.
 - La acción `computer type` de claude-in-chrome mutila texto con acentos (borra todo lo
   anterior al primer carácter no ASCII); usar `form_input`. Ya dejó datos corruptos en
   `configJson` del sitio `demo-cea59ef1` en producción.
-- `README.md`, `docs/COMANDOS.md` y todo `docs/historico/` están desactualizados y
-  describen un proyecto que no existe. No usarlos como fuente.
+- `docs/historico/` es archivo muerto por diseño: describe el proyecto de agosto de 2026
+  (suscripciones, N8N, Python, equipo de tres). Nunca citarlo como fuente de un hecho
+  actual. `README.md` y `docs/COMANDOS.md` estaban igual de desactualizados y se
+  corrigieron el 2026-09-12 — `COMANDOS.md` llegó a recomendar `prisma migrate dev`, que
+  D-17 prohíbe en este proyecto.
 - `.env.example` está incompleto: le faltan `ADMIN_SECRET`, `CLOUDFLARE_API_TOKEN`,
   `CLOUDFLARE_ZONE_ID` y `WORKER_SHARED_SECRET`, y conserva variables muertas
   (`N8N_WEBHOOK_URL`, `ADMIN_PASSWORD`, `FLOW_*`, `PAYPAL_*`, `UNSPLASH_ACCESS_KEY`,
