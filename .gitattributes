@@ -1,0 +1,8 @@
+# Normaliza los finales de línea del repositorio: todo archivo de texto se
+# almacena con LF, sin importar la plataforma de quien commitea. Sin esto,
+# `core.autocrlf` decide por máquina y un cambio de una línea puede volver al
+# índice con el archivo entero reescrito a CRLF, escondiendo el diff real.
+#
+# `text=auto` deja que Git detecte los binarios (las imágenes de `public/` y el
+# favicon) y no los toque.
+* text=auto eol=lf
