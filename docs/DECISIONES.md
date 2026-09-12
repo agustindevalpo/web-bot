@@ -522,3 +522,38 @@ inmediato en vez de quedar en silencio como hoy.
 `src/app/chat/DemoCTA.module.css` (clases `.alertaSandbox`/`.alertaDiscrepancia`);
 `scripts/dev-sandbox.mjs`; `tests/unit/app/chat/hrefPago.test.ts`; docs/ESTADO.md,
 secciones 1 y 6 (un solo ambiente Railway, receta local existente en el puerto 5433).
+
+## D-23 — El rediseño de plantillas entra por ciclos, con `LANDING` primero y `PROFESIONAL` último
+
+**Fecha:** 2026-09-12 · **Estado:** vigente
+**Contexto:** llegó un handoff de diseño de alta fidelidad
+(`docs/design_handoff_plantillas_webbot/`) que reemplaza las 5 plantillas actuales por 6
+plantillas SPA y agrega un tipo nuevo, `PROFESIONAL`. Las 5 actuales suman ~2.300 líneas
+entre TypeScript y CSS; lo propuesto supera las 5.000, más 10 campos opcionales de DTO,
+una migración de Prisma y 4 rubros nuevos en el chat. Contra el presupuesto de 400 líneas
+por revisión (D-21 y el preflight de sesión), no cabe como un cambio.
+**Decisión:** se corta en siete ciclos con dependencias explícitas
+(`docs/design_handoff_plantillas_webbot/PLAN-SLICES.md`). Un ciclo cero entrega solo las
+fundaciones compartidas —tokens estructurales, `Instrument Serif`, el clamp de contraste
+del acento, los keyframes con `prefers-reduced-motion` y el único componente cliente que
+envuelve el `<main>`— sin ninguna plantilla visible. Después va `LANDING`, y recién al
+final `PROFESIONAL`.
+**Por qué:** `LANDING` primero porque es el fallback de rubros desconocidos —el de más
+tráfico— y porque necesita un solo campo nuevo (`destacados?`): valida el patrón completo
+sobre la plantilla más segura, y si el patrón está mal se descubre en 400 líneas y no en
+5.000. `PROFESIONAL` al final porque es el único que arrastra backend: valor nuevo en el
+enum `Template`, migración de Prisma contra producción sin staging (D-17), y rubros nuevos
+en `DemoChatService`, en el prompt de `ClaudeChatService` y en `rubroDefaults.ts`. Ese
+último punto toca el chat, que es el camino de venta: un error ahí no rompe un sitio,
+rompe la venta. Mezclarlo con el primer ciclo pondría riesgo de producción dentro de un
+cambio de diseño.
+**Consecuencia:** ningún ciclo de plantilla puede empezar antes de que el ciclo cero esté
+cerrado. Los cinco de plantilla son independientes entre sí y pueden reordenarse por
+prioridad comercial, salvo `PROFESIONAL`. La copia de `BITACORA.md` que venía en el
+paquete se eliminó al entrar al repositorio por ser idéntica a `docs/BITACORA.md` (D-19):
+dos copias divergen apenas alguien toca una. El `.dc.html` se conserva como referencia de
+diseño, no como código a copiar.
+**Evidencia:** `docs/design_handoff_plantillas_webbot/README.md` y `PLAN-SLICES.md`;
+tamaño actual medido con `wc -l` sobre `src/components/templates/*/`;
+`src/domain/value-objects/Template.ts` y `schema.prisma:84-90` (5 valores, sin
+`PROFESIONAL`); `src/infrastructure/templates/rubroTemplates.ts` (10 rubros).

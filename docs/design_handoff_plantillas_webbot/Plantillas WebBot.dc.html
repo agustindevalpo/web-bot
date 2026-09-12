@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+@keyframes dvUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes dvFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes dvGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+body{margin:0;background:#EFEDE8;font-family:Montserrat,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#5B46F8;text-decoration:none}a:hover{color:#080056}
+.dv-turn{padding:44px 48px 40px;border-bottom:1px solid rgba(8,0,86,.10);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 22px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#080056;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 Montserrat,sans-serif;color:#080056}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(8,0,86,.09);color:#080056;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:9px;font:400 11.5px/1.3 Montserrat,sans-serif;color:rgba(8,0,86,.6)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(8,0,86,.10);border-radius:10px;box-shadow:0 2px 10px rgba(8,0,86,.05);overflow:hidden}
+.dv-opt:target .dv-oid{background:#5B46F8;color:#fff}
+.dv-next{margin:26px 0 0;font:12px/1.6 Montserrat,sans-serif;color:rgba(8,0,86,.55)}
+</style></helmet>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Seis plantillas SPA para la fábrica de sitios — escritorio + móvil</span></div>
+
+<div class="dv-card" style="width:1120px;padding:30px 34px;margin:0 0 34px;background:#080056">
+<div style="font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#15DEFA;margin:0 0 14px">Contexto y supuestos</div>
+<div style="font:400 20px/1.45 'Instrument Serif',serif;color:#fff;max-width:760px;margin:0 0 22px">Un solo sistema estructural —el de Devalpo— y un acento por cliente. La plantilla no se ve barata porque el contenido sea genérico: se ve cara por la tipografía, el aire y el ritmo, que son constantes y no dependen de lo que escriba el cliente.</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+<div><div style="font:700 11px Montserrat,sans-serif;color:#FFAF4D;margin:0 0 6px">Color</div><div style="font:300 12.5px/1.55 Montserrat,sans-serif;color:rgba(255,255,255,.78)">Neutros e ink fijos de Devalpo. Un único <span style="font-weight:600;color:#15DEFA">--acento</span> por sitio pinta eyebrows, botones, subrayados y detalles. Cambiar un hex cambia el sitio entero.</div></div>
+<div><div style="font:700 11px Montserrat,sans-serif;color:#FFAF4D;margin:0 0 6px">Navegación</div><div style="font:300 12.5px/1.55 Montserrat,sans-serif;color:rgba(255,255,255,.78)">SPA de una página: el header intercambia secciones con fundido. Sin recargas, sin scroll infinito. Los tabs de estas maquetas funcionan de verdad — haz clic.</div></div>
+<div><div style="font:700 11px Montserrat,sans-serif;color:#FFAF4D;margin:0 0 6px">Animación</div><div style="font:300 12.5px/1.55 Montserrat,sans-serif;color:rgba(255,255,255,.78)">Sutil y en cascada: cada bloque entra con 16px de desplazamiento y 70ms de retardo escalonado. Nada de parallax ni contadores.</div></div>
+<div><div style="font:700 11px Montserrat,sans-serif;color:#FFAF4D;margin:0 0 6px">Contenido</div><div style="font:300 12.5px/1.55 Montserrat,sans-serif;color:rgba(255,255,255,.78)">Todo en <span style="font-weight:600;color:#15DEFA">{llaves}</span> sale del <span style="font-weight:600">SiteConfigDTO</span>. Los recuadros con diagonal son fotos del cliente. Bloque legal queda fuera, según lo decidido.</div></div>
+</div>
+</div>
+
+<div class="dv-opts">
+
+<!-- ============ 1a LANDING ============ -->
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>LANDING · consultora, servicios profesionales, genérica</div>
+<div class="dv-card" style="width:1548px;padding:24px;background:#fff">
+<div style="display:flex;gap:26px;align-items:flex-start">
+
+<div style="flex:none;width:1120px;border:1px solid #E3E5EA;border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(16,19,26,.10)">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F6F5F2;border-bottom:1px solid #E3E5EA">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;text-align:center;font:500 11px Montserrat,sans-serif;color:#8A909C;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:5px 12px">{dominio-del-cliente}.cl</div>
+<div style="width:56px"></div>
+</div>
+<div data-spa data-accent="#5B46F8" data-navink="#5A6270" style="height:820px;display:flex;flex-direction:column;background:#fff">
+
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:78px;border-bottom:1px solid #ECEDF1">
+<div style="display:flex;align-items:center;gap:11px">
+<div style="width:30px;height:30px;border-radius:8px;background:#5B46F8;display:flex;align-items:center;justify-content:center;font:700 13px Montserrat,sans-serif;color:#fff">N</div>
+<div style="font:600 14.5px Montserrat,sans-serif;color:#10131A;letter-spacing:-.01em">{nombre del negocio}</div>
+</div>
+<nav style="display:flex;gap:30px">
+<a href="#1a" data-nav="inicio" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Inicio<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#5B46F8;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1a" data-nav="servicios" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Servicios<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#5B46F8;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1a" data-nav="galeria" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Nosotros<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#5B46F8;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1a" data-nav="contacto" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Contacto<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#5B46F8;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+</nav>
+<a href="#1a" style="font:600 12px Montserrat,sans-serif;color:#fff;background:#10131A;padding:11px 20px;border-radius:6px">Hablemos</a>
+</header>
+
+<main style="flex:1;overflow:hidden;position:relative">
+
+<div data-sec="inicio" style="height:100%;display:grid;grid-template-columns:1.05fr .95fr">
+<div style="padding:66px 30px 40px 44px;display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5B46F8;margin:0 0 20px">{rubro} · {ciudad}</div>
+<h1 data-rev style="opacity:0;margin:0 0 22px;font:400 58px/1.06 'Instrument Serif',serif;color:#10131A;letter-spacing:-.015em;max-width:12ch">{nombre del negocio}</h1>
+<p data-rev style="opacity:0;margin:0 0 34px;font:300 16px/1.65 Montserrat,sans-serif;color:#5A6270;max-width:42ch">{descripción del negocio — dos líneas que explican qué hace y para quién, tal como las escribió el cliente en el chat}</p>
+<div data-rev style="opacity:0;display:flex;gap:12px;margin:0 0 44px">
+<a href="#1a" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#5B46F8;padding:14px 24px;border-radius:6px">Escríbenos por WhatsApp</a>
+<a href="#1a" style="font:600 12.5px Montserrat,sans-serif;color:#10131A;border:1px solid #D9DBE1;padding:14px 24px;border-radius:6px">Llamar · {teléfono}</a>
+</div>
+<div data-rev style="opacity:0;display:flex;gap:0;border-top:1px solid #ECEDF1;padding:22px 0 0">
+<div style="flex:1"><div style="font:400 30px/1 'Instrument Serif',serif;color:#5B46F8">{dato}</div><div style="font:400 11px Montserrat,sans-serif;color:#8A909C;margin:7px 0 0">años de experiencia</div></div>
+<div style="flex:1;border-left:1px solid #ECEDF1;padding-left:22px"><div style="font:400 30px/1 'Instrument Serif',serif;color:#5B46F8">{dato}</div><div style="font:400 11px Montserrat,sans-serif;color:#8A909C;margin:7px 0 0">clientes atendidos</div></div>
+<div style="flex:1;border-left:1px solid #ECEDF1;padding-left:22px"><div style="font:400 30px/1 'Instrument Serif',serif;color:#5B46F8">{dato}</div><div style="font:400 11px Montserrat,sans-serif;color:#8A909C;margin:7px 0 0">servicios</div></div>
+</div>
+</div>
+<div style="position:relative;background:#F6F5F2;overflow:hidden">
+<div data-rev style="opacity:0;position:absolute;inset:44px 44px 120px 0;background:repeating-linear-gradient(135deg,#E7E5DF 0 12px,#F1EFE9 12px 24px);border-radius:4px;display:flex;align-items:flex-end;padding:22px"><span style="font:500 11px Montserrat,sans-serif;color:#9A968C">{foto principal — equipo, local u oficina}</span></div>
+<div data-rev style="opacity:0;position:absolute;left:-56px;bottom:52px;width:330px;background:#10131A;padding:26px 28px;border-radius:6px;box-shadow:0 22px 50px rgba(16,19,26,.22)">
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#15DEFA;margin:0 0 12px">Destacado</div>
+<div style="font:400 19px/1.4 'Instrument Serif',serif;color:#fff">{frase destacada del cliente — la promesa que lo diferencia}</div>
+</div>
+</div>
+</div>
+
+<div data-sec="servicios" style="display:none;height:100%;padding:56px 44px;overflow:hidden">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5B46F8;margin:0 0 14px">Servicios</div>
+<h2 data-rev style="opacity:0;margin:0 0 40px;font:400 40px/1.1 'Instrument Serif',serif;color:#10131A;max-width:18ch">Lo que hacemos por ti</h2>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#ECEDF1;border:1px solid #ECEDF1">
+<div data-rev style="opacity:0;background:#fff;padding:30px 26px 34px"><div style="font:400 13px Montserrat,sans-serif;color:#C7C3BA;margin:0 0 44px">01</div><div style="font:600 16px Montserrat,sans-serif;color:#10131A;margin:0 0 10px">{servicio 1}</div><div style="font:300 13px/1.65 Montserrat,sans-serif;color:#5A6270">{descripción breve del servicio, una o dos líneas}</div></div>
+<div data-rev style="opacity:0;background:#fff;padding:30px 26px 34px"><div style="font:400 13px Montserrat,sans-serif;color:#C7C3BA;margin:0 0 44px">02</div><div style="font:600 16px Montserrat,sans-serif;color:#10131A;margin:0 0 10px">{servicio 2}</div><div style="font:300 13px/1.65 Montserrat,sans-serif;color:#5A6270">{descripción breve del servicio, una o dos líneas}</div></div>
+<div data-rev style="opacity:0;background:#fff;padding:30px 26px 34px"><div style="font:400 13px Montserrat,sans-serif;color:#C7C3BA;margin:0 0 44px">03</div><div style="font:600 16px Montserrat,sans-serif;color:#10131A;margin:0 0 10px">{servicio 3}</div><div style="font:300 13px/1.65 Montserrat,sans-serif;color:#5A6270">{descripción breve del servicio, una o dos líneas}</div></div>
+<div data-rev style="opacity:0;background:#fff;padding:30px 26px 34px"><div style="font:400 13px Montserrat,sans-serif;color:#C7C3BA;margin:0 0 44px">04</div><div style="font:600 16px Montserrat,sans-serif;color:#10131A;margin:0 0 10px">{servicio 4}</div><div style="font:300 13px/1.65 Montserrat,sans-serif;color:#5A6270">{descripción breve del servicio, una o dos líneas}</div></div>
+<div data-rev style="opacity:0;background:#fff;padding:30px 26px 34px"><div style="font:400 13px Montserrat,sans-serif;color:#C7C3BA;margin:0 0 44px">05</div><div style="font:600 16px Montserrat,sans-serif;color:#10131A;margin:0 0 10px">{servicio 5}</div><div style="font:300 13px/1.65 Montserrat,sans-serif;color:#5A6270">{descripción breve del servicio, una o dos líneas}</div></div>
+<div data-rev style="opacity:0;background:#5B46F8;padding:30px 26px 34px;display:flex;flex-direction:column;justify-content:space-between"><div style="font:400 19px/1.35 'Instrument Serif',serif;color:#fff">¿No ves lo que buscas? Cuéntanos.</div><a href="#1a" style="font:600 12px Montserrat,sans-serif;color:#fff;border-bottom:1px solid rgba(255,255,255,.5);padding:0 0 4px;align-self:flex-start">Escríbenos →</a></div>
+</div>
+</div>
+
+<div data-sec="galeria" style="display:none;height:100%;padding:56px 44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1fr 1.15fr;gap:52px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5B46F8;margin:0 0 14px">Nosotros</div>
+<h2 data-rev style="opacity:0;margin:0 0 22px;font:400 38px/1.12 'Instrument Serif',serif;color:#10131A">{nombre del negocio} en {ciudad}</h2>
+<p data-rev style="opacity:0;margin:0 0 18px;font:300 14.5px/1.75 Montserrat,sans-serif;color:#5A6270">{texto "sobre nosotros" — historia del negocio, quién lo lleva, desde cuándo y por qué se hace distinto}</p>
+<div data-rev style="opacity:0;display:flex;flex-direction:column;gap:12px;margin:14px 0 0">
+<div style="display:flex;gap:11px;align-items:baseline"><span style="width:5px;height:5px;border-radius:50%;background:#5B46F8;flex:none"></span><span style="font:400 13.5px Montserrat,sans-serif;color:#10131A">{punto fuerte 1}</span></div>
+<div style="display:flex;gap:11px;align-items:baseline"><span style="width:5px;height:5px;border-radius:50%;background:#5B46F8;flex:none"></span><span style="font:400 13.5px Montserrat,sans-serif;color:#10131A">{punto fuerte 2}</span></div>
+<div style="display:flex;gap:11px;align-items:baseline"><span style="width:5px;height:5px;border-radius:50%;background:#5B46F8;flex:none"></span><span style="font:400 13.5px Montserrat,sans-serif;color:#10131A">{punto fuerte 3}</span></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px">
+<div data-rev style="opacity:0;grid-row:span 2;background:repeating-linear-gradient(135deg,#E7E5DF 0 12px,#F1EFE9 12px 24px);border-radius:4px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#9A968C">{foto 1}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#E7E5DF 0 12px,#F1EFE9 12px 24px);border-radius:4px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#9A968C">{foto 2}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#E7E5DF 0 12px,#F1EFE9 12px 24px);border-radius:4px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#9A968C">{foto 3}</span></div>
+</div>
+</div>
+</div>
+
+<div data-sec="contacto" style="display:none;height:100%;padding:56px 44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5B46F8;margin:0 0 14px">Contacto</div>
+<h2 data-rev style="opacity:0;margin:0 0 30px;font:400 38px/1.12 'Instrument Serif',serif;color:#10131A">Conversemos</h2>
+<div data-rev style="opacity:0;display:flex;flex-direction:column;gap:14px">
+<input placeholder="Tu nombre" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:6px;outline:none;background:#fff">
+<input placeholder="Tu correo o teléfono" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:6px;outline:none;background:#fff">
+<textarea placeholder="¿En qué te ayudamos?" rows="3" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:6px;outline:none;resize:none;background:#fff"></textarea>
+<a href="#1a" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#5B46F8;padding:14px 24px;border-radius:6px;text-align:center">Enviar mensaje</a>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:center;gap:16px">
+<div data-rev style="opacity:0;flex:1;background:#F6F5F2;border:1px solid #ECEDF1;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 38px,#E6E4DE 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#E6E4DE 38px 39px)"></div>
+<div style="position:relative;text-align:center"><div style="width:16px;height:16px;border-radius:50%;background:#5B46F8;margin:0 auto 10px;box-shadow:0 0 0 7px rgba(91,70,248,.18)"></div><span style="font:500 11px Montserrat,sans-serif;color:#8A909C">{dirección · {ciudad}}</span></div>
+</div>
+<div data-rev style="opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="border:1px solid #ECEDF1;border-radius:6px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A909C;margin:0 0 7px">Teléfono</div><div style="font:600 14px Montserrat,sans-serif;color:#10131A">{teléfono}</div></div>
+<div style="border:1px solid #ECEDF1;border-radius:6px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A909C;margin:0 0 7px">Correo</div><div style="font:600 14px Montserrat,sans-serif;color:#10131A">{email}</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<a href="#1a" style="position:absolute;right:32px;bottom:28px;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(37,211,102,.42)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</main>
+
+<footer style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:76px;background:#10131A">
+<div style="font:600 13px Montserrat,sans-serif;color:#fff">{nombre del negocio}</div>
+<div style="display:flex;gap:26px;font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.55)"><span>{teléfono}</span><span>{email}</span><span>@{instagram}</span></div>
+<div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.35)">Hecho con WebBot · Devalpo</div>
+</footer>
+</div>
+</div>
+
+<div data-phone style="flex:none;width:372px;padding:12px;background:#10131A;border-radius:42px;box-shadow:0 18px 44px rgba(16,19,26,.2)">
+<div data-revroot style="width:348px;height:836px;overflow:hidden;background:#fff;border-radius:31px;display:flex;flex-direction:column;position:relative">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 22px 0;font:600 11px Montserrat,sans-serif;color:#10131A"><span>9:41</span><span style="display:flex;gap:4px"><span style="width:16px;height:9px;border:1px solid #10131A;border-radius:2px;display:block"></span></span></div>
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #ECEDF1">
+<div style="display:flex;align-items:center;gap:9px"><div style="width:26px;height:26px;border-radius:7px;background:#5B46F8;display:flex;align-items:center;justify-content:center;font:700 12px Montserrat,sans-serif;color:#fff">N</div><div style="font:600 13px Montserrat,sans-serif;color:#10131A">{nombre}</div></div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="width:20px;height:1.5px;background:#10131A"></span><span style="width:20px;height:1.5px;background:#10131A"></span><span style="width:13px;height:1.5px;background:#10131A"></span></div>
+</header>
+<div style="flex:1;overflow:hidden;padding:34px 22px 0">
+<div data-rev style="opacity:0;font:600 9.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5B46F8;margin:0 0 14px">{rubro} · {ciudad}</div>
+<h1 data-rev style="opacity:0;margin:0 0 14px;font:400 38px/1.06 'Instrument Serif',serif;color:#10131A;letter-spacing:-.015em">{nombre del negocio}</h1>
+<p data-rev style="opacity:0;margin:0 0 24px;font:300 13.5px/1.65 Montserrat,sans-serif;color:#5A6270">{descripción del negocio en una o dos líneas}</p>
+<a data-rev href="#1a" style="opacity:0;display:block;font:600 12.5px Montserrat,sans-serif;color:#fff;background:#5B46F8;padding:15px 20px;border-radius:6px;text-align:center;margin:0 0 12px">Escríbenos por WhatsApp</a>
+<a data-rev href="#1a" style="opacity:0;display:block;font:600 12.5px Montserrat,sans-serif;color:#10131A;border:1px solid #D9DBE1;padding:15px 20px;border-radius:6px;text-align:center;margin:0 0 26px">Llamar · {teléfono}</a>
+<div data-rev style="opacity:0;height:186px;background:repeating-linear-gradient(135deg,#E7E5DF 0 12px,#F1EFE9 12px 24px);border-radius:4px;display:flex;align-items:flex-end;padding:16px;margin:0 0 20px"><span style="font:500 10.5px Montserrat,sans-serif;color:#9A968C">{foto principal}</span></div>
+<div data-rev style="opacity:0;background:#10131A;padding:20px;border-radius:6px"><div style="font:600 9.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#15DEFA;margin:0 0 9px">Destacado</div><div style="font:400 16px/1.4 'Instrument Serif',serif;color:#fff">{frase destacada del cliente}</div></div>
+</div>
+<a href="#1a" style="position:absolute;right:18px;bottom:26px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(37,211,102,.4)"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</div>
+</div>
+
+</div>
+<div data-notes style="margin:24px 0 0;border-top:1px solid #ECEDF1;padding:20px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#5B46F8;margin:0 0 7px">Ruta</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">templates/landing/</code> — reemplaza el layout actual migrado. El dispatcher y el fallback no cambian.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#5B46F8;margin:0 0 7px">Campos DTO</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Usa lo existente + <code style="font:500 11.5px ui-monospace,Menlo,monospace">sobreNosotros</code>. Los 3 números del hero son nuevos: <code style="font:500 11.5px ui-monospace,Menlo,monospace">destacados?: {valor,etiqueta}[]</code> opcional; si falta, la fila no se renderiza.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#5B46F8;margin:0 0 7px">Acento</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Un solo <code style="font:500 11.5px ui-monospace,Menlo,monospace">--acento</code> desde <code style="font:500 11.5px ui-monospace,Menlo,monospace">colores.primario</code>. Ink, neutros y el negro del footer son fijos de Devalpo — no salen de <code style="font:500 11.5px ui-monospace,Menlo,monospace">palette.ts</code>.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#5B46F8;margin:0 0 7px">SPA</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">El switch de secciones necesita un único componente cliente (<code style="font:500 11.5px ui-monospace,Menlo,monospace">'use client'</code>) que envuelva <code style="font:500 11.5px ui-monospace,Menlo,monospace">main</code>; header, footer y secciones siguen siendo Server Components pasados como children.</div></div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1b SERVICIOS ============ -->
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>SERVICIOS · dentista, veterinaria, peluquería, yoga</div>
+<div class="dv-card" style="width:1548px;padding:24px;background:#fff">
+<div style="display:flex;gap:26px;align-items:flex-start">
+
+<div style="flex:none;width:1120px;border:1px solid #E3E5EA;border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(16,19,26,.10)">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F6F5F2;border-bottom:1px solid #E3E5EA">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;text-align:center;font:500 11px Montserrat,sans-serif;color:#8A909C;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:5px 12px">{dominio-del-cliente}.cl</div>
+<div style="width:56px"></div>
+</div>
+<div data-spa data-accent="#0F7C74" data-navink="#5A6270" style="height:820px;display:flex;flex-direction:column;background:#fff">
+
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:78px;background:#fff;border-bottom:1px solid #E8EFEE">
+<div style="display:flex;align-items:center;gap:11px">
+<div style="width:32px;height:32px;border-radius:50%;background:#0F7C74;display:flex;align-items:center;justify-content:center;font:700 13px Montserrat,sans-serif;color:#fff">N</div>
+<div><div style="font:700 14.5px Montserrat,sans-serif;color:#10131A;letter-spacing:-.01em">{nombre del negocio}</div><div style="font:400 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A909C;margin:2px 0 0">{rubro} · {ciudad}</div></div>
+</div>
+<nav style="display:flex;gap:30px">
+<a href="#1b" data-nav="inicio" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Inicio<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#0F7C74;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1b" data-nav="servicios" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Servicios<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#0F7C74;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1b" data-nav="galeria" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">El lugar<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#0F7C74;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1b" data-nav="contacto" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Contacto<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#0F7C74;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+</nav>
+<a href="#1b" style="font:600 12px Montserrat,sans-serif;color:#fff;background:#0F7C74;padding:12px 22px;border-radius:999px">Agendar hora</a>
+</header>
+
+<main style="flex:1;overflow:hidden;position:relative;background:#F4F8F7">
+
+<div data-sec="inicio" style="height:100%;display:grid;grid-template-columns:1fr 1fr">
+<div style="padding:0 44px;display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;display:inline-flex;align-self:flex-start;align-items:center;gap:8px;background:#fff;border:1px solid #D7E6E4;border-radius:999px;padding:8px 15px;margin:0 0 24px"><span style="width:7px;height:7px;border-radius:50%;background:#0F7C74"></span><span style="font:600 11px Montserrat,sans-serif;color:#0F7C74">Atención hoy · {horario}</span></div>
+<h1 data-rev style="opacity:0;margin:0 0 20px;font:700 46px/1.12 Montserrat,sans-serif;color:#10131A;letter-spacing:-.028em;max-width:14ch">{titular del servicio}</h1>
+<p data-rev style="opacity:0;margin:0 0 32px;font:300 16px/1.7 Montserrat,sans-serif;color:#4A5560;max-width:40ch">{descripción del negocio — qué atiende, para quién y con qué cuidado}</p>
+<div data-rev style="opacity:0;display:flex;gap:12px;margin:0 0 38px">
+<a href="#1b" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#0F7C74;padding:15px 26px;border-radius:999px">Agendar por WhatsApp</a>
+<a href="#1b" style="font:600 12.5px Montserrat,sans-serif;color:#0F7C74;background:#fff;border:1px solid #C6DCD9;padding:15px 26px;border-radius:999px">{teléfono}</a>
+</div>
+<div data-rev style="opacity:0;display:flex;gap:26px">
+<div style="display:flex;align-items:center;gap:9px"><span style="width:22px;height:22px;border-radius:50%;background:#DCEDEB;display:flex;align-items:center;justify-content:center;font:700 11px Montserrat,sans-serif;color:#0F7C74">✓</span><span style="font:400 12.5px Montserrat,sans-serif;color:#4A5560">{beneficio 1}</span></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="width:22px;height:22px;border-radius:50%;background:#DCEDEB;display:flex;align-items:center;justify-content:center;font:700 11px Montserrat,sans-serif;color:#0F7C74">✓</span><span style="font:400 12.5px Montserrat,sans-serif;color:#4A5560">{beneficio 2}</span></div>
+</div>
+</div>
+<div style="position:relative;padding:44px 44px 44px 0">
+<div data-rev style="opacity:0;height:100%;background:repeating-linear-gradient(135deg,#DFE9E7 0 12px,#E9F1F0 12px 24px);border-radius:14px;display:flex;align-items:flex-end;padding:22px"><span style="font:500 11px Montserrat,sans-serif;color:#8FA5A2">{foto del box / consulta / salón}</span></div>
+<div data-rev style="opacity:0;position:absolute;left:-40px;bottom:76px;background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 18px 44px rgba(16,60,56,.16);width:250px">
+<div style="font:600 9.5px Montserrat,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#0F7C74;margin:0 0 10px">Horarios</div>
+<div style="display:flex;justify-content:space-between;font:400 12px Montserrat,sans-serif;color:#10131A;padding:6px 0;border-bottom:1px solid #F0F3F2"><span>Lun a Vie</span><span style="font-weight:600">{horario}</span></div>
+<div style="display:flex;justify-content:space-between;font:400 12px Montserrat,sans-serif;color:#10131A;padding:6px 0;border-bottom:1px solid #F0F3F2"><span>Sábado</span><span style="font-weight:600">{horario}</span></div>
+<div style="display:flex;justify-content:space-between;font:400 12px Montserrat,sans-serif;color:#9AA4AC;padding:6px 0"><span>Domingo</span><span>Cerrado</span></div>
+</div>
+</div>
+</div>
+
+<div data-sec="servicios" style="display:none;height:100%;padding:52px 44px;overflow:hidden">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#0F7C74;margin:0 0 12px">Servicios</div>
+<h2 data-rev style="opacity:0;margin:0 0 34px;font:700 34px/1.15 Montserrat,sans-serif;color:#10131A;letter-spacing:-.025em">Atenciones que ofrecemos</h2>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E4EDEC;border-radius:12px;padding:24px 26px;display:flex;gap:18px;align-items:flex-start"><div style="flex:none;width:40px;height:40px;border-radius:11px;background:#DCEDEB;display:flex;align-items:center;justify-content:center;font:700 14px Montserrat,sans-serif;color:#0F7C74">01</div><div><div style="font:600 15px Montserrat,sans-serif;color:#10131A;margin:0 0 7px">{servicio 1}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#5A6270">{qué incluye, en una línea}</div><div style="font:600 12px Montserrat,sans-serif;color:#0F7C74;margin:11px 0 0">desde {precio}</div></div></div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E4EDEC;border-radius:12px;padding:24px 26px;display:flex;gap:18px;align-items:flex-start"><div style="flex:none;width:40px;height:40px;border-radius:11px;background:#DCEDEB;display:flex;align-items:center;justify-content:center;font:700 14px Montserrat,sans-serif;color:#0F7C74">02</div><div><div style="font:600 15px Montserrat,sans-serif;color:#10131A;margin:0 0 7px">{servicio 2}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#5A6270">{qué incluye, en una línea}</div><div style="font:600 12px Montserrat,sans-serif;color:#0F7C74;margin:11px 0 0">desde {precio}</div></div></div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E4EDEC;border-radius:12px;padding:24px 26px;display:flex;gap:18px;align-items:flex-start"><div style="flex:none;width:40px;height:40px;border-radius:11px;background:#DCEDEB;display:flex;align-items:center;justify-content:center;font:700 14px Montserrat,sans-serif;color:#0F7C74">03</div><div><div style="font:600 15px Montserrat,sans-serif;color:#10131A;margin:0 0 7px">{servicio 3}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#5A6270">{qué incluye, en una línea}</div><div style="font:600 12px Montserrat,sans-serif;color:#0F7C74;margin:11px 0 0">desde {precio}</div></div></div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E4EDEC;border-radius:12px;padding:24px 26px;display:flex;gap:18px;align-items:flex-start"><div style="flex:none;width:40px;height:40px;border-radius:11px;background:#DCEDEB;display:flex;align-items:center;justify-content:center;font:700 14px Montserrat,sans-serif;color:#0F7C74">04</div><div><div style="font:600 15px Montserrat,sans-serif;color:#10131A;margin:0 0 7px">{servicio 4}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#5A6270">{qué incluye, en una línea}</div><div style="font:600 12px Montserrat,sans-serif;color:#0F7C74;margin:11px 0 0">desde {precio}</div></div></div>
+</div>
+<div data-rev style="opacity:0;margin:20px 0 0;background:#0F7C74;border-radius:12px;padding:22px 28px;display:flex;align-items:center;justify-content:space-between">
+<div style="font:400 15px Montserrat,sans-serif;color:#fff">¿No estás seguro de qué necesitas? Te orientamos sin costo.</div>
+<a href="#1b" style="font:600 12px Montserrat,sans-serif;color:#0F7C74;background:#fff;padding:12px 22px;border-radius:999px">Consultar</a>
+</div>
+</div>
+
+<div data-sec="galeria" style="display:none;height:100%;padding:52px 44px;overflow:hidden">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#0F7C74;margin:0 0 12px">El lugar</div>
+<h2 data-rev style="opacity:0;margin:0 0 12px;font:700 34px/1.15 Montserrat,sans-serif;color:#10131A;letter-spacing:-.025em">Dónde te atendemos</h2>
+<p data-rev style="opacity:0;margin:0 0 30px;font:300 14.5px/1.7 Montserrat,sans-serif;color:#4A5560;max-width:62ch">{texto "sobre nosotros" — cómo es el espacio, el equipo y la forma de trabajar}</p>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;height:340px">
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#DFE9E7 0 12px,#E9F1F0 12px 24px);border-radius:12px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#8FA5A2">{foto 1}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#DFE9E7 0 12px,#E9F1F0 12px 24px);border-radius:12px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#8FA5A2">{foto 2}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#DFE9E7 0 12px,#E9F1F0 12px 24px);border-radius:12px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#8FA5A2">{foto 3}</span></div>
+</div>
+</div>
+
+<div data-sec="contacto" style="display:none;height:100%;padding:52px 44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:44px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#0F7C74;margin:0 0 12px">Reservas</div>
+<h2 data-rev style="opacity:0;margin:0 0 26px;font:700 34px/1.15 Montserrat,sans-serif;color:#10131A;letter-spacing:-.025em">Pide tu hora</h2>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E4EDEC;border-radius:14px;padding:26px;display:flex;flex-direction:column;gap:12px">
+<input placeholder="Tu nombre" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:8px;outline:none">
+<input placeholder="Tu teléfono" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:8px;outline:none">
+<select style="font:400 13.5px Montserrat,sans-serif;color:#5A6270;padding:14px 16px;border:1px solid #E3E5EA;border-radius:8px;outline:none;background:#fff"><option>¿Qué necesitas? · {servicio}</option></select>
+<a href="#1b" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#0F7C74;padding:15px 24px;border-radius:999px;text-align:center;margin:4px 0 0">Solicitar hora</a>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:center;gap:14px">
+<div data-rev style="opacity:0;flex:1;background:#fff;border:1px solid #E4EDEC;border-radius:14px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 38px,#EDF3F2 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#EDF3F2 38px 39px)"></div>
+<div style="position:relative;text-align:center"><div style="width:16px;height:16px;border-radius:50%;background:#0F7C74;margin:0 auto 10px;box-shadow:0 0 0 7px rgba(15,124,116,.16)"></div><span style="font:500 11px Montserrat,sans-serif;color:#8A909C">{dirección} · {ciudad}</span></div>
+</div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E4EDEC;border-radius:14px;padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+<div><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A909C;margin:0 0 6px">Teléfono</div><div style="font:600 14px Montserrat,sans-serif;color:#10131A">{teléfono}</div></div>
+<div><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A909C;margin:0 0 6px">Instagram</div><div style="font:600 14px Montserrat,sans-serif;color:#0F7C74">@{instagram}</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<a href="#1b" style="position:absolute;right:32px;bottom:28px;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(37,211,102,.42)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</main>
+
+<footer style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:76px;background:#0B3B37">
+<div style="font:700 13px Montserrat,sans-serif;color:#fff">{nombre del negocio}</div>
+<div style="display:flex;gap:26px;font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.62)"><span>{dirección}</span><span>{teléfono}</span><span>@{instagram}</span></div>
+<div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.4)">Hecho con WebBot · Devalpo</div>
+</footer>
+</div>
+</div>
+
+<div data-phone style="flex:none;width:372px;padding:12px;background:#10131A;border-radius:42px;box-shadow:0 18px 44px rgba(16,19,26,.2)">
+<div data-revroot style="width:348px;height:836px;overflow:hidden;background:#F4F8F7;border-radius:31px;display:flex;flex-direction:column;position:relative">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 22px 0;font:600 11px Montserrat,sans-serif;color:#10131A"><span>9:41</span><span style="width:16px;height:9px;border:1px solid #10131A;border-radius:2px;display:block"></span></div>
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;background:#fff;border-bottom:1px solid #E8EFEE">
+<div style="display:flex;align-items:center;gap:9px"><div style="width:28px;height:28px;border-radius:50%;background:#0F7C74;display:flex;align-items:center;justify-content:center;font:700 12px Montserrat,sans-serif;color:#fff">N</div><div style="font:700 13px Montserrat,sans-serif;color:#10131A">{nombre}</div></div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="width:20px;height:1.5px;background:#10131A"></span><span style="width:20px;height:1.5px;background:#10131A"></span><span style="width:13px;height:1.5px;background:#10131A"></span></div>
+</header>
+<div style="flex:1;overflow:hidden;padding:26px 22px 0">
+<div data-rev style="opacity:0;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #D7E6E4;border-radius:999px;padding:7px 14px;margin:0 0 18px"><span style="width:7px;height:7px;border-radius:50%;background:#0F7C74"></span><span style="font:600 10.5px Montserrat,sans-serif;color:#0F7C74">Atención hoy · {horario}</span></div>
+<h1 data-rev style="opacity:0;margin:0 0 12px;font:700 32px/1.14 Montserrat,sans-serif;color:#10131A;letter-spacing:-.028em">{titular del servicio}</h1>
+<p data-rev style="opacity:0;margin:0 0 22px;font:300 13.5px/1.65 Montserrat,sans-serif;color:#4A5560">{descripción del negocio en una o dos líneas}</p>
+<a data-rev href="#1b" style="opacity:0;display:block;font:600 12.5px Montserrat,sans-serif;color:#fff;background:#0F7C74;padding:15px 20px;border-radius:999px;text-align:center;margin:0 0 22px">Agendar por WhatsApp</a>
+<div data-rev style="opacity:0;height:168px;background:repeating-linear-gradient(135deg,#DFE9E7 0 12px,#E9F1F0 12px 24px);border-radius:12px;display:flex;align-items:flex-end;padding:16px;margin:0 0 18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#8FA5A2">{foto del box / salón}</span></div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E4EDEC;border-radius:12px;padding:18px 20px">
+<div style="font:600 9.5px Montserrat,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#0F7C74;margin:0 0 10px">Horarios</div>
+<div style="display:flex;justify-content:space-between;font:400 12px Montserrat,sans-serif;color:#10131A;padding:5px 0;border-bottom:1px solid #F0F3F2"><span>Lun a Vie</span><span style="font-weight:600">{horario}</span></div>
+<div style="display:flex;justify-content:space-between;font:400 12px Montserrat,sans-serif;color:#10131A;padding:5px 0"><span>Sábado</span><span style="font-weight:600">{horario}</span></div>
+</div>
+</div>
+<a href="#1b" style="position:absolute;right:18px;bottom:26px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(37,211,102,.4)"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</div>
+</div>
+
+</div>
+<div data-notes style="margin:24px 0 0;border-top:1px solid #ECEDF1;padding:20px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#0F7C74;margin:0 0 7px">Ruta</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">templates/servicios/</code>. Es el template por defecto de dentista, veterinaria, peluquería y yoga en <code style="font:500 11.5px ui-monospace,Menlo,monospace">rubroTemplates.ts</code>.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#0F7C74;margin:0 0 7px">Campos nuevos</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">horarios?: {dia,rango}[]</code> y <code style="font:500 11.5px ui-monospace,Menlo,monospace">precioDesde?</code> por servicio. Ambos opcionales: sin ellos caen la tarjeta de horarios y la línea de precio, el resto no se mueve.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#0F7C74;margin:0 0 7px">Formulario</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Hoy es <code style="font:500 11.5px ui-monospace,Menlo,monospace">mailto:</code>. Para este template conviene que el submit arme el mensaje de WhatsApp con nombre + servicio prellenados — cero backend.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#0F7C74;margin:0 0 7px">Píldora "Atención hoy"</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Se calcula en cliente con la hora local. Si no hay <code style="font:500 11.5px ui-monospace,Menlo,monospace">horarios</code>, no se renderiza: nunca mostrar "abierto" adivinando.</div></div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1c RESTAURANTE ============ -->
+<div class="dv-opt" id="1c">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>RESTAURANTE · restaurante, panadería, cafetería, delivery</div>
+<div class="dv-card" style="width:1548px;padding:24px;background:#fff">
+<div style="display:flex;gap:26px;align-items:flex-start">
+
+<div style="flex:none;width:1120px;border:1px solid #E3E5EA;border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(16,19,26,.10)">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F6F5F2;border-bottom:1px solid #E3E5EA">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;text-align:center;font:500 11px Montserrat,sans-serif;color:#8A909C;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:5px 12px">{dominio-del-cliente}.cl</div>
+<div style="width:56px"></div>
+</div>
+<div data-spa data-accent="#D9762F" data-navink="rgba(255,255,255,.62)" style="height:820px;display:flex;flex-direction:column;background:#171310">
+
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:78px;border-bottom:1px solid rgba(255,255,255,.09)">
+<div style="font:400 21px 'Instrument Serif',serif;color:#fff;letter-spacing:.01em">{nombre del negocio}</div>
+<nav style="display:flex;gap:32px">
+<a href="#1c" data-nav="inicio" style="position:relative;font:500 12px Montserrat,sans-serif;letter-spacing:.05em;color:rgba(255,255,255,.62);padding:6px 0">Inicio<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#D9762F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1c" data-nav="menu" style="position:relative;font:500 12px Montserrat,sans-serif;letter-spacing:.05em;color:rgba(255,255,255,.62);padding:6px 0">Carta<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#D9762F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1c" data-nav="galeria" style="position:relative;font:500 12px Montserrat,sans-serif;letter-spacing:.05em;color:rgba(255,255,255,.62);padding:6px 0">El local<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#D9762F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1c" data-nav="contacto" style="position:relative;font:500 12px Montserrat,sans-serif;letter-spacing:.05em;color:rgba(255,255,255,.62);padding:6px 0">Reservas<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#D9762F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+</nav>
+<a href="#1c" style="font:600 11.5px Montserrat,sans-serif;letter-spacing:.06em;color:#171310;background:#D9762F;padding:12px 22px;border-radius:3px">RESERVAR</a>
+</header>
+
+<main style="flex:1;overflow:hidden;position:relative">
+
+<div data-sec="inicio" style="height:100%;position:relative">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#241D18 0 14px,#2B221C 14px 28px)"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(23,19,16,.96) 0%,rgba(23,19,16,.82) 46%,rgba(23,19,16,.35) 100%)"></div>
+<div style="position:absolute;right:40px;top:40px;font:500 11px Montserrat,sans-serif;color:rgba(255,255,255,.3)">{foto del plato principal}</div>
+<div style="position:relative;height:100%;padding:0 44px;display:flex;flex-direction:column;justify-content:center;max-width:640px">
+<div data-rev style="opacity:0;display:flex;align-items:center;gap:14px;margin:0 0 26px"><span style="width:34px;height:1px;background:#D9762F"></span><span style="font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#D9762F">{rubro} · {ciudad}</span></div>
+<h1 data-rev style="opacity:0;margin:0 0 24px;font:400 66px/1.02 'Instrument Serif',serif;color:#fff;letter-spacing:-.01em">{nombre del negocio}</h1>
+<p data-rev style="opacity:0;margin:0 0 36px;font:300 16px/1.7 Montserrat,sans-serif;color:rgba(255,255,255,.72);max-width:44ch">{descripción del negocio — qué se cocina, con qué ingredientes y desde cuándo}</p>
+<div data-rev style="opacity:0;display:flex;gap:12px;margin:0 0 42px">
+<a href="#1c" style="font:600 12px Montserrat,sans-serif;letter-spacing:.06em;color:#171310;background:#D9762F;padding:15px 26px;border-radius:3px">RESERVAR POR WHATSAPP</a>
+<a href="#1c" style="font:600 12px Montserrat,sans-serif;letter-spacing:.06em;color:#fff;border:1px solid rgba(255,255,255,.28);padding:15px 26px;border-radius:3px">VER LA CARTA</a>
+</div>
+<div data-rev style="opacity:0;border-left:2px solid #D9762F;padding:4px 0 4px 20px"><div style="font:400 22px/1.45 'Instrument Serif',serif;color:#fff;font-style:italic">"{frase destacada — el plato o promesa que los distingue}"</div></div>
+</div>
+</div>
+
+<div data-sec="menu" style="display:none;height:100%;padding:52px 44px;overflow:hidden;background:#171310">
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 0 34px">
+<div><div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#D9762F;margin:0 0 12px">La carta</div>
+<h2 data-rev style="opacity:0;margin:0;font:400 40px/1.1 'Instrument Serif',serif;color:#fff">Lo que servimos hoy</h2></div>
+<div data-rev style="opacity:0;font:300 12.5px Montserrat,sans-serif;color:rgba(255,255,255,.5)">Actualizada por {nombre del negocio}</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 56px">
+<div data-rev style="opacity:0">
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.42);padding:0 0 14px;border-bottom:1px solid rgba(255,255,255,.12);margin:0 0 18px">{categoría 1}</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 16px"><span style="font:500 14.5px Montserrat,sans-serif;color:#fff">{plato}</span><span style="flex:1;border-bottom:1px dotted rgba(255,255,255,.26);transform:translateY(-3px)"></span><span style="font:600 14px Montserrat,sans-serif;color:#D9762F">{precio}</span></div>
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 16px"><span style="font:500 14.5px Montserrat,sans-serif;color:#fff">{plato}</span><span style="flex:1;border-bottom:1px dotted rgba(255,255,255,.26);transform:translateY(-3px)"></span><span style="font:600 14px Montserrat,sans-serif;color:#D9762F">{precio}</span></div>
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 16px"><span style="font:500 14.5px Montserrat,sans-serif;color:#fff">{plato}</span><span style="flex:1;border-bottom:1px dotted rgba(255,255,255,.26);transform:translateY(-3px)"></span><span style="font:600 14px Montserrat,sans-serif;color:#D9762F">{precio}</span></div>
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 34px"><span style="font:500 14.5px Montserrat,sans-serif;color:#fff">{plato}</span><span style="flex:1;border-bottom:1px dotted rgba(255,255,255,.26);transform:translateY(-3px)"></span><span style="font:600 14px Montserrat,sans-serif;color:#D9762F">{precio}</span></div>
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.42);padding:0 0 14px;border-bottom:1px solid rgba(255,255,255,.12);margin:0 0 18px">{categoría 2}</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin:0 0 16px"><span style="font:500 14.5px Montserrat,sans-serif;color:#fff">{plato}</span><span style="flex:1;border-bottom:1px dotted rgba(255,255,255,.26);transform:translateY(-3px)"></span><span style="font:600 14px Montserrat,sans-serif;color:#D9762F">{precio}</span></div>
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font:500 14.5px Montserrat,sans-serif;color:#fff">{plato}</span><span style="flex:1;border-bottom:1px dotted rgba(255,255,255,.26);transform:translateY(-3px)"></span><span style="font:600 14px Montserrat,sans-serif;color:#D9762F">{precio}</span></div>
+</div>
+<div data-rev style="opacity:0;display:flex;flex-direction:column;gap:16px">
+<div style="background:#D9762F;border-radius:4px;padding:26px 28px">
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(23,19,16,.6);margin:0 0 12px">Menú del día</div>
+<div style="font:400 28px/1.2 'Instrument Serif',serif;color:#171310;margin:0 0 8px">{promoción del día}</div>
+<div style="font:300 13px/1.6 Montserrat,sans-serif;color:rgba(23,19,16,.72)">{qué incluye · horario en que aplica}</div>
+</div>
+<div style="flex:1;background:repeating-linear-gradient(135deg,#241D18 0 14px,#2B221C 14px 28px);border-radius:4px;display:flex;align-items:flex-end;padding:20px"><span style="font:500 11px Montserrat,sans-serif;color:rgba(255,255,255,.34)">{foto de un plato de la carta}</span></div>
+<a href="#1c" style="font:600 12px Montserrat,sans-serif;letter-spacing:.06em;color:#171310;background:#fff;padding:15px 26px;border-radius:3px;text-align:center">PEDIR DELIVERY POR WHATSAPP</a>
+</div>
+</div>
+</div>
+
+<div data-sec="galeria" style="display:none;height:100%;padding:52px 44px;overflow:hidden;background:#171310">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#D9762F;margin:0 0 12px">El local</div>
+<h2 data-rev style="opacity:0;margin:0 0 14px;font:400 40px/1.1 'Instrument Serif',serif;color:#fff">Cómo se siente estar aquí</h2>
+<p data-rev style="opacity:0;margin:0 0 30px;font:300 14.5px/1.75 Montserrat,sans-serif;color:rgba(255,255,255,.66);max-width:60ch">{texto "sobre nosotros" — la historia del local, quién cocina y qué se respira al entrar}</p>
+<div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:14px;height:330px">
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#241D18 0 14px,#2B221C 14px 28px);border-radius:4px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.34)">{foto 1}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#241D18 0 14px,#2B221C 14px 28px);border-radius:4px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.34)">{foto 2}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#241D18 0 14px,#2B221C 14px 28px);border-radius:4px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.34)">{foto 3}</span></div>
+</div>
+</div>
+
+<div data-sec="contacto" style="display:none;height:100%;padding:52px 44px;overflow:hidden;background:#171310">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#D9762F;margin:0 0 12px">Reservas</div>
+<h2 data-rev style="opacity:0;margin:0 0 26px;font:400 40px/1.1 'Instrument Serif',serif;color:#fff">Te guardamos mesa</h2>
+<div data-rev style="opacity:0;display:flex;flex-direction:column;gap:12px">
+<input placeholder="Tu nombre" style="font:400 13.5px Montserrat,sans-serif;color:#fff;padding:14px 16px;border:1px solid rgba(255,255,255,.18);border-radius:3px;outline:none;background:rgba(255,255,255,.04)">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<input placeholder="Personas" style="font:400 13.5px Montserrat,sans-serif;color:#fff;padding:14px 16px;border:1px solid rgba(255,255,255,.18);border-radius:3px;outline:none;background:rgba(255,255,255,.04)">
+<input placeholder="Día y hora" style="font:400 13.5px Montserrat,sans-serif;color:#fff;padding:14px 16px;border:1px solid rgba(255,255,255,.18);border-radius:3px;outline:none;background:rgba(255,255,255,.04)">
+</div>
+<a href="#1c" style="font:600 12px Montserrat,sans-serif;letter-spacing:.06em;color:#171310;background:#D9762F;padding:15px 26px;border-radius:3px;text-align:center;margin:4px 0 0">ENVIAR RESERVA</a>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:center;gap:14px">
+<div data-rev style="opacity:0;flex:1;border:1px solid rgba(255,255,255,.14);border-radius:4px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 38px,rgba(255,255,255,.06) 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,rgba(255,255,255,.06) 38px 39px)"></div>
+<div style="position:relative;text-align:center"><div style="width:16px;height:16px;border-radius:50%;background:#D9762F;margin:0 auto 10px;box-shadow:0 0 0 7px rgba(217,118,47,.2)"></div><span style="font:500 11px Montserrat,sans-serif;color:rgba(255,255,255,.55)">{dirección} · {ciudad}</span></div>
+</div>
+<div data-rev style="opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 7px">Teléfono</div><div style="font:600 14px Montserrat,sans-serif;color:#fff">{teléfono}</div></div>
+<div style="border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 7px">Instagram</div><div style="font:600 14px Montserrat,sans-serif;color:#D9762F">@{instagram}</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<a href="#1c" style="position:absolute;right:32px;bottom:28px;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(37,211,102,.42)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</main>
+
+<footer style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:76px;background:#0F0C0A;border-top:1px solid rgba(255,255,255,.08)">
+<div style="font:400 17px 'Instrument Serif',serif;color:#fff">{nombre del negocio}</div>
+<div style="display:flex;gap:26px;font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.5)"><span>{dirección}</span><span>{horario}</span><span>{teléfono}</span></div>
+<div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.3)">Hecho con WebBot · Devalpo</div>
+</footer>
+</div>
+</div>
+
+<div data-phone style="flex:none;width:372px;padding:12px;background:#10131A;border-radius:42px;box-shadow:0 18px 44px rgba(16,19,26,.2)">
+<div data-revroot style="width:348px;height:836px;overflow:hidden;background:#171310;border-radius:31px;display:flex;flex-direction:column;position:relative">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 22px 0;font:600 11px Montserrat,sans-serif;color:#fff"><span>9:41</span><span style="width:16px;height:9px;border:1px solid #fff;border-radius:2px;display:block"></span></div>
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.09)">
+<div style="font:400 18px 'Instrument Serif',serif;color:#fff">{nombre}</div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="width:20px;height:1.5px;background:#fff"></span><span style="width:20px;height:1.5px;background:#fff"></span><span style="width:13px;height:1.5px;background:#fff"></span></div>
+</header>
+<div style="flex:1;overflow:hidden;position:relative">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#241D18 0 14px,#2B221C 14px 28px)"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,19,16,.5) 0%,rgba(23,19,16,.97) 62%)"></div>
+<div style="position:relative;height:100%;padding:180px 22px 0;display:flex;flex-direction:column">
+<div data-rev style="opacity:0;display:flex;align-items:center;gap:12px;margin:0 0 18px"><span style="width:26px;height:1px;background:#D9762F"></span><span style="font:600 9.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#D9762F">{rubro} · {ciudad}</span></div>
+<h1 data-rev style="opacity:0;margin:0 0 14px;font:400 44px/1.03 'Instrument Serif',serif;color:#fff">{nombre del negocio}</h1>
+<p data-rev style="opacity:0;margin:0 0 24px;font:300 13.5px/1.7 Montserrat,sans-serif;color:rgba(255,255,255,.7)">{descripción del negocio en una o dos líneas}</p>
+<a data-rev href="#1c" style="opacity:0;display:block;font:600 12px Montserrat,sans-serif;letter-spacing:.06em;color:#171310;background:#D9762F;padding:15px 20px;border-radius:3px;text-align:center;margin:0 0 10px">RESERVAR POR WHATSAPP</a>
+<a data-rev href="#1c" style="opacity:0;display:block;font:600 12px Montserrat,sans-serif;letter-spacing:.06em;color:#fff;border:1px solid rgba(255,255,255,.28);padding:15px 20px;border-radius:3px;text-align:center;margin:0 0 26px">VER LA CARTA</a>
+<div data-rev style="opacity:0;border-left:2px solid #D9762F;padding:2px 0 2px 16px"><div style="font:400 17px/1.45 'Instrument Serif',serif;color:#fff;font-style:italic">"{frase destacada}"</div></div>
+</div>
+</div>
+<a href="#1c" style="position:absolute;right:18px;bottom:26px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(37,211,102,.4)"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</div>
+</div>
+
+</div>
+<div data-notes style="margin:24px 0 0;border-top:1px solid #ECEDF1;padding:20px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#D9762F;margin:0 0 7px">Ruta</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">templates/restaurante/</code>. Conserva la carta a dos columnas con guías punteadas que ya existe; cambia el fondo a oscuro y el display a serif.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#D9762F;margin:0 0 7px">Campos nuevos</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">La carta necesita precio y categoría: <code style="font:500 11.5px ui-monospace,Menlo,monospace">menu?: {categoria, items:{nombre,precio}[]}[]</code>. Si no viene, cae al <code style="font:500 11.5px ui-monospace,Menlo,monospace">servicios[]</code> plano de hoy sin precios.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#D9762F;margin:0 0 7px">Fondo oscuro</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">El acento del cliente aquí va sobre negro. Hay que forzar luminosidad mínima al acento (o usar su versión clara) para que un acento muy oscuro no desaparezca.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#D9762F;margin:0 0 7px">Reserva</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Nombre + personas + día arman el texto de WhatsApp. Es el único template donde el formulario supera al <code style="font:500 11.5px ui-monospace,Menlo,monospace">mailto:</code> con claridad.</div></div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1d PORTFOLIO ============ -->
+<div class="dv-opt" id="1d">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>PORTFOLIO · taller, constructora, oficios, fotografía</div>
+<div class="dv-card" style="width:1548px;padding:24px;background:#fff">
+<div style="display:flex;gap:26px;align-items:flex-start">
+
+<div style="flex:none;width:1120px;border:1px solid #E3E5EA;border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(16,19,26,.10)">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F6F5F2;border-bottom:1px solid #E3E5EA">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;text-align:center;font:500 11px Montserrat,sans-serif;color:#8A909C;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:5px 12px">{dominio-del-cliente}.cl</div>
+<div style="width:56px"></div>
+</div>
+<div data-spa data-accent="#FFAF4D" data-navink="rgba(255,255,255,.6)" style="height:820px;display:flex;flex-direction:column;background:#080056">
+
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:78px;border-bottom:1px solid rgba(255,255,255,.12)">
+<div style="font:800 15px Montserrat,sans-serif;letter-spacing:-.02em;color:#fff;text-transform:uppercase">{nombre del negocio}</div>
+<nav style="display:flex;gap:32px">
+<a href="#1d" data-nav="inicio" style="position:relative;font:500 12px Montserrat,sans-serif;color:rgba(255,255,255,.6);padding:6px 0">Inicio<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#FFAF4D;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1d" data-nav="trabajos" style="position:relative;font:500 12px Montserrat,sans-serif;color:rgba(255,255,255,.6);padding:6px 0">Trabajos<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#FFAF4D;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1d" data-nav="proceso" style="position:relative;font:500 12px Montserrat,sans-serif;color:rgba(255,255,255,.6);padding:6px 0">Cómo trabajo<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#FFAF4D;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1d" data-nav="contacto" style="position:relative;font:500 12px Montserrat,sans-serif;color:rgba(255,255,255,.6);padding:6px 0">Contacto<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#FFAF4D;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+</nav>
+<a href="#1d" style="font:700 11.5px Montserrat,sans-serif;color:#080056;background:#FFAF4D;padding:12px 22px;border-radius:4px">Pedir presupuesto</a>
+</header>
+
+<main style="flex:1;overflow:hidden;position:relative">
+
+<div data-sec="inicio" style="height:100%;padding:0 44px;display:flex;flex-direction:column;justify-content:center;position:relative">
+<div style="position:absolute;right:-60px;top:60px;width:420px;height:420px;border-radius:50%;border:1px solid rgba(255,175,77,.22)"></div>
+<div style="position:absolute;right:20px;top:140px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(21,222,250,.18)"></div>
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#FFAF4D;margin:0 0 26px">{rubro} · {ciudad}</div>
+<h1 data-rev style="opacity:0;margin:0 0 26px;font:800 72px/.98 Montserrat,sans-serif;letter-spacing:-.04em;color:#fff;max-width:16ch">{titular del oficio}</h1>
+<p data-rev style="opacity:0;margin:0 0 40px;font:300 16.5px/1.7 Montserrat,sans-serif;color:rgba(255,255,255,.7);max-width:46ch">{descripción del negocio — qué trabajos hace, en qué zona y con qué estándar}</p>
+<div data-rev style="opacity:0;display:flex;gap:12px;margin:0 0 52px">
+<a href="#1d" style="font:700 12.5px Montserrat,sans-serif;color:#080056;background:#FFAF4D;padding:15px 26px;border-radius:4px">Ver trabajos</a>
+<a href="#1d" style="font:600 12.5px Montserrat,sans-serif;color:#fff;border:1px solid rgba(255,255,255,.28);padding:15px 26px;border-radius:4px">WhatsApp · {teléfono}</a>
+</div>
+<div data-rev style="opacity:0;display:flex;gap:44px;border-top:1px solid rgba(255,255,255,.14);padding:26px 0 0;max-width:640px">
+<div><div style="font:800 34px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#15DEFA">{dato}</div><div style="font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.55);margin:8px 0 0">trabajos entregados</div></div>
+<div><div style="font:800 34px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#15DEFA">{dato}</div><div style="font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.55);margin:8px 0 0">años de oficio</div></div>
+<div><div style="font:800 34px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#15DEFA">{dato}</div><div style="font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.55);margin:8px 0 0">comunas atendidas</div></div>
+</div>
+</div>
+
+<div data-sec="trabajos" style="display:none;height:100%;padding:48px 44px;overflow:hidden">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 26px">
+<div><div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#FFAF4D;margin:0 0 12px">Trabajos</div>
+<h2 data-rev style="opacity:0;margin:0;font:800 38px/1.05 Montserrat,sans-serif;letter-spacing:-.035em;color:#fff">Lo último que salió del taller</h2></div>
+<div data-rev style="opacity:0;display:flex;gap:8px">
+<span style="font:600 11px Montserrat,sans-serif;color:#080056;background:#FFAF4D;padding:8px 15px;border-radius:999px">Todos</span>
+<span style="font:500 11px Montserrat,sans-serif;color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.2);padding:8px 15px;border-radius:999px">{categoría 1}</span>
+<span style="font:500 11px Montserrat,sans-serif;color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.2);padding:8px 15px;border-radius:999px">{categoría 2}</span>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:14px;height:470px">
+<div data-rev style="opacity:0;grid-column:span 2;grid-row:span 2;background:repeating-linear-gradient(135deg,#100A62 0 14px,#16106E 14px 28px);border-radius:6px;display:flex;flex-direction:column;justify-content:flex-end;padding:24px"><div style="font:700 16px Montserrat,sans-serif;color:#fff;margin:0 0 5px">{trabajo destacado}</div><div style="font:300 12px Montserrat,sans-serif;color:rgba(255,255,255,.55)">{tipo de trabajo · {ciudad}}</div></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#100A62 0 14px,#16106E 14px 28px);border-radius:6px;display:flex;align-items:flex-end;padding:18px"><span style="font:600 12.5px Montserrat,sans-serif;color:#fff">{trabajo 2}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#100A62 0 14px,#16106E 14px 28px);border-radius:6px;display:flex;align-items:flex-end;padding:18px"><span style="font:600 12.5px Montserrat,sans-serif;color:#fff">{trabajo 3}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#100A62 0 14px,#16106E 14px 28px);border-radius:6px;display:flex;align-items:flex-end;padding:18px"><span style="font:600 12.5px Montserrat,sans-serif;color:#fff">{trabajo 4}</span></div>
+<div data-rev style="opacity:0;background:#FFAF4D;border-radius:6px;display:flex;flex-direction:column;justify-content:space-between;padding:20px"><div style="font:700 15px/1.3 Montserrat,sans-serif;color:#080056">¿Tienes un proyecto parecido?</div><a href="#1d" style="font:700 11.5px Montserrat,sans-serif;color:#080056;border-bottom:1.5px solid rgba(8,0,86,.4);padding:0 0 3px;align-self:flex-start">Cotizar →</a></div>
+</div>
+</div>
+
+<div data-sec="proceso" style="display:none;height:100%;padding:48px 44px;overflow:hidden">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#FFAF4D;margin:0 0 12px">Cómo trabajo</div>
+<h2 data-rev style="opacity:0;margin:0 0 14px;font:800 38px/1.05 Montserrat,sans-serif;letter-spacing:-.035em;color:#fff;max-width:20ch">Del primer mensaje a la entrega</h2>
+<p data-rev style="opacity:0;margin:0 0 40px;font:300 14.5px/1.75 Montserrat,sans-serif;color:rgba(255,255,255,.65);max-width:60ch">{texto "sobre nosotros" — cómo se trabaja, qué garantías hay y qué puede esperar el cliente}</p>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.14);border-radius:6px;overflow:hidden">
+<div data-rev style="opacity:0;background:#080056;padding:28px 24px 32px"><div style="width:34px;height:34px;border-radius:50%;background:#FFAF4D;display:flex;align-items:center;justify-content:center;font:800 14px Montserrat,sans-serif;color:#080056;margin:0 0 22px">1</div><div style="font:700 14.5px Montserrat,sans-serif;color:#fff;margin:0 0 9px">{paso 1}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:rgba(255,255,255,.6)">{qué pasa en este paso}</div></div>
+<div data-rev style="opacity:0;background:#080056;padding:28px 24px 32px"><div style="width:34px;height:34px;border-radius:50%;background:#5B46F8;display:flex;align-items:center;justify-content:center;font:800 14px Montserrat,sans-serif;color:#fff;margin:0 0 22px">2</div><div style="font:700 14.5px Montserrat,sans-serif;color:#fff;margin:0 0 9px">{paso 2}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:rgba(255,255,255,.6)">{qué pasa en este paso}</div></div>
+<div data-rev style="opacity:0;background:#080056;padding:28px 24px 32px"><div style="width:34px;height:34px;border-radius:50%;background:#15DEFA;display:flex;align-items:center;justify-content:center;font:800 14px Montserrat,sans-serif;color:#080056;margin:0 0 22px">3</div><div style="font:700 14.5px Montserrat,sans-serif;color:#fff;margin:0 0 9px">{paso 3}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:rgba(255,255,255,.6)">{qué pasa en este paso}</div></div>
+<div data-rev style="opacity:0;background:#080056;padding:28px 24px 32px"><div style="width:34px;height:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font:800 14px Montserrat,sans-serif;color:#080056;margin:0 0 22px">4</div><div style="font:700 14.5px Montserrat,sans-serif;color:#fff;margin:0 0 9px">{paso 4}</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:rgba(255,255,255,.6)">{qué pasa en este paso}</div></div>
+</div>
+</div>
+
+<div data-sec="contacto" style="display:none;height:100%;padding:48px 44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#FFAF4D;margin:0 0 12px">Contacto</div>
+<h2 data-rev style="opacity:0;margin:0 0 12px;font:800 38px/1.05 Montserrat,sans-serif;letter-spacing:-.035em;color:#fff">Cuéntame el trabajo</h2>
+<p data-rev style="opacity:0;margin:0 0 26px;font:300 14px/1.7 Montserrat,sans-serif;color:rgba(255,255,255,.6);max-width:40ch">Respondo el mismo día. Si tienes fotos o medidas, mándalas por WhatsApp y la cotización sale más rápido.</p>
+<div data-rev style="opacity:0;display:flex;flex-direction:column;gap:12px">
+<input placeholder="Tu nombre" style="font:400 13.5px Montserrat,sans-serif;color:#fff;padding:14px 16px;border:1px solid rgba(255,255,255,.2);border-radius:4px;outline:none;background:rgba(255,255,255,.05)">
+<textarea placeholder="¿Qué necesitas?" rows="3" style="font:400 13.5px Montserrat,sans-serif;color:#fff;padding:14px 16px;border:1px solid rgba(255,255,255,.2);border-radius:4px;outline:none;resize:none;background:rgba(255,255,255,.05)"></textarea>
+<a href="#1d" style="font:700 12.5px Montserrat,sans-serif;color:#080056;background:#FFAF4D;padding:15px 26px;border-radius:4px;text-align:center">Pedir presupuesto</a>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:center;gap:14px">
+<div data-rev style="opacity:0;flex:1;border:1px solid rgba(255,255,255,.16);border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 38px,rgba(255,255,255,.07) 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,rgba(255,255,255,.07) 38px 39px)"></div>
+<div style="position:relative;text-align:center"><div style="width:16px;height:16px;border-radius:50%;background:#FFAF4D;margin:0 auto 10px;box-shadow:0 0 0 7px rgba(255,175,77,.2)"></div><span style="font:500 11px Montserrat,sans-serif;color:rgba(255,255,255,.55)">Trabajo en {ciudad} y alrededores</span></div>
+</div>
+<div data-rev style="opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 7px">Teléfono</div><div style="font:700 14px Montserrat,sans-serif;color:#fff">{teléfono}</div></div>
+<div style="border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 7px">Instagram</div><div style="font:700 14px Montserrat,sans-serif;color:#FFAF4D">@{instagram}</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<a href="#1d" style="position:absolute;right:32px;bottom:28px;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(37,211,102,.42)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</main>
+
+<footer style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:76px;background:#05003A">
+<div style="font:800 13px Montserrat,sans-serif;letter-spacing:-.02em;color:#fff;text-transform:uppercase">{nombre del negocio}</div>
+<div style="display:flex;gap:26px;font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.5)"><span>{ciudad}</span><span>{teléfono}</span><span>@{instagram}</span></div>
+<div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.3)">Hecho con WebBot · Devalpo</div>
+</footer>
+</div>
+</div>
+
+<div data-phone style="flex:none;width:372px;padding:12px;background:#10131A;border-radius:42px;box-shadow:0 18px 44px rgba(16,19,26,.2)">
+<div data-revroot style="width:348px;height:836px;overflow:hidden;background:#080056;border-radius:31px;display:flex;flex-direction:column;position:relative">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 22px 0;font:600 11px Montserrat,sans-serif;color:#fff"><span>9:41</span><span style="width:16px;height:9px;border:1px solid #fff;border-radius:2px;display:block"></span></div>
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.12)">
+<div style="font:800 13px Montserrat,sans-serif;letter-spacing:-.02em;color:#fff;text-transform:uppercase">{nombre}</div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="width:20px;height:1.5px;background:#fff"></span><span style="width:20px;height:1.5px;background:#fff"></span><span style="width:13px;height:1.5px;background:#fff"></span></div>
+</header>
+<div style="flex:1;overflow:hidden;padding:32px 22px 0;position:relative">
+<div style="position:absolute;right:-90px;top:10px;width:260px;height:260px;border-radius:50%;border:1px solid rgba(255,175,77,.22)"></div>
+<div data-rev style="opacity:0;font:600 9.5px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#FFAF4D;margin:0 0 18px">{rubro} · {ciudad}</div>
+<h1 data-rev style="opacity:0;margin:0 0 16px;font:800 44px/.99 Montserrat,sans-serif;letter-spacing:-.04em;color:#fff">{titular del oficio}</h1>
+<p data-rev style="opacity:0;margin:0 0 24px;font:300 13.5px/1.7 Montserrat,sans-serif;color:rgba(255,255,255,.68)">{descripción del negocio en una o dos líneas}</p>
+<a data-rev href="#1d" style="opacity:0;display:block;font:700 12.5px Montserrat,sans-serif;color:#080056;background:#FFAF4D;padding:15px 20px;border-radius:4px;text-align:center;margin:0 0 26px">Ver trabajos</a>
+<div data-rev style="opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 22px">
+<div style="height:120px;background:repeating-linear-gradient(135deg,#100A62 0 14px,#16106E 14px 28px);border-radius:6px;display:flex;align-items:flex-end;padding:14px"><span style="font:600 11px Montserrat,sans-serif;color:#fff">{trabajo 1}</span></div>
+<div style="height:120px;background:repeating-linear-gradient(135deg,#100A62 0 14px,#16106E 14px 28px);border-radius:6px;display:flex;align-items:flex-end;padding:14px"><span style="font:600 11px Montserrat,sans-serif;color:#fff">{trabajo 2}</span></div>
+</div>
+<div data-rev style="opacity:0;display:flex;gap:26px;border-top:1px solid rgba(255,255,255,.14);padding:20px 0 0">
+<div><div style="font:800 26px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#15DEFA">{dato}</div><div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.5);margin:6px 0 0">trabajos</div></div>
+<div><div style="font:800 26px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#15DEFA">{dato}</div><div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.5);margin:6px 0 0">años</div></div>
+<div><div style="font:800 26px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#15DEFA">{dato}</div><div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.5);margin:6px 0 0">comunas</div></div>
+</div>
+</div>
+<a href="#1d" style="position:absolute;right:18px;bottom:26px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(37,211,102,.4)"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</div>
+</div>
+
+</div>
+<div data-notes style="margin:24px 0 0;border-top:1px solid #ECEDF1;padding:20px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#B8791F;margin:0 0 7px">Ruta</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">templates/portfolio/</code>. Mantiene el hero editorial oscuro sin imagen que ya tenía; cambia la grilla de columnas CSS por un grid con una pieza destacada.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#B8791F;margin:0 0 7px">Único con navy</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Aquí el navy <code style="font:500 11.5px ui-monospace,Menlo,monospace">#080056</code> de Devalpo sí es el fondo, porque el oficio se luce sobre oscuro. Los pasos usan los 4 colores de marca como paleta secundaria.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#B8791F;margin:0 0 7px">Campos nuevos</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">trabajos?: {titulo,categoria,foto}[]</code> y <code style="font:500 11.5px ui-monospace,Menlo,monospace">proceso?: {titulo,detalle}[]</code>. Los filtros por categoría son cliente puro, sin fetch.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#B8791F;margin:0 0 7px">Fotos</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Es el template que más depende de fotos reales del cliente. Si <code style="font:500 11.5px ui-monospace,Menlo,monospace">imagenes</code> viene con menos de 4, la grilla debe colapsar a 2 piezas en vez de rellenar con stock.</div></div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1e TIENDA ============ -->
+<div class="dv-opt" id="1e">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>TIENDA · boutique, ferretería, venta por WhatsApp</div>
+<div class="dv-card" style="width:1548px;padding:24px;background:#fff">
+<div style="display:flex;gap:26px;align-items:flex-start">
+
+<div style="flex:none;width:1120px;border:1px solid #E3E5EA;border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(16,19,26,.10)">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F6F5F2;border-bottom:1px solid #E3E5EA">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;text-align:center;font:500 11px Montserrat,sans-serif;color:#8A909C;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:5px 12px">{dominio-del-cliente}.cl</div>
+<div style="width:56px"></div>
+</div>
+<div data-spa data-accent="#C2255C" data-navink="#5A6270" style="height:820px;display:flex;flex-direction:column;background:#fff">
+
+<div style="flex:none;height:34px;background:#C2255C;display:flex;align-items:center;justify-content:center"><span style="font:500 11px Montserrat,sans-serif;letter-spacing:.06em;color:#fff">{frase destacada — envío, descuento o novedad}</span></div>
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:74px;border-bottom:1px solid #EFEBED">
+<div style="font:700 16px Montserrat,sans-serif;letter-spacing:-.02em;color:#10131A">{nombre del negocio}</div>
+<nav style="display:flex;gap:30px">
+<a href="#1e" data-nav="inicio" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Inicio<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#C2255C;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1e" data-nav="productos" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Productos<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#C2255C;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1e" data-nav="galeria" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Nosotros<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#C2255C;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1e" data-nav="contacto" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#5A6270;padding:6px 0">Contacto<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:2px;background:#C2255C;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+</nav>
+<a href="#1e" style="font:600 12px Montserrat,sans-serif;color:#fff;background:#C2255C;padding:11px 20px;border-radius:999px">Comprar por WhatsApp</a>
+</header>
+
+<main style="flex:1;overflow:hidden;position:relative">
+
+<div data-sec="inicio" style="height:100%;display:grid;grid-template-columns:1fr 1fr">
+<div style="padding:0 40px 0 44px;display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C2255C;margin:0 0 18px">{rubro} · {ciudad}</div>
+<h1 data-rev style="opacity:0;margin:0 0 20px;font:700 50px/1.06 Montserrat,sans-serif;letter-spacing:-.035em;color:#10131A;max-width:13ch">{nombre del negocio}</h1>
+<p data-rev style="opacity:0;margin:0 0 30px;font:300 15.5px/1.7 Montserrat,sans-serif;color:#5A6270;max-width:40ch">{descripción del negocio — qué vende, para quién y qué lo hace distinto}</p>
+<div data-rev style="opacity:0;display:flex;gap:12px;margin:0 0 36px">
+<a href="#1e" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#C2255C;padding:15px 26px;border-radius:999px">Ver productos</a>
+<a href="#1e" style="font:600 12.5px Montserrat,sans-serif;color:#10131A;border:1px solid #E0DCDE;padding:15px 26px;border-radius:999px">{teléfono}</a>
+</div>
+<div data-rev style="opacity:0;display:flex;gap:28px;border-top:1px solid #EFEBED;padding:22px 0 0">
+<div style="display:flex;align-items:center;gap:9px"><span style="width:24px;height:24px;border-radius:50%;background:#FBE7EE;display:flex;align-items:center;justify-content:center;font:700 11px Montserrat,sans-serif;color:#C2255C">✓</span><span style="font:400 12.5px Montserrat,sans-serif;color:#4A5560">{beneficio 1}</span></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="width:24px;height:24px;border-radius:50%;background:#FBE7EE;display:flex;align-items:center;justify-content:center;font:700 11px Montserrat,sans-serif;color:#C2255C">✓</span><span style="font:400 12.5px Montserrat,sans-serif;color:#4A5560">{beneficio 2}</span></div>
+</div>
+</div>
+<div style="position:relative;padding:36px 44px 36px 0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px">
+<div data-rev style="opacity:0;grid-row:span 2;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px);border-radius:10px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#A8949C">{foto principal}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px);border-radius:10px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#A8949C">{foto 2}</span></div>
+<div data-rev style="opacity:0;background:#10131A;border-radius:10px;padding:20px;display:flex;flex-direction:column;justify-content:flex-end"><div style="font:700 22px/1.15 Montserrat,sans-serif;letter-spacing:-.02em;color:#fff;margin:0 0 6px">{promoción}</div><div style="font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.6)">{condición de la promoción}</div></div>
+</div>
+</div>
+
+<div data-sec="productos" style="display:none;height:100%;padding:44px 44px 0;overflow:hidden">
+<div style="display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 24px">
+<div><div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C2255C;margin:0 0 11px">Catálogo</div>
+<h2 data-rev style="opacity:0;margin:0;font:700 34px/1.12 Montserrat,sans-serif;letter-spacing:-.03em;color:#10131A">Nuestros productos</h2></div>
+<div data-rev style="opacity:0;display:flex;gap:8px">
+<span style="font:600 11px Montserrat,sans-serif;color:#fff;background:#10131A;padding:8px 15px;border-radius:999px">Todos</span>
+<span style="font:500 11px Montserrat,sans-serif;color:#5A6270;border:1px solid #E0DCDE;padding:8px 15px;border-radius:999px">{categoría 1}</span>
+<span style="font:500 11px Montserrat,sans-serif;color:#5A6270;border:1px solid #E0DCDE;padding:8px 15px;border-radius:999px">{categoría 2}</span>
+<span style="font:500 11px Montserrat,sans-serif;color:#5A6270;border:1px solid #E0DCDE;padding:8px 15px;border-radius:999px">{categoría 3}</span>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+<div data-rev style="opacity:0;border:1px solid #EFEBED;border-radius:10px;overflow:hidden"><div style="height:172px;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px);position:relative"><span style="position:absolute;left:12px;top:12px;font:600 9.5px Montserrat,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#C2255C;padding:5px 9px;border-radius:999px">Nuevo</span></div><div style="padding:16px"><div style="font:600 13.5px Montserrat,sans-serif;color:#10131A;margin:0 0 5px">{producto 1}</div><div style="font:300 11.5px Montserrat,sans-serif;color:#8A909C;margin:0 0 12px">{detalle corto}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 15px Montserrat,sans-serif;color:#10131A">{precio}</span><a href="#1e" style="font:600 11px Montserrat,sans-serif;color:#fff;background:#25D366;padding:8px 13px;border-radius:999px">Pedir</a></div></div></div>
+<div data-rev style="opacity:0;border:1px solid #EFEBED;border-radius:10px;overflow:hidden"><div style="height:172px;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px)"></div><div style="padding:16px"><div style="font:600 13.5px Montserrat,sans-serif;color:#10131A;margin:0 0 5px">{producto 2}</div><div style="font:300 11.5px Montserrat,sans-serif;color:#8A909C;margin:0 0 12px">{detalle corto}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 15px Montserrat,sans-serif;color:#10131A">{precio}</span><a href="#1e" style="font:600 11px Montserrat,sans-serif;color:#fff;background:#25D366;padding:8px 13px;border-radius:999px">Pedir</a></div></div></div>
+<div data-rev style="opacity:0;border:1px solid #EFEBED;border-radius:10px;overflow:hidden"><div style="height:172px;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px)"></div><div style="padding:16px"><div style="font:600 13.5px Montserrat,sans-serif;color:#10131A;margin:0 0 5px">{producto 3}</div><div style="font:300 11.5px Montserrat,sans-serif;color:#8A909C;margin:0 0 12px">{detalle corto}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 15px Montserrat,sans-serif;color:#10131A">{precio}</span><a href="#1e" style="font:600 11px Montserrat,sans-serif;color:#fff;background:#25D366;padding:8px 13px;border-radius:999px">Pedir</a></div></div></div>
+<div data-rev style="opacity:0;border:1px solid #EFEBED;border-radius:10px;overflow:hidden"><div style="height:172px;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px)"></div><div style="padding:16px"><div style="font:600 13.5px Montserrat,sans-serif;color:#10131A;margin:0 0 5px">{producto 4}</div><div style="font:300 11.5px Montserrat,sans-serif;color:#8A909C;margin:0 0 12px">{detalle corto}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 15px Montserrat,sans-serif;color:#10131A">{precio}</span><a href="#1e" style="font:600 11px Montserrat,sans-serif;color:#fff;background:#25D366;padding:8px 13px;border-radius:999px">Pedir</a></div></div></div>
+</div>
+<div data-rev style="opacity:0;margin:20px 0 0;background:#FBF2F6;border:1px solid #F3DFE8;border-radius:10px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between">
+<div style="font:400 14px Montserrat,sans-serif;color:#10131A">¿Buscas algo que no está en el catálogo? Escríbenos y lo conseguimos.</div>
+<a href="#1e" style="font:600 12px Montserrat,sans-serif;color:#fff;background:#C2255C;padding:12px 22px;border-radius:999px">Consultar</a>
+</div>
+</div>
+
+<div data-sec="galeria" style="display:none;height:100%;padding:44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1fr 1.1fr;gap:48px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C2255C;margin:0 0 11px">Nosotros</div>
+<h2 data-rev style="opacity:0;margin:0 0 18px;font:700 34px/1.12 Montserrat,sans-serif;letter-spacing:-.03em;color:#10131A">Quién está detrás</h2>
+<p data-rev style="opacity:0;margin:0 0 22px;font:300 14.5px/1.75 Montserrat,sans-serif;color:#5A6270">{texto "sobre nosotros" — cómo partió la tienda, qué selecciona y cómo despacha}</p>
+<div data-rev style="opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="border:1px solid #EFEBED;border-radius:10px;padding:16px"><div style="font:700 18px Montserrat,sans-serif;color:#C2255C;margin:0 0 5px">{dato}</div><div style="font:300 11.5px Montserrat,sans-serif;color:#8A909C">clientas atendidas</div></div>
+<div style="border:1px solid #EFEBED;border-radius:10px;padding:16px"><div style="font:700 18px Montserrat,sans-serif;color:#C2255C;margin:0 0 5px">{dato}</div><div style="font:300 11.5px Montserrat,sans-serif;color:#8A909C">días de despacho</div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px">
+<div data-rev style="opacity:0;grid-column:span 2;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px);border-radius:10px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#A8949C">{foto de la tienda o del equipo}</span></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px);border-radius:10px"></div>
+<div data-rev style="opacity:0;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px);border-radius:10px"></div>
+</div>
+</div>
+</div>
+
+<div data-sec="contacto" style="display:none;height:100%;padding:44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C2255C;margin:0 0 11px">Contacto</div>
+<h2 data-rev style="opacity:0;margin:0 0 24px;font:700 34px/1.12 Montserrat,sans-serif;letter-spacing:-.03em;color:#10131A">Escríbenos</h2>
+<div data-rev style="opacity:0;display:flex;flex-direction:column;gap:12px">
+<input placeholder="Tu nombre" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:8px;outline:none">
+<input placeholder="Tu correo o teléfono" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:8px;outline:none">
+<textarea placeholder="¿Qué producto te interesa?" rows="3" style="font:400 13.5px Montserrat,sans-serif;color:#10131A;padding:14px 16px;border:1px solid #E3E5EA;border-radius:8px;outline:none;resize:none"></textarea>
+<a href="#1e" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#C2255C;padding:15px 24px;border-radius:999px;text-align:center">Enviar</a>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:center;gap:14px">
+<div data-rev style="opacity:0;flex:1;background:#FAF8F9;border:1px solid #EFEBED;border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 38px,#F0EBED 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#F0EBED 38px 39px)"></div>
+<div style="position:relative;text-align:center"><div style="width:16px;height:16px;border-radius:50%;background:#C2255C;margin:0 auto 10px;box-shadow:0 0 0 7px rgba(194,37,92,.16)"></div><span style="font:500 11px Montserrat,sans-serif;color:#8A909C">{dirección o "venta online"} · {ciudad}</span></div>
+</div>
+<div data-rev style="opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div style="border:1px solid #EFEBED;border-radius:10px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A909C;margin:0 0 6px">WhatsApp</div><div style="font:600 14px Montserrat,sans-serif;color:#10131A">{teléfono}</div></div>
+<div style="border:1px solid #EFEBED;border-radius:10px;padding:18px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8A909C;margin:0 0 6px">Instagram</div><div style="font:600 14px Montserrat,sans-serif;color:#C2255C">@{instagram}</div></div>
+</div>
+</div>
+</div>
+</div>
+
+</main>
+
+<footer style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:76px;background:#10131A">
+<div style="font:700 13px Montserrat,sans-serif;letter-spacing:-.02em;color:#fff">{nombre del negocio}</div>
+<div style="display:flex;gap:26px;font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.55)"><span>{ciudad}</span><span>{teléfono}</span><span>@{instagram}</span></div>
+<div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.35)">Hecho con WebBot · Devalpo</div>
+</footer>
+</div>
+</div>
+
+<div data-phone style="flex:none;width:372px;padding:12px;background:#10131A;border-radius:42px;box-shadow:0 18px 44px rgba(16,19,26,.2)">
+<div data-revroot style="width:348px;height:836px;overflow:hidden;background:#fff;border-radius:31px;display:flex;flex-direction:column;position:relative">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 22px 0;font:600 11px Montserrat,sans-serif;color:#10131A"><span>9:41</span><span style="width:16px;height:9px;border:1px solid #10131A;border-radius:2px;display:block"></span></div>
+<div style="flex:none;height:30px;background:#C2255C;display:flex;align-items:center;justify-content:center;margin:10px 0 0"><span style="font:500 10px Montserrat,sans-serif;letter-spacing:.05em;color:#fff">{frase destacada}</span></div>
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid #EFEBED">
+<div style="font:700 14px Montserrat,sans-serif;letter-spacing:-.02em;color:#10131A">{nombre}</div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="width:20px;height:1.5px;background:#10131A"></span><span style="width:20px;height:1.5px;background:#10131A"></span><span style="width:13px;height:1.5px;background:#10131A"></span></div>
+</header>
+<div style="flex:1;overflow:hidden;padding:26px 22px 0">
+<div data-rev style="opacity:0;font:600 9.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#C2255C;margin:0 0 14px">{rubro} · {ciudad}</div>
+<h1 data-rev style="opacity:0;margin:0 0 12px;font:700 34px/1.08 Montserrat,sans-serif;letter-spacing:-.035em;color:#10131A">{nombre del negocio}</h1>
+<p data-rev style="opacity:0;margin:0 0 20px;font:300 13.5px/1.7 Montserrat,sans-serif;color:#5A6270">{descripción del negocio en una o dos líneas}</p>
+<div data-rev style="opacity:0;display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 18px">
+<div style="border:1px solid #EFEBED;border-radius:10px;overflow:hidden"><div style="height:112px;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px)"></div><div style="padding:12px"><div style="font:600 12px Montserrat,sans-serif;color:#10131A;margin:0 0 6px">{producto 1}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 13px Montserrat,sans-serif;color:#10131A">{precio}</span><span style="font:600 10px Montserrat,sans-serif;color:#fff;background:#25D366;padding:6px 10px;border-radius:999px">Pedir</span></div></div></div>
+<div style="border:1px solid #EFEBED;border-radius:10px;overflow:hidden"><div style="height:112px;background:repeating-linear-gradient(135deg,#F0E7EB 0 12px,#F7F1F4 12px 24px)"></div><div style="padding:12px"><div style="font:600 12px Montserrat,sans-serif;color:#10131A;margin:0 0 6px">{producto 2}</div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 13px Montserrat,sans-serif;color:#10131A">{precio}</span><span style="font:600 10px Montserrat,sans-serif;color:#fff;background:#25D366;padding:6px 10px;border-radius:999px">Pedir</span></div></div></div>
+</div>
+<div data-rev style="opacity:0;background:#10131A;border-radius:10px;padding:18px"><div style="font:700 19px/1.15 Montserrat,sans-serif;letter-spacing:-.02em;color:#fff;margin:0 0 5px">{promoción}</div><div style="font:300 11px Montserrat,sans-serif;color:rgba(255,255,255,.6)">{condición de la promoción}</div></div>
+</div>
+<div style="flex:none;padding:12px 22px 22px;border-top:1px solid #EFEBED;background:#fff"><a href="#1e" style="display:flex;align-items:center;justify-content:center;gap:9px;font:600 12.5px Montserrat,sans-serif;color:#fff;background:#25D366;padding:15px;border-radius:999px"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg>Comprar por WhatsApp</a></div>
+</div>
+</div>
+
+</div>
+<div data-notes style="margin:24px 0 0;border-top:1px solid #ECEDF1;padding:20px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#C2255C;margin:0 0 7px">Ruta</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">templates/tienda/</code>. Conserva la barra de contacto fija y el WhatsApp por tarjeta que ya existían; suma precio, etiqueta y filtros.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#C2255C;margin:0 0 7px">Campos nuevos</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">productos?: {nombre,detalle,precio,categoria,etiqueta?,foto}[]</code>. Sin precio la tarjeta muestra solo "Consultar" — no inventar valores.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#C2255C;margin:0 0 7px">Barra superior</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Reutiliza <code style="font:500 11.5px ui-monospace,Menlo,monospace">highlight</code>, que hoy aparece como estrella suelta. Como franja es el lugar donde más rinde en una tienda.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#C2255C;margin:0 0 7px">Único sin botón flotante</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">En móvil la barra inferior fija reemplaza al botón redondo: tapa menos catálogo y convierte mejor. En escritorio el CTA vive en el header.</div></div>
+</div>
+</div>
+</div>
+
+<!-- ============ 1f PROFESIONAL (nuevo) ============ -->
+<div class="dv-opt" id="1f">
+<div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>PROFESIONAL · tipo nuevo: abogado, contador, psicólogo, nutricionista — una persona</div>
+<div class="dv-card" style="width:1548px;padding:24px;background:#fff">
+<div style="display:flex;gap:26px;align-items:flex-start">
+
+<div style="flex:none;width:1120px;border:1px solid #E3E5EA;border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(16,19,26,.10)">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F6F5F2;border-bottom:1px solid #E3E5EA">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;text-align:center;font:500 11px Montserrat,sans-serif;color:#8A909C;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:5px 12px">{dominio-del-cliente}.cl</div>
+<div style="width:56px"></div>
+</div>
+<div data-spa data-accent="#1E6B4F" data-navink="#6B6357" style="height:820px;display:flex;flex-direction:column;background:#FBF9F4">
+
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:78px;border-bottom:1px solid #E9E4D9">
+<div><div style="font:400 19px 'Instrument Serif',serif;color:#1B1A16;letter-spacing:.01em">{nombre profesional}</div><div style="font:500 9.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#1E6B4F;margin:3px 0 0">{profesión}</div></div>
+<nav style="display:flex;gap:30px">
+<a href="#1f" data-nav="inicio" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#6B6357;padding:6px 0">Inicio<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#1E6B4F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1f" data-nav="areas" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#6B6357;padding:6px 0">Áreas<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#1E6B4F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1f" data-nav="trayectoria" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#6B6357;padding:6px 0">Trayectoria<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#1E6B4F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+<a href="#1f" data-nav="contacto" style="position:relative;font:500 12.5px Montserrat,sans-serif;color:#6B6357;padding:6px 0">Agendar<span data-ul style="position:absolute;left:0;right:0;bottom:0;height:1.5px;background:#1E6B4F;transform:scaleX(0);transform-origin:left;transition:transform .3s cubic-bezier(.2,.7,.2,1)"></span></a>
+</nav>
+<a href="#1f" style="font:600 12px Montserrat,sans-serif;color:#fff;background:#1E6B4F;padding:12px 22px;border-radius:4px">Reservar hora</a>
+</header>
+
+<main style="flex:1;overflow:hidden;position:relative">
+
+<div data-sec="inicio" style="height:100%;display:grid;grid-template-columns:1.1fr .9fr">
+<div style="padding:0 36px 0 44px;display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;display:flex;align-items:center;gap:12px;margin:0 0 24px"><span style="width:28px;height:1px;background:#1E6B4F"></span><span style="font:600 10.5px Montserrat,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#1E6B4F">{profesión} · {ciudad}</span></div>
+<h1 data-rev style="opacity:0;margin:0 0 22px;font:400 52px/1.08 'Instrument Serif',serif;color:#1B1A16;letter-spacing:-.01em;max-width:15ch">{promesa profesional en una frase}</h1>
+<p data-rev style="opacity:0;margin:0 0 32px;font:300 15.5px/1.75 Montserrat,sans-serif;color:#57514A;max-width:44ch">{descripción — a quién atiende, con qué enfoque y qué puede esperar la primera sesión}</p>
+<div data-rev style="opacity:0;display:flex;gap:12px;margin:0 0 40px">
+<a href="#1f" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#1E6B4F;padding:15px 26px;border-radius:4px">Agendar por WhatsApp</a>
+<a href="#1f" style="font:600 12.5px Montserrat,sans-serif;color:#1B1A16;border:1px solid #DDD6C8;padding:15px 26px;border-radius:4px">{teléfono}</a>
+</div>
+<div data-rev style="opacity:0;display:flex;gap:34px;border-top:1px solid #E9E4D9;padding:24px 0 0">
+<div><div style="font:400 12px Montserrat,sans-serif;color:#8C8478;margin:0 0 6px">Colegiatura</div><div style="font:600 13px Montserrat,sans-serif;color:#1B1A16">{registro o colegio}</div></div>
+<div><div style="font:400 12px Montserrat,sans-serif;color:#8C8478;margin:0 0 6px">Modalidad</div><div style="font:600 13px Montserrat,sans-serif;color:#1B1A16">Presencial y online</div></div>
+<div><div style="font:400 12px Montserrat,sans-serif;color:#8C8478;margin:0 0 6px">Primera sesión</div><div style="font:600 13px Montserrat,sans-serif;color:#1B1A16">{duración}</div></div>
+</div>
+</div>
+<div style="position:relative;padding:52px 44px 52px 0">
+<div data-rev style="opacity:0;height:100%;background:repeating-linear-gradient(135deg,#EBE5D7 0 12px,#F3EFE5 12px 24px);border-radius:2px;display:flex;align-items:flex-end;padding:22px"><span style="font:500 11px Montserrat,sans-serif;color:#A79E8C">{retrato profesional}</span></div>
+<div data-rev style="opacity:0;position:absolute;left:-44px;bottom:96px;width:232px;background:#1B1A16;padding:22px 24px;border-radius:2px;box-shadow:0 20px 46px rgba(27,26,22,.2)">
+<div style="font:400 30px/1 'Instrument Serif',serif;color:#fff;margin:0 0 8px">{años}</div>
+<div style="font:300 12px/1.55 Montserrat,sans-serif;color:rgba(255,255,255,.65)">años ejerciendo en {ciudad} y alrededores</div>
+</div>
+</div>
+</div>
+
+<div data-sec="areas" style="display:none;height:100%;padding:52px 44px;overflow:hidden">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#1E6B4F;margin:0 0 12px">Áreas de trabajo</div>
+<h2 data-rev style="opacity:0;margin:0 0 36px;font:400 40px/1.1 'Instrument Serif',serif;color:#1B1A16">En qué puedo ayudarte</h2>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E9E4D9;border-radius:3px;padding:28px 26px"><div style="font:400 22px 'Instrument Serif',serif;color:#1E6B4F;margin:0 0 34px">I</div><div style="font:600 15px Montserrat,sans-serif;color:#1B1A16;margin:0 0 10px">{área 1}</div><div style="font:300 12.5px/1.7 Montserrat,sans-serif;color:#57514A">{en qué consiste y para quién sirve}</div></div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E9E4D9;border-radius:3px;padding:28px 26px"><div style="font:400 22px 'Instrument Serif',serif;color:#1E6B4F;margin:0 0 34px">II</div><div style="font:600 15px Montserrat,sans-serif;color:#1B1A16;margin:0 0 10px">{área 2}</div><div style="font:300 12.5px/1.7 Montserrat,sans-serif;color:#57514A">{en qué consiste y para quién sirve}</div></div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E9E4D9;border-radius:3px;padding:28px 26px"><div style="font:400 22px 'Instrument Serif',serif;color:#1E6B4F;margin:0 0 34px">III</div><div style="font:600 15px Montserrat,sans-serif;color:#1B1A16;margin:0 0 10px">{área 3}</div><div style="font:300 12.5px/1.7 Montserrat,sans-serif;color:#57514A">{en qué consiste y para quién sirve}</div></div>
+</div>
+<div data-rev style="opacity:0;margin:22px 0 0;background:#1B1A16;border-radius:3px;padding:28px 32px;display:flex;align-items:center;justify-content:space-between">
+<div><div style="font:400 24px/1.35 'Instrument Serif',serif;color:#fff;margin:0 0 6px">La primera conversación es sin costo</div><div style="font:300 12.5px Montserrat,sans-serif;color:rgba(255,255,255,.6)">{condición o duración de esa primera instancia}</div></div>
+<a href="#1f" style="font:600 12px Montserrat,sans-serif;color:#1B1A16;background:#fff;padding:13px 24px;border-radius:4px">Agendar</a>
+</div>
+</div>
+
+<div data-sec="trayectoria" style="display:none;height:100%;padding:52px 44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:.95fr 1.05fr;gap:52px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#1E6B4F;margin:0 0 12px">Trayectoria</div>
+<h2 data-rev style="opacity:0;margin:0 0 20px;font:400 38px/1.12 'Instrument Serif',serif;color:#1B1A16">Sobre mí</h2>
+<p data-rev style="opacity:0;margin:0 0 26px;font:300 14.5px/1.8 Montserrat,sans-serif;color:#57514A">{texto "sobre nosotros" — formación, enfoque de trabajo y por qué eligió esta especialidad}</p>
+<div data-rev style="opacity:0;height:170px;background:repeating-linear-gradient(135deg,#EBE5D7 0 12px,#F3EFE5 12px 24px);border-radius:2px;display:flex;align-items:flex-end;padding:18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#A79E8C">{foto de la consulta u oficina}</span></div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;display:flex;gap:20px;padding:0 0 22px;border-bottom:1px solid #E9E4D9"><div style="flex:none;width:72px;font:600 12px Montserrat,sans-serif;color:#1E6B4F">{año}</div><div><div style="font:600 14.5px Montserrat,sans-serif;color:#1B1A16;margin:0 0 6px">{hito 1}</div><div style="font:300 12.5px/1.65 Montserrat,sans-serif;color:#57514A">{institución o detalle}</div></div></div>
+<div data-rev style="opacity:0;display:flex;gap:20px;padding:22px 0;border-bottom:1px solid #E9E4D9"><div style="flex:none;width:72px;font:600 12px Montserrat,sans-serif;color:#1E6B4F">{año}</div><div><div style="font:600 14.5px Montserrat,sans-serif;color:#1B1A16;margin:0 0 6px">{hito 2}</div><div style="font:300 12.5px/1.65 Montserrat,sans-serif;color:#57514A">{institución o detalle}</div></div></div>
+<div data-rev style="opacity:0;display:flex;gap:20px;padding:22px 0;border-bottom:1px solid #E9E4D9"><div style="flex:none;width:72px;font:600 12px Montserrat,sans-serif;color:#1E6B4F">{año}</div><div><div style="font:600 14.5px Montserrat,sans-serif;color:#1B1A16;margin:0 0 6px">{hito 3}</div><div style="font:300 12.5px/1.65 Montserrat,sans-serif;color:#57514A">{institución o detalle}</div></div></div>
+<div data-rev style="opacity:0;display:flex;gap:20px;padding:22px 0 0"><div style="flex:none;width:72px;font:600 12px Montserrat,sans-serif;color:#1E6B4F">{año}</div><div><div style="font:600 14.5px Montserrat,sans-serif;color:#1B1A16;margin:0 0 6px">{hito 4}</div><div style="font:300 12.5px/1.65 Montserrat,sans-serif;color:#57514A">{institución o detalle}</div></div></div>
+</div>
+</div>
+</div>
+
+<div data-sec="contacto" style="display:none;height:100%;padding:52px 44px;overflow:hidden">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;height:100%">
+<div style="display:flex;flex-direction:column;justify-content:center">
+<div data-rev style="opacity:0;font:600 10.5px Montserrat,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#1E6B4F;margin:0 0 12px">Agendar</div>
+<h2 data-rev style="opacity:0;margin:0 0 12px;font:400 38px/1.12 'Instrument Serif',serif;color:#1B1A16">Reserva tu hora</h2>
+<p data-rev style="opacity:0;margin:0 0 24px;font:300 14px/1.7 Montserrat,sans-serif;color:#57514A;max-width:42ch">Cuéntame brevemente tu caso. Respondo personalmente dentro del día hábil.</p>
+<div data-rev style="opacity:0;display:flex;flex-direction:column;gap:12px">
+<input placeholder="Tu nombre" style="font:400 13.5px Montserrat,sans-serif;color:#1B1A16;padding:14px 16px;border:1px solid #DDD6C8;border-radius:3px;outline:none;background:#fff">
+<input placeholder="Tu teléfono o correo" style="font:400 13.5px Montserrat,sans-serif;color:#1B1A16;padding:14px 16px;border:1px solid #DDD6C8;border-radius:3px;outline:none;background:#fff">
+<textarea placeholder="¿En qué necesitas ayuda?" rows="3" style="font:400 13.5px Montserrat,sans-serif;color:#1B1A16;padding:14px 16px;border:1px solid #DDD6C8;border-radius:3px;outline:none;resize:none;background:#fff"></textarea>
+<a href="#1f" style="font:600 12.5px Montserrat,sans-serif;color:#fff;background:#1E6B4F;padding:15px 24px;border-radius:4px;text-align:center">Solicitar hora</a>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;justify-content:center;gap:14px">
+<div data-rev style="opacity:0;flex:1;background:#fff;border:1px solid #E9E4D9;border-radius:3px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 38px,#F1ECE1 38px 39px),repeating-linear-gradient(90deg,transparent 0 38px,#F1ECE1 38px 39px)"></div>
+<div style="position:relative;text-align:center"><div style="width:16px;height:16px;border-radius:50%;background:#1E6B4F;margin:0 auto 10px;box-shadow:0 0 0 7px rgba(30,107,79,.16)"></div><span style="font:500 11px Montserrat,sans-serif;color:#8C8478">{dirección de la consulta} · {ciudad}</span></div>
+</div>
+<div data-rev style="opacity:0;background:#fff;border:1px solid #E9E4D9;border-radius:3px;padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:18px">
+<div><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8C8478;margin:0 0 6px">Teléfono</div><div style="font:600 14px Montserrat,sans-serif;color:#1B1A16">{teléfono}</div></div>
+<div><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#8C8478;margin:0 0 6px">Correo</div><div style="font:600 14px Montserrat,sans-serif;color:#1B1A16">{email}</div></div>
+</div>
+</div>
+</div>
+</div>
+
+<a href="#1f" style="position:absolute;right:32px;bottom:28px;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(37,211,102,.42)"><svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</main>
+
+<footer style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 44px;height:76px;background:#1B1A16">
+<div style="font:400 17px 'Instrument Serif',serif;color:#fff">{nombre profesional}</div>
+<div style="display:flex;gap:26px;font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.55)"><span>{profesión}</span><span>{teléfono}</span><span>{email}</span></div>
+<div style="font:300 10.5px Montserrat,sans-serif;color:rgba(255,255,255,.34)">Hecho con WebBot · Devalpo</div>
+</footer>
+</div>
+</div>
+
+<div data-phone style="flex:none;width:372px;padding:12px;background:#10131A;border-radius:42px;box-shadow:0 18px 44px rgba(16,19,26,.2)">
+<div data-revroot style="width:348px;height:836px;overflow:hidden;background:#FBF9F4;border-radius:31px;display:flex;flex-direction:column;position:relative">
+<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 22px 0;font:600 11px Montserrat,sans-serif;color:#1B1A16"><span>9:41</span><span style="width:16px;height:9px;border:1px solid #1B1A16;border-radius:2px;display:block"></span></div>
+<header style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #E9E4D9">
+<div><div style="font:400 16px 'Instrument Serif',serif;color:#1B1A16">{nombre profesional}</div><div style="font:500 8.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#1E6B4F;margin:2px 0 0">{profesión}</div></div>
+<div style="display:flex;flex-direction:column;gap:4px"><span style="width:20px;height:1.5px;background:#1B1A16"></span><span style="width:20px;height:1.5px;background:#1B1A16"></span><span style="width:13px;height:1.5px;background:#1B1A16"></span></div>
+</header>
+<div style="flex:1;overflow:hidden;padding:28px 22px 0">
+<div data-rev style="opacity:0;display:flex;align-items:center;gap:11px;margin:0 0 18px"><span style="width:24px;height:1px;background:#1E6B4F"></span><span style="font:600 9.5px Montserrat,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#1E6B4F">{profesión} · {ciudad}</span></div>
+<h1 data-rev style="opacity:0;margin:0 0 14px;font:400 36px/1.1 'Instrument Serif',serif;color:#1B1A16">{promesa profesional en una frase}</h1>
+<p data-rev style="opacity:0;margin:0 0 22px;font:300 13.5px/1.75 Montserrat,sans-serif;color:#57514A">{descripción en una o dos líneas}</p>
+<a data-rev href="#1f" style="opacity:0;display:block;font:600 12.5px Montserrat,sans-serif;color:#fff;background:#1E6B4F;padding:15px 20px;border-radius:4px;text-align:center;margin:0 0 22px">Agendar por WhatsApp</a>
+<div data-rev style="opacity:0;height:230px;background:repeating-linear-gradient(135deg,#EBE5D7 0 12px,#F3EFE5 12px 24px);border-radius:2px;display:flex;align-items:flex-end;padding:16px;margin:0 0 18px"><span style="font:500 10.5px Montserrat,sans-serif;color:#A79E8C">{retrato profesional}</span></div>
+<div data-rev style="opacity:0;display:flex;gap:24px;border-top:1px solid #E9E4D9;padding:18px 0 0">
+<div><div style="font:400 11px Montserrat,sans-serif;color:#8C8478;margin:0 0 5px">Modalidad</div><div style="font:600 12px Montserrat,sans-serif;color:#1B1A16">Presencial y online</div></div>
+<div><div style="font:400 11px Montserrat,sans-serif;color:#8C8478;margin:0 0 5px">1ª sesión</div><div style="font:600 12px Montserrat,sans-serif;color:#1B1A16">{duración}</div></div>
+</div>
+</div>
+<a href="#1f" style="position:absolute;right:18px;bottom:26px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(37,211,102,.4)"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z"/></svg></a>
+</div>
+</div>
+
+</div>
+<div data-notes style="margin:24px 0 0;border-top:1px solid #ECEDF1;padding:20px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#1E6B4F;margin:0 0 7px">Por qué falta</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Hoy un abogado o un psicólogo cae en SERVICIOS, que está pensado para un local con box y horarios. Aquí el producto es una persona: retrato, credenciales y trayectoria mandan.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#1E6B4F;margin:0 0 7px">Ruta</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">templates/profesional/</code> + valor <code style="font:500 11.5px ui-monospace,Menlo,monospace">PROFESIONAL</code> en el VO <code style="font:500 11.5px ui-monospace,Menlo,monospace">Template</code>, el registry y <code style="font:500 11.5px ui-monospace,Menlo,monospace">RUBRO_TEMPLATES</code>. Migración Prisma del enum incluida.</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#1E6B4F;margin:0 0 7px">Rubros nuevos</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270">Suma <code style="font:500 11.5px ui-monospace,Menlo,monospace">abogado</code>, <code style="font:500 11.5px ui-monospace,Menlo,monospace">contador</code>, <code style="font:500 11.5px ui-monospace,Menlo,monospace">psicologo</code> y <code style="font:500 11.5px ui-monospace,Menlo,monospace">nutricionista</code> al prompt de extracción y al mapa de rubros (hoy son 10 + <code style="font:500 11.5px ui-monospace,Menlo,monospace">otro</code>).</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#1E6B4F;margin:0 0 7px">Campos nuevos</div><div style="font:300 12px/1.6 Montserrat,sans-serif;color:#5A6270"><code style="font:500 11.5px ui-monospace,Menlo,monospace">profesion</code>, <code style="font:500 11.5px ui-monospace,Menlo,monospace">credenciales?</code> y <code style="font:500 11.5px ui-monospace,Menlo,monospace">trayectoria?: {anio,hito,detalle}[]</code>. Sin trayectoria, esa pestaña no aparece en el nav — el SPA arma el menú según lo que exista.</div></div>
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Los tabs del header funcionan: haz clic en Servicios, Carta o Trabajos dentro de cada maqueta. Sigue así: "cámbiale el acento a <a class="dv-oid" href="#1a">1a</a> para ver cómo se ve con otro color" · "<a class="dv-oid" href="#1c">1c</a> en claro en vez de oscuro" · "agrega el tipo LOCAL DE BARRIO (panadería, ferretería) con horarios y catálogo corto" · "llena <a class="dv-oid" href="#1e">1e</a> con el contenido real de Boutique Luna Nueva"</p>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mostrarNotas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Presentación&quot;},&quot;mostrarMovil&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Presentación&quot;},&quot;animaciones&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Presentación&quot;}}">
+class Component extends DCLogic {
+  componentDidMount(){ this.wire(); this.applyProps(); }
+  componentDidUpdate(){ this.applyProps(); }
+
+  applyProps(){
+    const notas = this.props.mostrarNotas !== false;
+    const movil = this.props.mostrarMovil !== false;
+    document.querySelectorAll('[data-notes]').forEach(n => { n.style.display = notas ? '' : 'none'; });
+    document.querySelectorAll('[data-phone]').forEach(n => { n.style.display = movil ? '' : 'none'; });
+  }
+
+  reveal(scope){
+    if (this.props.animaciones === false) {
+      scope.querySelectorAll('[data-rev]').forEach(el => { el.style.animation='none'; el.style.opacity='1'; el.style.transform='none'; });
+      return;
+    }
+    scope.querySelectorAll('[data-rev]').forEach((el,i) => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'dvUp .62s cubic-bezier(.2,.7,.2,1) ' + (i*70) + 'ms both';
+    });
+  }
+
+  wire(){
+    document.querySelectorAll('[data-spa]').forEach(spa => {
+      const accent = spa.getAttribute('data-accent') || '#5B46F8';
+      const ink = spa.getAttribute('data-navink') || '#5A6270';
+      const navs = Array.from(spa.querySelectorAll('[data-nav]'));
+      const secs = Array.from(spa.querySelectorAll('[data-sec]'));
+      const show = (id) => {
+        secs.forEach(s => {
+          const on = s.getAttribute('data-sec') === id;
+          s.style.display = on ? (s.getAttribute('data-disp') || 'block') : 'none';
+          if (on) {
+            s.style.animation = 'none'; void s.offsetWidth;
+            s.style.animation = 'dvFade .4s cubic-bezier(.2,.7,.2,1) both';
+            this.reveal(s);
+          }
+        });
+        navs.forEach(n => {
+          const on = n.getAttribute('data-nav') === id;
+          n.style.color = on ? accent : ink;
+          n.style.fontWeight = on ? '600' : '500';
+          const u = n.querySelector('[data-ul]');
+          if (u) u.style.transform = on ? 'scaleX(1)' : 'scaleX(0)';
+        });
+      };
+      navs.forEach(n => n.addEventListener('click', e => { e.preventDefault(); show(n.getAttribute('data-nav')); }));
+      secs.forEach(s => { if (s.style.display !== 'none') s.setAttribute('data-disp', s.style.display || 'block'); });
+      if (secs.length) show(secs[0].getAttribute('data-sec'));
+    });
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { this.reveal(e.target); io.unobserve(e.target); } });
+    }, { threshold: 0.06 });
+    document.querySelectorAll('[data-revroot]').forEach(el => io.observe(el));
+  }
+}
+
+</script>
+</body>
+</html>
