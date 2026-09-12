@@ -417,3 +417,32 @@ una sesión debe quedar en Engram antes de reflejarse acá.
 **Evidencia:** Engram `sdd-init/web-bot` (obs 1), sección Persistence mode;
 `docs/historico/WEBBOT_ARQUITECTURA.md` y `docs/historico/WEBBOT_ROADMAP.md` (movidos en
 la rama `docs/reconciliacion`).
+
+## D-20 — La documentación es parte del `done` de un ciclo, no un paso posterior
+
+**Fecha:** 2026-09-12 · **Estado:** vigente
+**Contexto:** la reconciliación de D-19 arregló el mapa, pero no la causa de que se
+pudriera. `sdd-archive` cerraba el ciclo en Engram sin tocar `docs/`, así que nada
+promovía lo aprendido hacia la documentación viva. Cada ciclo dejaba su verdad enterrada
+en su propio artefacto y el mapa nunca se movía. Sin una forzante, volvía a congelarse.
+**Decisión:** un ciclo SDD no está cerrado hasta que la documentación refleja lo que
+cambió. `sdd-archive` no puede reportar `done` sin (1) agregar a `DECISIONES.md` una
+entrada por cada decisión vigente que el ciclo tomó, (2) regenerar `ESTADO.md` si el ciclo
+invalidó algo que ese archivo afirma, y (3) declarar explícitamente en el informe de
+archivo si no hubo nada que actualizar. El orquestador verifica los tres puntos antes de
+aceptar el resultado. La misma regla rige el trabajo directo sin ciclo: si un cambio
+invalida una afirmación de `ESTADO.md`, se actualiza en el mismo commit o PR.
+**Por qué:** la documentación desactualizada no es neutra, es activamente dañina. La
+auditoría del 2026-09-12 encontró que `docs/COMANDOS.md` recomendaba `prisma migrate dev`,
+un comando que D-17 prohíbe en este proyecto, y que `README.md` afirmaba cobro recurrente
+mensual una semana después de que el modelo pasara a pago único. Un documento así no
+solo confunde: induce errores. Se exige declarar el "no hubo nada que actualizar" porque
+el silencio se lee igual que el olvido, y eso es precisamente lo que no se puede
+distinguir a un mes de distancia.
+**Consecuencia:** archivar un ciclo cuesta más. Ese costo es deliberado y es el precio de
+que el mapa siga sirviendo. Un informe de archivo sin mención a la documentación es un
+ciclo incompleto, no uno terminado. Una entrada en `DECISIONES.md` sin evidencia
+verificable no entra.
+**Evidencia:** `CLAUDE.md` del proyecto, sección "Documentación viva"; auditoría en
+`docs/COMANDOS.md:72` (el `migrate dev` corregido) y `README.md` (reescrito), ambos en el
+commit `cd3932b`.
