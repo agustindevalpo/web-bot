@@ -127,6 +127,9 @@ npm run dev                   # http://localhost:3000
 La variable inline gana sobre el `.env` del repo (Next.js no pisa una variable ya
 definida en el entorno).
 
+**Sandbox de pagos** (D-22): `npm run dev:sandbox` arma lo de arriba solo, contra su
+propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya puesto.
+
 **Tests:**
 
 ```bash
