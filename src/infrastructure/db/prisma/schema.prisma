@@ -11,6 +11,11 @@ model Cliente {
   email         String    @unique
   nombre        String
   telefono      String?
+  // El modelo de suscripción mensual se abandonó el 2026-09-05 a favor del
+  // pago único (docs/DECISIONES.md, D-09 reemplazada por D-10). El campo
+  // sigue aquí porque nada lo lee para decidir: todo Cliente se crea con
+  // Plan.STARTER y quitarlo exigiría una migración contra la base de
+  // producción sin ninguna ganancia funcional.
   plan          Plan      @default(STARTER)
   activo        Boolean   @default(false)
   fechaCreacion DateTime  @default(now())
@@ -66,6 +71,10 @@ model TokenAcceso {
   @@index([email])
 }
 
+// Vestigio del modelo de suscripción mensual, abandonado el 2026-09-05 en
+// favor del pago único (docs/DECISIONES.md, D-09 reemplazada por D-10). Se
+// conserva porque eliminarlo requeriría una migración contra la base de
+// producción y ningún módulo lee `Cliente.plan` para tomar una decisión.
 enum Plan {
   STARTER
   PRO

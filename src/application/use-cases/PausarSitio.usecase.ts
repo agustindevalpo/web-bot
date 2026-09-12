@@ -3,6 +3,12 @@ import { ISitioRepository } from '@/domain/repositories/ISitioRepository'
 import { INotificacionService } from '@/application/services/INotificacionService'
 import { ClienteNoEncontradoException } from '@/domain/exceptions/ClienteNoEncontradoException'
 
+// Se compone en src/infrastructure/container.ts pero ninguna ruta lo consume
+// todavía: es el flujo de suspensión por pago fallido, bloqueado en que el
+// motor de pagos no está deployado. No es un duplicado de
+// CambiarEstadoSitioUseCase, que activa/pausa un único Sitio por sitioId; este
+// caso de uso opera sobre el Cliente completo por clienteId, suspendiéndolo a
+// él y a todos sus Sitio. No se debe eliminar como código muerto.
 export class PausarSitioUseCase {
   constructor(
     private clienteRepo: IClienteRepository,

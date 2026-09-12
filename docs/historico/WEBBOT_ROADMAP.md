@@ -1,3 +1,15 @@
+> [!WARNING]
+> **Documento histórico. No describe el proyecto actual.**
+>
+> Congelado el 2026-08-08 (último cambio real). El proyecto mutó de forma sustancial
+> después de esa fecha y este archivo quedó describiendo otro producto: entre otras cosas
+> menciona Next.js 14, `middleware.ts`, Selenium, N8N, suscripciones por plan y un equipo
+> de tres personas. Nada de eso es cierto hoy.
+>
+> Se conserva porque registra la intención original de agosto de 2026, que tiene valor como
+> historia. Para saber qué **es** WebBot hoy, leer `docs/ESTADO.md`; para saber **por qué**
+> es así, `docs/DECISIONES.md`; para saber **qué pasó**, `docs/BITACORA.md`.
+
 # WebBot — Roadmap Técnico de Desarrollo
 **Devalpo 2026 · SaaS de sitios web generados por IA**
 
