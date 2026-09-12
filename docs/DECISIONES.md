@@ -557,3 +557,41 @@ diseño, no como código a copiar.
 tamaño actual medido con `wc -l` sobre `src/components/templates/*/`;
 `src/domain/value-objects/Template.ts` y `schema.prisma:84-90` (5 valores, sin
 `PROFESIONAL`); `src/infrastructure/templates/rubroTemplates.ts` (10 rubros).
+
+## D-24 — Fundaciones de plantillas (S0a): un solo atributo enciende la animación, el hamburguesa se difiere de entrada
+
+**Fecha:** 2026-09-12 · **Estado:** vigente
+**Contexto:** el ciclo S0 de D-23 se partió en S0a (tokens, motion, envoltorio SPA) y S0b
+(clamp de contraste del acento) porque el S0 original, con el clamp incluido, no cabía en
+el presupuesto de 400 líneas por revisión. S0a entrega las piezas que las 6 plantillas
+futuras van a compartir, sin ninguna plantilla visible todavía.
+**Decisión:** tres reglas de nombrado y contrato, fijadas ahora para que S1-S6 no
+improvisen cada una la suya:
+1. **Tokens estructurales con prefijo `--wb-tpl-*`** (`src/styles/tokens.css`) — distinto
+   de `--wb-color-*` (marca Devalpo) y de `--primario/--secundario/--acento/--texto`
+   (inyectados por sitio en `palette.ts`). Los tres conjuntos conviven sin colisión porque
+   ninguno comparte prefijo.
+2. **`data-dv-anim` es el único selector que enciende una animación** (`src/styles/motion.css`,
+   nunca `globals.css`). Un elemento sin ese atributo no anima, sea cual sea su CSS Module —
+   la auditoría en review es un solo grep. El guard de `prefers-reduced-motion: reduce` usa
+   `!important` a propósito: el estado oculto de cascada pesa (0,3,0) de especificidad y un
+   guard sin `!important` a (0,1,0) perdería esa pulseada.
+3. **El hamburguesa `<768px` se difiere a S1 desde el arranque de `tasks.md`, no como
+   contingencia.** S0a entrega el nav móvil como fila horizontal con scroll
+   (`overflow-x:auto`) en `SeccionesSPA.tsx` — un estado móvil legítimo, no uno roto.
+**Por qué:** fijar el contrato de animación en un solo componente cliente
+(`SeccionesSPA.tsx`) permite que las 4 secciones de cada plantilla se rendericen siempre
+—nunca se desmontan, solo se ocultan por CSS— porque un sitio vendido como "tu sitio, en
+Google" no puede tener 3 de 4 secciones ausentes del HTML. Diferir el hamburguesa evitó
+que la estimación de S0a se fuera de 385 a más de 400 líneas sin sacrificar cobertura de
+tests ni comentarios para lograrlo.
+**Consecuencia:** `shared/fuentes.ts` (Instrument Serif) queda sin ningún importador hasta
+S1 — los templates editoriales (LANDING, RESTAURANTE, PROFESIONAL) son quienes lo importan,
+deliberadamente no el layout raíz, porque ese layout también sirve la landing comercial,
+`/chat` y `/admin`. El comportamiento interactivo del envoltorio (cambio de sección,
+`IntersectionObserver`) queda sin test automatizado en S0a: `jest.config.ts` corre con
+`testEnvironment: 'node'`, sin jsdom, y esta cadena no lo agrega — la cobertura llega con
+Playwright en S1, cuando exista una plantilla real para ejercitar.
+**Evidencia:** `src/styles/tokens.css`, `src/styles/motion.css`,
+`src/components/templates/shared/{navegacion.ts,SeccionesSPA.tsx,SeccionesSPA.module.css,fuentes.ts}`;
+`tests/unit/components/templates/shared/navegacion.test.ts`.

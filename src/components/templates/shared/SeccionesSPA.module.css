@@ -1,0 +1,95 @@
+/*
+ * Shell del header + nav del envoltorio SPA (WB-plantillas-fundaciones, S0a).
+ * `claseHeader` permite a un template pisar este shell por completo (p. ej.
+ * TIENDA, que suma la franja de promo y baja a 74px de alto).
+ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 78px;
+  padding: 0 44px;
+  border-bottom: 1px solid var(--wb-tpl-line);
+  background: var(--wb-tpl-surface);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: none;
+}
+
+/*
+ * Móvil (<768px): fila horizontal con scroll, NO un botón hamburguesa. La
+ * decisión se tomó de entrada al armar tasks.md, no como contingencia — el
+ * hamburguesa (README.md:164) queda diferido a S1 (ver docs/DECISIONES.md).
+ */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
+.navItem {
+  position: relative;
+  flex: none;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: 500 12.5px var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  white-space: nowrap;
+}
+
+/* Subrayado del ítem activo: crece desde la izquierda (README.md:139). El
+ * color sale de `--acento`, la única variable de acento por sitio que este
+ * componente consume — nunca importa `palette.ts`. */
+.navItem::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--acento);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.navItemActivo {
+  font-weight: 600;
+  color: var(--acento);
+}
+
+.navItemActivo::after {
+  transform: scaleX(1);
+}
+
+.accion {
+  flex: none;
+}
+
+.main {
+  min-height: 0;
+}
+
+@media (max-width: 767px) {
+  .header {
+    padding: 0 22px;
+  }
+
+  .nav {
+    gap: 20px;
+  }
+}
