@@ -476,3 +476,49 @@ dependencias `supertest`/`@types/supertest`, sin uso en ningún test del reposit
 `src/infrastructure/container.ts:63-64`; `jest.config.ts:51` (único `displayName`
 restante); `package.json` (scripts `test:*`); `tests/mocks/` (los cuatro mocks movidos,
 antes en `tests/integration/mocks/`); rama `chore/deuda-tecnica`.
+
+---
+
+## D-22 — Sandbox de pagos local, con contraste declarado-vs-real para no fallar en silencio
+
+**Fecha:** 2026-09-12 · **Estado:** vigente
+**Contexto:** WebBot no tiene integración de Mercado Pago: el cobro es un único link
+estático en `NEXT_PUBLIC_MERCADOPAGO_LINK_URL` (D-14), y hasta ahora no había forma de
+probar el flujo de pago sin usar el link real. El riesgo concreto: alguien apunta la app
+al checkout de pruebas de Mercado Pago para ensayar y se olvida de revertirlo — un
+cliente real llega al checkout y no puede pagar, sin que nada lo avise.
+**Decisión:** el sandbox corre **local, contra su propio contenedor** (`npm run
+dev:sandbox`, `scripts/dev-sandbox.mjs`), no como un segundo ambiente desplegado: solo
+existe el ambiente `production` en Railway (docs/ESTADO.md, sección 2) y un segundo
+servicio cuesta dinero real para un desarrollador solo. Además de la URL del link, se
+agrega una variable de intención explícita, `NEXT_PUBLIC_PAGOS_MODO` (`produccion` /
+`prueba`), que nunca se usa sola: `contrastarModoPago()`
+(`src/app/chat/hrefPago.ts:95-110`) la cruza contra `clasificarEnlacePago()`
+(`src/app/chat/hrefPago.ts:41-73`), que deriva la clasificación real leyendo la URL con
+`URL` (host `mpago.la` = productivo; `pref_id` o `/checkout/v1/redirect` = prueba). El
+resultado del contraste, no la clasificación sola, decide el banner en `DemoCTA.tsx:46-62`:
+`discrepancia` (declarado y real no coinciden, en cualquier dirección) muestra una alerta
+roja más fuerte que la de sandbox tranquilo (`coincide-prueba`); sin declaración
+(`sin-declarar`) o con la URL sin reconocer (`indeterminado`) no muestra nada, porque no
+hay una afirmación que contrastar. `dev-sandbox.mjs` fija ambas variables juntas
+(`NEXT_PUBLIC_PAGOS_MODO=prueba` + el link de sandbox) para que el propio sandbox quede
+consistente y muestre siempre el banner tranquilo, nunca el de discrepancia.
+**Por qué:** una bandera declarada sola es peor que no tener bandera, porque crea dos
+fuentes de verdad que pueden discrepar sin que nadie se entere — alguien pone el link de
+sandbox, deja `NEXT_PUBLIC_PAGOS_MODO=produccion` puesto de una prueba anterior, y el
+sistema afirmaría "producción" con confianza mientras el checkout real está roto. Por eso
+la bandera nunca se lee sola: solo vale contrastada contra la URL, que es la evidencia. Se
+rechazó tratar la ausencia de bandera como "producción por defecto" porque eso fingiría
+una certeza que nadie declaró; se rechazó fundir el banner de discrepancia con el de
+sandbox tranquilo porque son severidades distintas — alguien que declaró producción y ve
+el banner calmo de sandbox no se entera de que hay un problema real.
+**Consecuencia:** el sandbox no reemplaza un ambiente de staging ni lo intenta ser: es una
+herramienta de desarrollo local, desechable, sin datos que preservar entre corridas. El
+banner de alarma solo se activa cuando alguien declara `NEXT_PUBLIC_PAGOS_MODO`
+explícitamente — Railway en producción debería declarar `produccion` para que una
+discrepancia futura (por ejemplo, alguien pega el link de sandbox por error) se vea de
+inmediato en vez de quedar en silencio como hoy.
+**Evidencia:** `src/app/chat/hrefPago.ts:20-110`; `src/app/chat/DemoCTA.tsx:12-18,46-62`;
+`src/app/chat/DemoCTA.module.css` (clases `.alertaSandbox`/`.alertaDiscrepancia`);
+`scripts/dev-sandbox.mjs`; `tests/unit/app/chat/hrefPago.test.ts`; docs/ESTADO.md,
+secciones 1 y 6 (un solo ambiente Railway, receta local existente en el puerto 5433).
