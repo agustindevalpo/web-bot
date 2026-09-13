@@ -3,7 +3,7 @@ import { IChatService } from '@/application/services/IChatService'
 import { MensajeDTO } from '@/application/dtos/MensajeDTO'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
-import { RUBRO_DEFAULTS } from '@/infrastructure/demo/rubroDefaults'
+import { RUBRO_DEFAULTS, resolverColores } from '@/infrastructure/demo/rubroDefaults'
 import { TemplateService } from '@/infrastructure/templates/TemplateService'
 import { ClaudeServiceError } from './claudeErrors'
 
@@ -118,10 +118,17 @@ export function parseSiteConfig(textoCrudo: string): SiteConfigDTO {
     throw extraccionFallidaError()
   }
 
-  const defaults = RUBRO_DEFAULTS[rubro] ?? RUBRO_DEFAULTS[RUBRO_VISUAL_FALLBACK]
+  // Rubro que efectivamente aporta los colores: si `rubro` es "otro" (o
+  // cualquier valor sin entrada propia), los colores caen al fallback, pero
+  // OVERRIDES_ACENTO debe consultarse con esa MISMA clave, no con el "otro"
+  // que termina en el DTO — si no, una excepción cargada para "panaderia"
+  // nunca se encontraría cuando el rubro detectado fue "otro".
+  const rubroColores = RUBRO_DEFAULTS[rubro] ? rubro : RUBRO_VISUAL_FALLBACK
+  const defaults = RUBRO_DEFAULTS[rubroColores]
 
   const contactoRaw = (raw.contacto ?? {}) as Record<string, unknown>
   const formulario = normalizarFormulario(contactoRaw.formulario)
+  const estilo = normalizarEstilo(raw.estilo)
 
   const config: SiteConfigDTO = {
     nombre,
@@ -136,9 +143,9 @@ export function parseSiteConfig(textoCrudo: string): SiteConfigDTO {
       ...(formulario ? { formulario } : {}),
     },
     redes: normalizarRedes(raw.redes),
-    estilo: normalizarEstilo(raw.estilo),
+    estilo,
     highlight: typeof raw.highlight === 'string' ? raw.highlight : '',
-    colores: defaults.colores,
+    colores: resolverColores(rubroColores, defaults.colores, estilo),
     imagenes: defaults.imagenes,
   }
 

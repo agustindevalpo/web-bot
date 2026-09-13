@@ -1,3 +1,6 @@
+import { Estilo } from '@/domain/value-objects/Estilo'
+import { derivarColores, type ColoresRubro } from '@/domain/color/acentoPorEstilo'
+
 // Cliente "dueño" de los sitios generados en modo demo — no paga, no se
 // factura, solo existe para satisfacer la FK de Sitio.clienteId. Creado por
 // prisma/seed-demo.ts (correr una vez por entorno).
@@ -92,6 +95,27 @@ export const RUBRO_DEFAULTS: Record<string, RubroVisualDefaults> = {
 }
 
 export const RUBRO_DEFAULT = 'panaderia'
+
+// Escape hatch manual: combinaciones (rubro, estilo) donde la regla de
+// src/domain/color/acentoPorEstilo.ts da un resultado matemáticamente válido
+// pero feo a la vista — la transformación es genérica y no puede saber, por
+// ejemplo, que rotar hacia ámbar arruina un rubro cuyo acento del rubro ya es
+// casi ámbar. Vacía a propósito: se llena caso a caso cuando el diseño
+// detecta una combinación así. Una entrada acá siempre gana por sobre el
+// valor derivado — ver `resolverColores` más abajo.
+export const OVERRIDES_ACENTO: Partial<Record<string, Partial<Record<Estilo, string>>>> = {}
+
+// Punto único donde se decide el acento final de un sitio: primero la
+// excepción manual (OVERRIDES_ACENTO), y si no hay ninguna, la derivación
+// automática (acentoPorEstilo.ts). Vive acá y no en el dominio porque
+// OVERRIDES_ACENTO es dato de infraestructura — el dominio no puede
+// depender de él sin invertir la capa (ver AGENTS.md, límite hexagonal).
+export function resolverColores(rubro: string, colores: ColoresRubro, estilo: Estilo): ColoresRubro {
+  const override = OVERRIDES_ACENTO[rubro]?.[estilo]
+  if (override) return { ...colores, acento: override }
+
+  return derivarColores(colores, estilo)
+}
 
 const DETECCION_RUBRO: Array<{ keywords: string[]; rubro: string }> = [
   { keywords: ['pan', 'panadería', 'panaderia', 'torta', 'repostería', 'horno', 'hallulla', 'marraqueta'], rubro: 'panaderia' },

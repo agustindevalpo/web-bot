@@ -2,7 +2,7 @@ import { IChatService } from '@/application/services/IChatService'
 import { MensajeDTO } from '@/application/dtos/MensajeDTO'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
-import { RUBRO_DEFAULTS, RUBRO_DEFAULT, detectarRubro } from '@/infrastructure/demo/rubroDefaults'
+import { RUBRO_DEFAULTS, RUBRO_DEFAULT, detectarRubro, resolverColores } from '@/infrastructure/demo/rubroDefaults'
 import { RUBRO_TEMPLATES, TEMPLATE_FALLBACK } from '@/infrastructure/templates/rubroTemplates'
 
 // Las preguntas del bot que siguen a la pregunta 1 ("¿cómo se llama tu
@@ -81,6 +81,7 @@ export class DemoChatService implements IChatService {
 
     const rubro = detectarRubro(nombre ?? '')
     const defaults = RUBRO_DEFAULTS[rubro] ?? RUBRO_DEFAULTS[RUBRO_DEFAULT]
+    const estilo = parseEstilo(estiloTexto ?? '')
 
     return {
       nombre: nombre ?? '',
@@ -90,10 +91,10 @@ export class DemoChatService implements IChatService {
       ciudad: ciudad ?? '',
       contacto: parseContacto(contactoTexto ?? ''),
       redes: parseRedes(redesTexto ?? ''),
-      estilo: parseEstilo(estiloTexto ?? ''),
+      estilo,
       highlight: highlight ?? '',
       template: RUBRO_TEMPLATES[rubro] ?? TEMPLATE_FALLBACK,
-      colores: defaults.colores,
+      colores: resolverColores(rubro, defaults.colores, estilo),
       imagenes: defaults.imagenes,
     }
   }

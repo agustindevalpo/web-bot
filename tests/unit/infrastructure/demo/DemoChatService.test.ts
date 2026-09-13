@@ -125,8 +125,11 @@ describe('DemoChatService', () => {
 
       const datos = await service.extraerDatos(historial)
 
+      // El acento ya no es el crudo de RUBRO_DEFAULTS: la respuesta "Moderno"
+      // pasa por derivarAcento antes de llegar acá (ver
+      // src/domain/color/acentoPorEstilo.ts).
       expect(datos.template).toBe('SERVICIOS')
-      expect(datos.colores).toEqual({ primario: '#6C5CE7', secundario: '#a29bfe', acento: '#fd79a8', texto: '#ffffff' })
+      expect(datos.colores).toEqual({ primario: '#6C5CE7', secundario: '#a29bfe', acento: '#dc93a9', texto: '#ffffff' })
       expect(datos.imagenes?.length).toBeGreaterThan(0)
     })
   })
