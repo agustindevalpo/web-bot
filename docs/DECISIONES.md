@@ -595,3 +595,77 @@ Playwright en S1, cuando exista una plantilla real para ejercitar.
 **Evidencia:** `src/styles/tokens.css`, `src/styles/motion.css`,
 `src/components/templates/shared/{navegacion.ts,SeccionesSPA.tsx,SeccionesSPA.module.css,fuentes.ts}`;
 `tests/unit/components/templates/shared/navegacion.test.ts`.
+
+## D-25 — El clamp de contraste (S0b) es búsqueda binaria con guarda, no un corte fijo de luminosidad
+
+**Fecha:** 2026-09-12 · **Estado:** vigente
+**Contexto:** el acento de cada sitio sale de `configJson.colores.acento` — dato de cliente
+sin ninguna validación. Ese color pinta botones, enlaces, subrayados, números e íconos
+sobre blanco en cuatro plantillas y sobre fondo oscuro en dos (`#171310` RESTAURANTE,
+`#080056` PORTFOLIO). Un amarillo pálido desaparece sobre blanco; un azul marino
+desaparece sobre oscuro. El handoff de diseño mandaba "subir la L de OKLCH hasta ~0.65".
+**Decisión:** cuatro reglas, todas contra lo que pedía el handoff:
+1. **Búsqueda binaria acotada sobre L, no un corte fijo.** Cada iteración convierte a sRGB
+   real, mapea gamut, cuantiza a hex y mide el contraste WCAG de ESE hex, nunca de los
+   números OKLCH (`contraste.ts:190-218`).
+2. **Una sola linealización sRGB↔lineal con umbral `0.04045`**, compartida por la
+   conversión OKLCH y por la luminancia WCAG (`contraste.ts:22-34`).
+3. **El objetivo es un parámetro con default 3, no 4.5 quemado** (`contraste.ts:19-20`).
+4. **Guarda de convergencia con fallback documentado**: si ninguna dirección alcanza el
+   objetivo, devuelve negro o blanco —el que más contraste dé contra ese fondo— en vez de
+   un color que falla en silencio (`contraste.ts:245-253`).
+**Por qué:** no existe forma cerrada. La L de OKLCH **no** predice el contraste WCAG: croma
+y tono desplazan la mezcla de canales RGB lineales por su cuenta, así que dos colores con
+la misma L pueden dar contrastes distintos contra el mismo fondo. El corte de 0.65 que
+circula está afinado para APCA, no para WCAG. Sobre el umbral: WCAG publica `0.03928` para
+la misma curva que sRGB define en `0.04045` —inconsistencia conocida de su texto—, y
+mezclar los dos en un mismo módulo produce números que no coinciden con ninguna de las dos
+especificaciones. Sobre el 3:1: WCAG 2.1 SC 1.4.3 exige 4.5:1 solo para texto normal;
+íconos, botones y bordes caen bajo SC 1.4.11, que exige 3:1 — pedir 4.5:1 para todo
+oscurece el acento más de lo necesario y le come la identidad al color del cliente. Y la
+guarda existe porque **nadie demostró que el contraste WCAG sea monótono respecto de la L
+de OKLCH a croma y tono fijos**, que es justo la propiedad que garantizaría que la
+bisección converge en vez de oscilar: no se le cree a la búsqueda, se remide el resultado.
+**Consecuencia:** `contraste.ts` queda sin ningún importador hasta S1, igual que
+`fuentes.ts` en S0a (D-24) — el fondo contra el que hay que clampear lo conoce cada
+plantilla, así que el cableado pertenece a S1-S6 y no acá. Además quedó corregido un error
+del research: rotulaba la matriz `[0.8189330101 …]` como "lineal-sRGB→LMS" cuando en
+realidad es **XYZ→LMS**. Usarla sobre RGB lineal le inventa croma 0.03 y tono 28.9° a todo
+gris, y con eso el clamp deja de preservar el tono. Se usa el par directo de Ottosson, con
+las constantes tomadas de un archivo verificable del propio repo.
+**Evidencia:** `src/components/templates/shared/contraste.ts`;
+`tests/unit/components/templates/shared/contraste.test.ts` (45 tests: round-trip exacto,
+anclas de luminancia que aíslan un coeficiente cada una, y el objetivo remedido sobre el
+color devuelto contra los tres fondos); research `sdd/plantillas-contraste/research`
+(Engram #608); matrices en `node_modules/@img/colour/color.cjs:499-501` (`rgb.oklab`),
+`:764` (`xyz.oklab`, la que el research confundía) y `:791-796` (la inversa);
+`docs/design_handoff_plantillas_webbot/PLAN-SLICES.md:40-41,78`.
+
+## D-26 — Pendiente: de dónde sale el color de acento de cada cliente
+
+**Fecha:** 2026-09-12 · **Estado:** PENDIENTE — bloquea S1, no bloquea S0b
+**Contexto:** al preparar el rediseño se descubrió que el cliente nunca elige un color. La
+pregunta 7 del chat le ofrece un estilo ("Moderno y minimalista / Cálido y cercano /
+Colorido y llamativo"), la respuesta se parsea y se guarda en `SiteConfigDTO.estilo`, y
+**ninguna plantilla la usa** — verificado por grep sobre `src/components/templates/`. Los
+colores salen del rubro detectado (`colores: defaults.colores`), así que dos panaderías
+reciben exactamente los mismos colores. El argumento de venta es "tu sitio", no "un sitio
+de panadería".
+**Decisión:** SIN TOMAR. Tres caminos planteados: (1) conectar el estilo que ya se
+pregunta, de modo que "cálido" dé una paleta y "moderno" otra, usando la respuesta que hoy
+se descarta y sin sumar preguntas; (2) preguntar el color directo, con una pregunta más o
+una paleta para elegir; (3) dejarlo por rubro y ajustarlo a mano desde `/admin` tras la
+venta, que es lo que de hecho ocurre hoy.
+**Por qué hay que decidirlo antes de S1:** el diseño nuevo se construye alrededor de **un
+solo color de acento por cliente** que pinta botones, subrayados, números e íconos — es lo
+que hace que dos sitios se vean distintos. Si ese acento sigue saliendo del rubro, el
+rediseño se apoya en algo que hoy no distingue a un cliente de otro. Se combina con el otro
+cabo suelto del mismo rediseño: colapsa los cuatro colores de `configJson.colores` a uno,
+dejando `primario`, `secundario` y `texto` sin uso.
+**Consecuencia mientras siga pendiente:** S0a y S0b pueden avanzar y entregarse, porque
+ninguno toca `palette.ts` ni el origen del color. S1 (LANDING) no debe arrancar sin esto
+resuelto.
+**Evidencia:** `src/infrastructure/demo/DemoChatService.ts:18,93,96`;
+`src/infrastructure/claude/ClaudeChatService.ts:141,175,207`;
+`src/infrastructure/demo/rubroDefaults.ts` (paletas por rubro); grep de `estilo` en
+`src/components/templates/` sin resultados fuera de `estiloCascada`, que es otra cosa.
