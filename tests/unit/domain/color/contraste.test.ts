@@ -8,7 +8,7 @@ import {
   razonContraste,
   OBJETIVO_NO_TEXTO,
   OBJETIVO_TEXTO,
-} from '@/components/templates/shared/contraste'
+} from '@/domain/color/contraste'
 
 // Fondos reales de las plantillas (docs/design_handoff_plantillas_webbot/).
 const BLANCO = '#ffffff'
