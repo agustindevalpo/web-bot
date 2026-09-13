@@ -31,7 +31,12 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
   // "Data-Driven Navigation" — si un template olvidara filtrar, el wrapper
   // igual no muestra jamás una pestaña o un panel vacíos.
   const seccionesVisibles = filtrarSecciones(secciones)
-  const [activaId, setActivaId] = useState(seccionesVisibles[0].id)
+  // El acceso a `[0]` es opcional a propósito: un arreglo vacío es alcanzable
+  // si un template llegara a pasar todas sus secciones sin contenido. En el
+  // cimiento de seis plantillas, reventar acá no deja una sección en blanco:
+  // tira abajo el sitio completo del cliente. Sin secciones no se renderiza
+  // nada (ver el corte más abajo, después de los hooks).
+  const [activaId, setActivaId] = useState(seccionesVisibles[0]?.id ?? '')
   const raizRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,8 +44,10 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
     if (!raiz) return
 
     // Gatea el contrato de visibilidad y el guard de reduced-motion de
-    // motion.css. Sin JS este atributo nunca se setea: las 4 secciones
-    // quedan visibles como scroll largo y el nav son anclas reales.
+    // motion.css. Sin JS este atributo nunca se setea y todas las secciones
+    // quedan visibles como scroll largo, que es lo que protege el contenido
+    // frente a los buscadores. El nav son botones, así que sin JS no navega:
+    // el contenido está completo pero los saltos entre secciones no funcionan.
     raiz.setAttribute('data-dv-ready', '')
 
     const observer = new IntersectionObserver(
@@ -58,6 +65,10 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
 
     return () => observer.disconnect()
   }, [])
+
+  // Después de los hooks, nunca antes: React exige que se ejecuten siempre en
+  // el mismo orden.
+  if (seccionesVisibles.length === 0) return null
 
   return (
     <div ref={raizRef} className={className}>
