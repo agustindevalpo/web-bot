@@ -712,3 +712,80 @@ desbloqueado S1 (LANDING).
 `src/infrastructure/claude/ClaudeChatService.ts` (punto de cableado);
 `tests/unit/domain/color/acentoPorEstilo.test.ts`; commits `627c2b1`, `965e247`,
 `0b6b101`, `2fa8d72`; Engram obs #612.
+
+---
+
+## D-28 — El rubro se deduce con evidencia local puntuada, y cuando no alcanza se pregunta
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** el rubro decide el template, la paleta y las fotos: es el dato que más
+define si el sitio "se ve como lo mío". Se deducía con `detectarRubro`, que recibía
+**solo el nombre del negocio** y comparaba por subcadena, devolviendo el primer rubro de
+la lista con una coincidencia y, si no había ninguna, `panaderia`. Medido sobre un corpus
+de 20 casos escritos como escribe la gente real —sin tildes, con faltas, con
+regionalismos chilenos— acertaba **5 de 20**: un taller mecánico llamado "Servicios
+Integrales SpA" salía con colores de pan y template `RESTAURANTE`.
+**Restricción que manda sobre el diseño:** clasificar con un LLM resolvería esto de
+raíz, y el código ya existe (`ClaudeChatService` le pregunta el rubro a Claude leyendo
+toda la conversación). Se descarta **por decisión de negocio, no técnica**: implica costo
+variable por demo y el producto todavía no genera ingresos. Se reevalúa cuando los haya.
+La demo pública —todo visitante sin plan activo, o sea todo prospecto— seguirá corriendo
+con deducción local.
+**Decisión:** cuatro piezas, todas locales y sin costo recurrente.
+1. `detectarRubro` recibe **nombre + descripción + servicios**, que es donde el cliente
+   sí dice a qué se dedica. Sube el acierto de 5/20 a 19/20 en el mismo corpus.
+2. La comparación es **por palabra**, no por subcadena: un keyword de 6 caracteres o más
+   se compara como prefijo (`veterinar` cubre sus derivados) y uno más corto como palabra
+   entera con plural opcional. Sin esto, ampliar el texto analizado convertía colisiones
+   raras en habituales: `pan` en "pantalones", `ropa` en "Europa", `corte` en "cortesía",
+   `moda` en "modalidad". El límite de palabra usa lookarounds sobre propiedades Unicode
+   porque `\b` de JavaScript es ASCII y se equivoca con tildes y con la ñ.
+3. Gana el rubro con **más coincidencias**, no el primero declarado; los empates se
+   rompen por orden de declaración y quedan expuestos al llamador. Antes, una veterinaria
+   que ofrecía "peluquería canina" se clasificaba como peluquería porque ese rubro está
+   declarado antes.
+4. El texto y los keywords se **normalizan sin tildes** antes de comparar, porque el
+   cliente escribe sin ellas. Efecto colateral aceptado y verificado: la ñ se pliega en n
+   (`ñ` se descompone en `n` + tilde combinante y no hay forma de separar ambos casos con
+   el mismo mecanismo). Se comprobó contra 30 palabras con ñ de uso corriente que no
+   genera ni un falso positivo.
+**El fallback deja de mentir.** Un rubro no reconocido ya no es `panaderia` sino `otro`,
+con paleta neutra (slate/grafito) y fotos genéricas. El template ya estaba resuelto y
+nunca se ejecutaba: `RUBRO_TEMPLATES` no tiene entrada para `otro`, así que
+`TEMPLATE_FALLBACK` (`LANDING`) aplica solo. `ClaudeChatService` tenía la misma mentira en
+`RUBRO_VISUAL_FALLBACK` y también se corrigió.
+**Caso especial del acento de `otro`:** para un rubro conocido, [D-27](#d-27--el-acento-sale-del-estilo-que-el-cliente-ya-responde-derivado-en-oklch-del-acento-del-rubro)
+transforma el acento **del rubro** porque ese acento es una identidad a preservar. `otro`
+no la tiene, así que el estilo elegido por el cliente decide el acento directamente:
+`moderno` `#556270`, `calido` `#b06a3b`, `colorido` `#0f8b8d`, los tres medidos por
+encima de 3:1 contra blanco. Es la variante que D-27 descartó para rubros conocidos, y acá
+es la correcta justamente porque no hay identidad que conservar. El módulo de dominio
+`acentoPorEstilo.ts` no conoce `otro`: el caso vive en `resolverColores`, con el resto de
+los datos por rubro.
+**Cuando el matcher no alcanza, se pregunta.** Si el puntaje es 0 o hay empate entre
+rubros distintos, el chat agrega **una novena pregunta** con las categorías en etiquetas
+para cliente y una salida explícita de "ninguno de estos". Va al final y no en el medio
+para no correr el destructuring posicional de `extraerDatos`, donde los primeros ocho
+índices significan siempre lo mismo. Un único helper arma el guion y tanto
+`procesarMensaje` como `conversacionCompleta` derivan de él, para que no puedan
+desincronizarse. `ChatWidget` no conoce el largo de la conversación, así que el front no
+cambia.
+**Lo que se descartó:** comparación difusa por distancia de edición para cubrir faltas de
+ortografía. A distancia 1, `pan` es también `pon`, `pin` y `can`, y `gato` es `gasto`: se
+ganan pocos aciertos y se compra una clase entera de falsos positivos difíciles de
+depurar. Con vocabulario amplio y normalización de tildes se cubren las faltas reales sin
+ese costo.
+**Consecuencia:** el vocabulario de `DETECCION_RUBRO` pasa a ser la palanca de mayor
+rendimiento y es **data, no algoritmo** — ampliarlo no requiere tocar código. Quedan
+detectadas como faltantes: `zapatos`, `zapatilla`, `queque`, `pasteler`, `barber`,
+`manicure`, `lubricentro`, `vacuna`, `cemento`, `colación`, `once` y un tronco `odontolog`
+que cubriría "odontológica"/"odontología"/"odontólogo" de una vez.
+**Evidencia:** `src/infrastructure/demo/rubroDefaults.ts` (normalización, puntaje,
+`RUBRO_OTRO`, `ACENTO_OTRO_POR_ESTILO`, `resolverColores`);
+`src/infrastructure/demo/DemoChatService.ts` (`construirScript`, pregunta guiada);
+`src/infrastructure/claude/ClaudeChatService.ts` (`RUBRO_VISUAL_FALLBACK`);
+`src/infrastructure/templates/rubroTemplates.ts` (`TEMPLATE_FALLBACK`);
+`tests/unit/infrastructure/demo/rubroDefaults.test.ts` y
+`tests/unit/infrastructure/demo/DemoChatService.test.ts`; commits `e0b3021`, `5caae5c`,
+`dfb3454`, `5ab9933`; verificado en vivo contra la Postgres local: un negocio que responde
+"ninguno de estos" queda con `rubro=otro`, `template=LANDING` y acento `#0f8b8d`.

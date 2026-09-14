@@ -70,7 +70,8 @@ src/
   en `app` / `subdominio` / `dominioPropio` y reescribe a `/sites/[subdominio]` o
   `/sites/custom/[host]`.
 - **Templates:** `rubroTemplates.ts` mapea los 10 rubros a 5 `Template`; `resolver.ts`
-  (puro) y `registry.ts` (JSX) están separados; fallback a `LANDING`.
+  (puro) y `registry.ts` (JSX) están separados; fallback a `LANDING`, que es lo que recibe
+  el rubro neutro `otro` cuando la deducción local no reconoce el negocio (D-28).
 - **Persistencia:** esquema en `src/infrastructure/db/prisma/schema.prisma`, 3
   migraciones en `prisma/migrations/`.
 
