@@ -5,13 +5,13 @@ import styles from './page.module.css'
 import { DemoCTA } from './DemoCTA'
 import { LeadForm } from './LeadForm'
 import { extraerOpciones } from './opciones'
+import { COOKIE_NAME } from './sessionCookie'
 
 interface Mensaje {
   rol: 'user' | 'assistant'
   contenido: string
 }
 
-const COOKIE_NAME = 'webbot_session'
 const MENSAJE_INICIAL =
   '¡Hola! Soy el asistente de WebBot. Te voy a hacer algunas preguntas para armar tu sitio. ¿Cómo se llama tu negocio?'
 
