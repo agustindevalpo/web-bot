@@ -51,7 +51,8 @@ Hexagonal por capas, con nombres de dominio en español (`Cliente`, `Sitio`, `Pa
 
 ```
 src/
-├── domain/           entidades, value objects, excepciones, puertos I*Repository
+├── domain/           entidades, value objects, excepciones, puertos I*Repository,
+│                     color/ (OKLCH: contraste y derivación del acento por estilo)
 ├── application/      DTOs, mappers, 13 casos de uso (*.usecase.ts), puertos I*Service
 ├── infrastructure/   adaptadores: db (Prisma), auth, claude, demo, email, cloudflare,
 │                     notifications, payments, railway, routing, templates

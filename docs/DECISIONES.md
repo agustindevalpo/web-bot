@@ -643,7 +643,7 @@ color devuelto contra los tres fondos); research `sdd/plantillas-contraste/resea
 
 ## D-26 — Pendiente: de dónde sale el color de acento de cada cliente
 
-**Fecha:** 2026-09-12 · **Estado:** PENDIENTE — bloquea S1, no bloquea S0b
+**Fecha:** 2026-09-12 · **Estado:** RESUELTA — reemplazada por [D-27](#d-27--el-acento-sale-del-estilo-que-el-cliente-ya-responde-derivado-en-oklch-del-acento-del-rubro)
 **Contexto:** al preparar el rediseño se descubrió que el cliente nunca elige un color. La
 pregunta 7 del chat le ofrece un estilo ("Moderno y minimalista / Cálido y cercano /
 Colorido y llamativo"), la respuesta se parsea y se guarda en `SiteConfigDTO.estilo`, y
@@ -669,3 +669,46 @@ resuelto.
 `src/infrastructure/claude/ClaudeChatService.ts:141,175,207`;
 `src/infrastructure/demo/rubroDefaults.ts` (paletas por rubro); grep de `estilo` en
 `src/components/templates/` sin resultados fuera de `estiloCascada`, que es otra cosa.
+
+---
+
+## D-27 — El acento sale del estilo que el cliente ya responde, derivado en OKLCH del acento del rubro
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** resuelve la pregunta que [D-26](#d-26--pendiente-de-dónde-sale-el-color-de-acento-de-cada-cliente)
+dejó abierta y que bloqueaba S1 del rediseño de plantillas (D-23). De los tres caminos
+planteados ahí se eligió el primero: usar la respuesta de estilo que el chat ya pide y
+que hasta hoy se descartaba, sin sumarle preguntas al cliente.
+**Decisión:** el acento final de un sitio se deriva al **generarlo** (no al renderizarlo)
+como `mapearAGamut(transformar(oklch(acento_del_rubro), estilo))`, con una tabla de
+excepciones manuales `(rubro, estilo) → hex` que gana sobre la regla. Cada estilo aplica
+una transformación distinta: `moderno` baja el croma a 0.55×; `calido` rota el tono un
+40 % del arco hacia el ámbar (70°) y sube 0.04 de L; `colorido` pide 1.35× de croma y, si
+no entra en sRGB, busca la luminosidad que maximiza el croma que sobrevive al mapeo.
+**Por qué al generar y no al renderizar:** el acento queda persistido en `configJson`,
+editable después desde `/admin`, y los sitios ya vendidos no mutan solos cuando la regla
+cambie.
+**Por qué una regla y no una tabla de 30 valores a mano:** un rubro nuevo hereda sus tres
+variantes sin decisiones de color extra, y se apoya en la maquinaria OKLCH que D-25 ya
+había pagado. La tabla de override cubre las combinaciones puntuales que la regla no
+acierta, sin obligar a acertar las 30 por adelantado.
+**Dos límites que la regla NO puede superar, medidos sobre las 30 combinaciones:**
+1. **Un acento frío no se vuelve cálido.** Rotar hacia el ámbar por el arco corto cruza
+   el verde (`#0891B2` → `#4ba37a`) y por el largo cae en lavanda (`#9e7ec2`). Cálido y
+   frío son mitades opuestas del círculo. Por eso un tono a más de 90° del ámbar conserva
+   su tono y solo se ablanda; si un rubro frío necesita un cálido real, va al override.
+2. **Un acento ya en la cúspide del gamut no se puede hacer más vívido.** `#FF8C00` y
+   `#FF4500` están en el máximo croma que sRGB permite para su tono: `colorido` los
+   devuelve intactos. La garantía del estilo es negativa a propósito — *nunca menos
+   saturado ni más claro que el base* — porque la versión anterior los "cambiaba"
+   bajándoles la saturación, que es entregar un color peor disfrazado de opción.
+**Consecuencia:** esto lleva de 10 variantes visuales a 30, **no a unicidad por cliente**.
+Dos panaderías que respondan ambas "cálido" siguen recibiendo el mismo sitio. Se aceptó
+como piso, no como techo. `SiteConfigDTO.estilo` deja de ser un campo muerto. Queda
+desbloqueado S1 (LANDING).
+**Evidencia:** `src/domain/color/acentoPorEstilo.ts` (regla y transformaciones);
+`src/infrastructure/demo/rubroDefaults.ts` (`OVERRIDES_ACENTO`, `resolverColores`);
+`src/infrastructure/demo/DemoChatService.ts` y
+`src/infrastructure/claude/ClaudeChatService.ts` (punto de cableado);
+`tests/unit/domain/color/acentoPorEstilo.test.ts`; commits `627c2b1`, `965e247`,
+`0b6b101`, `2fa8d72`; Engram obs #612.
