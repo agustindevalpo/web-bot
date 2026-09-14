@@ -70,8 +70,8 @@ function LoginFormCampos({ emailInicial }: LoginFormProps) {
   const textoIntro = !desdePago
     ? 'Ingresa tu email para crear tu cuenta y seguir armando tu sitio.'
     : emailInicial
-      ? 'Diste clic en «Quiero mi sitio real» y ya tenemos tu email de la demo. Confírmalo y te enviamos un link de acceso para seguir con tu sitio real.'
-      : 'Diste clic en «Quiero mi sitio real». Ingresa tu email y te enviamos un link de acceso para seguir con tu sitio real.'
+      ? 'Hiciste clic en «Quiero mi sitio real» y ya tenemos tu email de la demo. Confírmalo y te enviamos un link de acceso para seguir con tu sitio real.'
+      : 'Hiciste clic en «Quiero mi sitio real». Ingresa tu email y te enviamos un link de acceso para seguir con tu sitio real.'
 
   return (
     <div className={styles.card}>

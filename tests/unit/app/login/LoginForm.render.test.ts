@@ -36,7 +36,7 @@ describe('LoginForm — render', () => {
     const markup = renderToStaticMarkup(React.createElement(LoginForm, { emailInicial: '' }))
 
     expect(markup).toContain(
-      'Diste clic en «Quiero mi sitio real». Ingresa tu email y te enviamos un link de acceso para seguir con tu sitio real.',
+      'Hiciste clic en «Quiero mi sitio real». Ingresa tu email y te enviamos un link de acceso para seguir con tu sitio real.',
     )
     expect(markup).not.toContain('ya tenemos tu email de la demo')
     expect(markup).toContain('value=""')
@@ -48,7 +48,7 @@ describe('LoginForm — render', () => {
     const markup = renderToStaticMarkup(React.createElement(LoginForm, { emailInicial: 'ana@ejemplo.cl' }))
 
     expect(markup).toContain(
-      'Diste clic en «Quiero mi sitio real» y ya tenemos tu email de la demo. Confírmalo y te enviamos un link de acceso para seguir con tu sitio real.',
+      'Hiciste clic en «Quiero mi sitio real» y ya tenemos tu email de la demo. Confírmalo y te enviamos un link de acceso para seguir con tu sitio real.',
     )
     expect(markup).toContain('value="ana@ejemplo.cl"')
   })
