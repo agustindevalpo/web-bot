@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import styles from './page.module.css'
 import { DemoCTA } from './DemoCTA'
 import { LeadForm } from './LeadForm'
+import { extraerOpciones } from './opciones'
 
 interface Mensaje {
   rol: 'user' | 'assistant'
@@ -50,6 +51,47 @@ function mensajeErrorLead(codigo: unknown): string {
   }
 }
 
+// Burbuja del asistente, separada del componente principal para poder
+// testear el marcado que produce (prosa + botones de opción) sin simular
+// clics — el proyecto "unit" de Jest corre en testEnvironment 'node' (sin
+// jsdom, ver jest.config.ts), así que solo se puede verificar el HTML
+// resultante, nunca la interacción.
+export function BurbujaAsistente({
+  contenido,
+  mostrarOpciones,
+  enviando,
+  onSeleccionarOpcion,
+}: {
+  contenido: string
+  mostrarOpciones: boolean
+  enviando: boolean
+  onSeleccionarOpcion: (opcion: string) => void
+}) {
+  const { texto, opciones } = extraerOpciones(contenido)
+
+  return (
+    <>
+      <div className={`${styles.burbuja} ${styles.bot}`}>{texto}</div>
+
+      {mostrarOpciones && opciones.length > 0 && (
+        <div className={styles.opciones}>
+          {opciones.map((opcion) => (
+            <button
+              key={opcion}
+              type="button"
+              className={styles.opcion}
+              onClick={() => onSeleccionarOpcion(opcion)}
+              disabled={enviando}
+            >
+              {opcion}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  )
+}
+
 export default function ChatWidget() {
   const sessionIdRef = useRef<string | null>(null)
   const [mensajes, setMensajes] = useState<Mensaje[]>([
@@ -72,8 +114,12 @@ export default function ChatWidget() {
     finRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [mensajes, enviando])
 
-  async function enviarMensaje() {
-    const texto = input.trim()
+  // `textoDirecto` permite mandar una opción clicada sin pasar por el
+  // estado `input` — un clic manda una sola cosa, no "elegir y luego
+  // apretar enviar". Sin argumento, se comporta como antes: manda lo que
+  // haya en la caja de texto.
+  async function enviarMensaje(textoDirecto?: string) {
+    const texto = (textoDirecto ?? input).trim()
     if (!texto || enviando || completada || limiteAlcanzado) return
 
     if (!sessionIdRef.current) sessionIdRef.current = obtenerSessionId()
@@ -170,14 +216,33 @@ export default function ChatWidget() {
       <header className={styles.header}>WebBot</header>
 
       <main className={styles.chat}>
-        {mensajes.map((m, i) => (
-          <div
-            key={i}
-            className={`${styles.burbuja} ${m.rol === 'user' ? styles.usuario : styles.bot}`}
-          >
-            {m.contenido}
-          </div>
-        ))}
+        {mensajes.map((m, i) => {
+          if (m.rol === 'user') {
+            return (
+              <div key={i} className={`${styles.burbuja} ${styles.usuario}`}>
+                {m.contenido}
+              </div>
+            )
+          }
+
+          // Los botones de opción solo se ofrecen en la última pregunta
+          // vigente: si el cliente ya avanzó la conversación, o si está en
+          // curso un envío, terminó, o se topó con el límite diario, la
+          // pregunta queda como texto simple (igual que si nunca hubiera
+          // tenido viñetas).
+          const esUltimo = i === mensajes.length - 1
+          const mostrarOpciones = esUltimo && !completada && !enviando && !limiteAlcanzado
+
+          return (
+            <BurbujaAsistente
+              key={i}
+              contenido={m.contenido}
+              mostrarOpciones={mostrarOpciones}
+              enviando={enviando}
+              onSeleccionarOpcion={(opcion) => enviarMensaje(opcion)}
+            />
+          )
+        })}
 
         {enviando && (
           <div className={`${styles.burbuja} ${styles.bot} ${styles.escribiendo}`}>
@@ -215,7 +280,7 @@ export default function ChatWidget() {
         />
         <button
           className={styles.enviar}
-          onClick={enviarMensaje}
+          onClick={() => enviarMensaje()}
           disabled={enviando || !input.trim() || completada || limiteAlcanzado}
         >
           Enviar
