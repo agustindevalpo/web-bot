@@ -8,9 +8,13 @@ const HEX_VALIDO = /^#[0-9a-f]{6}$/i
 // Distancia circular a 70° (ámbar) — sirve para comprobar que `calido`
 // efectivamente acerca el tono, sin acoplar el test a un valor de grados
 // exacto que dependería de redondeos de cuantización a 8 bits.
-function distanciaAAmbar(h: number): number {
-  const diff = Math.abs(h - 70) % 360
+function distanciaCircular(a: number, b: number): number {
+  const diff = Math.abs(a - b) % 360
   return diff > 180 ? 360 - diff : diff
+}
+
+function distanciaAAmbar(h: number): number {
+  return distanciaCircular(h, 70)
 }
 
 describe('derivarAcento — dirección de cada estilo', () => {
@@ -23,20 +27,89 @@ describe('derivarAcento — dirección de cada estilo', () => {
     expect(derivado.l).toBeCloseTo(original.l, 2)
   })
 
-  it('calido acerca el tono a 70° (ámbar) por el arco más corto', () => {
-    const acento = '#0891B2'
+  it('calido acerca al ámbar un acento que ya es cálido', () => {
+    const acento = '#e94560'
     const original = linealAOklch(hexALineal(acento)!)
     const derivado = linealAOklch(hexALineal(derivarAcento(acento, Estilo.CALIDO))!)
 
     expect(distanciaAAmbar(derivado.h)).toBeLessThan(distanciaAAmbar(original.h))
   })
 
-  it('colorido aumenta el croma', () => {
+  // El caso que motivó MAX_ROTACION_CALIDO: rotar estos dos daba verde menta por
+  // un lado y lavanda por el otro. La regla ahora los deja donde están.
+  it.each([
+    ['#0891B2', 'turquesa de dentista'],
+    ['#15DEFA', 'cian de consultora'],
+  ])('calido NO rota un acento frío de raíz (%s, %s)', (acento) => {
+    const original = linealAOklch(hexALineal(acento)!)
+    const derivado = linealAOklch(hexALineal(derivarAcento(acento, Estilo.CALIDO))!)
+
+    // 2° de tolerancia: el tono no se toca, pero subir la L y cuantizar a 8 bits
+    // lo corre una fracción de grado. Sin la tolerancia el test mide el
+    // redondeo, no la regla. Rotar de verdad movería ~60°.
+    expect(distanciaCircular(derivado.h, original.h)).toBeLessThan(2)
+  })
+
+  it('calido ablanda igual al acento frío que no rota', () => {
+    const acento = '#0891B2'
+    const original = linealAOklch(hexALineal(acento)!)
+    const derivado = linealAOklch(hexALineal(derivarAcento(acento, Estilo.CALIDO))!)
+
+    expect(derivado.l).toBeGreaterThan(original.l)
+  })
+
+  it('colorido aumenta el croma cuando el pedido entra en gamut', () => {
     const acento = '#8B4513'
     const original = linealAOklch(hexALineal(acento)!)
     const derivado = linealAOklch(hexALineal(derivarAcento(acento, Estilo.COLORIDO))!)
 
     expect(derivado.c).toBeGreaterThan(original.c)
+    expect(derivado.l).toBeCloseTo(original.l, 2)
+  })
+
+  // La rama que arregló el "colorido lavado". Estos acentos ya están contra el
+  // borde de sRGB: el croma pedido se recorta entero, así que la intensidad hay
+  // que buscarla bajando la L hacia la cúspide del gamut. Con el +0.02 de L que
+  // llevaba la primera versión salían MÁS pálidos que el base (`#FF4500` daba
+  // `#ff572a`). La garantía es negativa: nunca menos croma, nunca más claro.
+  it.each(['#FF8C00', '#FF4500', '#f0c040', '#f39c12', '#e94560', '#15DEFA'])(
+    'colorido nunca devuelve un acento menos saturado ni más claro que el base (%s)',
+    (acento) => {
+      const original = linealAOklch(hexALineal(acento)!)
+      const derivado = linealAOklch(hexALineal(derivarAcento(acento, Estilo.COLORIDO))!)
+
+      expect(derivado.c).toBeGreaterThanOrEqual(original.c)
+      // El épsilon absorbe la cuantización a 8 bits: cuando el croma pedido sí
+      // entra en gamut la L no se toca, pero el ida y vuelta por hex la corre
+      // hasta ~1e-3. Sin esto el test mide el redondeo, no la regla.
+      expect(derivado.l).toBeLessThanOrEqual(original.l + 0.002)
+    },
+  )
+
+  // Acentos oscuros: la búsqueda de cúspide barre 0.25 de L hacia abajo, así
+  // que con L < 0.25 parte del barrido caería en luminosidades negativas si no
+  // estuviera acotado. La garantía tiene que sostenerse igual.
+  it.each(['#2b0b0f', '#1a1a2e', '#0f3460'])(
+    'colorido sostiene la garantía con un acento oscuro (%s)',
+    (acento) => {
+      const original = linealAOklch(hexALineal(acento)!)
+      const derivado = linealAOklch(hexALineal(derivarAcento(acento, Estilo.COLORIDO))!)
+
+      expect(derivado.c).toBeGreaterThanOrEqual(original.c)
+      expect(derivado.l).toBeLessThanOrEqual(original.l + 0.002)
+      expect(derivado.l).toBeGreaterThanOrEqual(0)
+    },
+  )
+
+  // `#f0c040` sí tiene margen: su cúspide está por debajo de su L, así que acá
+  // la búsqueda tiene que encontrar croma de verdad, no empatar.
+  it('colorido gana croma real cuando el tono tiene margen bajo su cúspide', () => {
+    const acento = '#f0c040'
+    const original = linealAOklch(hexALineal(acento)!)
+    const derivado = linealAOklch(hexALineal(derivarAcento(acento, Estilo.COLORIDO))!)
+
+    expect(derivado.c).toBeGreaterThan(original.c)
+    expect(derivado.l).toBeLessThan(original.l)
   })
 })
 

@@ -151,7 +151,7 @@ export function razonContraste(hexA: string, hexB: string): number {
 
 const EPS_GAMUT = 1e-6
 
-function enGamut(rgb: RGB): boolean {
+export function enGamut(rgb: RGB): boolean {
   return [rgb.r, rgb.g, rgb.b].every((v) => v >= -EPS_GAMUT && v <= 1 + EPS_GAMUT)
 }
 
