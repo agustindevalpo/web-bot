@@ -151,7 +151,7 @@ export function razonContraste(hexA: string, hexB: string): number {
 
 const EPS_GAMUT = 1e-6
 
-function enGamut(rgb: RGB): boolean {
+export function enGamut(rgb: RGB): boolean {
   return [rgb.r, rgb.g, rgb.b].every((v) => v >= -EPS_GAMUT && v <= 1 + EPS_GAMUT)
 }
 
@@ -160,7 +160,7 @@ function enGamut(rgb: RGB): boolean {
 // y tono, pero se corta por iteraciones fijas y sin medir deltaEOK — para un
 // acento de UI la diferencia es invisible, y el research marcó la afirmación
 // sobre deltaEOK como corroboración secundaria, no verbatim de la spec.
-function mapearAGamut(color: OKLCH): RGB {
+export function mapearAGamut(color: OKLCH): RGB {
   const directo = oklchALineal(color)
   if (enGamut(directo)) return directo
 

@@ -643,7 +643,7 @@ color devuelto contra los tres fondos); research `sdd/plantillas-contraste/resea
 
 ## D-26 — Pendiente: de dónde sale el color de acento de cada cliente
 
-**Fecha:** 2026-09-12 · **Estado:** PENDIENTE — bloquea S1, no bloquea S0b
+**Fecha:** 2026-09-12 · **Estado:** RESUELTA — reemplazada por [D-27](#d-27--el-acento-sale-del-estilo-que-el-cliente-ya-responde-derivado-en-oklch-del-acento-del-rubro)
 **Contexto:** al preparar el rediseño se descubrió que el cliente nunca elige un color. La
 pregunta 7 del chat le ofrece un estilo ("Moderno y minimalista / Cálido y cercano /
 Colorido y llamativo"), la respuesta se parsea y se guarda en `SiteConfigDTO.estilo`, y
@@ -669,3 +669,214 @@ resuelto.
 `src/infrastructure/claude/ClaudeChatService.ts:141,175,207`;
 `src/infrastructure/demo/rubroDefaults.ts` (paletas por rubro); grep de `estilo` en
 `src/components/templates/` sin resultados fuera de `estiloCascada`, que es otra cosa.
+
+---
+
+## D-27 — El acento sale del estilo que el cliente ya responde, derivado en OKLCH del acento del rubro
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** resuelve la pregunta que [D-26](#d-26--pendiente-de-dónde-sale-el-color-de-acento-de-cada-cliente)
+dejó abierta y que bloqueaba S1 del rediseño de plantillas (D-23). De los tres caminos
+planteados ahí se eligió el primero: usar la respuesta de estilo que el chat ya pide y
+que hasta hoy se descartaba, sin sumarle preguntas al cliente.
+**Decisión:** el acento final de un sitio se deriva al **generarlo** (no al renderizarlo)
+como `mapearAGamut(transformar(oklch(acento_del_rubro), estilo))`, con una tabla de
+excepciones manuales `(rubro, estilo) → hex` que gana sobre la regla. Cada estilo aplica
+una transformación distinta: `moderno` baja el croma a 0.55×; `calido` rota el tono un
+40 % del arco hacia el ámbar (70°) y sube 0.04 de L; `colorido` pide 1.35× de croma y, si
+no entra en sRGB, busca la luminosidad que maximiza el croma que sobrevive al mapeo.
+**Por qué al generar y no al renderizar:** el acento queda persistido en `configJson`,
+editable después desde `/admin`, y los sitios ya vendidos no mutan solos cuando la regla
+cambie.
+**Por qué una regla y no una tabla de 30 valores a mano:** un rubro nuevo hereda sus tres
+variantes sin decisiones de color extra, y se apoya en la maquinaria OKLCH que D-25 ya
+había pagado. La tabla de override cubre las combinaciones puntuales que la regla no
+acierta, sin obligar a acertar las 30 por adelantado.
+**Dos límites que la regla NO puede superar, medidos sobre las 30 combinaciones:**
+1. **Un acento frío no se vuelve cálido.** Rotar hacia el ámbar por el arco corto cruza
+   el verde (`#0891B2` → `#4ba37a`) y por el largo cae en lavanda (`#9e7ec2`). Cálido y
+   frío son mitades opuestas del círculo. Por eso un tono a más de 90° del ámbar conserva
+   su tono y solo se ablanda; si un rubro frío necesita un cálido real, va al override.
+2. **Un acento ya en la cúspide del gamut no se puede hacer más vívido.** `#FF8C00` y
+   `#FF4500` están en el máximo croma que sRGB permite para su tono: `colorido` los
+   devuelve intactos. La garantía del estilo es negativa a propósito — *nunca menos
+   saturado ni más claro que el base* — porque la versión anterior los "cambiaba"
+   bajándoles la saturación, que es entregar un color peor disfrazado de opción.
+**Consecuencia:** esto lleva de 10 variantes visuales a 30, **no a unicidad por cliente**.
+Dos panaderías que respondan ambas "cálido" siguen recibiendo el mismo sitio. Se aceptó
+como piso, no como techo. `SiteConfigDTO.estilo` deja de ser un campo muerto. Queda
+desbloqueado S1 (LANDING).
+**Evidencia:** `src/domain/color/acentoPorEstilo.ts` (regla y transformaciones);
+`src/infrastructure/demo/rubroDefaults.ts` (`OVERRIDES_ACENTO`, `resolverColores`);
+`src/infrastructure/demo/DemoChatService.ts` y
+`src/infrastructure/claude/ClaudeChatService.ts` (punto de cableado);
+`tests/unit/domain/color/acentoPorEstilo.test.ts`; commits `627c2b1`, `965e247`,
+`0b6b101`, `2fa8d72`; Engram obs #612.
+
+---
+
+## D-28 — El rubro se deduce con evidencia local puntuada, y cuando no alcanza se pregunta
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** el rubro decide el template, la paleta y las fotos: es el dato que más
+define si el sitio "se ve como lo mío". Se deducía con `detectarRubro`, que recibía
+**solo el nombre del negocio** y comparaba por subcadena, devolviendo el primer rubro de
+la lista con una coincidencia y, si no había ninguna, `panaderia`. Medido sobre un corpus
+de 20 casos escritos como escribe la gente real —sin tildes, con faltas, con
+regionalismos chilenos— acertaba **5 de 20**: un taller mecánico llamado "Servicios
+Integrales SpA" salía con colores de pan y template `RESTAURANTE`.
+**Restricción que manda sobre el diseño:** clasificar con un LLM resolvería esto de
+raíz, y el código ya existe (`ClaudeChatService` le pregunta el rubro a Claude leyendo
+toda la conversación). Se descarta **por decisión de negocio, no técnica**: implica costo
+variable por demo y el producto todavía no genera ingresos. Se reevalúa cuando los haya.
+La demo pública —todo visitante sin plan activo, o sea todo prospecto— seguirá corriendo
+con deducción local.
+**Decisión:** cuatro piezas, todas locales y sin costo recurrente.
+1. `detectarRubro` recibe **nombre + descripción + servicios**, que es donde el cliente
+   sí dice a qué se dedica. Sube el acierto de 5/20 a 19/20 en el mismo corpus.
+2. La comparación es **por palabra**, no por subcadena: un keyword de 6 caracteres o más
+   se compara como prefijo (`veterinar` cubre sus derivados) y uno más corto como palabra
+   entera con plural opcional. Sin esto, ampliar el texto analizado convertía colisiones
+   raras en habituales: `pan` en "pantalones", `ropa` en "Europa", `corte` en "cortesía",
+   `moda` en "modalidad". El límite de palabra usa lookarounds sobre propiedades Unicode
+   porque `\b` de JavaScript es ASCII y se equivoca con tildes y con la ñ.
+3. Gana el rubro con **más coincidencias**, no el primero declarado; los empates se
+   rompen por orden de declaración y quedan expuestos al llamador. Antes, una veterinaria
+   que ofrecía "peluquería canina" se clasificaba como peluquería porque ese rubro está
+   declarado antes.
+4. El texto y los keywords se **normalizan sin tildes** antes de comparar, porque el
+   cliente escribe sin ellas. Efecto colateral aceptado y verificado: la ñ se pliega en n
+   (`ñ` se descompone en `n` + tilde combinante y no hay forma de separar ambos casos con
+   el mismo mecanismo). Se comprobó contra 30 palabras con ñ de uso corriente que no
+   genera ni un falso positivo.
+**El fallback deja de mentir.** Un rubro no reconocido ya no es `panaderia` sino `otro`,
+con paleta neutra (slate/grafito) y fotos genéricas. El template ya estaba resuelto y
+nunca se ejecutaba: `RUBRO_TEMPLATES` no tiene entrada para `otro`, así que
+`TEMPLATE_FALLBACK` (`LANDING`) aplica solo. `ClaudeChatService` tenía la misma mentira en
+`RUBRO_VISUAL_FALLBACK` y también se corrigió.
+**Caso especial del acento de `otro`:** para un rubro conocido, [D-27](#d-27--el-acento-sale-del-estilo-que-el-cliente-ya-responde-derivado-en-oklch-del-acento-del-rubro)
+transforma el acento **del rubro** porque ese acento es una identidad a preservar. `otro`
+no la tiene, así que el estilo elegido por el cliente decide el acento directamente:
+`moderno` `#556270`, `calido` `#b06a3b`, `colorido` `#0f8b8d`, los tres medidos por
+encima de 3:1 contra blanco. Es la variante que D-27 descartó para rubros conocidos, y acá
+es la correcta justamente porque no hay identidad que conservar. El módulo de dominio
+`acentoPorEstilo.ts` no conoce `otro`: el caso vive en `resolverColores`, con el resto de
+los datos por rubro.
+**Cuando el matcher no alcanza, se pregunta.** Si el puntaje es 0 o hay empate entre
+rubros distintos, el chat agrega **una novena pregunta** con las categorías en etiquetas
+para cliente y una salida explícita de "ninguno de estos". Va al final y no en el medio
+para no correr el destructuring posicional de `extraerDatos`, donde los primeros ocho
+índices significan siempre lo mismo. Un único helper arma el guion y tanto
+`procesarMensaje` como `conversacionCompleta` derivan de él, para que no puedan
+desincronizarse. `ChatWidget` no conoce el largo de la conversación, así que el front no
+cambia.
+**Lo que se descartó:** comparación difusa por distancia de edición para cubrir faltas de
+ortografía. A distancia 1, `pan` es también `pon`, `pin` y `can`, y `gato` es `gasto`: se
+ganan pocos aciertos y se compra una clase entera de falsos positivos difíciles de
+depurar. Con vocabulario amplio y normalización de tildes se cubren las faltas reales sin
+ese costo.
+**Consecuencia:** el vocabulario de `DETECCION_RUBRO` pasa a ser la palanca de mayor
+rendimiento y es **data, no algoritmo** — ampliarlo no requiere tocar código. Quedan
+detectadas como faltantes: `zapatos`, `zapatilla`, `queque`, `pasteler`, `barber`,
+`manicure`, `lubricentro`, `vacuna`, `cemento`, `colación`, `once` y un tronco `odontolog`
+que cubriría "odontológica"/"odontología"/"odontólogo" de una vez.
+**Evidencia:** `src/infrastructure/demo/rubroDefaults.ts` (normalización, puntaje,
+`RUBRO_OTRO`, `ACENTO_OTRO_POR_ESTILO`, `resolverColores`);
+`src/infrastructure/demo/DemoChatService.ts` (`construirScript`, pregunta guiada);
+`src/infrastructure/claude/ClaudeChatService.ts` (`RUBRO_VISUAL_FALLBACK`);
+`src/infrastructure/templates/rubroTemplates.ts` (`TEMPLATE_FALLBACK`);
+`tests/unit/infrastructure/demo/rubroDefaults.test.ts` y
+`tests/unit/infrastructure/demo/DemoChatService.test.ts`; commits `e0b3021`, `5caae5c`,
+`dfb3454`, `5ab9933`; verificado en vivo contra la Postgres local: un negocio que responde
+"ninguno de estos" queda con `rubro=otro`, `template=LANDING` y acento `#0f8b8d`.
+
+---
+
+## D-29 — Las opciones del chat se renderizan parseando las viñetas del propio mensaje
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** el chat demo hace dos preguntas de selección múltiple —el estilo visual y,
+condicionalmente, el rubro ([D-28](#d-28--el-rubro-se-deduce-con-evidencia-local-puntuada-y-cuando-no-alcanza-se-pregunta))—
+y el cliente tenía que **tipear** la respuesta. En una demo que es el argumento de venta,
+cada carácter que hay que escribir es una chance de abandono.
+**Decisión:** el widget detecta las opciones **parseando las líneas que empiezan con `• `**
+del mensaje del asistente, las quita de la prosa y las renderiza como botones. Un click
+envía la etiqueta **exacta y literal** como mensaje del chat. El campo de texto sigue
+habilitado: es un atajo, no una restricción.
+**Por qué parsear y no agregar un campo `opciones` a la respuesta de la API:** un campo
+estructurado es lo correcto en hexagonal —la presentación no debería leer prosa— pero acá
+se rompe contra la realidad de los dos servicios de chat. `ClaudeChatService` genera el
+texto de sus preguntas con el modelo y nunca podría poblar ese campo de forma confiable,
+así que habría botones solo en modo demo y tipeo a mano en el modo pagado: exactamente al
+revés de lo que se busca. Ambos servicios ya usan el mismo formato de viñeta, así que un
+solo parser sirve para los dos, y un mensaje sin viñetas simplemente no muestra botones y
+se responde escribiendo, como siempre.
+**Por qué el click envía y no selecciona:** un radio son dos acciones (elegir y enviar);
+un botón que envía es una. El objetivo es que el cliente trabaje lo mínimo.
+**Consecuencia — esto es lo que obliga:** el formato `• opción` deja de ser una convención
+de redacción y pasa a ser **un contrato** entre el texto de las preguntas y el front.
+Cambiar la viñeta por un guion, numerar las opciones o reformatear la lista **apaga los
+botones sin romper ningún test de backend**. Y la etiqueta se envía literal porque el
+backend busca esas palabras: `parseEstilo` matchea contra "cálid"/"cercano"/"colorido"/
+"llamativo" y el matcher de rubro acepta las etiquetas amigables — renumerar u
+"ordenar" las opciones rompe la deducción río abajo.
+**Alcance:** cero cambios de backend. `src/app/chat/opciones.ts` (función pura),
+`ChatWidget.tsx` y `page.module.css`.
+**Evidencia:** `src/app/chat/opciones.ts` (`extraerOpciones`);
+`src/app/chat/ChatWidget.tsx` (`BurbujaAsistente`);
+`tests/unit/app/chat/opciones.test.ts` y
+`tests/unit/app/chat/BurbujaAsistente.render.test.ts` — este último renderiza con
+`renderToStaticMarkup` porque `jest.config.ts` corre en `testEnvironment: 'node'` y no hay
+jsdom para probar clicks; commits `b3873f4`, `ee6cb66`. Verificado en navegador contra el
+entorno local: las tres opciones de estilo se renderizan como botones y el click envía
+"Cálido y cercano" con su tilde intacta.
+
+---
+
+## D-30 — El correo del lead se precarga en `/login` desde la cookie, nunca desde la URL
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** un visitante terminaba la demo, dejaba nombre y correo en el `LeadForm`, hacía
+clic en «Quiero mi sitio real →» y aterrizaba en `/login`, que le pedía **el mismo correo
+otra vez** con un texto que no respondía a lo que había clickeado ("Ingresa tu email para
+crear tu cuenta"). Clickeaba para comprar y la pantalla le hablaba de crear una cuenta.
+**Precisión sobre el aterrizaje en `/login`:** no es un defecto nuevo. `resolverEnlacePago`
+(`src/app/chat/hrefPago.ts`) devuelve `HREF_PAGO_FALLBACK` cuando
+`NEXT_PUBLIC_MERCADOPAGO_LINK_URL` no está definida, y en local no lo está. Se verificó
+que producción **sí** tiene el link real inlineado en el bundle (`https://mpago.la/...`),
+así que ese camino no se recorre en producción.
+**Decisión:** `/login` resuelve el correo **en el servidor**, siguiendo la cadena
+cookie `webbot_session` → `Sesion.clienteId` → `Cliente.email`, y lo precarga en el campo,
+editable. `HREF_PAGO_FALLBACK` pasa a `/login?desde=pago`, y con ese marcador el texto
+responde a lo que la persona clickeó.
+**Por qué no `?email=` en la URL, que era lo obvio:** un correo en la query string queda en
+el historial del navegador, en los logs del servidor y en la cabecera `Referer` hacia
+cualquier recurso externo de la página. El dato ya es alcanzable desde la cookie, así que
+exponerlo no compra nada y sí agrega superficie. Un marcador de intención (`desde=pago`)
+sí puede ir en la URL: no es dato personal.
+**Degradación obligatoria:** cualquier eslabón ausente —sin cookie, sesión no encontrada,
+sesión sin `clienteId` porque el lead todavía no se capturó, cliente no encontrado— o un
+repositorio que falle, devuelve `''` y el campo arranca vacío, que es el comportamiento de
+siempre. `resolverEmailPrefill` nunca propaga el error: sería absurdo romper la puerta de
+entrada por una comodidad.
+**Consecuencia estructural:** `/login/page.tsx` deja de ser un único componente cliente y
+pasa a ser un componente de servidor que resuelve el dato más `LoginForm.tsx` con
+`'use client'`, igual que `src/app/chat/` ya separa `ChatWidget`, `LeadForm` y `DemoCTA`.
+El nombre de la cookie se extrajo a `src/app/chat/sessionCookie.ts` para que el servidor
+pueda importarlo sin cruzar la frontera `'use client'`.
+**Nota de idioma:** el texto dice "Hiciste clic", no "Diste clic". "Dar clic" es uso
+mexicano y colombiano; los clientes de WebBot son negocios chilenos.
+**Pendiente relacionado, deliberadamente fuera de este cambio:** hoy un link de pago
+**ausente** cae a `/login` sin ninguna alarma, mientras que un link de *pruebas* levanta un
+banner rojo (D-22). El caso más caro —el botón de compra convertido en un login— es el
+único sin aviso. Se difirió a un cambio posterior por decisión del usuario, dado que
+`NEXT_PUBLIC_*` se inlinea en tiempo de build y por lo tanto la variable no puede
+"caerse" en runtime: el fallo requiere un build corrido sin la variable, y su reparación
+exige recargarla **y reconstruir**.
+**Evidencia:** `src/app/login/emailPrefill.ts` (`resolverEmailPrefill`, pura e inyectada);
+`src/app/login/page.tsx` (componente de servidor); `src/app/login/LoginForm.tsx`;
+`src/app/chat/sessionCookie.ts`; `src/app/chat/hrefPago.ts:10`;
+`tests/unit/app/login/emailPrefill.test.ts` (6 casos, incluido el repositorio que lanza) y
+`tests/unit/app/login/LoginForm.render.test.ts`; commits `a8a7770`, `666ad11`, `f9707f2`.
+Verificado en navegador contra el entorno local: el correo del lead aparece precargado y el
+texto nombra el botón que se clickeó.

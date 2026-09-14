@@ -95,15 +95,15 @@ describe('DemoCTA — render (R10/S10.1)', () => {
       expect(markup).toContain('Pago único por Mercado Pago')
     })
 
-    it('cae a /login sin target=_blank cuando NEXT_PUBLIC_MERCADOPAGO_LINK_URL no está configurada', () => {
+    it('cae a /login?desde=pago sin target=_blank cuando NEXT_PUBLIC_MERCADOPAGO_LINK_URL no está configurada', () => {
       process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000'
       delete process.env.NEXT_PUBLIC_MERCADOPAGO_LINK_URL
       const DemoCTA = requerirDemoCTAFresco()
 
       const markup = renderToStaticMarkup(React.createElement(DemoCTA, { subdominioDemo: 'demo-e2e' }))
 
-      expect(markup).toMatch(/<a href="\/login"[^>]*>Quiero mi sitio real/)
-      expect(markup).not.toMatch(/<a href="\/login"[^>]*target="_blank"/)
+      expect(markup).toMatch(/<a href="\/login\?desde=pago"[^>]*>Quiero mi sitio real/)
+      expect(markup).not.toMatch(/<a href="\/login\?desde=pago"[^>]*target="_blank"/)
       expect(markup).not.toContain('Pago único por Mercado Pago')
       expect(markup).toContain('Sin contratos ni permanencia mínima.')
     })

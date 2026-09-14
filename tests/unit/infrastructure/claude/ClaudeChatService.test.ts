@@ -213,9 +213,12 @@ describe('parseSiteConfig — normalización', () => {
   })
 
   it('rellena template/colores/imagenes desde RUBRO_DEFAULTS según el rubro', () => {
+    // El acento ya no es el crudo de RUBRO_DEFAULTS: jsonBase() manda
+    // estilo "moderno", así que pasa por derivarAcento antes de llegar acá
+    // (ver src/domain/color/acentoPorEstilo.ts).
     const datos = parseSiteConfig(jsonBase({ rubro: 'veterinaria' }))
     expect(datos.template).toBe('SERVICIOS')
-    expect(datos.colores).toEqual({ primario: '#6C5CE7', secundario: '#a29bfe', acento: '#fd79a8', texto: '#ffffff' })
+    expect(datos.colores).toEqual({ primario: '#6C5CE7', secundario: '#a29bfe', acento: '#dc93a9', texto: '#ffffff' })
     expect(datos.imagenes?.length).toBeGreaterThan(0)
   })
 

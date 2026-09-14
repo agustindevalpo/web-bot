@@ -1,13 +1,17 @@
 // Resuelve a dónde lleva el CTA "Quiero mi sitio real" (WB-43). Módulo puro,
 // sin leer env: DemoCTA.tsx le pasa NEXT_PUBLIC_MERCADOPAGO_LINK_URL. Mientras la variable
-// no esté configurada, el CTA sigue llevando a /login como hasta ahora.
+// no esté configurada, el CTA sigue cayendo a /login (ver HREF_PAGO_FALLBACK).
 
 export interface EnlacePago {
   href: string
   externo: boolean
 }
 
-export const HREF_PAGO_FALLBACK = '/login'
+// `desde=pago` es un marcador de intención, no un dato personal: /login lo usa
+// para explicarle a quien llegó acá que vino del botón de compra, en vez de
+// mostrarle el texto genérico de "crear tu cuenta" (ver LoginForm.tsx). No
+// cambia a dónde lleva el fallback, solo por qué se ve como se ve al llegar.
+export const HREF_PAGO_FALLBACK = '/login?desde=pago'
 
 export function resolverEnlacePago(url: string | undefined): EnlacePago {
   const limpia = url?.trim() ?? ''
