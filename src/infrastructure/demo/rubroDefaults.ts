@@ -130,12 +130,51 @@ const DETECCION_RUBRO: Array<{ keywords: string[]; rubro: string }> = [
   { keywords: ['ropa', 'boutique', 'moda', 'vestido', 'tienda', 'indumentaria', 'calzado', 'accesorio'], rubro: 'tienda' },
 ]
 
+// A partir de esta longitud un keyword se compara como PREFIJO de palabra
+// (`veterinar` cubre veterinaria y veterinario sin listar los dos); por debajo
+// se compara como palabra ENTERA, admitiendo el plural.
+//
+// La distinción no es cosmética. Mientras `detectarRubro` solo miraba el nombre
+// del negocio, comparar por subcadena casi no molestaba porque el texto era
+// corto. Desde que mira también la descripción y los servicios, `pan` convierte
+// "pantalones" en panadería, `ropa` convierte "Europa" en tienda, `corte`
+// convierte "cortesía" en peluquería y `moda` convierte "modalidad" en tienda.
+const LARGO_MINIMO_PREFIJO = 6
+
+// `\b` de JavaScript es ASCII y se equivoca con acentos y ñ, que abundan acá
+// ("peluquería", "ñandú"). Por eso el límite de palabra se expresa con
+// lookarounds sobre las propiedades Unicode de letra y número.
+const LIMITE_IZQ = '(?<![\\p{L}\\p{N}])'
+const LIMITE_DER = '(?![\\p{L}\\p{N}])'
+
+function patronDe(keyword: string): RegExp {
+  const escapado = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const cuerpo =
+    keyword.length >= LARGO_MINIMO_PREFIJO ? escapado : `${escapado}(?:es|s)?${LIMITE_DER}`
+
+  return new RegExp(`${LIMITE_IZQ}${cuerpo}`, 'iu')
+}
+
+// Los patrones se compilan una sola vez, al cargar el módulo: `detectarRubro`
+// corre por cada sitio generado y no tiene por qué rearmar ~90 expresiones.
+const DETECCION_COMPILADA = DETECCION_RUBRO.map((entrada) => ({
+  rubro: entrada.rubro,
+  patrones: entrada.keywords.map(patronDe),
+}))
+
+/**
+ * Deduce el rubro a partir de lo que el cliente escribió. Se le pasa el nombre
+ * del negocio JUNTO CON la descripción y los servicios: el nombre por sí solo
+ * es justamente el campo donde un negocio real no dice a qué se dedica
+ * ("Servicios Integrales SpA", "Aurora"), y mirándolo solo a él la deducción
+ * caía en `RUBRO_DEFAULT` para casi cualquier cliente.
+ */
 export function detectarRubro(textoUsuario: string): string {
-  const texto = textoUsuario.toLowerCase()
-  for (const entrada of DETECCION_RUBRO) {
-    if (entrada.keywords.some((kw) => texto.includes(kw))) {
+  for (const entrada of DETECCION_COMPILADA) {
+    if (entrada.patrones.some((patron) => patron.test(textoUsuario))) {
       return entrada.rubro
     }
   }
+
   return RUBRO_DEFAULT
 }

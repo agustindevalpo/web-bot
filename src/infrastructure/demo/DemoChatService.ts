@@ -79,7 +79,11 @@ export class DemoChatService implements IChatService {
     const respuestas = historial.filter((m) => m.rol === 'user').map((m) => m.contenido)
     const [nombre, descripcion, serviciosTexto, ciudad, contactoTexto, redesTexto, estiloTexto, highlight] = respuestas
 
-    const rubro = detectarRubro(nombre ?? '')
+    // El rubro se deduce del nombre MÁS la descripción y los servicios: es en
+    // esos dos donde el cliente dice a qué se dedica ("somos un taller
+    // mecánico", "clínica dental"). Mirando solo el nombre, cualquier negocio
+    // que no se llamara como su rubro terminaba en RUBRO_DEFAULT.
+    const rubro = detectarRubro([nombre, descripcion, serviciosTexto].filter(Boolean).join(' '))
     const defaults = RUBRO_DEFAULTS[rubro] ?? RUBRO_DEFAULTS[RUBRO_DEFAULT]
     const estilo = parseEstilo(estiloTexto ?? '')
 
