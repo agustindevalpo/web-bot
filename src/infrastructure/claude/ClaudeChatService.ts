@@ -3,7 +3,7 @@ import { IChatService } from '@/application/services/IChatService'
 import { MensajeDTO } from '@/application/dtos/MensajeDTO'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
-import { RUBRO_DEFAULTS } from '@/infrastructure/demo/rubroDefaults'
+import { RUBRO_DEFAULTS, RUBRO_OTRO, resolverColores } from '@/infrastructure/demo/rubroDefaults'
 import { TemplateService } from '@/infrastructure/templates/TemplateService'
 import { ClaudeServiceError } from './claudeErrors'
 
@@ -27,7 +27,11 @@ const RUBROS_VALIDOS = [
   'otro',
 ] as const
 
-const RUBRO_VISUAL_FALLBACK = 'panaderia'
+// Antes apuntaba a "panaderia": un rubro que Claude devuelve pero que no
+// está en RUBROS_VALIDOS terminaba con colores y fotos de panadería sin
+// ninguna relación con el negocio real. RUBRO_OTRO (rubroDefaults.ts) es el
+// mismo catch-all neutro que usa el matcher local de DemoChatService.
+const RUBRO_VISUAL_FALLBACK = RUBRO_OTRO
 
 const ESTILOS_VALIDOS: readonly string[] = Object.values(Estilo)
 
@@ -118,10 +122,19 @@ export function parseSiteConfig(textoCrudo: string): SiteConfigDTO {
     throw extraccionFallidaError()
   }
 
-  const defaults = RUBRO_DEFAULTS[rubro] ?? RUBRO_DEFAULTS[RUBRO_VISUAL_FALLBACK]
+  // Rubro que efectivamente aporta los colores: "otro" ya tiene su propia
+  // entrada neutra en RUBRO_DEFAULTS, así que en el caso normal esto es
+  // simplemente `rubro`. RUBRO_VISUAL_FALLBACK queda como defensa extra por
+  // si algún valor normalizado quedara sin entrada propia — nunca debería
+  // pasar, porque RUBROS_VALIDOS y RUBRO_DEFAULTS se mantienen en sync a
+  // mano, pero de fallar silenciosamente sería peor que caer a un rubro
+  // conocido.
+  const rubroColores = RUBRO_DEFAULTS[rubro] ? rubro : RUBRO_VISUAL_FALLBACK
+  const defaults = RUBRO_DEFAULTS[rubroColores]
 
   const contactoRaw = (raw.contacto ?? {}) as Record<string, unknown>
   const formulario = normalizarFormulario(contactoRaw.formulario)
+  const estilo = normalizarEstilo(raw.estilo)
 
   const config: SiteConfigDTO = {
     nombre,
@@ -136,9 +149,9 @@ export function parseSiteConfig(textoCrudo: string): SiteConfigDTO {
       ...(formulario ? { formulario } : {}),
     },
     redes: normalizarRedes(raw.redes),
-    estilo: normalizarEstilo(raw.estilo),
+    estilo,
     highlight: typeof raw.highlight === 'string' ? raw.highlight : '',
-    colores: defaults.colores,
+    colores: resolverColores(rubroColores, defaults.colores, estilo),
     imagenes: defaults.imagenes,
   }
 

@@ -51,6 +51,47 @@
   font-style: italic;
 }
 
+.opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-self: flex-start;
+  max-width: 80%;
+}
+
+.opcion {
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #15defa;
+  background: transparent;
+  color: #15defa;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.opcion:hover:not(:disabled) {
+  background: #15defa;
+  color: #080056;
+}
+
+.opcion:focus-visible {
+  outline: 2px solid #15defa;
+  outline-offset: 2px;
+}
+
+.opcion:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opcion {
+    transition: none;
+  }
+}
+
 .error {
   align-self: center;
   color: #ff8080;
@@ -102,6 +143,10 @@
 
 @media (max-width: 480px) {
   .burbuja {
+    max-width: 90%;
+  }
+
+  .opciones {
     max-width: 90%;
   }
 

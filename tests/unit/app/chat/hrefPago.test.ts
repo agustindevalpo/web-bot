@@ -20,12 +20,12 @@ describe('resolverEnlacePago (WB-43)', () => {
     ['http sin TLS', 'http://mpago.la/abc123'],
     ['ruta relativa', '/pagar'],
     ['esquema javascript', 'javascript:alert(1)'],
-  ])('cae a /login cuando la URL es %s', (_caso, url) => {
+  ])('cae al fallback de /login cuando la URL es %s', (_caso, url) => {
     expect(resolverEnlacePago(url)).toEqual({ href: HREF_PAGO_FALLBACK, externo: false })
   })
 
-  it('el fallback es /login', () => {
-    expect(HREF_PAGO_FALLBACK).toBe('/login')
+  it('el fallback es /login con el marcador de intención desde=pago', () => {
+    expect(HREF_PAGO_FALLBACK).toBe('/login?desde=pago')
   })
 })
 

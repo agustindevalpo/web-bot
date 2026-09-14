@@ -899,6 +899,43 @@ solo por sus tests de render y por el flujo HTTP.
 
 ---
 
+## Fundaciones de plantillas (S0a) — rama `feature/plantillas-fundaciones` (2026-09-12)
+
+Primer ciclo SDD del rediseño de plantillas descrito en D-23/D-24. S0a no entrega ninguna
+plantilla visible — entrega lo que las 6 plantillas SPA futuras van a compartir:
+
+- **Tokens estructurales** `--wb-tpl-*` en `src/styles/tokens.css` (ink, ink-muted,
+  ink-faint, line, surface, surface-soft, whatsapp, placeholder), con comentario de mapeo
+  a los nombres del handoff y sin colisión con `--wb-color-*` ni con
+  `--primario/--secundario/--acento/--texto`.
+- **`src/styles/motion.css`** (nuevo, no `globals.css`): keyframes `dvUp`/`dvFade`, el
+  contrato `data-dv-anim` como único selector que enciende una animación, el guard de
+  `prefers-reduced-motion: reduce` con `!important` (necesario por la aritmética de
+  especificidad: (0,3,0) contra (0,1,0)), y el fallback sin JS — sin `data-dv-ready`
+  (seteado solo por el mount effect del wrapper) ninguna sección se oculta.
+- **Montserrat** extendida a los pesos 300–800 y **`shared/fuentes.ts`** (Instrument
+  Serif 400/400 itálica) cargable solo por los templates editoriales que llegan en S1 —
+  sin importador todavía, a propósito: el layout raíz también sirve la landing comercial,
+  `/chat` y `/admin`.
+- **`shared/navegacion.ts`**: `filtrarSecciones` (descarta una entrada solo si
+  `contenido == null`, nunca por falsiness — `0` y `''` sobreviven) y `estiloCascada`
+  (delay de cascada por índice). Cubiertas con `it.each` tabla-driven, 13 casos nuevos.
+- **`shared/SeccionesSPA.tsx` + `.module.css`**: primer `'use client'` bajo `templates/`.
+  Posee el id de sección activa y un `IntersectionObserver`; las 4 secciones siempre se
+  renderizan (nunca se desmontan, solo se ocultan por CSS) para no sacar contenido del
+  HTML. Nav móvil como fila con scroll horizontal — el hamburguesa `<768px` queda diferido
+  a S1 desde el arranque, no como contingencia.
+
+**Verificación real:** `npx tsc --noEmit`, `npm run lint` y `npm run build` en verde;
+`npm run test:unit` en 554/554 (53 suites, sube de la base 541/52 por los 13 casos de
+`navegacion.test.ts`). Sin test automatizado para el comportamiento interactivo del
+wrapper (`useState`, `IntersectionObserver`) — `jest.config.ts` corre `testEnvironment:
+'node'` sin jsdom y esta cadena no lo agrega; llega con Playwright en S1.
+
+**Sin consumidor todavía:** ningún template importa `SeccionesSPA` ni `fuentes.ts` en
+S0a — LANDING (S1) es el primero. `git diff --stat src/app/globals.css` queda vacío.
+
+---
 
 ## Decisiones que se apartan del roadmap original
 
