@@ -92,8 +92,32 @@ export const RUBRO_DEFAULTS: Record<string, RubroVisualDefaults> = {
       'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800',
     ],
   },
+  // Catch-all cuando `detectarRubro` no reconoce nada (ver RUBRO_OTRO más
+  // abajo): antes un negocio no reconocido se reportaba como "panaderia" con
+  // total confianza y heredaba colores y template de panadería sin tener
+  // nada que ver — colores neutros (slate/grafito) y fotos genéricas de
+  // oficina, sin ninguna seña de rubro, para no mentirle al cliente sobre su
+  // propio negocio. RUBRO_TEMPLATES no tiene entrada para "otro" a propósito
+  // (ver rubroTemplates.ts): TEMPLATE_FALLBACK (LANDING) aplica solo.
+  otro: {
+    colores: { primario: '#3b4252', secundario: '#4c566a', acento: '#556270', texto: '#ffffff' },
+    imagenes: [
+      'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200',
+      'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800',
+    ],
+  },
 }
 
+// Clave del catch-all — ver comentario en RUBRO_DEFAULTS.otro y en
+// resolverColores. `detectarRubro` la devuelve cuando ninguna palabra clave
+// matchea; también es la que ya usa ClaudeChatService.normalizarRubro para
+// un rubro que Claude reporta pero que no está en RUBROS_VALIDOS.
+export const RUBRO_OTRO = 'otro'
+
+// Histórico: hasta este cambio, un rubro no reconocido caía acá
+// ("panaderia") en vez de a un fallback neutro (ver RUBRO_OTRO). Se conserva
+// exportado por si algún llamador todavía la necesita, pero `detectarRubro`
+// ya NO la usa como valor de retorno.
 export const RUBRO_DEFAULT = 'panaderia'
 
 // Escape hatch manual: combinaciones (rubro, estilo) donde la regla de
@@ -105,30 +129,62 @@ export const RUBRO_DEFAULT = 'panaderia'
 // valor derivado — ver `resolverColores` más abajo.
 export const OVERRIDES_ACENTO: Partial<Record<string, Partial<Record<Estilo, string>>>> = {}
 
+// Caso especial de "otro": para un rubro conocido, `derivarAcento` transforma
+// el acento DEL RUBRO (D-27, docs/DECISIONES.md) porque ese acento ya es una
+// identidad a preservar. "otro" no tiene esa identidad — es un negocio que
+// nuestro matcher local no supo clasificar — así que no hay base de rubro
+// que transformar: acá el estilo elegido por el cliente es la única señal
+// real, y decide el acento directamente. Los tres valores pasan >=3:1 de
+// contraste contra blanco (razonContraste, contraste.ts): moderno 6.24:1,
+// calido 4.23:1, colorido 4.12:1 — medido, no supuesto (ver informe de la
+// Pieza 3 del cambio). Vive acá y no en acentoPorEstilo.ts a propósito: ese
+// módulo de dominio no conoce rubros ni "otro" (ver su cabecera).
+const ACENTO_OTRO_POR_ESTILO: Record<Estilo, string> = {
+  [Estilo.MODERNO]: '#556270',
+  [Estilo.CALIDO]: '#b06a3b',
+  [Estilo.COLORIDO]: '#0f8b8d',
+}
+
 // Punto único donde se decide el acento final de un sitio: primero la
-// excepción manual (OVERRIDES_ACENTO), y si no hay ninguna, la derivación
-// automática (acentoPorEstilo.ts). Vive acá y no en el dominio porque
-// OVERRIDES_ACENTO es dato de infraestructura — el dominio no puede
-// depender de él sin invertir la capa (ver AGENTS.md, límite hexagonal).
+// excepción manual (OVERRIDES_ACENTO), luego el caso especial de "otro", y
+// si no aplica ninguno, la derivación automática (acentoPorEstilo.ts). Vive
+// acá y no en el dominio porque OVERRIDES_ACENTO es dato de infraestructura
+// — el dominio no puede depender de él sin invertir la capa (ver AGENTS.md,
+// límite hexagonal).
 export function resolverColores(rubro: string, colores: ColoresRubro, estilo: Estilo): ColoresRubro {
   const override = OVERRIDES_ACENTO[rubro]?.[estilo]
   if (override) return { ...colores, acento: override }
 
+  if (rubro === RUBRO_OTRO) return { ...colores, acento: ACENTO_OTRO_POR_ESTILO[estilo] }
+
   return derivarColores(colores, estilo)
 }
 
+// Nota sobre "odontologia" y "odontólogo": a simple vista parecen el mismo
+// par accent/sin-accent que panadería/panaderia, pero NO lo son — son dos
+// palabras distintas ("odontología" = la disciplina, "odontólogo" = el
+// profesional) que difieren en un carácter más allá de la tilde
+// (...odontolog[o] contra ...odontolog[ia]). Tras la normalización de la
+// Pieza 2 siguen sin colisionar (se verificó carácter a carácter), así que
+// se conservan ambas — a diferencia de los 4 pares de abajo que sí son la
+// misma palabra repetida con y sin tilde.
 const DETECCION_RUBRO: Array<{ keywords: string[]; rubro: string }> = [
-  { keywords: ['pan', 'panadería', 'panaderia', 'torta', 'repostería', 'horno', 'hallulla', 'marraqueta'], rubro: 'panaderia' },
-  { keywords: ['pelo', 'peluquería', 'peluqueria', 'cabello', 'corte', 'colorimetría', 'salón', 'salon', 'beauty', 'estética'], rubro: 'peluqueria' },
+  { keywords: ['pan', 'panadería', 'torta', 'repostería', 'horno', 'hallulla', 'marraqueta'], rubro: 'panaderia' },
+  { keywords: ['pelo', 'peluquería', 'cabello', 'corte', 'colorimetría', 'salón', 'beauty', 'estética'], rubro: 'peluqueria' },
   { keywords: ['diente', 'dental', 'dentista', 'odontólogo', 'odontologia', 'boca', 'ortodoncia', 'clínica dental'], rubro: 'dentista' },
   { keywords: ['restaurant', 'restorán', 'comida', 'menú', 'almuerzo', 'cena', 'cocina', 'café', 'cafetería', 'picada'], rubro: 'restaurante' },
   { keywords: ['contab', 'tributar', 'impuesto', 'renta', 'sii', 'asesor', 'consultor', 'contador'], rubro: 'consultora' },
   { keywords: ['auto', 'mecánic', 'taller', 'motor', 'freno', 'aceite', 'vehículo', 'camion'], rubro: 'taller' },
   { keywords: ['yoga', 'meditación', 'pilates', 'bienestar', 'mindfulness', 'zen', 'relajación'], rubro: 'yoga' },
-  { keywords: ['ferretería', 'ferreteria', 'herramienta', 'construcción', 'pintura', 'gasfiter', 'electricidad'], rubro: 'ferreteria' },
+  { keywords: ['ferretería', 'herramienta', 'construcción', 'pintura', 'gasfiter', 'electricidad'], rubro: 'ferreteria' },
   { keywords: ['veterinar', 'mascota', 'perro', 'gato', 'animal', 'clínica animal', 'veterinaria'], rubro: 'veterinaria' },
   { keywords: ['ropa', 'boutique', 'moda', 'vestido', 'tienda', 'indumentaria', 'calzado', 'accesorio'], rubro: 'tienda' },
 ]
+
+// Las 10 categorías reconocidas por el matcher local, en el mismo orden de
+// declaración de arriba — lo usa DemoChatService para ofrecer la lista
+// completa como opciones cuando la detección da 0 puntaje (ver Pieza 4).
+export const RUBROS_CONOCIDOS: readonly string[] = DETECCION_RUBRO.map((entrada) => entrada.rubro)
 
 // A partir de esta longitud un keyword se compara como PREFIJO de palabra
 // (`veterinar` cubre veterinaria y veterinario sin listar los dos); por debajo
@@ -147,34 +203,103 @@ const LARGO_MINIMO_PREFIJO = 6
 const LIMITE_IZQ = '(?<![\\p{L}\\p{N}])'
 const LIMITE_DER = '(?![\\p{L}\\p{N}])'
 
+// El cliente escribe sin tildes con frecuencia ("odontologica", "relajacion",
+// "construccion"). NFD descompone cada letra acentuada en base + marca
+// combinante (ej. 'ó' → 'o' + U+0301) y el rango \u0300-\u036f cubre esas
+// marcas — se quitan y queda solo la base. Se aplica TANTO al texto del
+// cliente como a cada keyword antes de compilar el patrón: si solo se
+// normalizara un lado, "construcción" (keyword, con tilde) dejaría de
+// matchear "construccion" (texto del cliente, sin tilde).
+//
+// Esto también pliega la ñ a n, porque 'ñ' se descompone en 'n' + U+0303
+// (COMBINING TILDE) — no es un caso especial, es la misma regla. Se revisó
+// si eso genera colisiones con el vocabulario de DETECCION_RUBRO (del tipo
+// "año"/"ano") y no existe ninguna: ningún keyword de la lista depende de
+// distinguir ñ de n. Se probó además con casos fuera del vocabulario
+// ("Ñandú", "mañana", "pequeño") y ninguno coincide con ningún keyword ni
+// con ni sin el pliegue — ver tests.
+function normalizarDiacriticos(texto: string): string {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
 function patronDe(keyword: string): RegExp {
-  const escapado = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const normalizado = normalizarDiacriticos(keyword)
+  const escapado = normalizado.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const cuerpo =
-    keyword.length >= LARGO_MINIMO_PREFIJO ? escapado : `${escapado}(?:es|s)?${LIMITE_DER}`
+    normalizado.length >= LARGO_MINIMO_PREFIJO ? escapado : `${escapado}(?:es|s)?${LIMITE_DER}`
 
   return new RegExp(`${LIMITE_IZQ}${cuerpo}`, 'iu')
 }
 
 // Los patrones se compilan una sola vez, al cargar el módulo: `detectarRubro`
-// corre por cada sitio generado y no tiene por qué rearmar ~90 expresiones.
+// corre por cada sitio generado y no tiene por qué rearmar ~70 expresiones.
 const DETECCION_COMPILADA = DETECCION_RUBRO.map((entrada) => ({
   rubro: entrada.rubro,
   patrones: entrada.keywords.map(patronDe),
 }))
+
+export interface ResultadoDeteccion {
+  // Rubro ganador — el de más keywords matcheadas; en empate, el primero en
+  // orden de declaración (ver DETECCION_RUBRO). "otro" cuando nadie matcheó.
+  rubro: string
+  // Cantidad de keywords distintas que matchearon para `rubro`. 0 cuando
+  // nadie matcheó nada — ese es justamente el caso en que `rubro` es "otro".
+  hits: number
+  // Otros rubros que empataron en el máximo puntaje, en orden de
+  // declaración, "rubro" incluido como primer elemento. Longitud > 1 solo
+  // cuando hubo empate real; array vacío si un rubro ganó solo o si nadie
+  // matcheó nada (0 no es un empate, es ausencia de señal).
+  candidatosEmpatados: string[]
+}
+
+/**
+ * Igual que `detectarRubro`, pero expone el detalle que DemoChatService
+ * necesita para decidir si hace falta preguntar (Pieza 4): cuántas keywords
+ * matchearon y si hubo empate entre rubros distintos. `detectarRubro` no
+ * cambia de firma para no tocar a sus llamadores existentes — este es el
+ * punto de entrada nuevo.
+ *
+ * Antes se devolvía el PRIMER rubro con algún match, en orden de
+ * declaración — así "Patitas / clínica veterinaria / vacunas, consultas,
+ * peluquería canina" caía en `peluqueria` (1 match: "peluquería") en vez de
+ * `veterinaria` (2 matches: "veterinar" y "veterinaria", ambos sobre la
+ * misma palabra del texto), solo porque peluquería está declarada antes en
+ * la lista. Contar hits y quedarse con el máximo corrige eso sin tocar el
+ * orden de DETECCION_RUBRO, que sigue decidiendo los empates.
+ */
+export function detectarRubroDetallado(textoUsuario: string): ResultadoDeteccion {
+  const textoNormalizado = normalizarDiacriticos(textoUsuario)
+
+  const puntajes = DETECCION_COMPILADA.map((entrada) => ({
+    rubro: entrada.rubro,
+    hits: entrada.patrones.filter((patron) => patron.test(textoNormalizado)).length,
+  }))
+
+  const maxHits = Math.max(0, ...puntajes.map((p) => p.hits))
+  if (maxHits === 0) {
+    return { rubro: RUBRO_OTRO, hits: 0, candidatosEmpatados: [] }
+  }
+
+  const empatados = puntajes.filter((p) => p.hits === maxHits).map((p) => p.rubro)
+  return {
+    rubro: empatados[0],
+    hits: maxHits,
+    candidatosEmpatados: empatados.length > 1 ? empatados : [],
+  }
+}
 
 /**
  * Deduce el rubro a partir de lo que el cliente escribió. Se le pasa el nombre
  * del negocio JUNTO CON la descripción y los servicios: el nombre por sí solo
  * es justamente el campo donde un negocio real no dice a qué se dedica
  * ("Servicios Integrales SpA", "Aurora"), y mirándolo solo a él la deducción
- * caía en `RUBRO_DEFAULT` para casi cualquier cliente.
+ * caía en RUBRO_OTRO para casi cualquier cliente.
+ *
+ * Cuando nada matchea devuelve RUBRO_OTRO en vez de un rubro cualquiera
+ * (ver RUBRO_DEFAULTS.otro): reportar con total confianza "panaderia" para
+ * un negocio no reconocido le heredaba colores y plantilla de panadería sin
+ * ninguna relación real.
  */
 export function detectarRubro(textoUsuario: string): string {
-  for (const entrada of DETECCION_COMPILADA) {
-    if (entrada.patrones.some((patron) => patron.test(textoUsuario))) {
-      return entrada.rubro
-    }
-  }
-
-  return RUBRO_DEFAULT
+  return detectarRubroDetallado(textoUsuario).rubro
 }

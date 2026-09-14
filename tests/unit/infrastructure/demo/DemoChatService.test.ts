@@ -24,10 +24,17 @@ describe('DemoChatService', () => {
     expect(respuesta).toContain('productos o servicios')
   })
 
+  // Contenido "Panadería" (en vez del genérico "respuesta test" que tenía
+  // este test) a propósito: nombre/descripción/servicios salen de las 3
+  // primeras respuestas de usuario, y con texto genérico sin ninguna
+  // keyword el matcher da puntaje 0 — eso agrega la 9na pregunta guiada de
+  // la Pieza 4 y el flujo deja de terminar en la 8va respuesta, que es
+  // justo lo que este test verifica. Con "Panadería" el rubro es confiable
+  // (matchea "panadería", sin empate) y el guion base de 8 se mantiene.
   it('devuelve el mensaje final tras la 8va respuesta de usuario, coincidiendo con la conversación completa', async () => {
     const historial: MensajeDTO[] = Array.from({ length: 14 }, (_, i) => ({
       rol: i % 2 === 0 ? 'user' : 'assistant',
-      contenido: 'respuesta test',
+      contenido: 'Panadería',
       timestamp: new Date(),
     })) // 7 user + 7 assistant ya registradas
     const respuesta = await service.procesarMensaje(historial, 'última respuesta')
@@ -37,7 +44,7 @@ describe('DemoChatService', () => {
   it('marca conversación como completa después de 8 respuestas de usuario', () => {
     const historial: MensajeDTO[] = Array.from({ length: 16 }, (_, i) => ({
       rol: i % 2 === 0 ? 'user' : 'assistant',
-      contenido: 'respuesta test',
+      contenido: 'Panadería',
       timestamp: new Date(),
     }))
     expect(service.conversacionCompleta(historial)).toBe(true)
@@ -74,10 +81,18 @@ describe('DemoChatService', () => {
       })
     })
 
-    it('usa panaderia como fallback cuando no detecta rubro', async () => {
+    // Antes esta aserción esperaba "panaderia": un rubro no reconocido caía
+    // ahí con total confianza, heredando colores y plantilla de panadería
+    // sin ninguna relación real (ver Pieza 3 del cambio "acento y estilo").
+    // Se corrige a "otro" porque contradice el comportamiento nuevo, que es
+    // el que pidió el usuario — no se debilita la cobertura, se corrige la
+    // expectativa. Con un solo mensaje en el historial (no hay 9na
+    // respuesta) `extraerDatos` usa el texto original, que no matchea nada.
+    it('usa "otro" como fallback neutro cuando no detecta rubro', async () => {
       const historial: MensajeDTO[] = [{ rol: 'user', contenido: 'xkcd 1234 empresa xyz', timestamp: new Date() }]
       const datos = await service.extraerDatos(historial)
-      expect(datos.rubro).toBe('panaderia')
+      expect(datos.rubro).toBe('otro')
+      expect(datos.template).toBe('LANDING')
     })
   })
 
