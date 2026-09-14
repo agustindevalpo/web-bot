@@ -7,7 +7,7 @@
 
 ## Estado general
 
-**Última sesión:** 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
+**Última sesión:** 2026-09-13 — **Acento derivado del estilo (D-27), detección local de rubro con fallback neutro (D-28), opciones clicables en el chat (D-29) y precarga del correo en login (D-30)**, todo desplegado: `main` = `develop` = `ac079d7`, sin nada esperando. S0a y S0b del rediseño de plantillas también llegaron a producción; **S1 (LANDING) quedó desbloqueado pero pendiente de D-31**. Ver [Acento por estilo, detección de rubro y despliegue al día](#acento-por-estilo-detección-de-rubro-y-despliegue-al-día-2026-09-13). Sesión anterior: 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
 **Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 **Seguimiento también en Jira:** proyecto **WB (Web-Bot)** en `devalpo-team.atlassian.net` — espejo del roadmap. Estaba desactualizado respecto a esta bitácora al empezar la sesión del 14/08 (varios tickets de Fase 2 seguían en "Tareas por hacer" ya terminados); si no se sincronizó todavía en esta sesión, hacerlo antes de dar por buena la vista de Jira.
@@ -934,6 +934,103 @@ wrapper (`useState`, `IntersectionObserver`) — `jest.config.ts` corre `testEnv
 
 **Sin consumidor todavía:** ningún template importa `SeccionesSPA` ni `fuentes.ts` en
 S0a — LANDING (S1) es el primero. `git diff --stat src/app/globals.css` queda vacío.
+
+---
+
+## Acento por estilo, detección de rubro y despliegue al día (2026-09-13)
+
+Sesión larga, de un solo hilo: arrancó desbloqueando S1 del rediseño de plantillas y
+terminó con producción al día por primera vez en la semana. Cuatro decisiones nuevas
+(D-27 a D-30), una pendiente registrada (D-31) y siete ciclos desplegados.
+
+**`main` = `develop` = `ac079d7`.** No queda nada mergeado esperando despliegue.
+
+### D-27 — el acento sale del estilo que el cliente ya responde
+
+Cerró D-26, que bloqueaba S1. El chat preguntaba el estilo visual, guardaba la respuesta y
+ninguna plantilla la leía: dos panaderías recibían colores idénticos. Ahora el acento se
+deriva en OKLCH del acento del rubro según el estilo, al generar el sitio.
+
+Lo que valió más que el código fue **generar las 30 combinaciones y mirarlas**, tres veces.
+Cada vuelta encontró algo que ni el código ni los tests decían:
+
+1. La primera matriz mostró `calido` dando verde menta en los rubros fríos y `colorido`
+   casi sin efecto: 6 de 10 acentos ya estaban en el borde del gamut.
+2. El arreglo de `calido` cambió verde por lavanda. **Lo cazó un test que ya existía**:
+   "calido acerca el tono al ámbar" empezó a fallar porque el arco largo aleja. El test
+   tenía razón y la corrección estaba mal.
+3. Al instrumentar `colorido` para medir en vez de suponer, apareció que oscurecer BAJA el
+   croma en los naranjas de cúspide.
+
+Dos límites quedaron medidos y escritos en el ADR para que nadie los reintente: un acento
+frío no se vuelve cálido por rotación, y uno ya en la cúspide del gamut no se puede hacer
+más vívido dentro de sRGB.
+
+`contraste.ts` se mudó a `src/domain/color/`: no tenía importadores, así que costaba cero
+hoy y una cadena de PRs en dos ciclos más.
+
+### D-28 — el rubro se deduce de lo que el cliente describe
+
+Agustín probó el chat con datos cualquiera y le salió una panadería. `detectarRubro`
+recibía **solo el nombre del negocio** y comparaba por subcadena, cayendo en `panaderia`
+cuando no reconocía nada. Medido sobre un corpus de 20 casos escritos como escribe la
+gente —sin tildes, con faltas, con regionalismos chilenos—: **5 de 20**.
+
+Ahora recibe nombre + descripción + servicios: **19 de 20**. Más puntaje por cantidad de
+coincidencias (una veterinaria con "peluquería canina" se clasificaba como peluquería),
+tildes normalizadas, y un fallback neutro `otro` que reemplaza la mentira de `panaderia`.
+Cuando el matcher no alcanza, el chat hace una novena pregunta con las categorías.
+
+Clasificar con un LLM resolvería esto de raíz y el código ya existe, pero **se descartó por
+costo variable mientras el producto no genere ingresos** — decisión de negocio, registrada
+como tal para que dentro de seis meses se sepa que ya se pensó.
+
+### D-29 y D-30 — dos fricciones de la demo
+
+Las preguntas de opción múltiple ahora se responden con un click en vez de tipeando, y el
+login dejó de pedir el correo que el visitante ya dejó en el lead. Los dos salieron de
+mirar el flujo en el navegador, no de leer código.
+
+### El despliegue
+
+PR #34, uno solo, 1.819 líneas. Se propuso cortado en cuatro PRs encadenados contra el
+presupuesto de 400 líneas de D-23; Agustín eligió uno solo con el argumento correcto: es el
+único revisor.
+
+Sin CI en el repo, así que la barrera fue manual: 695 tests sobre `develop` ya integrado
+—no sobre la rama—, `tsc`, lint y **`next build` antes de tocar `main`**, que es el que los
+tests no cubren y el que puede tirar producción. Sin migraciones.
+
+Railway tardó **80 segundos**. Smoke test sin escribir en la base de producción, para no
+dejar basura como el registro `demo-cea59ef1` que quedó de la vez anterior.
+
+### Estado del rediseño de plantillas
+
+S0a y S0b en producción. **S1 (LANDING) desbloqueado y sin empezar.** Las cinco plantillas
+actuales están intactas: nadie nota diferencia todavía, y eso es exactamente lo que D-23
+diseñó para el ciclo cero.
+
+Antes de arrancar S1 hay que resolver **D-31**: el handoff colapsa las cuatro variables de
+paleta a una sola, y `primario`, `secundario` y `texto` quedan huérfanos en sitios que ya
+están publicados.
+
+### Trampas nuevas encontradas
+
+- **Git Bash + curl destruye los acentos.** Un heredoc con "leña" llega al servidor como
+  U+FFFD. No es bug del app: verificado que un POST desde node con `fetch` guarda
+  "Panadería Ñandú" intacto. Para probar flujos con texto en español, usar node.
+- **Docker Desktop no está en `C:\Program Files`**, sino en
+  `%LOCALAPPDATA%\Programs\DockerDesktop`.
+- Al probar el chat en Chrome, el input se deshabilita mientras envía y pierde el foco: hay
+  que hacer click antes de cada mensaje. Y `computer type` mutila las tildes.
+- `/login` pasó de estático a dinámico al leer la cookie en el servidor.
+
+### Queda abierto
+
+Ampliar el vocabulario de `DETECCION_RUBRO` —es data, no algoritmo, y es la palanca de
+mayor rendimiento que queda— · decidir si `veterinaria` en `colorido` va al override ·
+alarma cuando **falta** el link de pago, que hoy es el único fallo sin ningún aviso · y
+D-31 antes de S1.
 
 ---
 

@@ -880,3 +880,39 @@ exige recargarla **y reconstruir**.
 `tests/unit/app/login/LoginForm.render.test.ts`; commits `a8a7770`, `666ad11`, `f9707f2`.
 Verificado en navegador contra el entorno local: el correo del lead aparece precargado y el
 texto nombra el botón que se clickeó.
+
+---
+
+## D-31 — Pendiente: qué pasa con `primario`, `secundario` y `texto` cuando el diseño colapsa a un solo acento
+
+**Fecha:** 2026-09-13 · **Estado:** PENDIENTE — bloquea S1, no bloquea nada de lo desplegado
+**Contexto:** `PLAN-SLICES.md` lo lista como uno de los riesgos del rediseño y sigue sin
+resolverse. Hoy `src/components/templates/shared/palette.ts` inyecta **cuatro** variables
+CSS por sitio (`--primario`, `--secundario`, `--acento`, `--texto`) desde
+`configJson.colores`. El handoff de diseño se construye alrededor de **una sola**:
+`--acento`. [D-27](#d-27--el-acento-sale-del-estilo-que-el-cliente-ya-responde-derivado-en-oklch-del-acento-del-rubro)
+resolvió de dónde sale ese acento, pero no qué pasa con los otros tres.
+**Decisión:** SIN TOMAR. Tres caminos, sin evaluar todavía:
+(1) mantener las cuatro variables por compatibilidad y que las plantillas nuevas usen solo
+`--acento`, dejando tres huérfanas vivas en cada `configJson`;
+(2) migrar `configJson` de los sitios existentes a la forma nueva;
+(3) derivar `primario`, `secundario` y `texto` del acento con la misma maquinaria OKLCH de
+[D-25](#d-25--el-clamp-de-contraste-s0b-es-búsqueda-binaria-con-guarda-no-un-corte-fijo-de-luminosidad),
+y dejar de persistirlos.
+**Por qué hay que decidirlo antes de S1:** S1 (`LANDING`) es el primer ciclo que toca una
+plantilla de verdad, así que es el primero que se topa con el contrato de paleta. Y el
+riesgo no es estético: `PLAN-SLICES.md` advierte que el cambio **afecta cómo se ven los
+sitios ya publicados**. Hay sitios servidos en producción cuyo `configJson` tiene los
+cuatro colores; cualquiera de los tres caminos decide si esos sitios cambian de aspecto,
+cuándo, y si hace falta tocar datos.
+**Consecuencia mientras siga pendiente:** no bloquea nada de lo que está en producción —
+las cinco plantillas actuales siguen leyendo las cuatro variables y nadie nota nada. Sí
+bloquea S1, y con S1 los cinco ciclos de plantilla que dependen de él.
+**Recomendación registrada:** por tocar datos de sitios ya vendidos y por tener ambigüedad
+real entre tres caminos con consecuencias distintas, es el primer caso de esta serie donde
+un ciclo SDD completo se justifica de verdad. D-27 y D-28 no lo necesitaron porque la
+ambigüedad se resolvió conversando; acá hay estado persistido de por medio.
+**Evidencia:** `src/components/templates/shared/palette.ts:10-20` (las cuatro variables);
+`docs/design_handoff_plantillas_webbot/PLAN-SLICES.md`, tabla de riesgos, fila "Cambio del
+contrato de paleta"; `src/application/dtos/SiteConfigDTO.ts` (`colores` con los cuatro
+campos); sitios en producción servidos por `/sites/[subdominio]`.
