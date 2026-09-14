@@ -830,3 +830,53 @@ backend busca esas palabras: `parseEstilo` matchea contra "cálid"/"cercano"/"co
 jsdom para probar clicks; commits `b3873f4`, `ee6cb66`. Verificado en navegador contra el
 entorno local: las tres opciones de estilo se renderizan como botones y el click envía
 "Cálido y cercano" con su tilde intacta.
+
+---
+
+## D-30 — El correo del lead se precarga en `/login` desde la cookie, nunca desde la URL
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** un visitante terminaba la demo, dejaba nombre y correo en el `LeadForm`, hacía
+clic en «Quiero mi sitio real →» y aterrizaba en `/login`, que le pedía **el mismo correo
+otra vez** con un texto que no respondía a lo que había clickeado ("Ingresa tu email para
+crear tu cuenta"). Clickeaba para comprar y la pantalla le hablaba de crear una cuenta.
+**Precisión sobre el aterrizaje en `/login`:** no es un defecto nuevo. `resolverEnlacePago`
+(`src/app/chat/hrefPago.ts`) devuelve `HREF_PAGO_FALLBACK` cuando
+`NEXT_PUBLIC_MERCADOPAGO_LINK_URL` no está definida, y en local no lo está. Se verificó
+que producción **sí** tiene el link real inlineado en el bundle (`https://mpago.la/...`),
+así que ese camino no se recorre en producción.
+**Decisión:** `/login` resuelve el correo **en el servidor**, siguiendo la cadena
+cookie `webbot_session` → `Sesion.clienteId` → `Cliente.email`, y lo precarga en el campo,
+editable. `HREF_PAGO_FALLBACK` pasa a `/login?desde=pago`, y con ese marcador el texto
+responde a lo que la persona clickeó.
+**Por qué no `?email=` en la URL, que era lo obvio:** un correo en la query string queda en
+el historial del navegador, en los logs del servidor y en la cabecera `Referer` hacia
+cualquier recurso externo de la página. El dato ya es alcanzable desde la cookie, así que
+exponerlo no compra nada y sí agrega superficie. Un marcador de intención (`desde=pago`)
+sí puede ir en la URL: no es dato personal.
+**Degradación obligatoria:** cualquier eslabón ausente —sin cookie, sesión no encontrada,
+sesión sin `clienteId` porque el lead todavía no se capturó, cliente no encontrado— o un
+repositorio que falle, devuelve `''` y el campo arranca vacío, que es el comportamiento de
+siempre. `resolverEmailPrefill` nunca propaga el error: sería absurdo romper la puerta de
+entrada por una comodidad.
+**Consecuencia estructural:** `/login/page.tsx` deja de ser un único componente cliente y
+pasa a ser un componente de servidor que resuelve el dato más `LoginForm.tsx` con
+`'use client'`, igual que `src/app/chat/` ya separa `ChatWidget`, `LeadForm` y `DemoCTA`.
+El nombre de la cookie se extrajo a `src/app/chat/sessionCookie.ts` para que el servidor
+pueda importarlo sin cruzar la frontera `'use client'`.
+**Nota de idioma:** el texto dice "Hiciste clic", no "Diste clic". "Dar clic" es uso
+mexicano y colombiano; los clientes de WebBot son negocios chilenos.
+**Pendiente relacionado, deliberadamente fuera de este cambio:** hoy un link de pago
+**ausente** cae a `/login` sin ninguna alarma, mientras que un link de *pruebas* levanta un
+banner rojo (D-22). El caso más caro —el botón de compra convertido en un login— es el
+único sin aviso. Se difirió a un cambio posterior por decisión del usuario, dado que
+`NEXT_PUBLIC_*` se inlinea en tiempo de build y por lo tanto la variable no puede
+"caerse" en runtime: el fallo requiere un build corrido sin la variable, y su reparación
+exige recargarla **y reconstruir**.
+**Evidencia:** `src/app/login/emailPrefill.ts` (`resolverEmailPrefill`, pura e inyectada);
+`src/app/login/page.tsx` (componente de servidor); `src/app/login/LoginForm.tsx`;
+`src/app/chat/sessionCookie.ts`; `src/app/chat/hrefPago.ts:10`;
+`tests/unit/app/login/emailPrefill.test.ts` (6 casos, incluido el repositorio que lanza) y
+`tests/unit/app/login/LoginForm.render.test.ts`; commits `a8a7770`, `666ad11`, `f9707f2`.
+Verificado en navegador contra el entorno local: el correo del lead aparece precargado y el
+texto nombra el botón que se clickeó.
