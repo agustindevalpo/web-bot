@@ -789,3 +789,44 @@ que cubriría "odontológica"/"odontología"/"odontólogo" de una vez.
 `tests/unit/infrastructure/demo/DemoChatService.test.ts`; commits `e0b3021`, `5caae5c`,
 `dfb3454`, `5ab9933`; verificado en vivo contra la Postgres local: un negocio que responde
 "ninguno de estos" queda con `rubro=otro`, `template=LANDING` y acento `#0f8b8d`.
+
+---
+
+## D-29 — Las opciones del chat se renderizan parseando las viñetas del propio mensaje
+
+**Fecha:** 2026-09-13 · **Estado:** vigente
+**Contexto:** el chat demo hace dos preguntas de selección múltiple —el estilo visual y,
+condicionalmente, el rubro ([D-28](#d-28--el-rubro-se-deduce-con-evidencia-local-puntuada-y-cuando-no-alcanza-se-pregunta))—
+y el cliente tenía que **tipear** la respuesta. En una demo que es el argumento de venta,
+cada carácter que hay que escribir es una chance de abandono.
+**Decisión:** el widget detecta las opciones **parseando las líneas que empiezan con `• `**
+del mensaje del asistente, las quita de la prosa y las renderiza como botones. Un click
+envía la etiqueta **exacta y literal** como mensaje del chat. El campo de texto sigue
+habilitado: es un atajo, no una restricción.
+**Por qué parsear y no agregar un campo `opciones` a la respuesta de la API:** un campo
+estructurado es lo correcto en hexagonal —la presentación no debería leer prosa— pero acá
+se rompe contra la realidad de los dos servicios de chat. `ClaudeChatService` genera el
+texto de sus preguntas con el modelo y nunca podría poblar ese campo de forma confiable,
+así que habría botones solo en modo demo y tipeo a mano en el modo pagado: exactamente al
+revés de lo que se busca. Ambos servicios ya usan el mismo formato de viñeta, así que un
+solo parser sirve para los dos, y un mensaje sin viñetas simplemente no muestra botones y
+se responde escribiendo, como siempre.
+**Por qué el click envía y no selecciona:** un radio son dos acciones (elegir y enviar);
+un botón que envía es una. El objetivo es que el cliente trabaje lo mínimo.
+**Consecuencia — esto es lo que obliga:** el formato `• opción` deja de ser una convención
+de redacción y pasa a ser **un contrato** entre el texto de las preguntas y el front.
+Cambiar la viñeta por un guion, numerar las opciones o reformatear la lista **apaga los
+botones sin romper ningún test de backend**. Y la etiqueta se envía literal porque el
+backend busca esas palabras: `parseEstilo` matchea contra "cálid"/"cercano"/"colorido"/
+"llamativo" y el matcher de rubro acepta las etiquetas amigables — renumerar u
+"ordenar" las opciones rompe la deducción río abajo.
+**Alcance:** cero cambios de backend. `src/app/chat/opciones.ts` (función pura),
+`ChatWidget.tsx` y `page.module.css`.
+**Evidencia:** `src/app/chat/opciones.ts` (`extraerOpciones`);
+`src/app/chat/ChatWidget.tsx` (`BurbujaAsistente`);
+`tests/unit/app/chat/opciones.test.ts` y
+`tests/unit/app/chat/BurbujaAsistente.render.test.ts` — este último renderiza con
+`renderToStaticMarkup` porque `jest.config.ts` corre en `testEnvironment: 'node'` y no hay
+jsdom para probar clicks; commits `b3873f4`, `ee6cb66`. Verificado en navegador contra el
+entorno local: las tres opciones de estilo se renderizan como botones y el click envía
+"Cálido y cercano" con su tilde intacta.
