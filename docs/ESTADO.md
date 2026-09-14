@@ -9,7 +9,7 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-12 · `main` = `7f88280` · `develop` = `e8eb3cf`
+> **Última regeneración:** 2026-09-13 · `main` = `be9decc` · `develop` = `f4a9b9d`
 
 ---
 
@@ -77,15 +77,20 @@ src/
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `7f88280`, desplegado y verificado en vivo el 2026-09-12):**
+**En producción (`main` = `be9decc`, desplegado y verificado en vivo el 2026-09-13):**
 landing con precio único y promo · chat demo que genera un `Sitio` real · gate de lead
 (nombre + correo antes de revelar el sitio) · los 5 templates · dominios propios vía
 Cloudflare · panel `/admin` (pausar, reactivar, asignar dominio, editar `configJson`,
-confirmar pago y activar) · link de pago de Mercado Pago · **metadata y Open Graph
-propios por sitio**.
+confirmar pago y activar) · link de pago de Mercado Pago · metadata y Open Graph
+propios por sitio · **fundaciones del rediseño de plantillas** (tokens estructurales,
+motion.css, clamp de contraste en OKLCH, SeccionesSPA — S0a y S0b de D-23, sin plantilla
+visible todavía) · **acento derivado del estilo que el cliente elige** (D-27) ·
+**deducción de rubro sobre descripción y servicios, con fallback neutro y pregunta guiada**
+(D-28) · **opciones del chat clicables** (D-29) · **login que precarga el correo de la
+demo** (D-30).
 
-**En `develop`, sin adelanto sobre producción:** `develop` = `e8eb3cf` es el mismo
-contenido que `main`; `7f88280` solo agrega el commit de release.
+**En `develop`, sin adelanto sobre producción:** `develop` = `f4a9b9d` es el mismo
+contenido que `main`; `be9decc` solo agrega el commit de release.
 
 **No construido / inerte:**
 
