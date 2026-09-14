@@ -148,4 +148,95 @@ describe('DemoChatService', () => {
       expect(datos.imagenes?.length).toBeGreaterThan(0)
     })
   })
+
+  // Pieza 4: una 9na pregunta condicional, solo cuando el matcher local no
+  // tiene con qué decidir (puntaje 0). `procesarMensaje` y
+  // `conversacionCompleta` derivan del mismo guion interno (construirScript)
+  // para no poder desincronizarse — estos tests verifican esa propiedad
+  // desde afuera, con los dos métodos públicos.
+  describe('la pregunta guiada de rubro (guion de 8 vs 9 preguntas)', () => {
+    // Nombre + descripción + servicios sin ninguna keyword reconocible —
+    // confirmado con detectarRubroDetallado antes de escribir el test.
+    const respuestasAmbiguas = [
+      'Servicios Generales del Sur',
+      'Atendemos distintas necesidades de la comunidad',
+      'Trámites, gestión, apoyo administrativo',
+      'Rancagua',
+      '+56 9 5555 5555',
+      'sin redes',
+      'Moderno',
+      'Más de 10 años de trayectoria',
+    ]
+
+    const respuestasConfiables = [
+      'Panadería El Trigal',
+      'Vendemos pan artesanal y pastelería',
+      'Pan de masa madre, tortas, hallullas',
+      'Viña del Mar',
+      '+56 9 1234 5678 contacto@eltrigal.cl',
+      '@panaderiaeltrigal',
+      'Cálido y cercano',
+      '20 años de tradición familiar',
+    ]
+
+    function historialDeUsuario(respuestas: string[]): MensajeDTO[] {
+      return respuestas.map((contenido) => ({ rol: 'user' as const, contenido, timestamp: new Date() }))
+    }
+
+    it('con rubro ambiguo, agrega la pregunta guiada como 9na pregunta en vez del mensaje final', async () => {
+      // Historial con las 7 primeras respuestas ya registradas; la llamada
+      // actual envía la 8va (highlight). Con el guion base (7 preguntas,
+      // índices 0-6) esto devolvería el mensaje final — acá debe devolver la
+      // pregunta guiada en su lugar.
+      const historial = historialDeUsuario(respuestasAmbiguas.slice(0, 7))
+      const respuesta = await service.procesarMensaje(historial, respuestasAmbiguas[7])
+
+      expect(respuesta).toContain('categorías')
+      expect(respuesta).toContain('Ninguno de estos')
+      expect(respuesta).not.toContain('Perfecto')
+    })
+
+    it('con rubro confiable, NO agrega la pregunta guiada: responde el mensaje final de siempre', async () => {
+      const historial = historialDeUsuario(respuestasConfiables.slice(0, 7))
+      const respuesta = await service.procesarMensaje(historial, respuestasConfiables[7])
+
+      expect(respuesta).toContain('Perfecto')
+    })
+
+    it('conversacionCompleta exige 9 respuestas cuando el rubro es ambiguo, no 8', () => {
+      const con8 = historialDeUsuario(respuestasAmbiguas)
+      expect(service.conversacionCompleta(con8)).toBe(false)
+
+      const con9 = historialDeUsuario([...respuestasAmbiguas, 'Ninguno de estos'])
+      expect(service.conversacionCompleta(con9)).toBe(true)
+    })
+
+    it('conversacionCompleta exige solo 8 respuestas cuando el rubro es confiable', () => {
+      const con8 = historialDeUsuario(respuestasConfiables)
+      expect(service.conversacionCompleta(con8)).toBe(true)
+    })
+
+    it('procesarMensaje y conversacionCompleta concuerdan: mientras uno sigue preguntando, el otro no marca completa', () => {
+      const con8Ambiguas = historialDeUsuario(respuestasAmbiguas)
+      expect(service.conversacionCompleta(con8Ambiguas)).toBe(false)
+
+      const con8Confiables = historialDeUsuario(respuestasConfiables)
+      expect(service.conversacionCompleta(con8Confiables)).toBe(true)
+    })
+
+    it('responder la pregunta guiada con una etiqueta reconocida fija ese rubro', async () => {
+      const historial = historialDeUsuario([...respuestasAmbiguas, 'Peluquería o salón de belleza'])
+      const datos = await service.extraerDatos(historial)
+
+      expect(datos.rubro).toBe('peluqueria')
+    })
+
+    it('responder "ninguno de estos" deja el rubro en "otro"', async () => {
+      const historial = historialDeUsuario([...respuestasAmbiguas, 'Ninguno de estos'])
+      const datos = await service.extraerDatos(historial)
+
+      expect(datos.rubro).toBe('otro')
+      expect(datos.template).toBe('LANDING')
+    })
+  })
 })
