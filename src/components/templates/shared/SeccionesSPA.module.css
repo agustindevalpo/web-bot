@@ -4,12 +4,23 @@
  * TIENDA, que suma la franja de promo y baja a 74px de alto).
  */
 
+/*
+ * Sticky (WB-plantillas-landing-spa, S1): con las cuatro secciones apiladas
+ * en una sola página larga, el header tiene que seguir alcanzable mientras
+ * se hace scroll, no solo estar arriba del todo al cargar. `z-index` por
+ * encima del contenido de las secciones que scrollea debajo; el botón
+ * flotante de WhatsApp de LANDING usa z-index:20 y no se superpone con el
+ * header (extremos opuestos de la pantalla).
+ */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  height: 78px;
+  height: var(--wb-spa-header-alto);
   padding: 0 44px;
   border-bottom: 1px solid var(--wb-tpl-line);
   background: var(--wb-tpl-surface);
@@ -46,6 +57,10 @@
   border: none;
   background: none;
   cursor: pointer;
+  /* Ahora es un `<a>` (S1, ver SeccionesSPA.tsx), no un `<button>`: el
+   * subrayado nativo de enlace lo reemplaza el `::after` de abajo, que ya
+   * existía para marcar el ítem activo. */
+  text-decoration: none;
   font: 500 12.5px var(--font-montserrat), sans-serif;
   color: var(--wb-tpl-ink-muted);
   white-space: nowrap;
@@ -82,16 +97,21 @@
 
 /*
  * Shell raíz (header + main + pie) como columna flex que ocupa como mínimo
- * el viewport. Corrige el defecto donde una sección corta (Servicios,
- * Nosotros, Contacto en LANDING) dejaba el footer flotando arriba de un
- * vacío blanco: sin esto el root queda en `display: block` y su alto es
- * solo la suma de sus hijos.
+ * el viewport. Corrige el defecto donde una página con contenido corto
+ * dejaba el footer flotando arriba de un vacío blanco: sin esto el root
+ * queda en `display: block` y su alto es solo la suma de sus hijos.
  *
  * `100vh` primero como fallback para motores viejos, `100dvh` después para
  * descontar la barra de UI del navegador en mobile — si `100dvh` no es
  * válido, el navegador ignora esa declaración y conserva la anterior.
+ *
+ * `--wb-spa-header-alto` es la única fuente del alto del header (lo consume
+ * `.header` más abajo) y del offset de `scroll-margin-top` de cada sección.
+ * Duplicado en JS como `ALTO_HEADER_PX` (SeccionesSPA.tsx) para el
+ * `rootMargin` del scrollspy — ver el comentario de esa constante.
  */
 .shell {
+  --wb-spa-header-alto: 78px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -100,66 +120,60 @@
 
 /*
  * `flex: 1 1 auto` (no `flex: 1`, que fuerza `flex-basis: 0%`): el alto de
- * contenido de la sección activa sigue siendo la base, y solo crece para
- * absorber el sobrante cuando el shell es más alto que el contenido, y ese
- * sobrante es justo lo que `.main` le reparte a su hijo activo vía
- * `margin-block: auto` más abajo.
+ * contenido de `.main` sigue siendo la base, y solo crece para absorber el
+ * sobrante cuando el shell es más alto que el contenido — así el footer
+ * (hijo siguiente del shell, fuera de `.main`) queda pegado abajo cuando la
+ * página es corta.
  *
  * `min-height: 0` se mantiene: sin esto, un ítem flex no puede encogerse
  * por debajo del alto de su contenido y una sección muy alta desborda el
  * shell en vez de dejar que el propio contenido controle el scroll de la
  * página.
  *
- * `.main` pasa a ser column-flex (antes era un bloque simple) porque el
- * centrado por `margin-block: auto` del hijo de abajo solo existe como
- * mecanismo de flexbox/grid — en flujo de bloque normal, `margin-top/bottom:
- * auto` se resuelve siempre en 0, no centra nada.
+ * Sin `display: flex` (WB-plantillas-landing-spa, S1 — antes era column-flex
+ * para poder centrar la única sección activa con `margin-block: auto` en su
+ * hijo). Con las cuatro secciones siempre montadas y apiladas, ese centrado
+ * repartiría el espacio sobrante ENTRE secciones en vez de dejarlas fluir
+ * una debajo de otra, así que se saca por completo: `.main` vuelve a flujo
+ * de bloque normal para sus hijos. Sigue siendo un ítem flex del `.shell`
+ * (recibe `flex: 1 1 auto` igual), que es lo único que necesita para seguir
+ * empujando el footer al fondo en páginas cortas.
  */
 .main {
-  display: flex;
-  flex-direction: column;
   min-height: 0;
   flex: 1 1 auto;
 }
 
 /*
- * Corrige el vacío muerto que quedaba entre el contenido corto (p. ej.
- * Servicios con 2-4 tarjetas en vez de las 5-6 que asume el handoff) y el
- * footer: la sección activa (única visible, ver motion.css:65 — las
- * inactivas están en `display: none`) se centra en el alto sobrante de
- * `.main` en lugar de quedar pegada arriba con un vacío abajo.
+ * Offset del salto de ancla: sin esto, `#servicios` etc. dejan el borde
+ * superior de la sección tapado detrás del header sticky (78px) al saltar.
+ * `scroll-margin-top` es exactamente para esto — desplaza el punto de
+ * "llegada" del scroll sin tocar el layout ni el padding visual de la
+ * sección.
  *
  * Selector `:global` porque `[data-dv-section]` es un atributo del wrapper
  * de SeccionesSPA.tsx, no una clase de este módulo (contrato documentado en
  * motion.css) — no hace falta agregar una clase nueva en el TSX solo para
  * engancharlo acá.
- *
- * Mecanismo elegido: `margin-block: auto` sobre el ítem flex, NO
- * `justify-content: safe center` en `.main`. Ambos previenen el recorte de
- * una sección más alta que el contenedor (el caso real es el hero de
- * Inicio, `Landing.module.css` `.inicio { min-height: calc(100vh - 78px) }`),
- * pero por razones distintas:
- * - Con `margin-block: auto`, el spec de flexbox (§8.1) fija los márgenes
- *   auto en 0 cuando el espacio libre es negativo o cero — con eso el
- *   borde superior del ítem queda pegado al borde superior de `.main`, sin
- *   overflow raro ni recorte, y sin necesidad de ningún otro ajuste.
- * - `justify-content: safe center` depende de las keywords `safe`/`unsafe`
- *   de CSS Box Alignment L3, de soporte más nuevo e históricamente
- *   inconsistente (p. ej. versiones de Safari/iOS que ignoraban la keyword
- *   `safe` y caían en `center` puro) — ahí el recorte que este cambio
- *   existe para evitar podía volver a aparecer en navegadores viejos.
- *   `margin-block: auto` es comportamiento base de flexbox, estable desde
- *   sus primeras implementaciones, sin necesidad de una keyword de
- *   fallback.
- *
- * `flex-shrink: 0` es necesario porque el valor inicial de `flex-shrink` es
- * 1: sin esto, una sección alta (el hero) se encogería para caber en el
- * alto de `.main` en vez de desbordarlo hacia abajo controladamente,
- * distorsionando su contenido.
  */
 .main > :global([data-dv-section]) {
+  scroll-margin-top: var(--wb-spa-header-alto);
+}
+
+/*
+ * Centinela del scrollspy (SeccionesSPA.tsx): marca el fondo real de todo
+ * el documento para que el IntersectionObserver del "fin de página" pueda
+ * detectar el scroll máximo sin leer `scrollY`/`scrollHeight` a mano.
+ * `1px`, no `0`: un target de área cero deja la intersección a criterio de
+ * cada motor de layout; con un pixel real no hay ambigüedad que resolver.
+ * Sin color, sin texto, `flex-shrink: 0` para que nunca se lo coma el
+ * `flex: 1 1 auto` de `.main` (este div es hermano de `.main`, no su hijo,
+ * pero mantiene el hábito del resto del shell de no dejar nada a la
+ * `flex-basis` implícita).
+ */
+.finPagina {
+  height: 1px;
   flex-shrink: 0;
-  margin-block: auto;
 }
 
 @media (max-width: 767px) {

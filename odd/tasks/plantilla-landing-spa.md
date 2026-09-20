@@ -161,6 +161,64 @@ forma equivocada, no solo datos ausentes.
 breakpoint de 768px está escrito en el CSS, pero **nadie lo vio renderizado**. Queda como
 lo único sin comprobar de esta slice.
 
+## Desvío deliberado del handoff: scroll largo en vez de pestañas
+
+**Decisión de Agustín, 2026-09-20.** Miró la plantilla terminada y dijo que la home queda
+pobre: mostraba solo el hero, porque las otras tres secciones vivían detrás de pestañas.
+Pidió lo que hace cualquier sitio de pyme: todo en una página, scrolleando.
+
+**Esto contradice el handoff a propósito**, no por descuido:
+`docs/design_handoff_plantillas_webbot/README.md:133` dice *"Toda la página es una sola
+ruta. El header intercambia secciones sin recargar y sin scroll largo."* Se le presentó esa
+contradicción explícitamente y eligió desviarse igual, probándolo primero en LANDING antes
+de comprometer las otras cinco.
+
+Argumento que el handoff no consideró y que pesó en la decisión: el revelado en cascada
+está construido sobre un `IntersectionObserver`, pensado para revelar al scrollear. En modo
+pestañas todo entraba en pantalla de golpe y esa maquinaria quedaba desaprovechada. En
+scroll largo recién tiene sentido.
+
+**Qué cambió, todo en el shell compartido:** nav de `<button>` a `<a href="#id">` —
+compartibles, funcionan sin JS, y Google ve todo el contenido en una sola página—, header
+`sticky`, `scroll-margin-top` para que el ancla no caiga debajo del header, scroll suave
+con guarda de `prefers-reduced-motion`, y scrollspy por observer, sin escuchar el evento de
+scroll. Se quitó la regla de `motion.css` que ocultaba las secciones inactivas.
+
+**Queda por reconciliar:** el nombre `SeccionesSPA` ya no describe lo que hace. No se
+renombró en esta tanda a propósito. Y si el patrón se adopta, el handoff hay que enmendarlo
+o LANDING queda como la excepción deliberada entre seis.
+
+## Progreso (continuación)
+
+- 2026-09-20 — **Conversión a scroll largo**, con dos defectos encontrados midiendo en el
+  navegador:
+  - La última sección **nunca podía marcarse activa**. Estructural, no de calibración: la
+    banda de detección está a una distancia fija del borde superior, pero la página deja de
+    scrollear antes de que la última sección la alcance. Con esta config, Contacto quedaba
+    en 358px y la banda termina en 311. Resuelto con un centinela de 1px al final del
+    documento: intersectarlo equivale a «estamos en el fondo», sin depender del alto de
+    ninguna sección ni del footer. Con guarda para que una página que entra entera en la
+    ventana no marque la última sección al cargar.
+  - Una carrera real en la resolución del scrollspy cuando dos secciones intersectan la
+    banda a la vez, que pasaba con cualquier salto de scroll mayor a ~230px.
+  - Verificado con la pestaña visible: 0 → Inicio, 500 → Servicios, 1000 → Nosotros,
+    1253 (fondo) → **Contacto**, y al volver a subir suelta bien: 600 → Servicios,
+    0 → Inicio.
+
+## Trampa de verificación que costó tiempo real
+
+**Una pestaña de Chrome en segundo plano estrangula `IntersectionObserver` y el
+repintado.** Con `document.visibilityState === 'hidden'`, un observer de control sin
+opciones recibió **cero** eventos. Eso produjo tres diagnósticos falsos seguidos:
+«el scrollspy está roto», «la sección no termina de revelarse» y «la página no scrollea»
+—esta última porque `window.scrollTo({behavior:'auto'})` hereda el `scroll-behavior: smooth`
+del CSS y anima, así que leer `scrollY` en la línea siguiente devuelve el valor viejo; hay
+que usar `behavior: 'instant'`.
+
+**Antes de diagnosticar cualquier cosa en el navegador: comprobar `document.visibilityState`
+y `document.hasFocus()`.** Si dicen `hidden` / `false`, ninguna medición sirve.
+
 ## Próximo paso
 
-Reactivar RDD y abrir la cadena de PRs. Antes, decidir qué hacer con la verificación móvil.
+Reactivar RDD y abrir la cadena de PRs. Antes, decidir qué hacer con la verificación móvil
+y si el scroll largo se adopta para las otras cinco plantillas.
