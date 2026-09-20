@@ -23,7 +23,7 @@ function baseConfig(overrides: Partial<SiteConfigDTO> = {}): SiteConfigDTO {
 // --secundario y --texto se derivan siempre de él con `paletaDerivada.ts`.
 describe('buildPaletteStyle', () => {
   it('con solo colores.acento, deriva las otras tres y las cuatro variables quedan pobladas', () => {
-    const style = buildPaletteStyle(baseConfig({ colores: { acento: '#333333' } as SiteConfigDTO['colores'] }))
+    const style = buildPaletteStyle(baseConfig({ colores: { acento: '#333333' } }))
     const derivado = derivarPaletaDesdeAcento('#333333')
 
     expect(style).toEqual({
@@ -37,9 +37,16 @@ describe('buildPaletteStyle', () => {
   })
 
   it('con los cuatro colores viejos guardados, ignora primario/secundario/texto y deriva del acento', () => {
-    const style = buildPaletteStyle(
-      baseConfig({ colores: { primario: '#111111', secundario: '#222222', acento: '#333333', texto: '#444444' } }),
-    )
+    // Simula una fila ya existente en producción: el JSON crudo en la BD
+    // sigue trayendo los cuatro campos (D-31, camino 3 — sin migración de
+    // datos), pero `SiteConfigDTO.colores` ya solo tipa `acento`. El cast
+    // pasa por `unknown` a propósito: representa el dato tal como sale de
+    // `configJson` (sin tipar), no un literal que el código nuevo podría
+    // escribir.
+    const filaVieja = {
+      colores: { primario: '#111111', secundario: '#222222', acento: '#333333', texto: '#444444' },
+    } as unknown as Partial<SiteConfigDTO>
+    const style = buildPaletteStyle(baseConfig(filaVieja))
     const derivado = derivarPaletaDesdeAcento('#333333')
 
     expect(style).toEqual({

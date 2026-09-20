@@ -218,7 +218,9 @@ describe('parseSiteConfig — normalización', () => {
     // (ver src/domain/color/acentoPorEstilo.ts).
     const datos = parseSiteConfig(jsonBase({ rubro: 'veterinaria' }))
     expect(datos.template).toBe('SERVICIOS')
-    expect(datos.colores).toEqual({ primario: '#6C5CE7', secundario: '#a29bfe', acento: '#dc93a9', texto: '#ffffff' })
+    // D-31 (camino 3): solo `acento` se persiste — primario/secundario/texto
+    // se derivan siempre en tiempo de render (palette.ts).
+    expect(datos.colores).toEqual({ acento: '#dc93a9' })
     expect(datos.imagenes?.length).toBeGreaterThan(0)
   })
 

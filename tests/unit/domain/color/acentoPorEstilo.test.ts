@@ -138,14 +138,14 @@ describe('derivarAcento — degrada sin lanzar', () => {
 })
 
 describe('derivarColores', () => {
-  const colores = { primario: '#8B4513', secundario: '#D2691E', acento: '#FF8C00', texto: '#ffffff' }
+  // D-31 (camino 3): `ColoresRubro` quedó reducido a `acento` — ya no hay
+  // `primario`/`secundario`/`texto` que dejar intactos, así que esto es
+  // simplemente transformar el único campo.
+  const colores = { acento: '#FF8C00' }
 
-  it('deja primario, secundario y texto intactos y solo transforma el acento', () => {
+  it('transforma el acento con la misma regla que derivarAcento', () => {
     const resultado = derivarColores(colores, Estilo.COLORIDO)
 
-    expect(resultado.primario).toBe(colores.primario)
-    expect(resultado.secundario).toBe(colores.secundario)
-    expect(resultado.texto).toBe(colores.texto)
     expect(resultado.acento).toBe(derivarAcento(colores.acento, Estilo.COLORIDO))
     expect(resultado.acento).not.toBe(colores.acento)
   })
@@ -159,16 +159,16 @@ describe('resolverColores — el override manual gana sobre la derivación', () 
   })
 
   it('usa el hex de OVERRIDES_ACENTO en vez del derivado cuando hay entrada', () => {
-    const colores = { primario: '#000000', secundario: '#111111', acento: '#15defa', texto: '#ffffff' }
+    const colores = { acento: '#15defa' }
     OVERRIDES_ACENTO[RUBRO_DE_PRUEBA] = { [Estilo.MODERNO]: '#abcdef' }
 
     const resultado = resolverColores(RUBRO_DE_PRUEBA, colores, Estilo.MODERNO)
 
-    expect(resultado).toEqual({ ...colores, acento: '#abcdef' })
+    expect(resultado).toEqual({ acento: '#abcdef' })
   })
 
   it('sin override cae en la derivación automática', () => {
-    const colores = { primario: '#000000', secundario: '#111111', acento: '#15defa', texto: '#ffffff' }
+    const colores = { acento: '#15defa' }
 
     const resultado = resolverColores(RUBRO_DE_PRUEBA, colores, Estilo.MODERNO)
 

@@ -22,7 +22,7 @@ function configCompleto(overrides: Partial<SiteConfigDTO> = {}): SiteConfigDTO {
     estilo: Estilo.CALIDO,
     highlight: 'Horneamos tres veces al día.',
     imagenes: ['https://images.unsplash.com/hero.jpg', 'https://images.unsplash.com/galeria1.jpg'],
-    colores: { primario: '#8B4513', secundario: '#D2691E', acento: '#FF8C00', texto: '#ffffff' },
+    colores: { acento: '#FF8C00' },
     ...overrides,
   }
 }
