@@ -1,4 +1,10 @@
-import { derivarPaletaDesdeAcento, L_PRIMARIO, L_SECUNDARIO } from '@/domain/color/paletaDerivada'
+import {
+  derivarPaletaDesdeAcento,
+  ganadorDeContraste,
+  resolverPrimarioYTexto,
+  L_PRIMARIO,
+  L_SECUNDARIO,
+} from '@/domain/color/paletaDerivada'
 import { hexALineal, linealAHex, linealAOklch, mapearAGamut, razonContraste, OBJETIVO_TEXTO } from '@/domain/color/contraste'
 import { RUBRO_DEFAULTS } from '@/infrastructure/demo/rubroDefaults'
 
@@ -131,27 +137,105 @@ describe('derivarPaletaDesdeAcento — preserva tono y croma entre primario y se
 
   // HALLAZGO REPORTADO (no oculto, no destensado): para 'dentista' (#0891B2)
   // y 'yoga' (#f0c040) el tono SÍ corre más de 1° entre `primario` (L=0.22)
-  // y `secundario` (L=0.45) — delta medido ≈1.22° y ≈1.41° respectivamente.
-  // Causa observada: `mapearAGamut` recorta el croma pedido de forma
-  // distinta en cada L (dentista: croma sobreviviente ≈0.0405 en primario
-  // contra ≈0.0830 en secundario — casi el doble), y la cuantización a hex
-  // de 8 bits al volver de OKLCH arrastra el tono más que en los otros 9
-  // acentos, donde la brecha de croma entre ambos L es menor. No se sube el
-  // umbral de 1° para taparlo ni se afloja la tolerancia: queda su propio
-  // caso, marcado `skip`, documentando el valor real medido hasta que se
-  // decida si hace falta una tolerancia distinta o un ajuste de la
-  // derivación.
-  it.skip.each(ACENTOS_CON_DESVIO_DE_TONO)(
-    '%s (%s): primario y secundario comparten tono (delta < 1°) — DESVÍO CONOCIDO, ver comentario arriba',
-    (_rubro, acento) => {
+  // y `secundario` (L=0.45) — delta medido ≈1.2231° y ≈1.4089° respectivamente
+  // (valores exactos obtenidos corriendo `derivarPaletaDesdeAcento` sobre los
+  // acentos reales de RUBRO_DEFAULTS, no inventados). Causa observada:
+  // `mapearAGamut` recorta el croma pedido de forma distinta en cada L
+  // (dentista: croma sobreviviente ≈0.0405 en primario contra ≈0.0830 en
+  // secundario — casi el doble), y la cuantización a hex de 8 bits al volver
+  // de OKLCH arrastra el tono más que en los otros 9 acentos, donde la
+  // brecha de croma entre ambos L es menor.
+  //
+  // R3-invariante-de-tono-silenciada: en vez de dejar esto como `skip` (sin
+  // señal) o de aflojar el umbral de 1° para todos (destensa el resto), el
+  // desvío conocido queda PINEADO acá como cota superior justo por encima de
+  // lo medido — cualquier cambio futuro que lo ensanche, o que empuje un
+  // tercer rubro sobre el umbral, rompe el build.
+  const DESVIO_MAXIMO_CONOCIDO: Record<string, number> = {
+    dentista: 1.25,
+    yoga: 1.45,
+  }
+
+  it.each(ACENTOS_CON_DESVIO_DE_TONO)(
+    '%s (%s): el desvío de tono conocido no crece más allá de la cota pineada',
+    (rubro, acento) => {
       const { primario, secundario } = derivarPaletaDesdeAcento(acento)
 
       const hPrimario = linealAOklch(hexALineal(primario)!).h
       const hSecundario = linealAOklch(hexALineal(secundario)!).h
+      const delta = distanciaAngular(hPrimario, hSecundario)
 
-      expect(distanciaAngular(hPrimario, hSecundario)).toBeLessThan(1)
+      expect(delta).toBeGreaterThan(1) // sigue siendo el caso conocido, no una regresión que ya no aplica
+      expect(delta).toBeLessThanOrEqual(DESVIO_MAXIMO_CONOCIDO[rubro])
     },
   )
+})
+
+// R3-fallback-de-contraste-sin-cobertura: `ganadorDeContraste` y la rama de
+// reajuste de `resolverPrimarioYTexto` (paletaDerivada.ts) no tenían ningún
+// test directo — los 11 acentos de RUBRO_DEFAULTS y el barrido de 720 puntos
+// de más abajo son todos suficientemente oscuros en L_PRIMARIO (0.22) como
+// para que blanco gane siempre y el reajuste nunca se dispare.
+describe('ganadorDeContraste — ambas ramas del selector de texto', () => {
+  it('con un primario oscuro, blanco gana', () => {
+    expect(ganadorDeContraste('#001f28')).toBe('#ffffff')
+  })
+
+  it('con un primario claro, negro gana — rama nunca antes ejercitada', () => {
+    expect(ganadorDeContraste('#dedede')).toBe('#000000')
+  })
+})
+
+// Con el `objetivo` de producción (OBJETIVO_TEXTO = 4.5) el reajuste es
+// matemáticamente inalcanzable para CUALQUIER fondo: el punto de empate
+// entre el contraste con negro ((Y+0.05)/0.05) y con blanco (1.05/(Y+0.05))
+// se da en Y≈0.1791, donde ambos valen ~4.583 — y alejarse de ese punto en
+// cualquier dirección solo aumenta el contraste del ganador. Por eso ningún
+// acento real puede disparar la rama con el objetivo real (ver también el
+// comentario sobre `resolverPrimarioYTexto` en paletaDerivada.ts). Los casos
+// de abajo pasan un `objetivo` explícito más exigente que 4.583 para forzar
+// la rama de forma determinística y reproducible, y confirman igual que el
+// resultado cumple `OBJETIVO_TEXTO` de sobra.
+describe('resolverPrimarioYTexto — rama de reajuste de contraste', () => {
+  it('con un primario ya claro y el objetivo de producción, negro gana sin pasar por el reajuste', () => {
+    const oklch = { l: 0.9, c: 0, h: 0 }
+    const { primario, texto } = resolverPrimarioYTexto(oklch, 0.9)
+
+    expect(texto).toBe('#000000')
+    expect(razonContraste(texto, primario)).toBeGreaterThanOrEqual(OBJETIVO_TEXTO)
+    // La L del resultado queda prácticamente igual a la de entrada: prueba de
+    // que NO pasó por `clampAcento` (si hubiera reajustado se habría movido
+    // bastante más — ver los dos casos de abajo, donde sí se dispara).
+    expect(linealAOklch(hexALineal(primario)!).l).toBeCloseTo(0.9, 2)
+  })
+
+  it('con negro como texto ganador y un objetivo que no se alcanza de entrada, el reajuste ACLARA el primario', () => {
+    const oklch = { l: 0.6, c: 0, h: 0 }
+    const objetivoExigente = 15 // por encima del contraste inicial: fuerza la rama
+
+    const { primario, texto } = resolverPrimarioYTexto(oklch, 0.6, objetivoExigente)
+
+    expect(texto).toBe('#000000')
+    expect(razonContraste(texto, primario)).toBeGreaterThanOrEqual(objetivoExigente)
+    expect(razonContraste(texto, primario)).toBeGreaterThanOrEqual(OBJETIVO_TEXTO)
+    // Reajustó ACLARANDO: alejarse de negro (subir la L) es lo que aumenta el
+    // contraste cuando el texto ganador es negro.
+    expect(linealAOklch(hexALineal(primario)!).l).toBeGreaterThan(0.6)
+  })
+
+  it('con blanco como texto ganador y un objetivo que no se alcanza de entrada, el reajuste OSCURECE el primario', () => {
+    const oklch = { l: 0.35, c: 0, h: 0 }
+    const objetivoExigente = 15
+
+    const { primario, texto } = resolverPrimarioYTexto(oklch, 0.35, objetivoExigente)
+
+    expect(texto).toBe('#ffffff')
+    expect(razonContraste(texto, primario)).toBeGreaterThanOrEqual(objetivoExigente)
+    expect(razonContraste(texto, primario)).toBeGreaterThanOrEqual(OBJETIVO_TEXTO)
+    // Reajustó OSCURECIENDO: alejarse de blanco (bajar la L) es lo que
+    // aumenta el contraste cuando el texto ganador es blanco.
+    expect(linealAOklch(hexALineal(primario)!).l).toBeLessThan(0.35)
+  })
 })
 
 // R3-texto-contraste-no-garantizado: la tabla por rubro (ACENTOS_RUBRO,

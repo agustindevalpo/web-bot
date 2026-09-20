@@ -73,33 +73,61 @@ function conLuminosidad(oklch: OKLCH, l: number): string {
   return linealAHex(mapearAGamut({ ...oklch, l }))
 }
 
-function ganadorDeContraste(primario: string): string {
+// Exportada (R3-fallback-de-contraste-sin-cobertura) para que
+// `paletaDerivada.test.ts` pueda ejercitar la rama de negro directamente, sin
+// depender de encontrar un acento real que la dispare — ver más abajo por
+// qué eso no es posible con el objetivo de producción.
+export function ganadorDeContraste(primario: string): string {
   // `razonContraste` es simétrica: comparar cuál de los dos extremos da mayor
   // razón contra `primario` da el mejor candidato disponible con ese
   // `primario` — todavía puede no alcanzar `OBJETIVO_TEXTO`; ver
-  // `textoLegibleContra`, que es quien garantiza el objetivo.
+  // `resolverPrimarioYTexto`, que es quien garantiza el objetivo.
   return razonContraste('#ffffff', primario) >= razonContraste('#000000', primario) ? '#ffffff' : '#000000'
 }
 
 // Devuelve el `primario` (posiblemente reajustado en L) y el texto que
-// alcanza `OBJETIVO_TEXTO` contra él. Si el `primario` de partida (L en
-// `lPrimario`) ya deja a blanco o negro por encima del objetivo, se devuelve
-// tal cual. Si no, se trata al texto ganador como el "fondo" fijo y se mueve
-// la L de `primario` con `clampAcento` (mismo mecanismo que ese módulo usa
-// para el acento contra un fondo de plantilla) hasta alcanzar 4.5:1,
-// preservando tono y croma. `clampAcento` nunca falla en devolver algo por
-// debajo del objetivo cuando el "fondo" es blanco o negro puro: en el peor
-// caso el propio extremo opuesto (negro u blanco) da máximo contraste.
-function primarioConTextoLegible(oklch: OKLCH): { primario: string; texto: string } {
-  const primarioBase = conLuminosidad(oklch, L_PRIMARIO)
+// alcanza `objetivo` contra él. Si el `primario` de partida (L en `l`) ya
+// deja a blanco o negro por encima del objetivo, se devuelve tal cual. Si no,
+// se trata al texto ganador como el "fondo" fijo y se mueve la L de
+// `primario` con `clampAcento` (mismo mecanismo que ese módulo usa para el
+// acento contra un fondo de plantilla) hasta alcanzarlo, preservando tono y
+// croma. `clampAcento` nunca falla en devolver algo por debajo del objetivo
+// cuando el "fondo" es blanco o negro puro: en el peor caso el propio extremo
+// opuesto (negro o blanco) da máximo contraste.
+//
+// `l` y `objetivo` son parámetros (no `L_PRIMARIO`/`OBJETIVO_TEXTO` quemados
+// adentro) exclusivamente para que el test pueda forzar la rama de reajuste
+// de forma determinística — ver R3-fallback-de-contraste-sin-cobertura.
+// `primarioConTextoLegible`, la única llamadora en producción, siempre pasa
+// `L_PRIMARIO` y el `objetivo` por defecto (`OBJETIVO_TEXTO`), así que el
+// comportamiento público de `derivarPaletaDesdeAcento` no cambia.
+//
+// Por qué el reajuste es matemáticamente inalcanzable con `objetivo =
+// OBJETIVO_TEXTO` (4.5): para cualquier fondo, el mejor de blanco/negro
+// siempre da como mínimo ~4.583:1 — el punto de empate entre
+// `(Y+0.05)/0.05` (contraste con negro) y `1.05/(Y+0.05)` (contraste con
+// blanco) se da en Y≈0.1791, donde ambos valen ~4.583, y alejarse de ese
+// punto en cualquier dirección solo aumenta el contraste del ganador. Por
+// eso el barrido de 720 puntos de `paletaDerivada.test.ts` nunca dispara
+// esta rama con un acento real: no es un hueco de cobertura evitable, es una
+// garantía matemática de la fórmula WCAG. El test de esta rama pasa un
+// `objetivo` explícito más exigente (no `OBJETIVO_TEXTO`) para forzar el
+// reajuste de forma reproducible, y confirma igual que el resultado sigue
+// cumpliendo `OBJETIVO_TEXTO` de sobra.
+export function resolverPrimarioYTexto(oklch: OKLCH, l: number, objetivo: number = OBJETIVO_TEXTO): { primario: string; texto: string } {
+  const primarioBase = conLuminosidad(oklch, l)
   const texto = ganadorDeContraste(primarioBase)
 
-  if (razonContraste(texto, primarioBase) >= OBJETIVO_TEXTO) {
+  if (razonContraste(texto, primarioBase) >= objetivo) {
     return { primario: primarioBase, texto }
   }
 
-  const primario = clampAcento(primarioBase, texto, OBJETIVO_TEXTO)
+  const primario = clampAcento(primarioBase, texto, objetivo)
   return { primario, texto }
+}
+
+function primarioConTextoLegible(oklch: OKLCH): { primario: string; texto: string } {
+  return resolverPrimarioYTexto(oklch, L_PRIMARIO)
 }
 
 /**

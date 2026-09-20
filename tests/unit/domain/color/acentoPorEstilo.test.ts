@@ -201,6 +201,21 @@ describe('resolverColores — el override manual gana sobre la derivación', () 
     expect(Object.keys(resultado)).toEqual(['acento'])
   })
 
+  // R3-asercion-no-distingue-rama: la versión anterior de este caso solo
+  // comparaba `Object.keys(resultado)` contra `['acento']` — las tres ramas
+  // de `resolverColores` devuelven exactamente esa forma, así que la
+  // aserción pasaba igual de verde corriera la rama general o la de
+  // override. Se agrega la aserción de VALOR de abajo, que sí distingue: si
+  // por error corriera la rama de override (por ejemplo por una fuga de
+  // `OVERRIDES_ACENTO[RUBRO_DE_PRUEBA]` entre casos), `acento` sería
+  // `'#abcdef'` en vez del valor derivado.
+  //
+  // Sobre la fuga: se verificó que NO existe — el `afterEach` de la línea
+  // 157 (`delete OVERRIDES_ACENTO[RUBRO_DE_PRUEBA]`) alcanza a los cuatro
+  // `it` de este `describe`, incluido el anterior a este (el que sí escribe
+  // el override), así que ya corre entre ambos y deja la tabla limpia antes
+  // de este caso. Queda igual la aserción de valor: aunque hoy no haya fuga,
+  // es la única forma de que este test detecte una si se introdujera.
   it('descarta cualquier campo extra de colores en la rama general (sin override) — mismo contrato de D-31', () => {
     const coloresConCamposExtra = {
       acento: '#15defa',
@@ -212,5 +227,7 @@ describe('resolverColores — el override manual gana sobre la derivación', () 
     const resultado = resolverColores(RUBRO_DE_PRUEBA, coloresConCamposExtra, Estilo.MODERNO)
 
     expect(Object.keys(resultado)).toEqual(['acento'])
+    expect(resultado.acento).toBe(derivarAcento('#15defa', Estilo.MODERNO))
+    expect(resultado.acento).not.toBe('#abcdef')
   })
 })

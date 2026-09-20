@@ -86,4 +86,39 @@ describe('buildPaletteStyle', () => {
       '--texto': '#ffffff',
     })
   })
+
+  // R3-colores-sin-acento-sin-cobertura: la fila legacy que describe el
+  // comentario del DTO (`config.colores` presente, pero sin `acento` —
+  // posible en JSON crudo de producción de antes de D-31) no tenía cobertura
+  // a nivel de componente. El cast pasa por `unknown`, igual que la fila
+  // vieja de más arriba: representa el dato tal como puede llegar sin tipar,
+  // no un literal que el código nuevo escribiría.
+  it('con config.colores presente pero sin acento, cae al acento por defecto y deriva desde ahí', () => {
+    const filaSinAcento = { colores: {} } as unknown as Partial<SiteConfigDTO>
+    const style = buildPaletteStyle(baseConfig(filaSinAcento))
+
+    expect(style).toEqual({
+      '--primario': '#001f25',
+      '--secundario': '#00606e',
+      '--acento': '#15DEFA',
+      '--texto': '#ffffff',
+    })
+  })
+
+  // `config.colores?.acento ?? ACENTO_DEFAULT` NO intercepta un string
+  // vacío — `??` solo cubre `null`/`undefined`. Este caso sobrevive igual
+  // porque `derivarPaletaDesdeAcento` trata '' como hex inválido y degrada
+  // al acento por defecto internamente (probado en
+  // tests/unit/domain/color/paletaDerivada.test.ts); acá se fija el mismo
+  // comportamiento en el límite del componente.
+  it('con acento como string vacío, cae al acento por defecto y deriva desde ahí', () => {
+    const style = buildPaletteStyle(baseConfig({ colores: { acento: '' } }))
+
+    expect(style).toEqual({
+      '--primario': '#001f25',
+      '--secundario': '#00606e',
+      '--acento': '#15DEFA',
+      '--texto': '#ffffff',
+    })
+  })
 })
