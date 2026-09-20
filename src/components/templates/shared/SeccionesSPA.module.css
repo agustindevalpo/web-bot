@@ -80,8 +80,86 @@
   flex: none;
 }
 
+/*
+ * Shell raíz (header + main + pie) como columna flex que ocupa como mínimo
+ * el viewport. Corrige el defecto donde una sección corta (Servicios,
+ * Nosotros, Contacto en LANDING) dejaba el footer flotando arriba de un
+ * vacío blanco: sin esto el root queda en `display: block` y su alto es
+ * solo la suma de sus hijos.
+ *
+ * `100vh` primero como fallback para motores viejos, `100dvh` después para
+ * descontar la barra de UI del navegador en mobile — si `100dvh` no es
+ * válido, el navegador ignora esa declaración y conserva la anterior.
+ */
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/*
+ * `flex: 1 1 auto` (no `flex: 1`, que fuerza `flex-basis: 0%`): el alto de
+ * contenido de la sección activa sigue siendo la base, y solo crece para
+ * absorber el sobrante cuando el shell es más alto que el contenido, y ese
+ * sobrante es justo lo que `.main` le reparte a su hijo activo vía
+ * `margin-block: auto` más abajo.
+ *
+ * `min-height: 0` se mantiene: sin esto, un ítem flex no puede encogerse
+ * por debajo del alto de su contenido y una sección muy alta desborda el
+ * shell en vez de dejar que el propio contenido controle el scroll de la
+ * página.
+ *
+ * `.main` pasa a ser column-flex (antes era un bloque simple) porque el
+ * centrado por `margin-block: auto` del hijo de abajo solo existe como
+ * mecanismo de flexbox/grid — en flujo de bloque normal, `margin-top/bottom:
+ * auto` se resuelve siempre en 0, no centra nada.
+ */
 .main {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
+  flex: 1 1 auto;
+}
+
+/*
+ * Corrige el vacío muerto que quedaba entre el contenido corto (p. ej.
+ * Servicios con 2-4 tarjetas en vez de las 5-6 que asume el handoff) y el
+ * footer: la sección activa (única visible, ver motion.css:65 — las
+ * inactivas están en `display: none`) se centra en el alto sobrante de
+ * `.main` en lugar de quedar pegada arriba con un vacío abajo.
+ *
+ * Selector `:global` porque `[data-dv-section]` es un atributo del wrapper
+ * de SeccionesSPA.tsx, no una clase de este módulo (contrato documentado en
+ * motion.css) — no hace falta agregar una clase nueva en el TSX solo para
+ * engancharlo acá.
+ *
+ * Mecanismo elegido: `margin-block: auto` sobre el ítem flex, NO
+ * `justify-content: safe center` en `.main`. Ambos previenen el recorte de
+ * una sección más alta que el contenedor (el caso real es el hero de
+ * Inicio, `Landing.module.css` `.inicio { min-height: calc(100vh - 78px) }`),
+ * pero por razones distintas:
+ * - Con `margin-block: auto`, el spec de flexbox (§8.1) fija los márgenes
+ *   auto en 0 cuando el espacio libre es negativo o cero — con eso el
+ *   borde superior del ítem queda pegado al borde superior de `.main`, sin
+ *   overflow raro ni recorte, y sin necesidad de ningún otro ajuste.
+ * - `justify-content: safe center` depende de las keywords `safe`/`unsafe`
+ *   de CSS Box Alignment L3, de soporte más nuevo e históricamente
+ *   inconsistente (p. ej. versiones de Safari/iOS que ignoraban la keyword
+ *   `safe` y caían en `center` puro) — ahí el recorte que este cambio
+ *   existe para evitar podía volver a aparecer en navegadores viejos.
+ *   `margin-block: auto` es comportamiento base de flexbox, estable desde
+ *   sus primeras implementaciones, sin necesidad de una keyword de
+ *   fallback.
+ *
+ * `flex-shrink: 0` es necesario porque el valor inicial de `flex-shrink` es
+ * 1: sin esto, una sección alta (el hero) se encogería para caber en el
+ * alto de `.main` en vez de desbordarlo hacia abajo controladamente,
+ * distorsionando su contenido.
+ */
+.main > :global([data-dv-section]) {
+  flex-shrink: 0;
+  margin-block: auto;
 }
 
 @media (max-width: 767px) {

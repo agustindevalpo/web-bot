@@ -71,7 +71,7 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
   if (seccionesVisibles.length === 0) return null
 
   return (
-    <div ref={raizRef} className={className}>
+    <div ref={raizRef} className={className ? `${styles.shell} ${className}` : styles.shell}>
       <header className={claseHeader ?? styles.header}>
         <div className={styles.marca}>{marca}</div>
         <nav className={styles.nav}>
