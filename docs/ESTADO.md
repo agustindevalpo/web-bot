@@ -9,7 +9,7 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-13 · `main` = `be9decc` · `develop` = `f4a9b9d`
+> **Última regeneración:** 2026-09-20 · `main` = `ed2788e` · `develop` = `f669651`
 
 ---
 
@@ -52,7 +52,8 @@ Hexagonal por capas, con nombres de dominio en español (`Cliente`, `Sitio`, `Pa
 ```
 src/
 ├── domain/           entidades, value objects, excepciones, puertos I*Repository,
-│                     color/ (OKLCH: contraste y derivación del acento por estilo)
+│                     color/ (OKLCH: contraste, derivación del acento por estilo,
+│                     y derivación de primario/secundario/texto desde el acento)
 ├── application/      DTOs, mappers, 13 casos de uso (*.usecase.ts), puertos I*Service
 ├── infrastructure/   adaptadores: db (Prisma), auth, claude, demo, email, cloudflare,
 │                     notifications, payments, railway, routing, templates
@@ -72,12 +73,17 @@ src/
 - **Templates:** `rubroTemplates.ts` mapea los 10 rubros a 5 `Template`; `resolver.ts`
   (puro) y `registry.ts` (JSX) están separados; fallback a `LANDING`, que es lo que recibe
   el rubro neutro `otro` cuando la deducción local no reconoce el negocio (D-28).
+- **Paleta:** `configJson.colores` guarda **solo** `acento` (D-32) — `primario`,
+  `secundario` y `texto` ya no se persisten, se derivan al renderizar con
+  `derivarPaletaDesdeAcento()` (`src/domain/color/paletaDerivada.ts`) y
+  `palette.ts` sigue emitiendo las cuatro variables CSS que las 5 plantillas vivas
+  consumen.
 - **Persistencia:** esquema en `src/infrastructure/db/prisma/schema.prisma`, 3
-  migraciones en `prisma/migrations/`.
+  migraciones en `prisma/migrations/`; D-32 no agregó ninguna.
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `be9decc`, desplegado y verificado en vivo el 2026-09-13):**
+**En producción (`main` = `ed2788e`, desplegado y verificado en vivo el 2026-09-20):**
 landing con precio único y promo · chat demo que genera un `Sitio` real · gate de lead
 (nombre + correo antes de revelar el sitio) · los 5 templates · dominios propios vía
 Cloudflare · panel `/admin` (pausar, reactivar, asignar dominio, editar `configJson`,
@@ -87,10 +93,14 @@ motion.css, clamp de contraste en OKLCH, SeccionesSPA — S0a y S0b de D-23, sin
 visible todavía) · **acento derivado del estilo que el cliente elige** (D-27) ·
 **deducción de rubro sobre descripción y servicios, con fallback neutro y pregunta guiada**
 (D-28) · **opciones del chat clicables** (D-29) · **login que precarga el correo de la
-demo** (D-30).
+demo** (D-30) · **paleta de cada sitio derivada de un único acento** — `primario`,
+`secundario` y `texto` dejaron de persistirse y se calculan del acento en cada render
+(D-32); efecto visible: los sitios ya publicados cambiaron de `--primario`/`--secundario`,
+verificado en vivo (`demo-veterinaria` y `demo-tienda` sirven la paleta derivada).
 
-**En `develop`, sin adelanto sobre producción:** `develop` = `f4a9b9d` es el mismo
-contenido que `main`; `be9decc` solo agrega el commit de release.
+**En `develop`, sin adelanto sobre producción:** `develop` = `f669651` es el mismo
+contenido que `main`; `ed2788e` solo agrega el commit de release. S1 (LANDING) del
+rediseño de plantillas queda **desbloqueado** por D-32, pero no arrancado.
 
 **No construido / inerte:**
 
@@ -140,7 +150,7 @@ propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya pues
 **Tests:**
 
 ```bash
-npm run test:unit          # Jest — 52 suites / 504 tests en verde
+npm run test:unit          # Jest — 61 suites / 812 tests en verde
 npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
 npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
 npm run test:all            # jest + cucumber
@@ -171,11 +181,12 @@ No existe un script `test` a secas.
   `configJson` del sitio `demo-cea59ef1` en producción.
 - `docs/historico/` es archivo muerto por diseño: describe el proyecto de agosto de 2026
   (suscripciones, N8N, Python, equipo de tres). Nunca citarlo como fuente de un hecho
-  actual. `README.md` y `docs/COMANDOS.md` estaban igual de desactualizados y se
-  corrigieron el 2026-09-12 — `COMANDOS.md` llegó a recomendar `prisma migrate dev`, que
-  D-17 prohíbe en este proyecto.
+  actual.
 - El panel `/admin` lee `ADMIN_SECRET`, no `ADMIN_PASSWORD`. Ese nombre viejo estuvo en
   `.env.example` hasta el 2026-09-12 sin que ningún módulo lo leyera, y es el tipo de
   variable fantasma que hace perder una tarde: se carga, no pasa nada, y no hay error.
 - Las credenciales del motor de pagos (`FLOW_*`, `MP_ACCESS_TOKEN`, `PAYPAL_*`) ya no
   figuran en `.env.example`: vuelven cuando ese microservicio esté desplegado.
+- Filas de `Sitio` escritas antes del 2026-09-20 conservan `primario`, `secundario` y
+  `texto` en su `configJson.colores` (D-32): son campos huérfanos, nadie los borra ni
+  los reescribe, y ningún código los lee — no confundirlos con el dato vigente.
