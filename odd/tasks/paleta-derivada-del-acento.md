@@ -80,12 +80,33 @@ Convención obligatoria del módulo: puro, sin excepciones, igual que `contraste
       CSS (las plantillas actuales las necesitan: 64 usos entre las tres), pero las tres
       salen de la derivación sobre `colores.acento`. Fallback a `PALETA_DEFAULT.acento`.
       Ruta: delegada (writer, junto a T1). Commit `a4e8ad6`.
-- [ ] **T3 — Dejar de persistir los tres.** `RUBRO_DEFAULTS` y su duplicado a mano en
+- [x] **T3 — Dejar de persistir los tres.** `RUBRO_DEFAULTS` y su duplicado a mano en
       `prisma/seed-demo.ts` pasan a un solo color por rubro; `resolverColores`,
-      `SiteConfigDTO` y los dos servicios de chat acompañan. Ruta: delegada (writer).
-- [ ] **T4 — Documentación.** D-31 pasa de PENDIENTE a decidida en `docs/DECISIONES.md`;
-      `docs/ESTADO.md` solo si el cambio invalida algo que afirma; jornada en
-      `docs/BITACORA.md`. Ruta: inline o delegada según tamaño.
+      `SiteConfigDTO` y los dos servicios de chat acompañan. Sin migración: las filas
+      existentes conservan los tres campos viejos como huérfanos inertes. Ruta: delegada
+      (writer). Commit `625f8ab`.
+- [x] **T4 — Documentación.** D-31 pasa de PENDIENTE a RESUELTA (reemplazada por D-32) en
+      `docs/DECISIONES.md`, con la entrada D-32 nueva al final del archivo. `docs/ESTADO.md`
+      **no se regeneró**: nada de lo desplegado cambia, porque nada de este ciclo llegó a
+      `develop` ni a `main`. Jornada agregada en `docs/BITACORA.md`. Este propio documento
+      actualizado con T3, T5, T6 y el cierre de Progreso/Próximo paso. Ruta: inline (esta
+      sesión). Sin commit todavía — la rama de trabajo se deja tal como está, sin commitear
+      por instrucción explícita de esta tarea.
+- [x] **T5 — Primera ronda de hallazgos (dos revisiones de confiabilidad).** Seis
+      hallazgos: el objetivo de 4.5:1 pasa de comentario a garantía en código
+      (`clampAcento` reajusta `primario` si hace falta), `--acento` deja de emitirse crudo
+      con un hex de entrada inválido, tests dejan de autoconfirmarse (golden values para
+      los 11 acentos reales + barrido de 720 casos), invariante de tono parametrizada sobre
+      distancia angular real. No estaba prevista al crear este documento — surgió de la
+      revisión adversarial, no del plan original. Ruta: delegada (writer). Commit `6a4c1bc`.
+- [x] **T6 — Segunda ronda de hallazgos (tercera revisión de confiabilidad).** Cuatro
+      hallazgos: `resolverPrimarioYTexto` y `ganadorDeContraste` exportados y probados
+      directamente; documentado en código que la rama de reparación de contraste es
+      código muerto contra el objetivo de producción (punto de equilibrio WCAG ~4.583:1,
+      por encima de 4.5) y se conserva a propósito; `dentista`/`yoga` dejan de estar
+      *skipped* y su deriva de tono (1.2231°/1.4089°) queda fijada como cota superior por
+      rubro; dos casos nuevos de forma vieja en `palette.test.ts`. Tampoco prevista al
+      crear este documento. Ruta: delegada (writer). Commit `93c9690`.
 
 ## Criterios de aceptación
 
@@ -127,7 +148,25 @@ Corte natural: PR1 = T1 + T2 (comportamiento), PR2 = T3 + T4 (contrato y docs).
   contra un `primario` de L 0.22 también da blanco — o sea que la variable más usada de
   las tres (39 usos) **no cambia en ningún sitio publicado**. El cambio visual real se
   concentra en `--primario` y `--secundario`, que pasan a ser tintes del acento.
+- 2026-09-19 — Rama `feature/paleta-contrato-un-color` creada, encadenada sobre
+  `feature/paleta-derivada-del-acento` (PR2 de la cadena). **T3 cerrada**, commit
+  `625f8ab`: `configJson.colores` queda reducido al acento; sin migración de datos.
+- 2026-09-19/20 — Tres revisiones adversariales de confiabilidad corrieron sobre el
+  código de T1-T3, aprobadas y con acuse de recibo. **T5 cerrada** (seis hallazgos de las
+  dos primeras), commit `6a4c1bc`. **T6 cerrada** (cuatro hallazgos de la tercera), commit
+  `93c9690`. Estado final de la rama: **796 tests / 61 suites / 0 skipped**,
+  `npx tsc --noEmit` limpio, `npm run lint` con 0 errores y los mismos 21 warnings
+  preexistentes de `develop`. Deriva de tono conocida en `dentista` (1.2231°) y `yoga`
+  (1.4089°) queda pinneada como cota superior por rubro, no resuelta.
+- 2026-09-20 — **T4 cerrada**: `docs/DECISIONES.md` (D-31 → RESUELTA, D-32 nueva),
+  `docs/BITACORA.md` (jornada agregada) y este documento actualizados.
+  `docs/ESTADO.md` se evaluó y **no se regeneró**: nada de lo que afirma quedó
+  invalidado porque nada de este ciclo se mergeó — `develop` y `main` siguen en
+  `963a63e`. Cambio de documentación sin commitear, por instrucción explícita de la
+  tarea que lo pidió.
 
 ## Próximo paso
 
-T3 (dejar de persistir los tres) en una rama encadenada sobre ésta, y después T4 (docs).
+Abrir los PRs de la cadena (`feature-branch-chain`): PR1 = T1+T2 sobre `develop`, PR2 =
+T3+T5+T6 sobre PR1. Mergear en orden. Recién ahí S1 (LANDING) queda desbloqueado de
+verdad — hoy sigue desbloqueado solo *en código*, no en producción.

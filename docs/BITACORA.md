@@ -7,7 +7,7 @@
 
 ## Estado general
 
-**Última sesión:** 2026-09-13 — **Acento derivado del estilo (D-27), detección local de rubro con fallback neutro (D-28), opciones clicables en el chat (D-29) y precarga del correo en login (D-30)**, todo desplegado: `main` = `develop` = `ac079d7`, sin nada esperando. S0a y S0b del rediseño de plantillas también llegaron a producción; **S1 (LANDING) quedó desbloqueado pero pendiente de D-31**. Ver [Acento por estilo, detección de rubro y despliegue al día](#acento-por-estilo-detección-de-rubro-y-despliegue-al-día-2026-09-13). Sesión anterior: 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
+**Última sesión:** 2026-09-19/20 — **D-31 resuelta por el camino (3): `primario`, `secundario` y `texto` se derivan del acento en vez de persistirse (D-32)**, ruta ODD. Código completo y verificado (796 tests / 61 suites, `tsc` limpio, lint 0 errores) pero **sin desplegar**: vive en `feature/paleta-contrato-un-color` encadenada sobre `feature/paleta-derivada-del-acento`, ninguna de las dos mergeada — `main` = `develop` siguen en `963a63e`, así que ningún sitio publicado cambió de aspecto todavía. Ver [Paleta derivada del acento — D-31 resuelta por D-32](#paleta-derivada-del-acento--d-31-resuelta-por-d-32-ruta-odd-2026-09-20). Sesión anterior: 2026-09-13 — **Acento derivado del estilo (D-27), detección local de rubro con fallback neutro (D-28), opciones clicables en el chat (D-29) y precarga del correo en login (D-30)**, todo desplegado: `main` = `develop` = `ac079d7`, sin nada esperando. S0a y S0b del rediseño de plantillas también llegaron a producción; **S1 (LANDING) quedó desbloqueado pero pendiente de D-31**. Ver [Acento por estilo, detección de rubro y despliegue al día](#acento-por-estilo-detección-de-rubro-y-despliegue-al-día-2026-09-13). Sesión anterior: 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
 **Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 **Seguimiento también en Jira:** proyecto **WB (Web-Bot)** en `devalpo-team.atlassian.net` — espejo del roadmap. Estaba desactualizado respecto a esta bitácora al empezar la sesión del 14/08 (varios tickets de Fase 2 seguían en "Tareas por hacer" ya terminados); si no se sincronizó todavía en esta sesión, hacerlo antes de dar por buena la vista de Jira.
@@ -1031,6 +1031,79 @@ Ampliar el vocabulario de `DETECCION_RUBRO` —es data, no algoritmo, y es la pa
 mayor rendimiento que queda— · decidir si `veterinaria` en `colorido` va al override ·
 alarma cuando **falta** el link de pago, que hoy es el único fallo sin ningún aviso · y
 D-31 antes de S1.
+
+---
+
+## Paleta derivada del acento — D-31 resuelta por D-32, ruta ODD (2026-09-20)
+
+**Objetivo:** resolver D-31, que bloqueaba S1 (LANDING) del rediseño de plantillas. Ruta
+elegida por Agustín: ODD (organic), no un ciclo SDD — pese a que D-31 mismo recomendaba lo
+contrario — porque el mapeo de impacto previo (Engram obs #744, exploración read-only del
+2026-09-19) mostró que el camino elegido no toca datos, bajando la ambigüedad que
+justificaba SDD. Documento de trabajo: `odd/tasks/paleta-derivada-del-acento.md`.
+
+### Decisión de producto
+
+Camino **(3)** de los tres que planteaba D-31: derivar `primario`, `secundario` y `texto`
+del acento con la maquinaria OKLCH de D-25, y dejar de persistirlos. Detalle completo de
+la regla, el porqué frente a los caminos (1) y (2), y las consecuencias aceptadas, en
+[D-32](./DECISIONES.md#d-32--primario-secundario-y-texto-se-derivan-del-acento-y-dejan-de-persistirse).
+De paso quedó resuelto a favor de D-27 un conflicto detectado en el handoff de diseño:
+`README.md:31` y `:80` siguen diciendo que el acento sale de `colores.primario`, dato
+desactualizado desde D-27.
+
+### Dos ramas encadenadas, ninguna mergeada
+
+`feature/paleta-derivada-del-acento` (T1+T2) → `feature/paleta-contrato-un-color` (T3-T6),
+sobre `develop` en `963a63e`. Ni `develop` ni `main` avanzaron: siguen en `963a63e` al
+cierre de esta jornada.
+
+- `a4e8ad6` — T1+T2: módulo puro `src/domain/color/paletaDerivada.ts` (81 líneas) +
+  `palette.ts` deriva en vez de leer. Ya cerrado y verificado en la jornada del 19/09 (ver
+  entrada anterior de esta bitácora).
+- `a3ab4fe` — evidencia de verificación de T1/T2 en el documento ODD.
+- `625f8ab` — T3: `configJson.colores` se reduce al acento. `RUBRO_DEFAULTS` y su
+  duplicado a mano en `prisma/seed-demo.ts` pasan de cuatro colores por rubro a uno;
+  `resolverColores`, `SiteConfigDTO` y los dos servicios de chat acompañan. Sin migración:
+  las filas existentes conservan los tres campos viejos como huérfanos inertes, nunca se
+  tocan.
+- `6a4c1bc` — T5 (primera ronda de hallazgos): corrige seis hallazgos de dos revisiones de
+  confiabilidad. El objetivo de 4.5:1 deja de ser un comentario y pasa a estar garantizado
+  en código (`clampAcento` reajusta `primario` si hace falta); `--acento` deja de emitirse
+  crudo cuando el hex de entrada es inválido; los tests dejan de autoconfirmarse (golden
+  values para los 11 acentos reales + barrido de 720 casos).
+- `93c9690` — T6 (segunda ronda): corrige cuatro hallazgos de una tercera revisión.
+  `resolverPrimarioYTexto` y `ganadorDeContraste` quedan exportados y probados
+  directamente; queda documentado en código que la rama de reparación de contraste es
+  código muerto contra el objetivo de producción (el punto de equilibrio WCAG entre blanco
+  y negro es ~4.583:1, por encima del 4.5 pedido) — se conserva y se prueba con un umbral
+  más exigente a propósito, como protección ante un cambio futuro de `L_PRIMARIO`; la
+  deriva de tono conocida en `dentista` (1.2231°) y `yoga` (1.4089°) deja de estar
+  *skipped* y queda fijada como cota superior por rubro.
+
+### Revisiones
+
+Tres revisiones adversariales de confiabilidad (`review-reliability`) corrieron sobre este
+código, quedaron aprobadas y con acuse de recibo. Sus hallazgos combinados (seis en las dos
+primeras, cuatro en la tercera) motivaron los commits `6a4c1bc` y `93c9690` — ver el
+detalle de cada hallazgo en los propios mensajes de esos commits.
+
+### Verificación (estado de la rama, corrida al cierre de esta jornada)
+
+`npm run test:unit` → **796 tests, 61 suites, 0 skipped** (venía de 762 tras T1+T2).
+`npx tsc --noEmit` → limpio. `npm run lint` → 0 errores, 21 warnings preexistentes y
+ajenos a los archivos tocados (los mismos que en `963a63e`, confirmado antes de escribir
+esta entrada).
+
+### Estado y qué queda abierto
+
+Nada de esto llegó a `develop` ni a `main`: **la apariencia de los sitios publicados no
+cambió todavía.** Falta abrir los PRs de la cadena (`feature-branch-chain`, PR1 = T1+T2,
+PR2 = T3-T6) y mergearlos en orden. La deriva de tono en `dentista`/`yoga` queda pinneada
+como límite conocido, no como pendiente a resolver. `docs/DECISIONES.md`,
+`docs/ESTADO.md` y `docs/BITACORA.md` (T4, esta misma entrada) cierran la parte de
+documentación del ciclo — `ESTADO.md` no se regeneró: nada de lo que afirma quedó
+invalidado, porque nada de este trabajo llegó a producción.
 
 ---
 
