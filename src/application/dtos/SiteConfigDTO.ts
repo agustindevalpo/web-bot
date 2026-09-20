@@ -1,11 +1,24 @@
 import { Estilo } from '@/domain/value-objects/Estilo'
 
+// Un servicio es un nombre solo (forma legada, ya en producción) o un
+// objeto con nombre + descripción opcional (rediseño de plantillas, handoff
+// v2: las tres direcciones muestran una frase bajo cada servicio —
+// README.md:201 ya la pedía, D-19 nunca se implementó porque el DTO no
+// tenía dónde ponerla). Aditivo: ninguna fila de `Sitio` en producción trae
+// el shape de objeto hoy, así que el shape legado sigue funcionando sin
+// migración. Nada valida `configJson` en runtime
+// (`src/app/sites/renderizarSitio.ts:18` es un cast pelado), así que una
+// entrada de cualquier forma puede llegar hasta el render — se normaliza en
+// el borde (`shared/servicios.ts`), no acá, mismo patrón que D-32 con el
+// color.
+export type ServicioDTO = string | { nombre: string; descripcion?: string }
+
 export interface SiteConfigDTO {
   nombre: string
   rubro: string
   descripcion: string
   sobreNosotros?: string
-  servicios: string[]
+  servicios: ServicioDTO[]
   ciudad: string
   contacto: {
     telefono: string

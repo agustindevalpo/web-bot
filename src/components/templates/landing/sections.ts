@@ -1,5 +1,6 @@
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { buildWhatsAppUrl, buildTelUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
+import { nombreDeServicio, descripcionDeServicio } from '@/components/templates/shared/servicios'
 
 // Constructores puros de props por sección del rediseño SPA (rediseño de
 // plantillas, S1) — de props planas a las cuatro entradas que consume
@@ -23,6 +24,27 @@ function comoStringNoVacio(valor: unknown): string | null {
 function comoArrayDeStrings(valor: unknown): string[] {
   if (!Array.isArray(valor)) return []
   return valor.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+}
+
+// Cada entrada de `servicios` puede llegar en forma legada (string) o con
+// descripción propia (objeto) — ver `SiteConfigDTO.ts` `ServicioDTO`. Mismo
+// criterio defensivo que `comoArrayDeStrings`/`comoDestacados`: trimea el
+// nombre y descarta la entrada si queda vacío o si la forma no es
+// reconocible (`nombreDeServicio`/`descripcionDeServicio` de
+// `shared/servicios.ts`, que ya tratan el dato como forma no confiable y
+// nunca lanzan).
+type ServicioNormalizado = { nombre: string; descripcion: string | null }
+
+function comoServicios(valor: unknown): ServicioNormalizado[] {
+  if (!Array.isArray(valor)) return []
+  const resultado: ServicioNormalizado[] = []
+  for (const item of valor) {
+    const nombreCrudo = nombreDeServicio(item)
+    const nombre = typeof nombreCrudo === 'string' ? nombreCrudo.trim() : ''
+    if (nombre === '') continue
+    resultado.push({ nombre, descripcion: descripcionDeServicio(item) })
+  }
+  return resultado
 }
 
 export type Destacado = { valor: string; etiqueta: string }
@@ -122,7 +144,10 @@ export function buildInicio(config: SiteConfigDTO): InicioProps {
   }
 }
 
-export type ServicioItem = { numero: number; titulo: string }
+// `descripcion` nace siempre ausente hoy (ningún productor del chat la
+// pregunta ni la extrae, ver `SiteConfigDTO.ts`), pero el tipo la expone
+// desde ya para que la celda de Servicios la pinte apenas exista.
+export type ServicioItem = { numero: number; titulo: string; descripcion: string | null }
 
 export type ServiciosProps = {
   etiqueta: string
@@ -143,16 +168,20 @@ export type ServiciosProps = {
 // solo la grilla): no tiene sentido mostrar una celda de CTA sola sin ningún
 // servicio alrededor, y es coherente con esta misma regla.
 export function buildServicios(config: SiteConfigDTO): ServiciosProps | null {
-  const nombres = comoArrayDeStrings(config.servicios).slice(0, MAX_SERVICIOS_GRID)
-  if (nombres.length === 0) return null
+  const servicios = comoServicios(config.servicios).slice(0, MAX_SERVICIOS_GRID)
+  if (servicios.length === 0) return null
 
   const telefono = comoStringNoVacio(config.contacto?.telefono)
-  const restoFila = nombres.length % COLUMNAS_GRID_SERVICIOS
+  const restoFila = servicios.length % COLUMNAS_GRID_SERVICIOS
   const ctaSpan = restoFila === 0 ? COLUMNAS_GRID_SERVICIOS : COLUMNAS_GRID_SERVICIOS - restoFila
 
   return {
     etiqueta: ETIQUETA_SERVICIOS,
-    items: nombres.map((titulo, indice) => ({ numero: indice + 1, titulo })),
+    items: servicios.map((servicio, indice) => ({
+      numero: indice + 1,
+      titulo: servicio.nombre,
+      descripcion: servicio.descripcion,
+    })),
     ctaFrase: FRASE_CTA_SERVICIOS,
     ctaEnlaceTexto: TEXTO_ENLACE_CTA_SERVICIOS,
     whatsappUrl: telefono ? buildWhatsAppUrl(telefono) : null,

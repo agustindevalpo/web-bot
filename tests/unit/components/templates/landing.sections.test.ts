@@ -138,11 +138,40 @@ describe('landing/sections — buildServicios', () => {
     expect(buildServicios(configCompleto())?.etiqueta).toBe('Qué ofrecemos')
   })
 
-  it('numera los servicios del config desde 1', () => {
+  // Forma legada — la única que existe hoy en producción (D-19 nunca se
+  // implementó): un array de strings, sin descripción. `descripcion: null`
+  // en cada item, no el campo ausente, porque `ServicioItem.descripcion` es
+  // `string | null`, no opcional (T-servicios-descripcion).
+  it('numera los servicios del config desde 1 (forma legada: strings, sin descripción)', () => {
     expect(buildServicios(configCompleto())?.items).toEqual([
-      { numero: 1, titulo: 'Pan artesanal' },
-      { numero: 2, titulo: 'Tortas' },
-      { numero: 3, titulo: 'Hallullas' },
+      { numero: 1, titulo: 'Pan artesanal', descripcion: null },
+      { numero: 2, titulo: 'Tortas', descripcion: null },
+      { numero: 3, titulo: 'Hallullas', descripcion: null },
+    ])
+  })
+
+  it('acepta el shape objeto { nombre, descripcion } y expone la descripción', () => {
+    const servicios = buildServicios(
+      configCompleto({ servicios: [{ nombre: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' }] }),
+    )
+    expect(servicios?.items).toEqual([{ numero: 1, titulo: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' }])
+  })
+
+  it('objeto sin descripción propia también queda con descripcion: null — la celda no lee como error', () => {
+    const servicios = buildServicios(configCompleto({ servicios: [{ nombre: 'Tortas' }] }))
+    expect(servicios?.items).toEqual([{ numero: 1, titulo: 'Tortas', descripcion: null }])
+  })
+
+  it('mezcla de strings y objetos en el mismo array, cada uno con su propia descripción o sin ella', () => {
+    const servicios = buildServicios(
+      configCompleto({
+        servicios: ['Pan artesanal', { nombre: 'Tortas', descripcion: 'A pedido, con 48h de anticipación.' }, 'Hallullas'],
+      }),
+    )
+    expect(servicios?.items).toEqual([
+      { numero: 1, titulo: 'Pan artesanal', descripcion: null },
+      { numero: 2, titulo: 'Tortas', descripcion: 'A pedido, con 48h de anticipación.' },
+      { numero: 3, titulo: 'Hallullas', descripcion: null },
     ])
   })
 
@@ -187,10 +216,22 @@ describe('landing/sections — buildServicios', () => {
       expect(buildServicios(config)).toBeNull()
     })
 
-    it('descarta entradas de servicios que no son string, sin lanzar', () => {
-      const config = configCompleto({ servicios: ['Pan artesanal', 42 as unknown as string, null as unknown as string] })
+    // Antes de aceptar el shape objeto, cualquier entrada que no fuera string
+    // se descartaba entera. Ahora un objeto con `nombre` es válido (ver el
+    // describe de arriba); lo que sigue descartándose es lo que no es ni
+    // string ni un objeto con `nombre` — número, `null`, o un objeto sin
+    // `nombre` (`descripcion` suelta no alcanza).
+    it('descarta entradas que no son string ni objeto con nombre, sin lanzar', () => {
+      const config = configCompleto({
+        servicios: [
+          'Pan artesanal',
+          42 as unknown as string,
+          null as unknown as string,
+          { descripcion: 'sin nombre' } as unknown as string,
+        ],
+      })
       expect(() => buildServicios(config)).not.toThrow()
-      expect(buildServicios(config)?.items).toEqual([{ numero: 1, titulo: 'Pan artesanal' }])
+      expect(buildServicios(config)?.items).toEqual([{ numero: 1, titulo: 'Pan artesanal', descripcion: null }])
     })
   })
 })

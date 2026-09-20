@@ -261,6 +261,19 @@
   color: var(--wb-tpl-ink);
 }
 
+/* `300 13px/1.65 Montserrat` (README.md:201) — nace ausente hoy (ningún
+   productor del chat completa `servicios[].descripcion` todavía, ver
+   `SiteConfigDTO.ts`), así que en la práctica esta clase no se pinta en
+   ningún sitio real por ahora. `index.tsx` solo la renderiza cuando el
+   servicio trae descripción propia; sin ella la celda queda igual que hoy
+   (número + título), que es el estado que ya se ve en producción y se
+   verificó en navegador — no un placeholder ni un hueco. */
+.servicioDescripcion {
+  font: 300 13px/1.65 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  margin: 8px 0 0;
+}
+
 .servicioCtaCelda {
   background: var(--acento);
   padding: 30px 26px 34px;

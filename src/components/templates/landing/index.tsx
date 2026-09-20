@@ -122,6 +122,7 @@ export default async function Landing({ config }: TemplateProps) {
               >
                 <div className={styles.servicioNumero}>{String(item.numero).padStart(2, '0')}</div>
                 <div className={styles.servicioTitulo}>{item.titulo}</div>
+                {item.descripcion && <p className={styles.servicioDescripcion}>{item.descripcion}</p>}
               </div>
             ))}
             <div
