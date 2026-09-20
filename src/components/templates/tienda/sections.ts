@@ -1,5 +1,6 @@
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { buildWhatsAppUrl, buildTelUrl, buildInstagramUrl, buildMailtoUrl } from '@/components/templates/shared/enlaces'
+import { nombreDeServicio } from '@/components/templates/shared/servicios'
 
 // Constructores puros de props por sección (Decisión D4 en design.md) —
 // ninguno hace fetch ni toca el DOM, todos toleran un config que solo trae
@@ -81,9 +82,14 @@ export function buildProductos(config: SiteConfigDTO): ProductosProps | null {
   const telefono = config.contacto?.telefono || null
   const whatsappUrl = telefono ? buildWhatsAppUrl(telefono) : null
 
+  // `nombreDeServicio` deja pasar un string sin tocarlo y `undefined` (índice
+  // fuera de rango) resuelve a `null` igual que antes (ver
+  // `shared/servicios.ts`), así que para `servicios: string[]` (la única
+  // forma que existe hoy en producción) el resultado es idéntico al de antes
+  // de que el DTO aceptara el shape objeto.
   const items: ProductoItem[] = resto.map((imagen, indice) => ({
     imagen,
-    texto: servicios[indice] ?? null,
+    texto: nombreDeServicio(servicios[indice]) ?? null,
     whatsappUrl,
   }))
 

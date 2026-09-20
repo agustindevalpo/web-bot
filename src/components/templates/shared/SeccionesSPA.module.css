@@ -4,12 +4,23 @@
  * TIENDA, que suma la franja de promo y baja a 74px de alto).
  */
 
+/*
+ * Sticky (WB-plantillas-landing-spa, S1): con las cuatro secciones apiladas
+ * en una sola página larga, el header tiene que seguir alcanzable mientras
+ * se hace scroll, no solo estar arriba del todo al cargar. `z-index` por
+ * encima del contenido de las secciones que scrollea debajo; el botón
+ * flotante de WhatsApp de LANDING usa z-index:20 y no se superpone con el
+ * header (extremos opuestos de la pantalla).
+ */
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  height: 78px;
+  height: var(--wb-spa-header-alto);
   padding: 0 44px;
   border-bottom: 1px solid var(--wb-tpl-line);
   background: var(--wb-tpl-surface);
@@ -46,6 +57,10 @@
   border: none;
   background: none;
   cursor: pointer;
+  /* Ahora es un `<a>` (S1, ver SeccionesSPA.tsx), no un `<button>`: el
+   * subrayado nativo de enlace lo reemplaza el `::after` de abajo, que ya
+   * existía para marcar el ítem activo. */
+  text-decoration: none;
   font: 500 12.5px var(--font-montserrat), sans-serif;
   color: var(--wb-tpl-ink-muted);
   white-space: nowrap;
@@ -80,8 +95,85 @@
   flex: none;
 }
 
+/*
+ * Shell raíz (header + main + pie) como columna flex que ocupa como mínimo
+ * el viewport. Corrige el defecto donde una página con contenido corto
+ * dejaba el footer flotando arriba de un vacío blanco: sin esto el root
+ * queda en `display: block` y su alto es solo la suma de sus hijos.
+ *
+ * `100vh` primero como fallback para motores viejos, `100dvh` después para
+ * descontar la barra de UI del navegador en mobile — si `100dvh` no es
+ * válido, el navegador ignora esa declaración y conserva la anterior.
+ *
+ * `--wb-spa-header-alto` es la única fuente del alto del header (lo consume
+ * `.header` más abajo) y del offset de `scroll-margin-top` de cada sección.
+ * Duplicado en JS como `ALTO_HEADER_PX` (SeccionesSPA.tsx) para el
+ * `rootMargin` del scrollspy — ver el comentario de esa constante.
+ */
+.shell {
+  --wb-spa-header-alto: 78px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/*
+ * `flex: 1 1 auto` (no `flex: 1`, que fuerza `flex-basis: 0%`): el alto de
+ * contenido de `.main` sigue siendo la base, y solo crece para absorber el
+ * sobrante cuando el shell es más alto que el contenido — así el footer
+ * (hijo siguiente del shell, fuera de `.main`) queda pegado abajo cuando la
+ * página es corta.
+ *
+ * `min-height: 0` se mantiene: sin esto, un ítem flex no puede encogerse
+ * por debajo del alto de su contenido y una sección muy alta desborda el
+ * shell en vez de dejar que el propio contenido controle el scroll de la
+ * página.
+ *
+ * Sin `display: flex` (WB-plantillas-landing-spa, S1 — antes era column-flex
+ * para poder centrar la única sección activa con `margin-block: auto` en su
+ * hijo). Con las cuatro secciones siempre montadas y apiladas, ese centrado
+ * repartiría el espacio sobrante ENTRE secciones en vez de dejarlas fluir
+ * una debajo de otra, así que se saca por completo: `.main` vuelve a flujo
+ * de bloque normal para sus hijos. Sigue siendo un ítem flex del `.shell`
+ * (recibe `flex: 1 1 auto` igual), que es lo único que necesita para seguir
+ * empujando el footer al fondo en páginas cortas.
+ */
 .main {
   min-height: 0;
+  flex: 1 1 auto;
+}
+
+/*
+ * Offset del salto de ancla: sin esto, `#servicios` etc. dejan el borde
+ * superior de la sección tapado detrás del header sticky (78px) al saltar.
+ * `scroll-margin-top` es exactamente para esto — desplaza el punto de
+ * "llegada" del scroll sin tocar el layout ni el padding visual de la
+ * sección.
+ *
+ * Selector `:global` porque `[data-dv-section]` es un atributo del wrapper
+ * de SeccionesSPA.tsx, no una clase de este módulo (contrato documentado en
+ * motion.css) — no hace falta agregar una clase nueva en el TSX solo para
+ * engancharlo acá.
+ */
+.main > :global([data-dv-section]) {
+  scroll-margin-top: var(--wb-spa-header-alto);
+}
+
+/*
+ * Centinela del scrollspy (SeccionesSPA.tsx): marca el fondo real de todo
+ * el documento para que el IntersectionObserver del "fin de página" pueda
+ * detectar el scroll máximo sin leer `scrollY`/`scrollHeight` a mano.
+ * `1px`, no `0`: un target de área cero deja la intersección a criterio de
+ * cada motor de layout; con un pixel real no hay ambigüedad que resolver.
+ * Sin color, sin texto, `flex-shrink: 0` para que nunca se lo coma el
+ * `flex: 1 1 auto` de `.main` (este div es hermano de `.main`, no su hijo,
+ * pero mantiene el hábito del resto del shell de no dejar nada a la
+ * `flex-basis` implícita).
+ */
+.finPagina {
+  height: 1px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 767px) {
