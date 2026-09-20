@@ -71,12 +71,15 @@ Convención obligatoria del módulo: puro, sin excepciones, igual que `contraste
 
 ## Tareas
 
-- [ ] **T1 — Módulo de derivación.** `src/domain/color/paletaDerivada.ts` +
-      `tests/unit/domain/color/paletaDerivada.test.ts`. Ruta: delegada (writer).
-- [ ] **T2 — `palette.ts` deriva en vez de leer.** Sigue emitiendo las cuatro variables
+- [x] **T1 — Módulo de derivación.** `src/domain/color/paletaDerivada.ts` (81 líneas) +
+      `tests/unit/domain/color/paletaDerivada.test.ts` (109 líneas). Ruta: delegada
+      (writer; disparador: 2+ archivos no triviales). Commit `a4e8ad6`.
+      Constantes: `L_PRIMARIO = 0.22` (citada del handoff `README.md:237`),
+      `L_SECUNDARIO = 0.45` (decisión de este ciclo, sin precedente textual).
+- [x] **T2 — `palette.ts` deriva en vez de leer.** Sigue emitiendo las cuatro variables
       CSS (las plantillas actuales las necesitan: 64 usos entre las tres), pero las tres
       salen de la derivación sobre `colores.acento`. Fallback a `PALETA_DEFAULT.acento`.
-      Ruta: delegada (writer, junto a T1).
+      Ruta: delegada (writer, junto a T1). Commit `a4e8ad6`.
 - [ ] **T3 — Dejar de persistir los tres.** `RUBRO_DEFAULTS` y su duplicado a mano en
       `prisma/seed-demo.ts` pasan a un solo color por rubro; `resolverColores`,
       `SiteConfigDTO` y los dos servicios de chat acompañan. Ruta: delegada (writer).
@@ -111,7 +114,20 @@ Corte natural: PR1 = T1 + T2 (comportamiento), PR2 = T3 + T4 (contrato y docs).
   (camino 3). Documento creado. Sin escrituras de código todavía.
 - 2026-09-19 — Rama `feature/paleta-derivada-del-acento` creada desde `develop` `963a63e`.
   Cadena elegida: `feature-branch-chain`.
+- 2026-09-19 — **T1 + T2 cerradas**, commit `a4e8ad6` (PR1). Verificación observada por el
+  writer y re-corrida por el orquestador como spot check:
+  `npx tsc --noEmit`: limpio · `npm run lint`: 0 errores, 21 warnings preexistentes y
+  ajenos a los archivos tocados · `npm run test:unit`: **762/762 en 61 suites** (venía de
+  695, +67 tests nuevos).
+  Evaluación RDD de ese commit contra `963a63e`:
+  `risk: medium` (`executable_change` en `palette.ts`), 5 paths / 372 líneas,
+  `review_due: false` por `under_budget`. Queda pendiente dentro del slice: se revisa
+  cuando un commit posterior cruce el presupuesto.
+  Hallazgo del readback: los **11 rubros ya tenían `texto: '#ffffff'`**, y la derivación
+  contra un `primario` de L 0.22 también da blanco — o sea que la variable más usada de
+  las tres (39 usos) **no cambia en ningún sitio publicado**. El cambio visual real se
+  concentra en `--primario` y `--secundario`, que pasan a ser tintes del acento.
 
 ## Próximo paso
 
-T1 + T2 con un writer delegado, sobre la rama ya creada.
+T3 (dejar de persistir los tres) en una rama encadenada sobre ésta, y después T4 (docs).
