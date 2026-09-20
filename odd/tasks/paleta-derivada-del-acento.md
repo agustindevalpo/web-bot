@@ -163,7 +163,22 @@ Corte natural: PR1 = T1 + T2 (comportamiento), PR2 = T3 + T4 (contrato y docs).
   `docs/ESTADO.md` se evaluó y **no se regeneró**: nada de lo que afirma quedó
   invalidado porque nada de este ciclo se mergeó — `develop` y `main` siguen en
   `963a63e`. Cambio de documentación sin commitear, por instrucción explícita de la
-  tarea que lo pidió.
+  tarea que lo pidió. Commit `b92ab20`.
+- 2026-09-20 — **T7 — Cuarta revisión** (aprobada y acusada). Dos warnings. Arreglado
+  `R3-001`: `derivarPaletaDesdeAcento` reenviaba el acento crudo, así que un hex válido
+  pero no canónico (`#FF8C00`, `#f80`) salía con otra convención de formato que los tres
+  derivados. Nada se veía mal —CSS no distingue mayúsculas en hex—, pero la coherencia
+  que el módulo declara era falsa. Ahora las cuatro salen de `linealAHex`, y el fallback
+  también. Commit `9e29f2f`. **812 tests**, cero skipped.
+
+## Deuda menor conocida (decidida, no olvidada)
+
+- `R3-002` — el barrido de 720 casos en `tests/unit/domain/color/paletaDerivada.test.ts`
+  acumula incumplimientos en un array y compara al final, en vez de asertar por caso. Si
+  alguna combinación lanzara, el barrido se corta en el primer error duro en vez de
+  reportar el conjunto completo, que es lo que el patrón promete. No se arregló: es
+  ergonomía de test, no corrección. Se corta acá a propósito — cuatro vueltas de revisión
+  y los hallazgos ya son pulido.
 
 ## Próximo paso
 
