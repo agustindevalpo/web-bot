@@ -117,3 +117,35 @@ del diseñador.
 3. Cómo se pide el **logo** y las **fotos** —subir archivos— sin romper el ritmo.
 4. Si algún campo del diseño de plantillas conviene **sacrificar** por costar más de lo
    que aporta. Bajar el alcance es una respuesta válida.
+
+---
+
+## Respuesta del diseñador y decisiones tomadas (2026-09-20)
+
+El diseñador respondió con una tercera vuelta del prototipo
+(`design_handoff_plantillas_webbot/Plantillas WebBot v3.dc.html`, bloque `t3`).
+
+**Aceptó la hipótesis de los dos momentos y le agregó un segundo movimiento que este
+brief no proponía:** el chat de la demo **no crece, se acorta** — de 8-9 preguntas a 6.
+
+### Decidido por Agustín
+
+**Cuándo se abre «Completar mi sitio»: mixto.** El texto —descripciones de servicios,
+testimonio, micro-preguntas de «sobre nosotros»— se abre **al dejar los datos**, antes de
+pagar. El **logo y las fotos reales**, recién **después de pagar**.
+
+El porqué: el texto sirve para enganchar, y cuanto más trabajo invirtió el visitante en
+su sitio, más le cuesta abandonarlo. Pero el logo y las fotos son justo lo que más trabajo
+le ahorran a Devalpo, así que esos se pagan primero.
+
+Costo asumido: dos estados de permiso en vez de uno, y más lógica para mantener con una
+sola persona.
+
+### Sigue sin decidirse
+
+- Cuál de las tres direcciones de LANDING (2a Editorial / 2b Bloques / 2c Oscuro). El
+  diseñador no la declaró en prosa, pero las maquetas del momento 2 usan la firma visual
+  de **2a**.
+- El hueco que el diseñador no nombró: las ranuras rotuladas de foto («principal», «quien
+  atiende», «un detalle») implican que `imagenes?: string[]` deje de ser un arreglo plano
+  y pase a ranuras tipadas.
