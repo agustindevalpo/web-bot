@@ -42,10 +42,18 @@ function comoDestacados(valor: unknown): Destacado[] {
 }
 
 // Techos de la maqueta (README.md:190-207): 3 cifras en el hero, grilla de
-// 5 servicios + la celda de CTA, 4 fotos en el grid asimétrico de Nosotros.
+// 5 servicios + la celda de CTA, 3 fotos en el grid asimétrico de Nosotros.
+//
+// Las 3 fotos salen de la aritmética del grid, no de un gusto: README.md:203
+// pide «grid `1fr 1fr` × `1fr 1fr` ... con la primera celda ocupando
+// `grid-row: span 2`». Dos columnas por dos filas son cuatro casillas, y la
+// celda que abarca dos filas se come dos, así que quedan dos libres: una
+// grande y dos chicas. Con un cuarto cupo la grilla se desborda a una tercera
+// fila que la maqueta nunca tuvo, y la sección pasa a ser más alta que el
+// hero — medido: 955px contra 652px del hero, antes de corregirlo.
 const MAX_DESTACADOS = 3
 const MAX_SERVICIOS_GRID = 5
-const MAX_IMAGENES_NOSOTROS = 4
+const MAX_IMAGENES_NOSOTROS = 3
 
 // La grilla de Servicios es de 3 columnas (Landing.module.css
 // `.serviciosGrid`) y la celda de CTA es siempre la última. Con un número

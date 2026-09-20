@@ -56,6 +56,16 @@
   padding: 11px 20px;
   border-radius: 6px;
   white-space: nowrap;
+  transition: filter 0.2s ease;
+}
+
+.botonHablemos:hover {
+  filter: brightness(0.92);
+}
+
+.botonHablemos:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
 }
 
 /* Eyebrow compartido por las 4 secciones — color acento, mayúsculas. */
@@ -194,7 +204,10 @@
   background: var(--wb-tpl-ink);
   padding: 26px 28px;
   border-radius: 6px;
-  box-shadow: 0 18px 44px rgba(16, 19, 26, 0.16);
+  /* Tarjeta flotante oscura (README.md:120): `0 22px 50px rgba(16,19,26,.22)`,
+     no la clara — el fondo es --wb-tpl-ink. Confirmado contra el prototipo
+     (`Plantillas WebBot.dc.html:95`). */
+  box-shadow: 0 22px 50px rgba(16, 19, 26, 0.22);
 }
 
 .tarjetaEyebrow {
@@ -267,6 +280,16 @@
   color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.5);
   width: fit-content;
+  transition: filter 0.2s ease;
+}
+
+.servicioCtaEnlace:hover {
+  filter: brightness(0.85);
+}
+
+.servicioCtaEnlace:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 /* ── Nosotros ── */
@@ -276,6 +299,20 @@
   grid-template-columns: 1fr 1.15fr;
   gap: 52px;
   padding: 56px 44px;
+}
+
+/* `index.tsx` ya referenciaba esta clase (columna izquierda de Nosotros) sin
+   que existiera acá — resolvía a `undefined`. Se agrega en vez de borrar la
+   referencia: el prototipo especifica ese wrapper como
+   `display:flex;flex-direction:column;justify-content:center`
+   (`Plantillas WebBot.dc.html:113`), y es gratis reproducirlo con fidelidad
+   aunque hoy no cambie nada visible (`.nosotros` ya no tiene alto resuelto
+   en el scroll largo, así que el `justify-content:center` no tiene espacio
+   extra que repartir todavía). */
+.nosotrosIzquierda {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .nosotrosTitulo {
@@ -296,14 +333,50 @@
   gap: 14px;
 }
 
+/*
+ * `1fr` rows need a resolved container height to distribute — they had one
+ * in the old tabbed layout (`height:100%` on the tab pane), but the SPA
+ * conversion put `#nosotros` in natural document flow, and both children of
+ * a cell (`next/image` con `fill`, y el placeholder) son `position:absolute`
+ * y no aportan altura intrínseca. Resultado medido en `demo-consultora`:
+ * filas de 32.675px/0px, grilla de fotos prácticamente plana.
+ *
+ * Fix: darle a la celda un `aspect-ratio` propio. Con la altura del
+ * contenedor indefinida, el algoritmo de grid trata `1fr` como si fuera
+ * `auto` (se basa en la contribución de max-content de cada celda) — el
+ * `aspect-ratio` es justo lo que le da a esa celda, vacía salvo por hijos
+ * absolutos, una altura preferida real. Es el mismo mecanismo que ya usa
+ * `.fotoPlaceholder` en móvil (línea de abajo), aplicado acá porque el
+ * problema es el mismo: una caja sin contenido intrínseco dentro de un
+ * contenedor sin alto resuelto.
+ *
+ * Las 4 celdas del grid son de longitud fija (`MAX_IMAGENES_NOSOTROS = 4` en
+ * `sections.ts`), rellenas con `null` → placeholder cuando falta una foto:
+ * el grid siempre tiene 4 celdas, con 1, 2, 3 o 4 fotos reales entre ellas.
+ * Este `aspect-ratio` no distingue foto real de placeholder (ambos hijos son
+ * `position:absolute;inset:0`), así que el fix vale para cualquier
+ * combinación.
+ */
 .nosotrosImgCelda {
   position: relative;
   border-radius: 4px;
   overflow: hidden;
+  aspect-ratio: 4 / 3;
 }
 
+/*
+ * La celda principal ocupa `grid-row: span 2` — necesita el doble de alto
+ * que una celda simple (más el gap entre filas), no el mismo `aspect-ratio`.
+ * Usarlo igual la dejaría pidiendo la altura de UNA fila mientras ocupa dos,
+ * y el grid la achicaría a la mitad de lo que se ve en la maqueta. `2 / 3`
+ * es `4 / 3` con el alto duplicado (0.75× el ancho → 1.5× el ancho), así que
+ * la celda principal lee proporcionalmente el doble de alta que sus 3
+ * vecinas, sin distorsión (el `object-fit: cover` de `.fotoImg` hace el
+ * recorte final).
+ */
 .nosotrosImgPrincipal {
   grid-row: span 2;
+  aspect-ratio: 2 / 3;
 }
 
 .nosotrosImgPlaceholder {
@@ -321,9 +394,24 @@
   padding: 56px 44px;
 }
 
+/* Mismo caso que `.nosotrosIzquierda` de arriba: `index.tsx` ya la
+   referenciaba (columna izquierda de Contacto) y no existía. El prototipo
+   especifica el mismo wrapper (`Plantillas WebBot.dc.html:137`). */
+.contactoIzquierda {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .contactoTitulo {
-  font: 400 32px/1.15 var(--font-instrument-serif), serif;
-  margin: 0 0 24px;
+  /* README.md no repite el tamaño explícitamente para esta sección; el
+     prototipo sí ("Plantillas WebBot.dc.html:139"): `400 38px/1.12
+     'Instrument Serif' margin:0 0 30px`, igual que el H2 de Nosotros
+     (README.md:203). El `32px/1.15` y `margin: 0 0 24px` anteriores eran un
+     desvío de transcripción, no una decisión — las otras tres secciones
+     (Servicios, Inicio, Nosotros) ya coinciden con su spec al pixel. */
+  font: 400 38px/1.12 var(--font-instrument-serif), serif;
+  margin: 0 0 30px;
   color: var(--wb-tpl-ink);
 }
 
@@ -466,6 +554,16 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 26px rgba(37, 211, 102, 0.42);
+  transition: filter 0.2s ease;
+}
+
+.whatsappFlotante:hover {
+  filter: brightness(0.92);
+}
+
+.whatsappFlotante:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
 }
 
 /* ── Responsivo — único breakpoint real (README.md:159-166) ── */

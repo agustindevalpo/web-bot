@@ -237,26 +237,30 @@ describe('landing/sections — buildNosotros', () => {
     expect(buildNosotros(config)).toBeNull()
   })
 
-  it('excluye la primera imagen (usada en el hero) y completa hasta 4 cupos con null', () => {
+  // Tres cupos, no cuatro: la grilla de la maqueta (README.md:203) es de dos
+  // columnas por dos filas y su primera celda abarca dos filas, así que solo
+  // quedan dos casillas libres además de la grande. Con un cuarto cupo la
+  // grilla se desbordaba a una tercera fila inexistente en el diseño y la
+  // sección terminaba más alta que el hero (medido: 955px contra 652px).
+  it('excluye la primera imagen (usada en el hero) y completa hasta 3 cupos con null', () => {
     const nosotros = buildNosotros(configCompleto())
     expect(nosotros?.imagenes).toEqual([
       'https://images.unsplash.com/galeria1.jpg',
       'https://images.unsplash.com/galeria2.jpg',
       null,
-      null,
     ])
   })
 
-  it('deja los 4 cupos de imagen en null cuando no hay imágenes de galería', () => {
+  it('deja los 3 cupos de imagen en null cuando no hay imágenes de galería', () => {
     const nosotros = buildNosotros(configCompleto({ sobreNosotros: 'Somos una panadería familiar.', imagenes: undefined }))
-    expect(nosotros?.imagenes).toEqual([null, null, null, null])
+    expect(nosotros?.imagenes).toEqual([null, null, null])
   })
 
   describe('contra forma equivocada (imagenes malformado)', () => {
     it('trata un imagenes que es un string (no array) como sin fotos, sin lanzar', () => {
       const config = configCompleto({ imagenes: 'no soy un array' as unknown as string[] })
       expect(() => buildNosotros(config)).not.toThrow()
-      expect(buildNosotros(config)?.imagenes).toEqual([null, null, null, null])
+      expect(buildNosotros(config)?.imagenes).toEqual([null, null, null])
     })
   })
 })
