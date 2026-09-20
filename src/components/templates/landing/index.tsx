@@ -6,6 +6,7 @@ import SeccionesSPA from '@/components/templates/shared/SeccionesSPA'
 import { filtrarSecciones, estiloCascada, type SeccionSPA } from '@/components/templates/shared/navegacion'
 import { instrumentSerif } from '@/components/templates/shared/fuentes'
 import { clampAcento, OBJETIVO_TEXTO } from '@/domain/color/contraste'
+import Monograma from '@/components/templates/shared/Monograma'
 import { buildMarca, buildInicio, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
 import FormularioContacto from './FormularioContacto'
 import styles from './Landing.module.css'
@@ -221,9 +222,22 @@ export default async function Landing({ config }: TemplateProps) {
     },
   ])
 
+  // Regla 04 del handoff (bloque 3c): cuando llega el logo, ocupa el mismo
+  // espacio que el monograma — nada más se mueve alrededor. `.marcaLogoBox`
+  // fija ese espacio (30px alto en escritorio, 26px en móvil,
+  // `Landing.module.css`) para que `Image fill` + `object-fit: contain`
+  // escale el logo del cliente sin recortarlo ni deformarlo. Sin logo,
+  // `Monograma` (variante "serifCalado" — regla 02, LANDING es editorial)
+  // ocupa ese mismo slot derivado de `marca.iniciales`.
   const marcaSlot = (
     <>
-      <span className={styles.marcaInicial}>{marca.inicial}</span>
+      {marca.logo ? (
+        <span className={styles.marcaLogoBox}>
+          <Image src={marca.logo} alt={marca.nombre} fill sizes="160px" className={styles.marcaLogoImg} />
+        </span>
+      ) : (
+        <Monograma iniciales={marca.iniciales} variante="serifCalado" />
+      )}
       <span className={styles.marcaNombre}>{marca.nombre}</span>
     </>
   )

@@ -51,4 +51,13 @@ export interface SiteConfigDTO {
   // pregunta ni completa este campo todavía: queda fuera de este slice, así
   // que en la práctica hoy nace siempre ausente.
   destacados?: { valor: string; etiqueta: string }[]
+  // URL del logo del cliente (handoff de diseño, bloque 3c — "Cuando llega
+  // el logo, ocupa el mismo espacio"). Mismo patrón aditivo-opcional que
+  // `destacados`: cuando el campo no viene, el header sigue mostrando el
+  // monograma derivado de `nombre` (`shared/iniciales.ts` +
+  // `shared/Monograma.tsx`) — nunca un hueco ni un ícono roto. A propósito,
+  // NINGÚN productor lo completa todavía (no hay flujo de subida de
+  // archivos en el chat ni en `/admin`): nace siempre ausente hasta que esa
+  // superficie exista.
+  logo?: string
 }
