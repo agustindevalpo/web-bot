@@ -302,12 +302,24 @@ describe('derivarPaletaDesdeAcento — garantía de contraste para un acento arb
           combinacionesEvaluadas++
 
           const acento = linealAHex(mapearAGamut({ l, c, h }))
-          const { primario, texto } = derivarPaletaDesdeAcento(acento)
+          const { primario, texto, acento: acentoResuelto } = derivarPaletaDesdeAcento(acento)
           const contraste = razonContraste(texto, primario)
 
           if (contraste < OBJETIVO_TEXTO) {
             incumplimientos.push(
               `caso #${combinacionesEvaluadas} (h=${h}, l=${l.toFixed(2)}, c=${c}, acento=${acento}) → contraste=${contraste.toFixed(3)}, esperado ≥ ${OBJETIVO_TEXTO}`,
+            )
+          }
+
+          // R3-acento-roundtrip-arbitrario: `--acento` es el único color que el
+          // cliente realmente eligió, y desde R3-001 se re-codifica hex → RGB
+          // lineal → hex en vez de pasar de largo. Los golden values fijan ese
+          // round-trip solo para los 11 acentos de la tabla; acá se cubre para
+          // 720 acentos arbitrarios. Si la conversión llegara a correr un canal
+          // en una unidad, el color del cliente cambiaría en silencio.
+          if (acentoResuelto !== acento) {
+            incumplimientos.push(
+              `caso #${combinacionesEvaluadas} (h=${h}, l=${l.toFixed(2)}, c=${c}) → el acento no hace round-trip: entró ${acento}, salió ${acentoResuelto}`,
             )
           }
         }

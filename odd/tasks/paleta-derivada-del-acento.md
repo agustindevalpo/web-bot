@@ -181,6 +181,22 @@ Corte natural: PR1 = T1 + T2 (comportamiento), PR2 = T3 + T4 (contrato y docs).
   no un `720` fijo — y cada incumplimiento reportado ya identifica su propio caso
   (`caso #N (h=…, l=…, c=…, acento=…)`). Ya no queda como deuda aceptada.
 
+## Hallazgo refutado con evidencia (sexta revisión)
+
+- `R3-secundario-sin-garantia-de-contraste` (WARNING) sostiene que `--texto` garantiza
+  4.5:1 solo contra `--primario`, mientras «las plantillas consumen un único `--texto`
+  sobre los dos fondos», dejando sin probar la legibilidad sobre `--secundario`.
+  **La premisa no se sostiene contra el código.** `--secundario` tiene exactamente un uso
+  vivo en todo el árbol de plantillas: `src/components/templates/landing/Landing.module.css:34`,
+  un `radial-gradient` decorativo al 45% que se desvanece a transparente, en un `div`
+  absoluto de 380px detrás de `.heroContent`. **Nunca es fondo sólido de texto.** No hay
+  ningún par «texto sobre secundario» que probar, así que no se agregó un test para una
+  combinación que no existe.
+  Además, el perfil de riesgo no lo cambió este ciclo: antes `secundario` era un color
+  elegido a mano por rubro y se usaba en ese mismo gradiente; ahora es el acento a L 0.45
+  y se usa igual. Si algún slice futuro del rediseño pone texto sobre `--secundario`
+  sólido, ahí sí hay que garantizar el contraste — y este párrafo queda como el aviso.
+
 ## Próximo paso
 
 Abrir los PRs de la cadena (`feature-branch-chain`): PR1 = T1+T2 sobre `develop`, PR2 =
