@@ -278,6 +278,33 @@ export function construirWhatsAppFormulario(telefono: string, nombre: string, em
   return buildWhatsAppUrlConMensaje(telefono, construirMensajeContacto(nombre, email, mensaje))
 }
 
+export type ResultadoEnvioContacto = { mensaje: string | null; debeResetear: boolean }
+
+const MENSAJE_SIN_TELEFONO = 'No pudimos preparar el mensaje de WhatsApp. Escríbenos al teléfono o al email de esta sección.'
+const MENSAJE_POPUP_BLOQUEADO = 'Tu navegador bloqueó la ventana de WhatsApp. Permite ventanas emergentes o escríbenos al teléfono o al email de esta sección.'
+
+// Decide qué feedback mostrar y si el formulario debe limpiarse, sin tocar el
+// DOM — `abrirVentana` es la única frontera con el navegador, inyectada para
+// poder pinear los 3 casos (sin teléfono, popup bloqueado, éxito) sin jsdom
+// (ver test). Nunca pide resetear salvo que `abrirVentana` haya devuelto algo
+// truthy: ni con teléfono inutilizable ni con el popup bloqueado se pierde lo
+// que la persona tipeó (R3-002).
+export function resolverEnvioContacto(
+  telefono: string,
+  nombre: string,
+  email: string,
+  mensaje: string,
+  abrirVentana: (url: string) => unknown,
+): ResultadoEnvioContacto {
+  const url = construirWhatsAppFormulario(telefono, nombre, email, mensaje)
+  if (!url) return { mensaje: MENSAJE_SIN_TELEFONO, debeResetear: false }
+
+  const ventana = abrirVentana(url)
+  if (!ventana) return { mensaje: MENSAJE_POPUP_BLOQUEADO, debeResetear: false }
+
+  return { mensaje: null, debeResetear: true }
+}
+
 export type FooterProps = {
   nombre: string
   ciudad: string | null

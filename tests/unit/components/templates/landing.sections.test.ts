@@ -7,6 +7,7 @@ import {
   buildFooter,
   construirMensajeContacto,
   construirWhatsAppFormulario,
+  resolverEnvioContacto,
 } from '@/components/templates/landing/sections'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
@@ -366,6 +367,27 @@ describe('landing/sections — construirWhatsAppFormulario', () => {
 
   it('retorna null cuando el teléfono no tiene dígitos utilizables', () => {
     expect(construirWhatsAppFormulario('sin numero', 'Ana', 'ana@mail.cl', 'Hola')).toBeNull()
+  })
+})
+
+describe('landing/sections — resolverEnvioContacto (R3-002)', () => {
+  it('cuando la ventana se abre, no hay mensaje de error y pide resetear el formulario', () => {
+    const resultado = resolverEnvioContacto('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Hola', () => ({}))
+    expect(resultado).toEqual({ mensaje: null, debeResetear: true })
+  })
+
+  it('sin teléfono utilizable, avisa y no pide resetear (nunca abre ventana ni pierde lo tipeado)', () => {
+    const abrirVentana = jest.fn()
+    const resultado = resolverEnvioContacto('sin numero', 'Ana', 'ana@mail.cl', 'Hola', abrirVentana)
+    expect(abrirVentana).not.toHaveBeenCalled()
+    expect(resultado.debeResetear).toBe(false)
+    expect(resultado.mensaje).toMatch(/teléfono o al email/)
+  })
+
+  it('con el popup bloqueado (abrirVentana devuelve un valor falsy), avisa y no pide resetear', () => {
+    const resultado = resolverEnvioContacto('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Hola', () => null)
+    expect(resultado.debeResetear).toBe(false)
+    expect(resultado.mensaje).toMatch(/bloqueó/)
   })
 })
 

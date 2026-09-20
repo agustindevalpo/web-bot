@@ -465,6 +465,11 @@
   filter: brightness(0.92);
 }
 
+.contactoEstado {
+  font: 400 12.5px var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink);
+}
+
 .contactoDerecha {
   display: flex;
   flex-direction: column;

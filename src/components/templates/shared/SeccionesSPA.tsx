@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { filtrarSecciones, type SeccionSPA } from './navegacion'
+import { resolverSeccionActiva } from './scrollspy'
 import styles from './SeccionesSPA.module.css'
 
 export type SeccionesSPAProps = {
@@ -169,33 +170,18 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
     // volver a subir: en cuanto el centinela deja de intersectar,
     // `enFinDePagina` vuelve a `false` y esta función vuelve a depender
     // solo de la franja, sin ningún paso adicional de "desbloqueo".
+    // Decisión pura extraída a `resolverSeccionActiva` (shared/scrollspy.ts) —
+    // pineada con tests unitarios ahí, sin stubear IntersectionObserver.
     function recalcularActiva() {
-      // `window.scrollY > 0` (lectura síncrona y barata, no un listener de
-      // scroll — solo se consulta acá, disparada por los observers) cubre
-      // el caso simétrico: una página tan corta que entra entera en el
-      // viewport tiene su centinela intersectando DESDE el montaje, con
-      // `scrollY` todavía en 0. Sin este guard, esa página arrancaría con
-      // la ÚLTIMA sección activa en vez de la primera — literalmente al
-      // revés de "la primera sección está activa en scrollY 0". El guard
-      // hace que "fin de página" solo pese cuando el usuario efectivamente
-      // se movió del techo.
-      if (enFinDePagina && window.scrollY > 0) {
-        const ultimaId = Array.from(seccionNodos.current.keys()).at(-1)
-        if (ultimaId) {
-          setActivaId(ultimaId)
-          return
-        }
-      }
-
-      let activaEntreLasQueIntersectan: string | null = null
-      for (const id of seccionNodos.current.keys()) {
-        if (interseccionPorId.get(id)) activaEntreLasQueIntersectan = id
-      }
-      // Si ninguna sección conocida está actualmente en la franja (hueco
-      // transitorio entre lecturas, o batch inicial todavía incompleto), se
-      // conserva la activa actual en vez de apagar el nav — nunca "no hay
-      // ninguna sección activa" es un estado válido para el usuario.
-      if (activaEntreLasQueIntersectan) setActivaId(activaEntreLasQueIntersectan)
+      setActivaId((activaActual) =>
+        resolverSeccionActiva(
+          Array.from(seccionNodos.current.keys()),
+          interseccionPorId,
+          enFinDePagina,
+          window.scrollY,
+          activaActual,
+        ),
+      )
     }
 
     const observerScrollspy = new IntersectionObserver(
