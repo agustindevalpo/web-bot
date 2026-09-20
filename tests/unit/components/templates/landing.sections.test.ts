@@ -48,13 +48,29 @@ function configSoloNombre(): SiteConfigDTO {
 }
 
 describe('landing/sections — buildMarca', () => {
-  it('arma la inicial en mayúscula desde el nombre', () => {
-    expect(buildMarca(configCompleto())).toEqual({ nombre: 'Panadería El Trigal', inicial: 'P' })
+  it('arma las dos iniciales en mayúscula desde el nombre, saltando el artículo', () => {
+    // "Panadería El Trigal": "El" es la única palabra de 2 letras — se salta
+    // (shared/iniciales.ts) y las iniciales salen de Panadería + Trigal.
+    expect(buildMarca(configCompleto())).toEqual({ nombre: 'Panadería El Trigal', iniciales: 'PT', logo: null })
   })
 
   it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
     expect(() => buildMarca(configSoloNombre())).not.toThrow()
-    expect(buildMarca(configSoloNombre())).toEqual({ nombre: 'Sitio E2E', inicial: 'S' })
+    // "Sitio E2E": ambas palabras tienen más de 2 letras y ninguna es
+    // artículo/preposición — iniciales de las dos palabras tal cual.
+    expect(buildMarca(configSoloNombre())).toEqual({ nombre: 'Sitio E2E', iniciales: 'SE', logo: null })
+  })
+
+  it('expone `logo` cuando config.logo viene con contenido', () => {
+    expect(buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png' }))).toEqual({
+      nombre: 'Panadería El Trigal',
+      iniciales: 'PT',
+      logo: 'https://cdn.example.com/logo.png',
+    })
+  })
+
+  it('`logo` es null cuando config.logo es solo espacios', () => {
+    expect(buildMarca(configCompleto({ logo: '   ' })).logo).toBeNull()
   })
 })
 

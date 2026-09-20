@@ -1,6 +1,7 @@
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { buildWhatsAppUrl, buildTelUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
 import { nombreDeServicio, descripcionDeServicio } from '@/components/templates/shared/servicios'
+import { obtenerIniciales } from '@/components/templates/shared/iniciales'
 
 // Constructores puros de props por sección del rediseño SPA (rediseño de
 // plantillas, S1) — de props planas a las cuatro entradas que consume
@@ -102,11 +103,17 @@ const ETIQUETA_FOTO_HERO = 'Nuestro trabajo'
 const FRASE_CTA_SERVICIOS = '¿Conversamos sobre tu proyecto?'
 const TEXTO_ENLACE_CTA_SERVICIOS = 'Escríbenos →'
 
-export type MarcaProps = { nombre: string; inicial: string }
+// `iniciales` reemplaza a la vieja `inicial` (una sola letra, cuadrado con
+// relleno plano — handoff bloque 3c, regla 03) por las dos iniciales del
+// monograma (`shared/iniciales.ts`, regla 01). `logo` es `null` cuando
+// `config.logo` está ausente o vacío — la misma decisión pura que
+// `index.tsx` usa para elegir entre pintar el logo del cliente
+// (`object-fit: contain`, regla 04) o el monograma derivado del nombre.
+export type MarcaProps = { nombre: string; iniciales: string; logo: string | null }
 
 export function buildMarca(config: SiteConfigDTO): MarcaProps {
   const nombre = comoStringNoVacio(config.nombre) ?? ''
-  return { nombre, inicial: nombre.trim().charAt(0).toUpperCase() }
+  return { nombre, iniciales: obtenerIniciales(nombre), logo: comoStringNoVacio(config.logo) }
 }
 
 export type InicioProps = {

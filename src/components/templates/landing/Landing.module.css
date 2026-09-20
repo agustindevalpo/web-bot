@@ -28,19 +28,25 @@
   background: var(--wb-tpl-surface);
 }
 
-/* ── Marca (slot `marca` del header, shell en SeccionesSPA.module.css) ── */
+/* ── Marca (slot `marca` del header, shell en SeccionesSPA.module.css) ──
+ * El cuadrado con la inicial y relleno plano (`.marcaInicial`) se reemplazó
+ * por el monograma compartido (`shared/Monograma.tsx`, variante
+ * "serifCalado" — handoff bloque 3c, regla 03: ese cuadrado es justo "el
+ * gesto que grita 'no puso su logo'"). `.marcaLogoBox`/`.marcaLogoImg` son
+ * el otro lado de la regla 04: cuando el cliente sube logo, ocupa el mismo
+ * espacio que el monograma ocupaba, `object-fit: contain`, nada se mueve
+ * alrededor. */
 
-.marcaInicial {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
+.marcaLogoBox {
+  position: relative;
+  width: 160px;
   height: 30px;
-  border-radius: 8px;
-  background: var(--acento);
-  color: #fff;
-  font: 700 13px var(--font-montserrat), sans-serif;
   flex: none;
+}
+
+.marcaLogoImg {
+  object-fit: contain;
+  object-position: left center;
 }
 
 .marcaNombre {
@@ -587,6 +593,11 @@
 /* ── Responsivo — único breakpoint real (README.md:159-166) ── */
 
 @media (max-width: 767px) {
+  .marcaLogoBox {
+    width: 130px;
+    height: 26px;
+  }
+
   .inicio {
     grid-template-columns: 1fr;
     min-height: auto;

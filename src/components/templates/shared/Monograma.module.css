@@ -1,0 +1,53 @@
+/*
+ * Handoff de diseño, bloque 3c — valores exactos del prototipo (swatches de
+ * "Cuatro variantes, una por plantilla"). El fondo de cada swatch en el
+ * prototipo es el LIENZO del mock (el header de la plantilla real, no algo
+ * que este módulo deba pintar) — confirmado leyendo el bloque: solo
+ * "circuloPleno" trae un fondo propio (círculo blanco), porque ES parte del
+ * diseño de esa variante, no el canvas. Las otras tres quedan transparentes
+ * a propósito y dejan ver el fondo del header de su plantilla.
+ *
+ * Las cuatro comparten color de letras (`--acento`, la única variable de
+ * acento que cualquier template consume — mismo criterio que
+ * `Landing.module.css`) y `line-height: 1` para no sumar espacio vertical
+ * fantasma alrededor del glifo dentro del slot `marca` del header
+ * (`SeccionesSPA.module.css` `.marca`, `align-items: center`).
+ */
+
+.monograma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  line-height: 1;
+  color: var(--acento);
+}
+
+/* Serif calado → Landing · Profesional. Sin caja: las letras solas, caladas
+   sobre el fondo del header. */
+.serifCalado {
+  font: 400 38px var(--font-instrument-serif), serif;
+}
+
+/* Círculo pleno → Servicios. Único caso con fondo propio (regla 03 del
+   handoff: nunca relleno plano de color — acá el relleno es blanco fijo y
+   las letras llevan el color, lo inverso del cuadrado que reemplaza). */
+.circuloPleno {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #fff;
+  font: 700 17px var(--font-montserrat), sans-serif;
+}
+
+/* Itálica sobre negro → Restaurante. */
+.italicaSobreNegro {
+  font: 400 30px var(--font-instrument-serif), serif;
+  font-style: italic;
+}
+
+/* Sans pesado → Portfolio · Tienda. */
+.sansPesado {
+  font: 800 30px var(--font-montserrat), sans-serif;
+  letter-spacing: -0.04em;
+}
