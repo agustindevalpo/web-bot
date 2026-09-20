@@ -885,7 +885,7 @@ texto nombra el botón que se clickeó.
 
 ## D-31 — Pendiente: qué pasa con `primario`, `secundario` y `texto` cuando el diseño colapsa a un solo acento
 
-**Fecha:** 2026-09-13 · **Estado:** PENDIENTE — bloquea S1, no bloquea nada de lo desplegado
+**Fecha:** 2026-09-13 · **Estado:** RESUELTA — reemplazada por [D-32](#d-32--primario-secundario-y-texto-se-derivan-del-acento-y-dejan-de-persistirse)
 **Contexto:** `PLAN-SLICES.md` lo lista como uno de los riesgos del rediseño y sigue sin
 resolverse. Hoy `src/components/templates/shared/palette.ts` inyecta **cuatro** variables
 CSS por sitio (`--primario`, `--secundario`, `--acento`, `--texto`) desde
@@ -916,3 +916,93 @@ ambigüedad se resolvió conversando; acá hay estado persistido de por medio.
 `docs/design_handoff_plantillas_webbot/PLAN-SLICES.md`, tabla de riesgos, fila "Cambio del
 contrato de paleta"; `src/application/dtos/SiteConfigDTO.ts` (`colores` con los cuatro
 campos); sitios en producción servidos por `/sites/[subdominio]`.
+
+---
+
+## D-32 — Primario, secundario y texto se derivan del acento y dejan de persistirse
+
+**Fecha:** 2026-09-19/20 · **Estado:** vigente — código completo en rama, **sin
+desplegar**: vive en `feature/paleta-contrato-un-color` (encadenada sobre
+`feature/paleta-derivada-del-acento`, ninguna de las dos mergeada); `develop` y `main`
+siguen en `963a63e`, el mismo commit que dejó a D-31 pendiente.
+**Contexto:** resuelve [D-31](#d-31--pendiente-qué-pasa-con-primario-secundario-y-texto-cuando-el-diseño-colapsa-a-un-solo-acento),
+que bloqueaba S1 del rediseño de plantillas (D-23). Ruta ODD (organic), no un ciclo SDD:
+Agustín la eligió el 2026-09-19 apartándose de la propia recomendación de D-31 ("primer
+caso de esta serie donde un ciclo SDD completo se justifica de verdad"), porque el mapeo
+de impacto (Engram obs #744) mostró que el camino elegido no toca datos.
+**Decisión:** camino **(3)** de los tres que planteaba D-31 — derivar `primario`,
+`secundario` y `texto` del acento con la maquinaria OKLCH de D-25, y dejar de escribirlos
+en `configJson.colores`. Regla de derivación (`src/domain/color/paletaDerivada.ts`):
+`primario` = acento a L 0.22 en OKLCH mapeado a gamut (cita literal del handoff,
+`docs/design_handoff_plantillas_webbot/README.md:237`, generalizada a los seis rubros);
+`secundario` = L 0.45 (decisión propia de este ciclo, sin precedente textual); `texto` =
+blanco o negro, el que gane `razonContraste` contra `primario`, **garantizado** ≥4.5:1
+(WCAG SC 1.4.3) — si ningún extremo lo alcanza a L 0.22, la L de `primario` se reajusta
+con `clampAcento` hasta lograrlo.
+**Por qué el camino (3) y no (1) o (2):** (1) — mantener las cuatro variables y que las
+plantillas nuevas lean solo el acento — dejaba huérfanos vivos sin resolver el contrato de
+paleta que pide el handoff. (2) — migrar `configJson` de los sitios existentes — no tenía
+ningún mecanismo sobre el cual construirse: las tres migraciones de Prisma son solo DDL,
+cero `UPDATE`s previos sobre `configJson` (Engram obs #744). El hallazgo que decidió: el
+(3) **no exige migración de datos**, porque toda fila ya tiene `acento` —el único
+insumo— y los otros tres simplemente dejan de leerse.
+**Qué NO se hizo, deliberadamente:** no hay migración de datos ni cambio de schema
+Prisma (fuera de alcance explícito, `odd/tasks/paleta-derivada-del-acento.md`); las filas
+existentes conservan `primario`, `secundario` y `texto` en su `configJson` como campos
+huérfanos e inertes — nadie los borra ni los reescribe. `resolverColores` y
+`RUBRO_DEFAULTS`/`prisma/seed-demo.ts` (antes duplicados a mano con los cuatro colores por
+rubro) quedan reducidos a un solo color, el acento (commit `625f8ab`).
+**Consecuencia aceptada, todavía no materializada:** cuando esta rama llegue a producción,
+**los sitios ya publicados cambian de aspecto** — sus `primario`/`secundario` guardados
+dejan de leerse y se reemplazan por la derivación. Efecto medido: los 11 rubros de
+`RUBRO_DEFAULTS` ya tenían `texto: '#ffffff'` (`rubroDefaults.ts` en `963a63e`, líneas
+26-103) y la derivación también da blanco para todos — la variable más usada de las tres
+(39 usos, Engram #744) **no cambia en ningún sitio publicado**; el cambio visual real
+queda confinado a `--primario` y `--secundario`. Las cinco plantillas vivas siguen
+emitiendo las cuatro variables CSS (64 apariciones de las tres derivadas bajo
+`src/components/templates`, verificado por grep) — dejar de emitirlas las habría roto; ese
+cableado se retira recién cuando el rediseño de plantillas reemplace esos templates.
+**Deriva de tono conocida y aceptada, no corregida:** `mapearAGamut` recorta el croma de
+forma distinta a L 0.22 que a L 0.45 según el tono, así que `primario` y `secundario` no
+siempre comparten tono exacto. Medido sobre los 11 acentos reales: `dentista` (`#0891B2`)
+deriva 1.2231° y `yoga` (`#f0c040`) 1.4089°; los otros nueve quedan bajo el umbral de 1°.
+Se fija como cota superior por rubro en el test, no se persigue una corrección — commit
+`93c9690`.
+**Rama de código provablemente muerta, conservada a propósito:** la reparación de
+contraste (`clampAcento` sobre `primario` cuando ni blanco ni negro llegan a 4.5:1) nunca
+se dispara con un acento real, porque el punto de equilibrio WCAG entre blanco y negro es
+~4.583:1 — por encima del objetivo de 4.5. Se mantiene y se prueba con un objetivo
+explícito más exigente que el de producción, porque protege un cambio futuro de
+`L_PRIMARIO` — commit `93c9690`.
+**Conflicto resuelto en el handoff de diseño:** `docs/design_handoff_plantillas_webbot/README.md:31`
+y `:80` dicen que el acento sale de `configJson.colores.primario`. Desactualizado: D-27 ya
+había establecido que el acento por cliente es `colores.acento`, derivado del estilo en
+OKLCH. Con D-31 resuelta por el camino (3), `acento` pasa a ser el único color persistido,
+así que esas dos líneas del handoff quedan obsoletas por construcción y no se siguen.
+Queda documentado para que nadie las use como referencia más adelante.
+**El acento persistido sale siempre en forma canónica:** una cuarta revisión de
+confiabilidad encontró (`R3-001`) que `derivarPaletaDesdeAcento` reenviaba el string de
+entrada de `acento` tal cual, sin pasar por la misma conversión que ya usaban `primario` y
+`secundario`. Un hex válido pero no canónico (`#FF8C00`, `#f80`) salía entonces con otra
+convención de formato que los tres colores derivados — nada se veía mal (CSS no distingue
+mayúsculas en hex ni formato corto/largo), pero la coherencia de formato que el módulo
+declara para las cuatro variables era falsa. Corregido: `acento` ahora sale de
+`linealAHex` igual que los otros tres, así que hace el mismo viaje de ida y vuelta
+(hex → RGB lineal → hex) y las cuatro variables CSS comparten una sola convención
+(minúsculas, seis dígitos) — commit `9e29f2f`.
+**Revisión adversarial:** cuatro revisiones de confiabilidad (`review-reliability`)
+corrieron sobre este código, quedaron aprobadas y con acuse de recibo; sus hallazgos
+motivaron los commits `6a4c1bc` (seis hallazgos de las dos primeras revisiones), `93c9690`
+(cuatro hallazgos de la tercera) y `9e29f2f` (dos hallazgos de la cuarta, `R3-001`
+corregido en código) — detalle en los propios mensajes de commit. Una quinta revisión
+encontró tres hallazgos más de endurecimiento de tests, sin cambios en `src/` — ver
+`odd/tasks/paleta-derivada-del-acento.md`.
+**Verificación (estado de la rama al cierre, no de producción):** `npm run test:unit` →
+812 tests, 61 suites, 0 skipped; `npx tsc --noEmit` limpio; `npm run lint` → 0 errores, 21
+warnings preexistentes y ajenos a este cambio (los mismos que en `963a63e`).
+**Evidencia:** `src/domain/color/paletaDerivada.ts`;
+`src/components/templates/shared/palette.ts`; `src/infrastructure/demo/rubroDefaults.ts`;
+`prisma/seed-demo.ts`; commits `a4e8ad6`, `a3ab4fe`, `625f8ab`, `6a4c1bc`, `93c9690`,
+`b92ab20`, `9e29f2f`, `fd7eb64` (ramas `feature/paleta-derivada-del-acento` y
+`feature/paleta-contrato-un-color`); `odd/tasks/paleta-derivada-del-acento.md`; Engram obs
+#744 (mapeo de impacto) y #745 (espejo del documento ODD).

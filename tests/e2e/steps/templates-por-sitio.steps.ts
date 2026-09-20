@@ -33,7 +33,7 @@ function construirConfigDePrueba(subdominio: string) {
       'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200',
       'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=800',
     ],
-    colores: { primario: '#123456', secundario: '#654321', acento: '#abcdef', texto: '#ffffff' },
+    colores: { acento: '#abcdef' },
   }
 }
 

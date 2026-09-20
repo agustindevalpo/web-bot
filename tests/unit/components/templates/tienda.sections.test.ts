@@ -26,7 +26,7 @@ function configCompleto(overrides: Partial<SiteConfigDTO> = {}): SiteConfigDTO {
       'https://images.unsplash.com/producto2.jpg',
       'https://images.unsplash.com/producto3.jpg',
     ],
-    colores: { primario: '#1B4332', secundario: '#2D6A4F', acento: '#D9A441', texto: '#ffffff' },
+    colores: { acento: '#D9A441' },
     ...overrides,
   }
 }

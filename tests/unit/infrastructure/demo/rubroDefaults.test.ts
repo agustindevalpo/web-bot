@@ -184,4 +184,22 @@ describe('resolverColores — acento neutro exclusivo de "otro"', () => {
 
     expect(resultado.acento).not.toBe('#556270')
   })
+
+  // R3-resolverColores-descarta-entrada: igual que la rama de override (ver
+  // acentoPorEstilo.test.ts), la rama de "otro" construye el objeto de
+  // salida a mano (`{ acento: ... }`) y descarta cualquier otro campo que
+  // traiga `colores`. Deliberado por D-31 (camino 3): esos campos ya no los
+  // lee nadie del sistema — no es un olvido de esta rama en particular.
+  it('descarta cualquier campo extra de colores también en la rama de "otro" — mismo contrato de D-31', () => {
+    const coloresConCamposExtra = {
+      acento: '#15defa',
+      primario: '#000000',
+      secundario: '#111111',
+      texto: '#ffffff',
+    } as unknown as (typeof RUBRO_DEFAULTS)[typeof RUBRO_OTRO]['colores']
+
+    const resultado = resolverColores(RUBRO_OTRO, coloresConCamposExtra, Estilo.MODERNO)
+
+    expect(Object.keys(resultado)).toEqual(['acento'])
+  })
 })

@@ -152,19 +152,21 @@ export function derivarAcento(acentoDelRubro: string, estilo: Estilo): string {
   return linealAHex(mapearAGamut(oklch))
 }
 
+// D-31 (camino 3): `primario`, `secundario` y `texto` dejaron de persistirse
+// — `acento` es el único color por rubro. `palette.ts` los deriva siempre en
+// tiempo de render con `derivarPaletaDesdeAcento` (src/domain/color/paletaDerivada.ts).
 export interface ColoresRubro {
-  primario: string
-  secundario: string
   acento: string
-  texto: string
 }
 
 /**
- * Igual que `derivarAcento`, pero opera sobre el objeto `colores` completo:
- * `primario`, `secundario` y `texto` pasan sin tocar, solo `acento` se
- * deriva. Pensada para reemplazar `defaults.colores` en un solo punto de
- * llamada (DemoChatService/ClaudeChatService).
+ * Igual que `derivarAcento`, pero opera sobre el objeto `colores` completo.
+ * Con un solo campo (`acento`, ver D-31) esto es una transformación directa;
+ * se mantiene como función propia porque `resolverColores` la usa como el
+ * caso general (sin override, sin "otro") y ambos llamadores externos
+ * (DemoChatService/ClaudeChatService) siguen pasando el objeto `colores`
+ * completo, no el string suelto.
  */
 export function derivarColores(colores: ColoresRubro, estilo: Estilo): ColoresRubro {
-  return { ...colores, acento: derivarAcento(colores.acento, estilo) }
+  return { acento: derivarAcento(colores.acento, estilo) }
 }
