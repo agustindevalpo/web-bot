@@ -15,9 +15,17 @@ const ACENTO_DEFAULT = '#15DEFA'
 // siempre del acento con `derivarPaletaDesdeAcento`. Las cuatro variables se
 // siguen emitiendo igual: las plantillas vivas tienen 64 usos entre las tres
 // derivadas y romperían sin ellas.
+//
+// `--acento` se emite con el acento RESUELTO que devuelve
+// `derivarPaletaDesdeAcento` (no con el valor crudo de `config.colores`): si
+// el dato de cliente no es un hex válido, la derivación ya degrada
+// internamente al acento por defecto para calcular primario/secundario/texto,
+// y `--acento` tiene que coincidir con ESE mismo valor — de lo contrario
+// quedaría con el dato roto mientras las otras tres variables ya reflejan el
+// fallback, rompiendo la coherencia de las cuatro entre sí.
 export function buildPaletteStyle(config: SiteConfigDTO): CSSProperties {
-  const acento = config.colores?.acento ?? ACENTO_DEFAULT
-  const { primario, secundario, texto } = derivarPaletaDesdeAcento(acento)
+  const acentoEntrada = config.colores?.acento ?? ACENTO_DEFAULT
+  const { primario, secundario, texto, acento } = derivarPaletaDesdeAcento(acentoEntrada)
 
   return {
     '--primario': primario,

@@ -1,4 +1,4 @@
-import { derivarAcento, derivarColores } from '@/domain/color/acentoPorEstilo'
+import { derivarAcento, derivarColores, type ColoresRubro } from '@/domain/color/acentoPorEstilo'
 import { linealAOklch, hexALineal } from '@/domain/color/contraste'
 import { Estilo } from '@/domain/value-objects/Estilo'
 import { resolverColores, OVERRIDES_ACENTO } from '@/infrastructure/demo/rubroDefaults'
@@ -173,5 +173,44 @@ describe('resolverColores — el override manual gana sobre la derivación', () 
     const resultado = resolverColores(RUBRO_DE_PRUEBA, colores, Estilo.MODERNO)
 
     expect(resultado).toEqual(derivarColores(colores, Estilo.MODERNO))
+  })
+
+  // R3-resolverColores-descarta-entrada: `colores` tipa `ColoresRubro`
+  // (`{ acento: string }`, D-31, camino 3), pero un objeto crudo en runtime
+  // —por ejemplo si `configJson` todavía trae `primario`/`secundario`/`texto`
+  // huérfanos de una fila vieja— puede traer más campos que el tipo permite.
+  // `resolverColores` los descarta. Esto es DELIBERADO, no un descuido: la
+  // decisión de D-31 fue justamente que esos tres campos dejan de leerse en
+  // ningún punto del sistema (ver rubroDefaults.ts y paletaDerivada.ts), así
+  // que reenviarlos sería resucitar dato muerto. Se fija acá como contrato
+  // para las dos rutas de la función que construyen el objeto de salida a
+  // mano (override y, más abajo en rubroDefaults.test.ts, "otro"); la ruta
+  // general pasa por `derivarColores`, que también solo lee `colores.acento`.
+  it('descarta cualquier campo extra de colores en la rama de override — comportamiento deliberado de D-31, no un olvido', () => {
+    const coloresConCamposExtra = {
+      acento: '#15defa',
+      primario: '#000000',
+      secundario: '#111111',
+      texto: '#ffffff',
+    } as unknown as ColoresRubro
+    OVERRIDES_ACENTO[RUBRO_DE_PRUEBA] = { [Estilo.MODERNO]: '#abcdef' }
+
+    const resultado = resolverColores(RUBRO_DE_PRUEBA, coloresConCamposExtra, Estilo.MODERNO)
+
+    expect(resultado).toEqual({ acento: '#abcdef' })
+    expect(Object.keys(resultado)).toEqual(['acento'])
+  })
+
+  it('descarta cualquier campo extra de colores en la rama general (sin override) — mismo contrato de D-31', () => {
+    const coloresConCamposExtra = {
+      acento: '#15defa',
+      primario: '#000000',
+      secundario: '#111111',
+      texto: '#ffffff',
+    } as unknown as ColoresRubro
+
+    const resultado = resolverColores(RUBRO_DE_PRUEBA, coloresConCamposExtra, Estilo.MODERNO)
+
+    expect(Object.keys(resultado)).toEqual(['acento'])
   })
 })

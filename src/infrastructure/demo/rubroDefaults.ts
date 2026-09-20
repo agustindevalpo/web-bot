@@ -154,6 +154,17 @@ const ACENTO_OTRO_POR_ESTILO: Record<Estilo, string> = {
 // acá y no en el dominio porque OVERRIDES_ACENTO es dato de infraestructura
 // — el dominio no puede depender de él sin invertir la capa (ver AGENTS.md,
 // límite hexagonal).
+//
+// Las tres ramas devuelven un objeto `{ acento: ... }` construido a mano, sin
+// `...colores` de por medio: cualquier campo extra que `colores` traiga en
+// runtime (p. ej. un `primario`/`secundario`/`texto` huérfano de una fila
+// vieja, ver SiteConfigDTO) se descarta. Es DELIBERADO, no un recorte
+// accidental al reducir `ColoresRubro` a un solo campo: D-31 (camino 3)
+// estableció que esos tres campos ya no los lee nadie del sistema — ni
+// `palette.ts` (que deriva siempre desde `acento`, ver paletaDerivada.ts) ni
+// ningún otro punto — así que reenviarlos sería resucitar dato muerto.
+// Pinneado en tests/unit/domain/color/acentoPorEstilo.test.ts y
+// tests/unit/infrastructure/demo/rubroDefaults.test.ts.
 export function resolverColores(rubro: string, colores: ColoresRubro, estilo: Estilo): ColoresRubro {
   const override = OVERRIDES_ACENTO[rubro]?.[estilo]
   if (override) return { acento: override }
