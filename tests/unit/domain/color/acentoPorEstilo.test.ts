@@ -1,4 +1,4 @@
-import { derivarAcento, derivarColores } from '@/domain/color/acentoPorEstilo'
+import { derivarAcento, derivarColores, type ColoresRubro } from '@/domain/color/acentoPorEstilo'
 import { linealAOklch, hexALineal } from '@/domain/color/contraste'
 import { Estilo } from '@/domain/value-objects/Estilo'
 import { resolverColores, OVERRIDES_ACENTO } from '@/infrastructure/demo/rubroDefaults'
@@ -138,14 +138,14 @@ describe('derivarAcento — degrada sin lanzar', () => {
 })
 
 describe('derivarColores', () => {
-  const colores = { primario: '#8B4513', secundario: '#D2691E', acento: '#FF8C00', texto: '#ffffff' }
+  // D-31 (camino 3): `ColoresRubro` quedó reducido a `acento` — ya no hay
+  // `primario`/`secundario`/`texto` que dejar intactos, así que esto es
+  // simplemente transformar el único campo.
+  const colores = { acento: '#FF8C00' }
 
-  it('deja primario, secundario y texto intactos y solo transforma el acento', () => {
+  it('transforma el acento con la misma regla que derivarAcento', () => {
     const resultado = derivarColores(colores, Estilo.COLORIDO)
 
-    expect(resultado.primario).toBe(colores.primario)
-    expect(resultado.secundario).toBe(colores.secundario)
-    expect(resultado.texto).toBe(colores.texto)
     expect(resultado.acento).toBe(derivarAcento(colores.acento, Estilo.COLORIDO))
     expect(resultado.acento).not.toBe(colores.acento)
   })
@@ -159,19 +159,75 @@ describe('resolverColores — el override manual gana sobre la derivación', () 
   })
 
   it('usa el hex de OVERRIDES_ACENTO en vez del derivado cuando hay entrada', () => {
-    const colores = { primario: '#000000', secundario: '#111111', acento: '#15defa', texto: '#ffffff' }
+    const colores = { acento: '#15defa' }
     OVERRIDES_ACENTO[RUBRO_DE_PRUEBA] = { [Estilo.MODERNO]: '#abcdef' }
 
     const resultado = resolverColores(RUBRO_DE_PRUEBA, colores, Estilo.MODERNO)
 
-    expect(resultado).toEqual({ ...colores, acento: '#abcdef' })
+    expect(resultado).toEqual({ acento: '#abcdef' })
   })
 
   it('sin override cae en la derivación automática', () => {
-    const colores = { primario: '#000000', secundario: '#111111', acento: '#15defa', texto: '#ffffff' }
+    const colores = { acento: '#15defa' }
 
     const resultado = resolverColores(RUBRO_DE_PRUEBA, colores, Estilo.MODERNO)
 
     expect(resultado).toEqual(derivarColores(colores, Estilo.MODERNO))
+  })
+
+  // R3-resolverColores-descarta-entrada: `colores` tipa `ColoresRubro`
+  // (`{ acento: string }`, D-31, camino 3), pero un objeto crudo en runtime
+  // —por ejemplo si `configJson` todavía trae `primario`/`secundario`/`texto`
+  // huérfanos de una fila vieja— puede traer más campos que el tipo permite.
+  // `resolverColores` los descarta. Esto es DELIBERADO, no un descuido: la
+  // decisión de D-31 fue justamente que esos tres campos dejan de leerse en
+  // ningún punto del sistema (ver rubroDefaults.ts y paletaDerivada.ts), así
+  // que reenviarlos sería resucitar dato muerto. Se fija acá como contrato
+  // para las dos rutas de la función que construyen el objeto de salida a
+  // mano (override y, más abajo en rubroDefaults.test.ts, "otro"); la ruta
+  // general pasa por `derivarColores`, que también solo lee `colores.acento`.
+  it('descarta cualquier campo extra de colores en la rama de override — comportamiento deliberado de D-31, no un olvido', () => {
+    const coloresConCamposExtra = {
+      acento: '#15defa',
+      primario: '#000000',
+      secundario: '#111111',
+      texto: '#ffffff',
+    } as unknown as ColoresRubro
+    OVERRIDES_ACENTO[RUBRO_DE_PRUEBA] = { [Estilo.MODERNO]: '#abcdef' }
+
+    const resultado = resolverColores(RUBRO_DE_PRUEBA, coloresConCamposExtra, Estilo.MODERNO)
+
+    expect(resultado).toEqual({ acento: '#abcdef' })
+    expect(Object.keys(resultado)).toEqual(['acento'])
+  })
+
+  // R3-asercion-no-distingue-rama: la versión anterior de este caso solo
+  // comparaba `Object.keys(resultado)` contra `['acento']` — las tres ramas
+  // de `resolverColores` devuelven exactamente esa forma, así que la
+  // aserción pasaba igual de verde corriera la rama general o la de
+  // override. Se agrega la aserción de VALOR de abajo, que sí distingue: si
+  // por error corriera la rama de override (por ejemplo por una fuga de
+  // `OVERRIDES_ACENTO[RUBRO_DE_PRUEBA]` entre casos), `acento` sería
+  // `'#abcdef'` en vez del valor derivado.
+  //
+  // Sobre la fuga: se verificó que NO existe — el `afterEach` de la línea
+  // 157 (`delete OVERRIDES_ACENTO[RUBRO_DE_PRUEBA]`) alcanza a los cuatro
+  // `it` de este `describe`, incluido el anterior a este (el que sí escribe
+  // el override), así que ya corre entre ambos y deja la tabla limpia antes
+  // de este caso. Queda igual la aserción de valor: aunque hoy no haya fuga,
+  // es la única forma de que este test detecte una si se introdujera.
+  it('descarta cualquier campo extra de colores en la rama general (sin override) — mismo contrato de D-31', () => {
+    const coloresConCamposExtra = {
+      acento: '#15defa',
+      primario: '#000000',
+      secundario: '#111111',
+      texto: '#ffffff',
+    } as unknown as ColoresRubro
+
+    const resultado = resolverColores(RUBRO_DE_PRUEBA, coloresConCamposExtra, Estilo.MODERNO)
+
+    expect(Object.keys(resultado)).toEqual(['acento'])
+    expect(resultado.acento).toBe(derivarAcento('#15defa', Estilo.MODERNO))
+    expect(resultado.acento).not.toBe('#abcdef')
   })
 })

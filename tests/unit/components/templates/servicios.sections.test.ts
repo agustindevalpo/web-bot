@@ -21,7 +21,7 @@ function configCompleto(overrides: Partial<SiteConfigDTO> = {}): SiteConfigDTO {
     estilo: Estilo.CALIDO,
     highlight: 'Primera consulta sin costo.',
     imagenes: ['https://images.unsplash.com/hero-dental.jpg', 'https://images.unsplash.com/extra.jpg'],
-    colores: { primario: '#0B3D91', secundario: '#1E5FCC', acento: '#4FD1C5', texto: '#ffffff' },
+    colores: { acento: '#4FD1C5' },
     ...overrides,
   }
 }

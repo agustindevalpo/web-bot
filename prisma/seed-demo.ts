@@ -37,7 +37,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=800',
         'https://images.unsplash.com/photo-1556217477-d325251ece38?w=800',
       ],
-      colores: { primario: '#8B4513', secundario: '#D2691E', acento: '#FF8C00', texto: '#ffffff' },
+      colores: { acento: '#FF8C00' },
     },
   },
   {
@@ -57,7 +57,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200',
         'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800',
       ],
-      colores: { primario: '#1a1a2e', secundario: '#16213e', acento: '#e94560', texto: '#ffffff' },
+      colores: { acento: '#e94560' },
     },
   },
   {
@@ -77,7 +77,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=1200',
         'https://images.unsplash.com/photo-1588776814546-1ffbb9b3754e?w=800',
       ],
-      colores: { primario: '#0f3460', secundario: '#16213e', acento: '#0891B2', texto: '#ffffff' },
+      colores: { acento: '#0891B2' },
     },
   },
   {
@@ -97,7 +97,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200',
         'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
       ],
-      colores: { primario: '#7B2D00', secundario: '#A0522D', acento: '#FF6B35', texto: '#ffffff' },
+      colores: { acento: '#FF6B35' },
     },
   },
   {
@@ -117,7 +117,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200',
         'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800',
       ],
-      colores: { primario: '#1e3a5f', secundario: '#2d5986', acento: '#15DEFA', texto: '#ffffff' },
+      colores: { acento: '#15DEFA' },
     },
   },
   {
@@ -137,7 +137,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=1200',
         'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=800',
       ],
-      colores: { primario: '#1a1a1a', secundario: '#2d2d2d', acento: '#FF4500', texto: '#ffffff' },
+      colores: { acento: '#FF4500' },
     },
   },
   {
@@ -157,7 +157,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=1200',
         'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800',
       ],
-      colores: { primario: '#4a7c59', secundario: '#6b9e79', acento: '#f0c040', texto: '#ffffff' },
+      colores: { acento: '#f0c040' },
     },
   },
   {
@@ -177,7 +177,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200',
         'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
       ],
-      colores: { primario: '#1a1a2e', secundario: '#16213e', acento: '#FFAF4D', texto: '#ffffff' },
+      colores: { acento: '#FFAF4D' },
     },
   },
   {
@@ -197,7 +197,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1200',
         'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
       ],
-      colores: { primario: '#6C5CE7', secundario: '#a29bfe', acento: '#fd79a8', texto: '#ffffff' },
+      colores: { acento: '#fd79a8' },
     },
   },
   {
@@ -217,7 +217,7 @@ const SITIOS_DEMO = [
         'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200',
         'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800',
       ],
-      colores: { primario: '#c0392b', secundario: '#e74c3c', acento: '#f39c12', texto: '#ffffff' },
+      colores: { acento: '#f39c12' },
     },
   },
 ]

@@ -10,8 +10,11 @@ export const CLIENTE_DEMO_ID = 'cliente-demo-webbot-devalpo'
 // duplicaba el mapeo rubro→Template ahora centralizado en
 // infrastructure/templates/rubroTemplates.ts (Requirement "Single Selection
 // Code Path"). Este archivo conserva solo lo puramente visual.
+// D-31 (camino 3): solo `acento` se persiste por rubro — `primario`,
+// `secundario` y `texto` se derivan siempre en `palette.ts`
+// (src/domain/color/paletaDerivada.ts) y ya no viven acá.
 export interface RubroVisualDefaults {
-  colores: { primario: string; secundario: string; acento: string; texto: string }
+  colores: { acento: string }
   imagenes: string[]
 }
 
@@ -23,70 +26,70 @@ export interface RubroVisualDefaults {
 // el script de seed (fuera de src/, sin alias @/) a este módulo.
 export const RUBRO_DEFAULTS: Record<string, RubroVisualDefaults> = {
   panaderia: {
-    colores: { primario: '#8B4513', secundario: '#D2691E', acento: '#FF8C00', texto: '#ffffff' },
+    colores: { acento: '#FF8C00' },
     imagenes: [
       'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200',
       'https://images.unsplash.com/photo-1556217477-d325251ece38?w=800',
     ],
   },
   peluqueria: {
-    colores: { primario: '#1a1a2e', secundario: '#16213e', acento: '#e94560', texto: '#ffffff' },
+    colores: { acento: '#e94560' },
     imagenes: [
       'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200',
       'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800',
     ],
   },
   dentista: {
-    colores: { primario: '#0f3460', secundario: '#16213e', acento: '#0891B2', texto: '#ffffff' },
+    colores: { acento: '#0891B2' },
     imagenes: [
       'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=1200',
       'https://images.unsplash.com/photo-1588776814546-1ffbb9b3754e?w=800',
     ],
   },
   restaurante: {
-    colores: { primario: '#7B2D00', secundario: '#A0522D', acento: '#FF6B35', texto: '#ffffff' },
+    colores: { acento: '#FF6B35' },
     imagenes: [
       'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200',
       'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
     ],
   },
   consultora: {
-    colores: { primario: '#1e3a5f', secundario: '#2d5986', acento: '#15DEFA', texto: '#ffffff' },
+    colores: { acento: '#15DEFA' },
     imagenes: [
       'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200',
       'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800',
     ],
   },
   taller: {
-    colores: { primario: '#1a1a1a', secundario: '#2d2d2d', acento: '#FF4500', texto: '#ffffff' },
+    colores: { acento: '#FF4500' },
     imagenes: [
       'https://images.unsplash.com/photo-1625047509248-ec889cbff17f?w=1200',
       'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=800',
     ],
   },
   yoga: {
-    colores: { primario: '#4a7c59', secundario: '#6b9e79', acento: '#f0c040', texto: '#ffffff' },
+    colores: { acento: '#f0c040' },
     imagenes: [
       'https://images.unsplash.com/photo-1588286840104-8957b019727f?w=1200',
       'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800',
     ],
   },
   ferreteria: {
-    colores: { primario: '#1a1a2e', secundario: '#16213e', acento: '#FFAF4D', texto: '#ffffff' },
+    colores: { acento: '#FFAF4D' },
     imagenes: [
       'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200',
       'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800',
     ],
   },
   veterinaria: {
-    colores: { primario: '#6C5CE7', secundario: '#a29bfe', acento: '#fd79a8', texto: '#ffffff' },
+    colores: { acento: '#fd79a8' },
     imagenes: [
       'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1200',
       'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
     ],
   },
   tienda: {
-    colores: { primario: '#c0392b', secundario: '#e74c3c', acento: '#f39c12', texto: '#ffffff' },
+    colores: { acento: '#f39c12' },
     imagenes: [
       'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200',
       'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800',
@@ -100,7 +103,7 @@ export const RUBRO_DEFAULTS: Record<string, RubroVisualDefaults> = {
   // propio negocio. RUBRO_TEMPLATES no tiene entrada para "otro" a propósito
   // (ver rubroTemplates.ts): TEMPLATE_FALLBACK (LANDING) aplica solo.
   otro: {
-    colores: { primario: '#3b4252', secundario: '#4c566a', acento: '#556270', texto: '#ffffff' },
+    colores: { acento: '#556270' },
     imagenes: [
       'https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=1200',
       'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800',
@@ -151,11 +154,22 @@ const ACENTO_OTRO_POR_ESTILO: Record<Estilo, string> = {
 // acá y no en el dominio porque OVERRIDES_ACENTO es dato de infraestructura
 // — el dominio no puede depender de él sin invertir la capa (ver AGENTS.md,
 // límite hexagonal).
+//
+// Las tres ramas devuelven un objeto `{ acento: ... }` construido a mano, sin
+// `...colores` de por medio: cualquier campo extra que `colores` traiga en
+// runtime (p. ej. un `primario`/`secundario`/`texto` huérfano de una fila
+// vieja, ver SiteConfigDTO) se descarta. Es DELIBERADO, no un recorte
+// accidental al reducir `ColoresRubro` a un solo campo: D-31 (camino 3)
+// estableció que esos tres campos ya no los lee nadie del sistema — ni
+// `palette.ts` (que deriva siempre desde `acento`, ver paletaDerivada.ts) ni
+// ningún otro punto — así que reenviarlos sería resucitar dato muerto.
+// Pinneado en tests/unit/domain/color/acentoPorEstilo.test.ts y
+// tests/unit/infrastructure/demo/rubroDefaults.test.ts.
 export function resolverColores(rubro: string, colores: ColoresRubro, estilo: Estilo): ColoresRubro {
   const override = OVERRIDES_ACENTO[rubro]?.[estilo]
-  if (override) return { ...colores, acento: override }
+  if (override) return { acento: override }
 
-  if (rubro === RUBRO_OTRO) return { ...colores, acento: ACENTO_OTRO_POR_ESTILO[estilo] }
+  if (rubro === RUBRO_OTRO) return { acento: ACENTO_OTRO_POR_ESTILO[estilo] }
 
   return derivarColores(colores, estilo)
 }
