@@ -30,4 +30,12 @@ export interface SiteConfigDTO {
   colores?: {
     acento: string
   }
+  // Fila de 3 cifras destacadas del hero de LANDING (handoff de diseño,
+  // rediseño de plantillas S1). Mismo patrón aditivo-opcional que
+  // `sobreNosotros`: cuando el campo no viene, la fila simplemente no se
+  // renderiza — no se inventan valores. A propósito, el productor del chat
+  // (ClaudeChatService.parseSiteConfig, DemoChatService.extraerDatos) NO
+  // pregunta ni completa este campo todavía: queda fuera de este slice, así
+  // que en la práctica hoy nace siempre ausente.
+  destacados?: { valor: string; etiqueta: string }[]
 }
