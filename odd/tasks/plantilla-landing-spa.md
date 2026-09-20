@@ -136,7 +136,31 @@ forma equivocada, no solo datos ausentes.
   el orquestador: `npx tsc --noEmit` limpio · `npm run test:unit` **821/821** en 61 suites
   (venía de 812, +9 tests) · `npm run lint` 0 errores con los 21 warnings preexistentes.
 
+- 2026-09-20 — **T3 a T6 cerradas** más dos defectos encontrados **mirando la plantilla en
+  el navegador**, no en los tests, y arreglados en la misma tanda:
+  - **Hueco en la grilla de Servicios.** Con 4 servicios + la celda CTA quedaban 5 celdas
+    en una grilla 3×2 y la sexta se veía como un rectángulo gris. Ahora el CTA se extiende
+    (`grid-column: span N`, con `N` calculado del resto de la fila) y llena lo que sobra,
+    para cualquier cantidad de 1 a 6+.
+  - **Nosotros repetía el hero palabra por palabra.** El H2 era el nombre del negocio —el
+    mismo string que el H1— y el párrafo caía a `descripcion`, que es justo lo que el hero
+    ya muestra. **Se elimina el fallback `sobreNosotros → descripcion` para esta
+    plantilla**: tenía sentido en el scroll largo viejo, donde los dos bloques estaban a
+    miles de píxeles; en la SPA están a un clic y se leía como error. El párrafo aparece
+    solo si hay `sobreNosotros` propio, y el H2 pasa a ser chrome de sección
+    («Quiénes somos»), igual que «Qué ofrecemos» en Servicios. Si la sección queda sin
+    texto propio **y** sin fotos, desaparece del nav. Las otras cuatro plantillas
+    conservan su fallback: cada una tiene su propio `sections.ts`.
+  - Verificación: `tsc` limpio · `lint` 0 errores · `test:unit` **843/843**, cero skipped
+    (venía de 821) · `build` limpio · y revisión visual de las cuatro secciones.
+
+## Verificación visual pendiente
+
+**El móvil no se pudo verificar.** Chrome no aplica el achique de ventana por debajo de
+~500px desde la automatización, y tras dos intentos se cortó en vez de insistir. El
+breakpoint de 768px está escrito en el CSS, pero **nadie lo vio renderizado**. Queda como
+lo único sin comprobar de esta slice.
+
 ## Próximo paso
 
-T3 a T6: la plantilla. Construir defensivo contra `destacados` malformado, por el hallazgo
-de arriba.
+Reactivar RDD y abrir la cadena de PRs. Antes, decidir qué hacer con la verificación móvil.
