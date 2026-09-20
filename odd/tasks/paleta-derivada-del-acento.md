@@ -173,12 +173,13 @@ Corte natural: PR1 = T1 + T2 (comportamiento), PR2 = T3 + T4 (contrato y docs).
 
 ## Deuda menor conocida (decidida, no olvidada)
 
-- `R3-002` — el barrido de 720 casos en `tests/unit/domain/color/paletaDerivada.test.ts`
-  acumula incumplimientos en un array y compara al final, en vez de asertar por caso. Si
-  alguna combinación lanzara, el barrido se corta en el primer error duro en vez de
-  reportar el conjunto completo, que es lo que el patrón promete. No se arregló: es
-  ergonomía de test, no corrección. Se corta acá a propósito — cuatro vueltas de revisión
-  y los hallazgos ya son pulido.
+- `R3-002` — **CERRADO** en la quinta revisión adversarial. El barrido de 720 casos en
+  `tests/unit/domain/color/paletaDerivada.test.ts` seguía acumulando incumplimientos en un
+  array sin probar que el triple `for` hubiera evaluado algo (`R3-barrido-puede-pasar-vacio`).
+  Se agregó una aserción de vida — cuenta las combinaciones evaluadas y la compara contra
+  el producto de los generadores (`HUES.length * LUMINOSIDADES.length * CROMAS.length`),
+  no un `720` fijo — y cada incumplimiento reportado ya identifica su propio caso
+  (`caso #N (h=…, l=…, c=…, acento=…)`). Ya no queda como deuda aceptada.
 
 ## Próximo paso
 

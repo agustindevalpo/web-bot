@@ -980,16 +980,29 @@ había establecido que el acento por cliente es `colores.acento`, derivado del e
 OKLCH. Con D-31 resuelta por el camino (3), `acento` pasa a ser el único color persistido,
 así que esas dos líneas del handoff quedan obsoletas por construcción y no se siguen.
 Queda documentado para que nadie las use como referencia más adelante.
-**Revisión adversarial:** tres revisiones de confiabilidad (`review-reliability`)
+**El acento persistido sale siempre en forma canónica:** una cuarta revisión de
+confiabilidad encontró (`R3-001`) que `derivarPaletaDesdeAcento` reenviaba el string de
+entrada de `acento` tal cual, sin pasar por la misma conversión que ya usaban `primario` y
+`secundario`. Un hex válido pero no canónico (`#FF8C00`, `#f80`) salía entonces con otra
+convención de formato que los tres colores derivados — nada se veía mal (CSS no distingue
+mayúsculas en hex ni formato corto/largo), pero la coherencia de formato que el módulo
+declara para las cuatro variables era falsa. Corregido: `acento` ahora sale de
+`linealAHex` igual que los otros tres, así que hace el mismo viaje de ida y vuelta
+(hex → RGB lineal → hex) y las cuatro variables CSS comparten una sola convención
+(minúsculas, seis dígitos) — commit `9e29f2f`.
+**Revisión adversarial:** cuatro revisiones de confiabilidad (`review-reliability`)
 corrieron sobre este código, quedaron aprobadas y con acuse de recibo; sus hallazgos
-motivaron los commits `6a4c1bc` (seis hallazgos de las dos primeras revisiones) y
-`93c9690` (cuatro hallazgos de la tercera) — detalle en los propios mensajes de commit.
+motivaron los commits `6a4c1bc` (seis hallazgos de las dos primeras revisiones), `93c9690`
+(cuatro hallazgos de la tercera) y `9e29f2f` (dos hallazgos de la cuarta, `R3-001`
+corregido en código) — detalle en los propios mensajes de commit. Una quinta revisión
+encontró tres hallazgos más de endurecimiento de tests, sin cambios en `src/` — ver
+`odd/tasks/paleta-derivada-del-acento.md`.
 **Verificación (estado de la rama al cierre, no de producción):** `npm run test:unit` →
-796 tests, 61 suites, 0 skipped; `npx tsc --noEmit` limpio; `npm run lint` → 0 errores, 21
+812 tests, 61 suites, 0 skipped; `npx tsc --noEmit` limpio; `npm run lint` → 0 errores, 21
 warnings preexistentes y ajenos a este cambio (los mismos que en `963a63e`).
 **Evidencia:** `src/domain/color/paletaDerivada.ts`;
 `src/components/templates/shared/palette.ts`; `src/infrastructure/demo/rubroDefaults.ts`;
-`prisma/seed-demo.ts`; commits `a4e8ad6`, `a3ab4fe`, `625f8ab`, `6a4c1bc`, `93c9690`
-(ramas `feature/paleta-derivada-del-acento` y `feature/paleta-contrato-un-color`);
-`odd/tasks/paleta-derivada-del-acento.md`; Engram obs #744 (mapeo de impacto) y #745
-(espejo del documento ODD).
+`prisma/seed-demo.ts`; commits `a4e8ad6`, `a3ab4fe`, `625f8ab`, `6a4c1bc`, `93c9690`,
+`b92ab20`, `9e29f2f`, `fd7eb64` (ramas `feature/paleta-derivada-del-acento` y
+`feature/paleta-contrato-un-color`); `odd/tasks/paleta-derivada-del-acento.md`; Engram obs
+#744 (mapeo de impacto) y #745 (espejo del documento ODD).

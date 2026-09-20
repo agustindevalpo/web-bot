@@ -273,28 +273,50 @@ describe('resolverPrimarioYTexto — rama de reajuste de contraste', () => {
 // barrido cubre muchos tonos, luminosidades y cromas de un acento de
 // cliente ARBITRARIO (no solo los de la tabla) para que un futuro cambio que
 // rompa la garantía falle acá, no en producción.
+// R3-barrido-puede-pasar-vacio: el barrido es la única evidencia que respalda
+// la garantía de 4.5:1 para un acento de cliente arbitrario, pero antes solo
+// aserteaba que el acumulador de incumplimientos quedaba vacío — nada
+// comprobaba que el triple `for` hubiera evaluado algún caso. Si los límites
+// colapsaran (un `length` editado, un generador vaciado, un narrowing
+// temprano) el test seguía pasando en verde sin probar nada. Ahora se cuentan
+// las combinaciones evaluadas y se compara contra el producto de los
+// generadores, calculado de los propios arrays — no un `720` fijo — para que
+// la aserción de vida siga a los generadores si cambian.
+// Esto también cierra R3-002 (deuda aceptada en el ciclo anterior): la
+// aserción de vida prueba que el barrido corrió completo, y cada
+// incumplimiento reportado ya identifica su propio caso (h/l/c/acento) sin
+// necesidad de cambiar el patrón de "acumular y comparar al final".
 describe('derivarPaletaDesdeAcento — garantía de contraste para un acento arbitrario', () => {
   it('para un barrido amplio de tonos/luminosidades/cromas, el texto derivado siempre cumple 4.5:1 contra el primario', () => {
     const HUES = Array.from({ length: 18 }, (_, i) => i * 20) // 0..340, cada 20°
     const LUMINOSIDADES = Array.from({ length: 10 }, (_, i) => 0.05 + i * 0.1) // 0.05..0.95
     const CROMAS = [0.05, 0.12, 0.19, 0.26]
+    const COMBINACIONES_ESPERADAS = HUES.length * LUMINOSIDADES.length * CROMAS.length
 
     const incumplimientos: string[] = []
+    let combinacionesEvaluadas = 0
 
     for (const h of HUES) {
       for (const l of LUMINOSIDADES) {
         for (const c of CROMAS) {
+          combinacionesEvaluadas++
+
           const acento = linealAHex(mapearAGamut({ l, c, h }))
           const { primario, texto } = derivarPaletaDesdeAcento(acento)
           const contraste = razonContraste(texto, primario)
 
           if (contraste < OBJETIVO_TEXTO) {
-            incumplimientos.push(`h=${h} l=${l.toFixed(2)} c=${c} acento=${acento} → contraste=${contraste.toFixed(3)}`)
+            incumplimientos.push(
+              `caso #${combinacionesEvaluadas} (h=${h}, l=${l.toFixed(2)}, c=${c}, acento=${acento}) → contraste=${contraste.toFixed(3)}, esperado ≥ ${OBJETIVO_TEXTO}`,
+            )
           }
         }
       }
     }
 
+    // Aserción de vida: si esto no da 720, el barrido no evaluó lo que dice
+    // evaluar y el resultado de abajo no prueba nada.
+    expect(combinacionesEvaluadas).toBe(COMBINACIONES_ESPERADAS)
     expect(incumplimientos).toEqual([])
   })
 })
@@ -304,18 +326,27 @@ describe('derivarPaletaDesdeAcento — garantía de contraste para un acento arb
 // los mismos que ya usa ACENTOS_RUBRO arriba, leídos de la fuente, no
 // inventados. Un ajuste futuro de `L_PRIMARIO`/`L_SECUNDARIO` o de la regla
 // de derivación tiene que romper esta prueba de forma ruidosa.
-const PALETA_ESPERADA_POR_RUBRO: Record<string, { primario: string; secundario: string; texto: string }> = {
-  panaderia: { primario: '#2c1300', secundario: '#804300', texto: '#ffffff' },
-  peluqueria: { primario: '#39000c', secundario: '#a10032', texto: '#ffffff' },
-  dentista: { primario: '#001f28', secundario: '#005f76', texto: '#ffffff' },
-  restaurante: { primario: '#340b00', secundario: '#932e00', texto: '#ffffff' },
-  consultora: { primario: '#001f25', secundario: '#00606e', texto: '#ffffff' },
-  taller: { primario: '#360700', secundario: '#992500', texto: '#ffffff' },
-  yoga: { primario: '#231900', secundario: '#6b5100', texto: '#ffffff' },
-  ferreteria: { primario: '#291600', secundario: '#784900', texto: '#ffffff' },
-  veterinaria: { primario: '#380019', secundario: '#971752', texto: '#ffffff' },
-  tienda: { primario: '#291600', secundario: '#774a00', texto: '#ffffff' },
-  otro: { primario: '#111c27', secundario: '#4a5764', texto: '#ffffff' },
+//
+// R3-acento-roundtrip-sin-golden: `acento` se persiste ahora como hex ->
+// lineal RGB -> hex (commit `9e29f2f`), pero esta tabla solo pineaba
+// primario/secundario/texto, así que el round-trip quedaba value-probado
+// para ninguno de los 11 acentos reales. `acento` se agrega acá con el mismo
+// método que el resto de la tabla: corrido una vez con el código real
+// (`derivarPaletaDesdeAcento`) y pegado como literal, nunca calculado dentro
+// del test. Los 11 acentos reales round-trip-ean limpio a su propia forma en
+// minúsculas — no hay defecto de conversión que reportar.
+const PALETA_ESPERADA_POR_RUBRO: Record<string, { primario: string; secundario: string; texto: string; acento: string }> = {
+  panaderia: { primario: '#2c1300', secundario: '#804300', texto: '#ffffff', acento: '#ff8c00' },
+  peluqueria: { primario: '#39000c', secundario: '#a10032', texto: '#ffffff', acento: '#e94560' },
+  dentista: { primario: '#001f28', secundario: '#005f76', texto: '#ffffff', acento: '#0891b2' },
+  restaurante: { primario: '#340b00', secundario: '#932e00', texto: '#ffffff', acento: '#ff6b35' },
+  consultora: { primario: '#001f25', secundario: '#00606e', texto: '#ffffff', acento: '#15defa' },
+  taller: { primario: '#360700', secundario: '#992500', texto: '#ffffff', acento: '#ff4500' },
+  yoga: { primario: '#231900', secundario: '#6b5100', texto: '#ffffff', acento: '#f0c040' },
+  ferreteria: { primario: '#291600', secundario: '#784900', texto: '#ffffff', acento: '#ffaf4d' },
+  veterinaria: { primario: '#380019', secundario: '#971752', texto: '#ffffff', acento: '#fd79a8' },
+  tienda: { primario: '#291600', secundario: '#774a00', texto: '#ffffff', acento: '#f39c12' },
+  otro: { primario: '#111c27', secundario: '#4a5764', texto: '#ffffff', acento: '#556270' },
 }
 
 describe('derivarPaletaDesdeAcento — valores dorados por rubro (regresión visual)', () => {
@@ -323,9 +354,9 @@ describe('derivarPaletaDesdeAcento — valores dorados por rubro (regresión vis
     const esperado = PALETA_ESPERADA_POR_RUBRO[rubro]
     expect(esperado).toBeDefined()
 
-    const { primario, secundario, texto } = derivarPaletaDesdeAcento(acento)
+    const paleta = derivarPaletaDesdeAcento(acento)
 
-    expect({ primario, secundario, texto }).toEqual(esperado)
+    expect({ primario: paleta.primario, secundario: paleta.secundario, texto: paleta.texto, acento: paleta.acento }).toEqual(esperado)
   })
 
   it('PALETA_ESPERADA_POR_RUBRO cubre exactamente los rubros de RUBRO_DEFAULTS', () => {
