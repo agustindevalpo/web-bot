@@ -65,7 +65,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toEqual({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15DEFA',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })
@@ -82,7 +82,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toEqual({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15DEFA',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })
@@ -100,7 +100,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toEqual({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15DEFA',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })
@@ -117,7 +117,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toEqual({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15DEFA',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })

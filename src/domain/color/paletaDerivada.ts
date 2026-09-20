@@ -55,19 +55,25 @@ export interface PaletaDerivada {
   primario: string
   secundario: string
   texto: string
-  // Acento efectivamente usado para derivar el resto de la paleta: igual al
-  // parámetro de entrada cuando es un hex válido, o `ACENTO_DEFAULT` cuando
-  // no lo es. `palette.ts` lo usa para emitir `--acento`, así las cuatro
-  // variables CSS quedan siempre coherentes entre sí — un acento inválido de
-  // cliente nunca deja `--acento` con el valor roto mientras las otras tres
-  // ya cayeron al fallback (R3-acento-no-normalizado).
+  // Acento efectivamente usado para derivar el resto de la paleta, siempre en
+  // forma canónica (minúsculas, seis dígitos): el de entrada cuando es un hex
+  // válido, o `ACENTO_DEFAULT` cuando no lo es. `palette.ts` lo usa para emitir
+  // `--acento`, así las cuatro variables CSS quedan siempre coherentes entre sí
+  // — ni un acento inválido deja `--acento` roto mientras las otras tres ya
+  // cayeron al fallback, ni un `#FF8C00` válido convive con un `#2c1300`
+  // derivado, con dos convenciones de formato para la misma entrada.
   acento: string
 }
 
 // Hex de `ACENTO_DEFAULT` en OKLCH — precalculado porque `hexALineal` de un
 // hex constante y válido nunca puede dar `null`; el `!` queda documentado acá
 // y no disperso en cada llamada de fallback.
-const OKLCH_ACENTO_DEFAULT: OKLCH = linealAOklch(hexALineal(ACENTO_DEFAULT)!)
+const RGB_ACENTO_DEFAULT = hexALineal(ACENTO_DEFAULT)!
+const OKLCH_ACENTO_DEFAULT: OKLCH = linealAOklch(RGB_ACENTO_DEFAULT)
+
+// `ACENTO_DEFAULT` en la misma forma canónica que emite `linealAHex`, para que
+// el fallback no introduzca la incoherencia de formato que este módulo evita.
+const ACENTO_DEFAULT_CANONICO = linealAHex(RGB_ACENTO_DEFAULT)
 
 function conLuminosidad(oklch: OKLCH, l: number): string {
   return linealAHex(mapearAGamut({ ...oklch, l }))
@@ -137,11 +143,14 @@ function primarioConTextoLegible(oklch: OKLCH): { primario: string; texto: strin
  * propagar el dato roto — mismo criterio que `acentoPorEstilo.ts` y
  * `contraste.ts`, porque `acento` es dato de cliente sin validar. El `acento`
  * devuelto en el resultado es ese mismo acento resuelto (el válido de
- * entrada, o el de reserva), nunca el valor roto original.
+ * entrada, o el de reserva), nunca el valor roto original, y siempre en la
+ * forma canónica que emite `linealAHex`: minúsculas y seis dígitos. Así un
+ * `#FF8C00` o un `#f80` de entrada salen con el mismo formato que los tres
+ * colores derivados, en vez de mezclar convenciones en las cuatro variables.
  */
 export function derivarPaletaDesdeAcento(acento: string): PaletaDerivada {
   const base = hexALineal(acento)
-  const acentoResuelto = base === null ? ACENTO_DEFAULT : acento
+  const acentoResuelto = base === null ? ACENTO_DEFAULT_CANONICO : linealAHex(base)
   const oklch = base === null ? OKLCH_ACENTO_DEFAULT : linealAOklch(base)
 
   const { primario, texto } = primarioConTextoLegible(oklch)

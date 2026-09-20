@@ -62,6 +62,35 @@ describe('derivarPaletaDesdeAcento — degrada sin lanzar', () => {
   })
 })
 
+// R3-001: el acento devuelto reenviaba el string crudo de entrada, así que un
+// hex válido pero no canónico salía con otra convención de formato que los tres
+// colores derivados (`--acento: '#FF8C00'` junto a `--primario: '#2c1300'`).
+// CSS no distingue mayúsculas en hex, así que nada se veía mal; lo que era
+// falso era la coherencia que el módulo declara. Ahora las cuatro salen de
+// `linealAHex`.
+describe('derivarPaletaDesdeAcento — el acento devuelto siempre es canónico', () => {
+  it.each([
+    ['mayúsculas', '#FF8C00', '#ff8c00'],
+    ['formato corto', '#f80', '#ff8800'],
+    ['con espacios alrededor', '  #0891B2  ', '#0891b2'],
+    ['ya canónico', '#15defa', '#15defa'],
+  ])('%s: %s → %s', (_descripcion, entrada, esperado) => {
+    expect(derivarPaletaDesdeAcento(entrada).acento).toBe(esperado)
+  })
+
+  it('el fallback de acento inválido también sale canónico', () => {
+    expect(derivarPaletaDesdeAcento('no-es-color').acento).toBe('#15defa')
+  })
+
+  it.each(ACENTOS_RUBRO)('%s (%s): las cuatro variables comparten convención de formato', (_rubro, acento) => {
+    const { primario, secundario, texto, acento: acentoResuelto } = derivarPaletaDesdeAcento(acento)
+
+    for (const color of [primario, secundario, texto, acentoResuelto]) {
+      expect(color).toMatch(/^#[0-9a-f]{6}$/)
+    }
+  })
+})
+
 describe('derivarPaletaDesdeAcento — salida siempre en sRGB válido', () => {
   it.each(ACENTOS_RUBRO)('%s (%s): primario y secundario son hex de 6 dígitos', (_rubro, acento) => {
     const { primario, secundario } = derivarPaletaDesdeAcento(acento)
