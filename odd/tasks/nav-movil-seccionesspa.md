@@ -81,4 +81,15 @@
   not fire IntersectionObserver or smooth scroll — test with a visible tab.
   Checks: `tsc --noEmit` clean, lint 0 errors (21 pre-existing warnings),
   `test:unit` 880/880.
+- 2026-09-26 — T6 (Agustín's feedback): `Hablemos` clipped at the top on
+  mobile (top edge y = -4px) because the CTA is an inline `<a>` whose
+  vertical padding doesn't count toward the line box. `.accion` now
+  centers with flex, and row 1 goes 38 → 52px (CSS var + `ALTO_FILA1_MOBIL_PX`)
+  so the button has 10px above and below. Deliberate deviation from the
+  Bloques 82px total (now 96px + 1px border): the user asked for the air.
+  Logo stays left (Agustín agreed after reviewing `handoff_bloques/README.md:140`).
+  Evidence: mobile button 11..43 (center 27 = brand center 27), stuck header
+  top -52 / nav top 0; desktop unchanged at 78px. Shadow not re-observed
+  (background tab), logic unchanged. Commit `cdc1ceb`. Checks: tsc clean,
+  lint 0 errors, test:unit 880/880.
 - Next: push the branch and open a PR to `develop` (user's decision).
