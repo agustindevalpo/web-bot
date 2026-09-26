@@ -24,7 +24,7 @@
 - [x] **T2** — `/privacidad` page. Route: same writer. Commit `7a04821`. File: `src/app/privacidad/page.tsx`.
 - [x] **T3** — Landing footer: seller identity (business name, RUT, address) + links to both pages. Route: same writer. Commit `0100598`. Files: `src/app/page.tsx`, `src/app/page.module.css`.
 - [x] **T4** — Withdrawal-exclusion notice + terms link next to the payment button (`src/app/chat/DemoCTA.tsx`). Route: same writer. Commit `1793984`. Files: `src/app/chat/DemoCTA.tsx`, `src/app/chat/DemoCTA.module.css`.
-- [ ] **T5** — Visual check (desktop + 390px) and docs: `ESTADO.md` (legal pages exist; blocker becomes "lawyer review"), `DECISIONES.md` entry for the withdrawal exclusion. Route: inline (orchestrator).
+- [x] **T5** — Visual check (desktop + 390px) and docs: `DECISIONES.md` D-39/D-40 (`ESTADO.md` is regenerated in the release commit, when the pages reach `main`). Route: inline (orchestrator).
 
 ## Acceptance
 
@@ -66,3 +66,16 @@
     there's no evidence WebBot has ever collected minors' data.
   - Disclaimer: these are a well-grounded draft, not legal advice —
     recommend lawyer review before paid traffic (per task doc).
+- 2026-09-26 — T5 by orchestrator. Fixed the copy test that T0 broke
+  (`f2d5b86`; my earlier filtered run hid it). Text review: art. 3 bis b)
+  exclusion now grounded on the provider's express disclosure, processors
+  outside Chile disclosed (`70174e6`); withdrawal notice moved ABOVE the pay
+  button so it is read before contracting (`a0e3b2f`). Visual: /terminos and
+  /privacidad readable at desktop and 390px (22px padding, no overflow);
+  landing footer shows identity + both links, legal line contrast 4.75:1.
+  DemoCTA notice reviewed in code only (it appears after a full demo chat).
+  D-39/D-40 added. Checks: tsc clean, lint 0 errors, test:unit 884/884
+  (65 suites), build lists /terminos and /privacidad as static.
+- Open for Agustín: confirm IVA wording, non-renewal consequence, IP license
+  clause; lawyer review before paid traffic.
+- Next: PR to develop, then release to main with ESTADO.md regenerated.
