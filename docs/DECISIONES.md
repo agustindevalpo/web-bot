@@ -1187,3 +1187,70 @@ queda confirmado como fila horizontal con scroll, sin hamburguesa — la misma d
 D-24 ya había diferido.
 **Evidencia:** `docs/design_handoff_plantillas_webbot/handoff_bloques/README.md:1-38`;
 commit `b97febb`.
+
+---
+
+## D-39 — Se excluye el derecho a retracto, compensado con una garantía de publicación
+
+**Fecha:** 2026-09-26 · **Estado:** vigente
+**Contexto:** WebBot se vende a distancia (chat + link de Mercado Pago), y la Ley 19.496
+(art. 3 bis, letra b) le da al consumidor 10 días para retractarse, salvo que el
+proveedor lo excluya expresamente antes de contratar. Hasta hoy no había términos ni
+aviso de ningún tipo.
+**Decisión (Agustín):** el retracto **no aplica**, y se informa antes del pago. A cambio,
+Devalpo garantiza devolver el pago íntegro si el sitio no queda publicado en el dominio
+del cliente dentro de 10 días corridos desde la confirmación del pago, por causas
+atribuibles a Devalpo.
+**Por qué:** el cliente ve y aprueba su sitio terminado **antes** de pagar ("No pagas
+nada hasta ver tu sitio listo"): cuando paga, el trabajo ya está hecho. Un retracto de 10
+días le permitiría pedir el dinero con el sitio ya entregado. La garantía cubre el único
+riesgo real que corre el cliente, que es que Devalpo no publique.
+**Consecuencia:** el aviso tiene que ir **antes** del botón de pago del chat, no solo en
+`/terminos`, porque la exclusión solo vale si se informó antes de contratar. Si algún día
+el pago ocurre antes de ver el sitio, esta decisión pierde su fundamento y hay que
+revisarla. Los textos son un borrador sin revisión de abogado.
+**Evidencia:** `src/app/terminos/page.tsx` §7; `src/app/chat/DemoCTA.tsx` (aviso sobre el
+botón, `a0e3b2f`); commits `a8d862d`, `70174e6`; Engram `odd/paginas-legales-webbot/tasks`.
+
+---
+
+## D-40 — La landing no promete un bloque legal en los sitios de clientes hasta que exista
+
+**Fecha:** 2026-09-26 · **Estado:** vigente
+**Contexto:** la tarjeta "¿Te piden un sitio web?" de la landing prometía que el sitio del
+cliente sale "con lo que exige la ley chilena del consumidor … y tus términos y
+condiciones". Ninguna de las 5 plantillas muestra términos, razón social ni RUT.
+**Decisión:** las páginas legales se hacen en dos alcances. Primero las de WebBot mismo
+(`/terminos`, `/privacidad` e identificación del proveedor en el footer). El bloque legal
+dentro de las plantillas de cliente queda para la tanda de Bloques. Mientras tanto la
+tarjeta describe solo lo que se entrega.
+**Por qué:** el bloqueador de venta era la falta de términos de WebBot mismo; el bloque de
+las plantillas toca las 5 plantillas y el chat (tendría que pedir razón social y RUT al
+cliente), así que conviene hacerlo junto con el rediseño.
+**Consecuencia:** un test impide que la promesa vuelva al copy sin el bloque
+(`tests/unit/app/landing/copy.test.ts`). Cuando las plantillas tengan el bloque legal, se
+puede restaurar la promesa y actualizar el test.
+**Evidencia:** commits `df4af2d` (copy), `f2d5b86` (test); `src/app/_landing/copy.ts:108`.
+
+---
+
+## D-41 — El precio incluye un dominio estándar con tope; el dominio siempre va a nombre del cliente
+
+**Fecha:** 2026-09-26 · **Estado:** vigente
+**Contexto:** la landing promete "Con tu dominio" y "Dominio a tu nombre", y el precio
+incluía "tu dominio configurado (.cl o .com)" sin límite. Hay dominios premium cuyo costo
+Devalpo no puede absorber dentro de un pago único de $149.990.
+**Decisión (Agustín):** si el cliente trae dominio, se usa ese. Si no, el precio incluye
+un dominio `.cl` o `.com` estándar de hasta `TOPE_DOMINIO_ANUAL` ($15.000 al año, IVA
+incluido); un dominio premium o más caro lo paga el cliente por la diferencia, al
+registrarlo y en cada renovación. En todos los casos el dominio se registra a nombre del
+negocio del cliente.
+**Por qué:** protege el margen sin tocar la promesa principal de la landing. Se descartó
+dejar a los clientes sin dominio en un subdominio o una ruta de un dominio de Devalpo:
+obligaba a reescribir el titular y el sello "Dominio a tu nombre", que es un argumento de
+confianza frente a agencias que retienen dominios.
+**Consecuencia:** la oferta de la landing y `/terminos` §6 dicen lo mismo, y el tope vive
+en una sola constante. Si cambia el costo de los dominios estándar, se ajusta
+`TOPE_DOMINIO_ANUAL` y ambos textos lo reflejan solos.
+**Evidencia:** `src/app/_landing/precios.ts` (`TOPE_DOMINIO_ANUAL`);
+`src/app/_landing/copy.ts` (FAQ "¿Y si ya tengo dominio?"); commit `42d4e21`.

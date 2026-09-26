@@ -1,0 +1,98 @@
+/*
+ * Estilos compartidos para las páginas legales (/terminos, /privacidad —
+ * WB-legal). Reutiliza los tokens de src/styles/tokens.css (--wb-color-*,
+ * --wb-space-*, --wb-text-*) para no duplicar la paleta de la landing.
+ * Contenido legal: se prioriza legibilidad sobre densidad, por eso un
+ * ancho máximo angosto y line-height generoso.
+ */
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--wb-space-10) var(--wb-space-8);
+  font-family: var(--wb-font-body);
+  color: var(--wb-color-ink);
+  line-height: 1.7;
+}
+
+.volver {
+  display: inline-block;
+  margin-bottom: var(--wb-space-6);
+  font-size: var(--wb-text-sm);
+  font-weight: 600;
+  color: var(--wb-color-secondary);
+}
+
+.volver:hover {
+  text-decoration: underline;
+}
+
+.titulo {
+  font-family: var(--wb-font-display);
+  font-size: var(--wb-text-3xl);
+  line-height: 1.2;
+  margin-bottom: var(--wb-space-2);
+}
+
+.actualizado {
+  font-size: var(--wb-text-sm);
+  color: var(--wb-color-muted);
+  margin-bottom: var(--wb-space-8);
+}
+
+.seccion {
+  margin-bottom: var(--wb-space-8);
+}
+
+.seccionTitulo {
+  font-family: var(--wb-font-display);
+  font-size: var(--wb-text-xl);
+  margin-bottom: var(--wb-space-3);
+  color: var(--wb-color-ink);
+}
+
+.seccion p {
+  font-size: var(--wb-text-base);
+  color: var(--wb-color-ink-soft);
+  margin-bottom: var(--wb-space-3);
+}
+
+.seccion ul {
+  margin: 0 0 var(--wb-space-3);
+  padding-left: var(--wb-space-5);
+}
+
+.seccion li {
+  font-size: var(--wb-text-base);
+  color: var(--wb-color-ink-soft);
+  margin-bottom: var(--wb-space-2);
+}
+
+.seccion a {
+  color: var(--wb-color-secondary);
+  font-weight: 600;
+}
+
+.seccion a:hover {
+  text-decoration: underline;
+}
+
+/* Bloque destacado: usado para el derecho a retracto y la garantía de
+   publicación, las dos cláusulas que la ley exige que sean visibles y no
+   queden diluidas entre el resto del texto. */
+.destacado {
+  padding: var(--wb-space-5);
+  border-radius: var(--wb-radius-md);
+  background: var(--wb-color-surface-muted);
+  border: 1px solid var(--wb-color-border);
+}
+
+.destacado p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--wb-space-8) 22px;
+  }
+}

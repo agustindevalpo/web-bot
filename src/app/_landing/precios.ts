@@ -7,6 +7,10 @@ export const PRECIO_PROMO = 119990
 export const PRECIO_MULTIPAGINA = 249990
 export const RENOVACION_ANUAL = 39990
 export const CUPOS_PROMO = 10
+// Costo anual máximo (IVA incluido) del dominio .cl/.com que cubre el precio.
+// Un dominio premium o más caro lo paga el cliente por la diferencia
+// (decisión de Agustín, 2026-09-26 — ver /terminos §6).
+export const TOPE_DOMINIO_ANUAL = 15000
 
 // Mantención manual: no hay conteo en base de datos (ver design D10).
 // Al vender un cupo, sumar 1 acá y documentar el cambio en docs/BITACORA.md.

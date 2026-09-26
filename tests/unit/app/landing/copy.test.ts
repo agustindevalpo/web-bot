@@ -147,12 +147,23 @@ describe('POR_QUE_DEVALPO', () => {
     }
   })
 
-  it('incluye el gancho legal exacto exigido por R8/design (mínimos legales SERNAC)', () => {
-    const conGancho = POR_QUE_DEVALPO.puntos.filter((p) => p.desc.includes('términos y condiciones'))
-    expect(conGancho).toHaveLength(1)
-    expect(conGancho[0].desc).toContain('datos del negocio')
-    expect(conGancho[0].desc).toContain('contacto')
-    expect(conGancho[0].desc).toContain('descripción y precios')
+  // Hasta el 2026-09-26 este punto prometía "lo que exige la ley chilena del
+  // consumidor ... y tus términos y condiciones", pero ninguna plantilla de
+  // cliente muestra términos, razón social ni RUT. Se retiró la promesa
+  // (odd/tasks/paginas-legales-webbot.md, T0) hasta que exista el bloque
+  // legal en las plantillas; este test impide que vuelva sin ese bloque.
+  it('no promete términos y condiciones ni cumplimiento legal en los sitios de clientes', () => {
+    for (const punto of POR_QUE_DEVALPO.puntos) {
+      expect(punto.desc).not.toMatch(/términos y condiciones|exige la ley/i)
+    }
+  })
+
+  it('mantiene el gancho de "¿Te piden un sitio web?" describiendo solo lo que se entrega', () => {
+    const gancho = POR_QUE_DEVALPO.puntos.find((p) => p.titulo === '¿Te piden un sitio web?')
+    expect(gancho).toBeDefined()
+    expect(gancho!.desc).toContain('datos de tu negocio')
+    expect(gancho!.desc).toContain('contactarte')
+    expect(gancho!.desc).toContain('descripción de lo que ofreces')
   })
 })
 
