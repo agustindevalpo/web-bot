@@ -18,7 +18,9 @@
 
 - [x] **T1** — Mobile nav row per Bloques spec: two-row header on mobile (brand + CTA, then scrollable nav row), nav never collapses, active item underlined, sticky shows only the 44px row with shadow, active item kept visible by scrolling inside the row only. Route: delegated (writer trigger: 2+ non-trivial files).
 - [x] **T2** — Fix missing `key` warning in `SeccionesSPA` children. Route: same writer.
-- [ ] **T3** — Visual verification at 390px and desktop in the browser. Route: inline (orchestrator). **Not done by the writer**: the sandboxed Chrome automation's `resize_window` did not change the real viewport in this session (`window.innerWidth` stayed 1920 after several resize attempts, including to 800×600) — an environment limitation, not a code issue. The orchestrator needs to do the actual 390px/desktop check.
+- [x] **T3** — Visual verification at 390px and desktop in the browser. Route: inline (orchestrator). `resize_window` does not change the viewport (maximized window), so mobile was checked inside a 390×844 same-origin iframe.
+- [x] **T4** (found by T3) — Sticky header never stuck, on desktop or mobile: `overflow-x: hidden` on html+body made body a scroll container. Fixed with `overflow-x: clip` in `globals.css`. Route: inline (one mechanical line).
+- [x] **T5** (found by T3) — Mobile row 1 measured 51px instead of 38px, so 13px of the brand peeked under the pinned nav: `Monograma` variants' `font` shorthand reset `line-height` to `normal`. Fixed with `/1` in each shorthand. Route: inline (mechanical).
 
 ## Acceptance
 
@@ -67,3 +69,16 @@
   880/880 passing (876 baseline + 4 new in `navScroll.test.ts`).
   T3 (visual check at 390px) is NOT covered by these checks — see the note
   on T3 above.
+- 2026-09-26 — T3 done by orchestrator. Found T4 and T5 (both pre-existing,
+  both invisible to unit tests). Commits: `4eb59d0` (globals clip),
+  `700f9ec` (Monograma line-height). Evidence after fixes, demo-consultora:
+  desktop header 78px, `top: 0` when scrolled to 1500; mobile 390px header
+  83px (82 + 1px border), all four links visible without swiping, Hablemos
+  fully visible, scrolled to 1500 → header `top: -38`, nav `top: 0`, shadow
+  on, active item follows the section (Nosotros), `scrollWidth` 375, no key
+  warning in the dev overlay. Anchor jump verified: `#servicios` lands at
+  78px (right under the header). Note: a hidden (background) Chrome tab does
+  not fire IntersectionObserver or smooth scroll — test with a visible tab.
+  Checks: `tsc --noEmit` clean, lint 0 errors (21 pre-existing warnings),
+  `test:unit` 880/880.
+- Next: push the branch and open a PR to `develop` (user's decision).
