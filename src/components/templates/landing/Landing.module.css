@@ -605,7 +605,7 @@
    * Reduce el padding para dejar más margen incluso con nombres de marca
    * largos, sin achicar tanto el texto que pierda el mínimo de toque (regla
    * de `.header`/`.marca`/`.accion` en SeccionesSPA.module.css: la fila
-   * completa mide 38px, este botón queda bien dentro con este padding).
+   * completa mide 52px, este botón queda bien dentro con este padding).
    */
   .botonHablemos {
     padding: 9px 16px;

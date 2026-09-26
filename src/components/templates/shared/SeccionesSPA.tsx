@@ -42,7 +42,7 @@ const ALTO_HEADER_MOBIL_PX = 44
 // de abajo usa esto como `rootMargin` superior de SU PROPIO observer (el
 // del header pegado, no el del scrollspy) para no marcar "pegado" hasta
 // que esa fila termine de esconderse detrás del header sticky.
-const ALTO_FILA1_MOBIL_PX = 38
+const ALTO_FILA1_MOBIL_PX = 52
 // Debe calzar con `scroll-padding-inline` del `.nav` móvil (CSS,
 // README.md:302) — el ítem activo nunca queda pegado al canto de la fila
 // cuando el efecto de scroll-al-activo de abajo lo centra.

@@ -104,7 +104,13 @@
   transform: scaleX(1);
 }
 
+/* `display: flex` + centrado: el botón que llega por `accionHeader` suele ser
+ * un `<a>` en línea, y el padding vertical de un elemento en línea no cuenta
+ * para el alto de la línea — el botón sobresalía de esta caja y en móvil
+ * quedaba cortado por arriba (medido: borde superior en y = -4px). */
 .accion {
+  display: flex;
+  align-items: center;
   flex: none;
 }
 
@@ -231,7 +237,7 @@
      * solo quede pineada la fila 2. Duplicado en JS como
      * `ALTO_FILA1_MOBIL_PX` (SeccionesSPA.tsx) para el centinela del
      * IntersectionObserver que detecta cuándo el header ya está pegado. */
-    --wb-spa-header-fila1-alto: 38px;
+    --wb-spa-header-fila1-alto: 52px;
   }
 
   .header {
@@ -257,7 +263,7 @@
     top: calc(-1 * var(--wb-spa-header-fila1-alto));
   }
 
-  /* Línea 1 con alto fijo (38px, `--wb-spa-header-fila1-alto`) para que el
+  /* Línea 1 con alto fijo (52px, `--wb-spa-header-fila1-alto`) para que el
    * cálculo de `top` de arriba sea exacto sin importar si el monograma
    * (26px) o el botón Hablemos (más alto en escritorio) son más chicos que
    * eso — `align-items: center` (heredado de `.header`) centra el
