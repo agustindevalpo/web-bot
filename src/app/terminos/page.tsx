@@ -81,10 +81,11 @@ export default function TerminosPage() {
       <LegalSeccion titulo="7. Derecho a retracto y garantía de publicación">
         <LegalDestacado>
           <p>
-            <strong>Derecho a retracto:</strong> de acuerdo con el artículo 3 bis, letra b), de la Ley 19.496 sobre
-            Protección de los Derechos de los Consumidores, el derecho a retracto <strong>no aplica</strong> a este
-            contrato. La razón es que tú revisas y apruebas el sitio terminado <em>antes</em> de pagar: el pago
-            ocurre solo cuando ya conoces el resultado final del servicio.
+            <strong>Derecho a retracto:</strong> conforme a la facultad del artículo 3 bis, letra b), de la Ley
+            19.496 sobre Protección de los Derechos de los Consumidores, Devalpo informa expresamente, antes de la
+            contratación, que el derecho a retracto <strong>no aplica</strong> a este contrato. Lo excluimos porque tú
+            revisas y apruebas el sitio terminado <em>antes</em> de pagar: el pago ocurre solo cuando ya conoces el
+            resultado final del servicio.
           </p>
           <p>
             <strong>Garantía de publicación:</strong> como compensación, si tu sitio no queda publicado en tu dominio

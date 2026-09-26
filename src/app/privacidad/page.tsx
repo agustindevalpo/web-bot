@@ -61,6 +61,10 @@ export default function PrivacidadPage() {
           </li>
         </ul>
         <p>
+          Estos proveedores pueden almacenar o procesar los datos en servidores ubicados fuera de Chile. Solo
+          reciben lo necesario para prestar su servicio y no los usan para fines propios.
+        </p>
+        <p>
           Mercado Pago es un enlace de pago externo: cuando pagas, tus datos de pago los recibe Mercado Pago
           directamente en su propio sitio. WebBot no le envía ningún dato tuyo y no tiene acceso a tu información de
           pago.
