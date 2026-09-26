@@ -92,4 +92,9 @@
   top -52 / nav top 0; desktop unchanged at 78px. Shadow not re-observed
   (background tab), logic unchanged. Commit `cdc1ceb`. Checks: tsc clean,
   lint 0 errors, test:unit 880/880.
+- 2026-09-26 — T7 (Agustín's feedback): LANDING footer centered on mobile
+  (the Bloques handoff doesn't fix mobile footer alignment). Bottom padding
+  84px so the floating WhatsApp button (y 770..818) clears the credit line
+  (ends y 759). Every line centered at x≈187 in a 375 viewport; desktop
+  unchanged (76px). CSS-only change; no tests touch it.
 - Next: push the branch and open a PR to `develop` (user's decision).
