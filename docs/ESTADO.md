@@ -9,7 +9,7 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-20 · `main` = `23ed10b` · `develop` = `5f0aef8`
+> **Última regeneración:** 2026-09-26 · `main` = `3f60b9b` · `develop` = `3f60b9b`
 
 ---
 
@@ -75,10 +75,11 @@ src/
   (puro) y `registry.ts` (JSX) están separados; fallback a `LANDING`, que es lo que recibe
   el rubro neutro `otro` cuando la deducción local no reconoce el negocio (D-28).
   `components/templates/shared/` reúne lo que las plantillas comparten al migrar al
-  rediseño: `SeccionesSPA.tsx`/`scrollspy.ts` (shell de scroll largo con nav de anclas),
+  rediseño: `SeccionesSPA.tsx`/`scrollspy.ts`/`navScroll.ts` (shell de scroll largo con
+  nav de anclas; en móvil, fila de secciones deslizable y pegada arriba, sin hamburguesa),
   `Monograma.tsx`/`iniciales.ts` (marca cuando no hay logo, D-37) y `servicios.ts`
   (normaliza `servicios: string | {nombre, descripcion?}`, D-35) — hoy **solo `LANDING`
-  las consume, y solo en `develop`**; las otras cuatro plantillas siguen sin migrar.
+  las consume**; las otras cuatro plantillas siguen sin migrar.
 - **Paleta:** `configJson.colores` guarda **solo** `acento` (D-32) — `primario`,
   `secundario` y `texto` ya no se persisten, se derivan al renderizar con
   `derivarPaletaDesdeAcento()` (`src/domain/color/paletaDerivada.ts`) y
@@ -90,7 +91,7 @@ src/
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `23ed10b`, desplegado y verificado en vivo el 2026-09-20):**
+**En producción (`main` = `3f60b9b`, desplegado y verificado en vivo el 2026-09-26):**
 capacidad de generar un sitio real por chat demo con gate de lead (nombre + correo antes
 de revelar el sitio) · 5 templates de sitio elegidos por rubro · dominios propios vía
 Cloudflare · panel `/admin` para pausar, reactivar, asignar dominio, editar `configJson`
@@ -100,15 +101,13 @@ derivada de un único acento en OKLCH, con `primario`/`secundario`/`texto` calcu
 cada render en vez de leídos de la base (D-32) · acento derivado del estilo que el
 cliente elige en el chat (D-27) · deducción de rubro sobre descripción y servicios, con
 fallback neutro y pregunta guiada si no alcanza (D-28) · opciones del chat clicables
-(D-29) · login que precarga el correo de quien ya dejó el lead (D-30).
+(D-29) · login que precarga el correo de quien ya dejó el lead (D-30) · **S1 del
+rediseño**: `LANDING` como página de scroll largo con nav de anclas (D-33), monograma de
+marca (D-37), descripción por servicio (D-35), formulario de contacto que nunca descarta
+un envío en silencio, y navegación móvil con header pegado y footer centrado (PR #41).
+Las otras 4 plantillas siguen con el diseño anterior.
 
-**En `develop`, sin adelanto sobre producción — S1 del rediseño de plantillas
-(PRs #37, #38, #39):** `LANDING` reescrita sobre la dirección de diseño "Bloques": scroll
-largo con nav de anclas en vez de pestañas (D-33), sistema de monograma de marca (D-37),
-descripción por servicio (D-35), formulario de contacto que nunca descarta un envío en
-silencio. Nada de esto es visible todavía en ningún sitio real: **`main` sigue sirviendo
-la `LANDING` anterior**, sin marca ni scroll largo. Las otras 4 plantillas siguen intactas
-en ambas ramas — nadie las tocó.
+`develop` y `main` están en el mismo commit: no hay nada mergeado esperando deploy.
 
 **No construido / inerte:**
 
@@ -137,7 +136,6 @@ en ambas ramas — nadie las tocó.
 | Activación automática por pago | Deploy del motor de pagos de Devalpo. |
 | T9 de `site-metadata` | Pegar un link de sitio real en WhatsApp y pasarlo por el Sharing Debugger de Facebook — solo se puede probar en vivo. |
 | Limpiar el sitio de prueba `demo-cea59ef1` | Es un `UPDATE` contra la Postgres de producción; falta que Agustín decida corregir o borrar. |
-| S2-S6 del rediseño de plantillas | Que S1 (`LANDING`, ya mergeada en `develop`) llegue a `main` primero. |
 
 ## 6. Cómo correrlo
 
@@ -162,7 +160,7 @@ propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya pues
 **Tests:**
 
 ```bash
-npm run test:unit          # Jest — 63 suites / 876 tests en verde
+npm run test:unit          # Jest — 64 suites / 880 tests en verde
 npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
 npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
 npm run test:all            # jest + cucumber
@@ -191,7 +189,11 @@ No existe un script `test` a secas.
 - Una pestaña de Chrome en segundo plano estrangula `IntersectionObserver` y el repintado:
   produce diagnósticos falsos ("el scrollspy no funciona", "la página no scrollea").
   Comprobar `document.visibilityState`/`document.hasFocus()` antes de diagnosticar nada
-  medido en el navegador.
+  medido en el navegador. Con la ventana maximizada, `resize_window` no cambia el
+  viewport: el móvil se mide dentro de un `<iframe>` de 390px del mismo origen.
+- `overflow-x: hidden` en `html` y `body` a la vez convierte al `body` en contenedor de
+  scroll y **mata todo `position: sticky`** (se pega a una caja que no se mueve). Por eso
+  `globals.css` usa `overflow-x: clip`. Ningún test unitario lo ve.
 - `docs/historico/` es archivo muerto por diseño: describe el proyecto de agosto de 2026
   (suscripciones, N8N, Python, equipo de tres). Nunca citarlo como fuente de un hecho
   actual.
