@@ -9,7 +9,7 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-26 · `main` = `3f60b9b` · `develop` = `3f60b9b`
+> **Última regeneración:** 2026-09-26 · `main` = `6852d39` · `develop` = `6852d39`
 
 ---
 
@@ -25,7 +25,10 @@ promesa **"tu sitio web en un día, en producción, con tu propio dominio"**.
   desde `/admin` y eso activa al cliente.
 - **Precios vigentes** (`src/app/_landing/precios.ts`): $149.990 sitio, $119.990 promo
   para los primeros 10 cupos (0 vendidos hasta hoy), $249.990 multipágina, $39.990
-  renovación anual.
+  renovación anual con 30 días de gracia. Precios finales con IVA incluido (D-39). Incluye
+  un dominio `.cl`/`.com` estándar hasta `TOPE_DOMINIO_ANUAL` ($15.000/año), siempre a
+  nombre del cliente; uno premium paga la diferencia (D-41). Sin derecho a retracto,
+  con garantía de publicación en 10 días (D-39).
 - **Embudo:** aviso → landing → chat demo → el visitante deja nombre y correo → se le
   revela su sitio demo → paga → Devalpo le asigna el dominio.
 - **Equipo:** Agustín Romero, solo.
@@ -104,7 +107,9 @@ fallback neutro y pregunta guiada si no alcanza (D-28) · opciones del chat clic
 (D-29) · login que precarga el correo de quien ya dejó el lead (D-30) · **S1 del
 rediseño**: `LANDING` como página de scroll largo con nav de anclas (D-33), monograma de
 marca (D-37), descripción por servicio (D-35), formulario de contacto que nunca descarta
-un envío en silencio, y navegación móvil con header pegado y footer centrado (PR #41).
+un envío en silencio, y navegación móvil con header pegado y footer centrado (PR #41) ·
+**páginas legales** `/terminos` y `/privacidad`, e identificación del proveedor (razón
+social, RUT, domicilio) en el footer de la landing (PR #42).
 Las otras 4 plantillas siguen con el diseño anterior.
 
 `develop` y `main` están en el mismo commit: no hay nada mergeado esperando deploy.
@@ -121,7 +126,8 @@ Las otras 4 plantillas siguen con el diseño anterior.
   está desplegado (la organización tiene restricciones de OAuth App que impiden clonarlo).
 - `pausarSitioUC`, `reactivarSitioUC` y `verificarDominioUC` están compuestos en el
   container pero ninguna ruta los consume (verificado por grep).
-- Páginas legales (términos, privacidad, bloque legal): no existen.
+- Bloque legal dentro de los sitios de clientes (términos, razón social, RUT): no existe;
+  la landing ya no lo promete (D-40). Va con la tanda de Bloques.
 - Captura de contenido adicional para el rediseño (logo, fotos reales, descripción por
   servicio): decidido el momento —texto antes de pagar, material gráfico después (D-36)—
   pero el chat todavía no pide ninguno de los dos.
@@ -130,7 +136,7 @@ Las otras 4 plantillas siguen con el diseño anterior.
 
 | Qué | Bloqueado en |
 |---|---|
-| Vender a tráfico frío | Páginas legales inexistentes (Ley 19.496 / expectativas de Mercado Pago). Último bloqueador de venta. |
+| Vender a tráfico frío con tranquilidad | Que un abogado revise `/terminos` y `/privacidad`: son un borrador fundado en las leyes 19.496 y 19.628, sin revisión profesional. |
 | Chat real con Claude | Que Agustín cargue `ANTHROPIC_API_KEY` en Railway. |
 | Magic link en producción | Cuenta de Resend con dominio verificado. |
 | Activación automática por pago | Deploy del motor de pagos de Devalpo. |
@@ -160,7 +166,7 @@ propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya pues
 **Tests:**
 
 ```bash
-npm run test:unit          # Jest — 64 suites / 880 tests en verde
+npm run test:unit          # Jest — 65 suites / 884 tests en verde
 npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
 npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
 npm run test:all            # jest + cucumber
