@@ -12,6 +12,11 @@
  * `Landing.module.css`) y `line-height: 1` para no sumar espacio vertical
  * fantasma alrededor del glifo dentro del slot `marca` del header
  * (`SeccionesSPA.module.css` `.marca`, `align-items: center`).
+ *
+ * Cada variante declara el `/1` dentro de su shorthand `font`: el shorthand
+ * reinicia `line-height` a `normal` y pisaría el `line-height: 1` de
+ * `.monograma` (misma especificidad, regla posterior). Sin eso el glifo de
+ * 38px medía 50px de alto y descuadraba la fila 1 del header móvil.
  */
 
 .monograma {
@@ -26,7 +31,7 @@
 /* Serif calado → Landing · Profesional. Sin caja: las letras solas, caladas
    sobre el fondo del header. */
 .serifCalado {
-  font: 400 38px var(--font-instrument-serif), serif;
+  font: 400 38px/1 var(--font-instrument-serif), serif;
 }
 
 /* Círculo pleno → Servicios. Único caso con fondo propio (regla 03 del
@@ -37,17 +42,17 @@
   height: 46px;
   border-radius: 50%;
   background: #fff;
-  font: 700 17px var(--font-montserrat), sans-serif;
+  font: 700 17px/1 var(--font-montserrat), sans-serif;
 }
 
 /* Itálica sobre negro → Restaurante. */
 .italicaSobreNegro {
-  font: 400 30px var(--font-instrument-serif), serif;
+  font: 400 30px/1 var(--font-instrument-serif), serif;
   font-style: italic;
 }
 
 /* Sans pesado → Portfolio · Tienda. */
 .sansPesado {
-  font: 800 30px var(--font-montserrat), sans-serif;
+  font: 800 30px/1 var(--font-montserrat), sans-serif;
   letter-spacing: -0.04em;
 }
