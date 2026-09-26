@@ -105,7 +105,7 @@ export const POR_QUE_DEVALPO = {
     },
     {
       titulo: '¿Te piden un sitio web?',
-      desc: 'Si estás activando Webpay o Mercado Pago y te piden un sitio, te lo entregamos con lo que exige la ley chilena del consumidor: datos del negocio, contacto, descripción y precios, y tus términos y condiciones.',
+      desc: 'Si estás activando Webpay o Mercado Pago y te piden un sitio, te lo entregamos listo para mostrar: los datos de tu negocio, cómo contactarte y la descripción de lo que ofreces.',
     },
   ],
 }
