@@ -43,8 +43,8 @@ export default function TerminosPage() {
           El sitio de una página tiene un valor de <strong>{formatCLP(PRECIO_SITIO)}</strong>. Como precio de
           lanzamiento, los primeros {CUPOS_PROMO} clientes pagan <strong>{formatCLP(PRECIO_PROMO)}</strong>; agotados
           esos cupos, rige el precio normal. El sitio de varias páginas tiene un valor de{' '}
-          <strong>{formatCLP(PRECIO_MULTIPAGINA)}</strong>. Todos los valores están expresados en pesos chilenos
-          (CLP) y corresponden a un pago único, sin mensualidades.
+          <strong>{formatCLP(PRECIO_MULTIPAGINA)}</strong>. Todos los valores son precios finales en pesos chilenos
+          (CLP), <strong>IVA incluido</strong>, y corresponden a un pago único, sin mensualidades.
         </p>
         <p>El precio incluye:</p>
         <ul>
