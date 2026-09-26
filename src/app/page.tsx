@@ -209,6 +209,13 @@ function Footer() {
       <div className={styles.footerText}>
         Agustín Nicolás Romero Salazar · CEO &amp; Co-Founder · agustin.romero@devalpo.cl · +56 9 7642 4587
       </div>
+      <div className={styles.footerLegal}>
+        Devalpo Soluciones Tecnológicas SpA · RUT 77.119.936-4 · Reñaca Norte 265, of. 510, Viña del Mar
+      </div>
+      <div className={styles.footerLinks}>
+        <Link href="/terminos" className={styles.footerLink}>Términos y condiciones</Link>
+        <Link href="/privacidad" className={styles.footerLink}>Privacidad</Link>
+      </div>
       <div className={styles.footerCopy}>© 2026 Devalpo · Soluciones Tecnológicas</div>
     </footer>
   )
