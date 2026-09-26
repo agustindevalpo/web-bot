@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { filtrarSecciones, type SeccionSPA } from './navegacion'
 import { resolverSeccionActiva } from './scrollspy'
@@ -278,7 +278,22 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
         ))}
       </main>
 
-      {pie}
+      {/* `pie` llega como prop desde un Server Component (cada
+          `sections.ts` de template lo arma vía JSX del lado del server) y
+          termina siendo UN hijo más entre varios (`header`, `main`, este,
+          el centinela de abajo) del mismo nivel del `div` raíz — a
+          diferencia de `marca`/`accionHeader`, que son el único hijo de su
+          propio `div` envoltorio y por eso nunca pisan este problema. Un
+          elemento creado server-side y pasado como prop no llega
+          pre-validado por el JSX estático de ESTE archivo (React solo
+          marca así los hijos que él mismo crea al compilar este render), así
+          que al reconciliar la lista de hijos de `.shell` lo trata como
+          "hijo de lista sin key" y tira el warning (root cause de T2 en
+          odd/tasks/nav-movil-seccionesspa.md — confirmado con el overlay de
+          Next, que apunta exactamente a este `pie`, no a ningún `.map` de
+          este archivo: ambos ya tenían `key={seccion.id}`). `Fragment`
+          explícito porque el atajo `<>...</>` no acepta `key`. */}
+      <Fragment key="pie">{pie}</Fragment>
 
       {/* Centinela de fin de página para el scrollspy (ver el comentario
           largo en el efecto de arriba): 1px real, no cero, para no
