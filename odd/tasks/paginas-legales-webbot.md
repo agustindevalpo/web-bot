@@ -76,6 +76,16 @@
   DemoCTA notice reviewed in code only (it appears after a full demo chat).
   D-39/D-40 added. Checks: tsc clean, lint 0 errors, test:unit 884/884
   (65 suites), build lists /terminos and /privacidad as static.
-- Open for Agustín: confirm IVA wording, non-renewal consequence, IP license
-  clause; lawyer review before paid traffic.
+- 2026-09-26 — Agustín's answers on the assumptions: (1) prices do NOT add
+  IVA and the MP link charges exactly $149.990 → under Ley 19.496 art. 30
+  the advertised price is the total, so terms say "IVA incluido"
+  (`105cf3e`); tax consequence (IVA comes out of the $149.990) flagged to
+  him for his accountant. (2) 30-day grace period after renewal is due, then
+  the site is paused (`f9643a6`); pausing is manual in /admin today.
+  (3) Domain: standard .cl/.com included up to `TOPE_DOMINIO_ANUAL`
+  ($15.000/yr IVA incl., cap proposed by orchestrator, accepted with the
+  option), premium pays the difference, always in the client's name;
+  landing FAQ + "incluye" updated to match (`42d4e21`); D-41 added. IP
+  license clause (template/code stay Devalpo's) kept; not objected.
+- Open: lawyer review before paid traffic.
 - Next: PR to develop, then release to main with ESTADO.md regenerated.

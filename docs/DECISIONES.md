@@ -1231,3 +1231,26 @@ cliente), así que conviene hacerlo junto con el rediseño.
 (`tests/unit/app/landing/copy.test.ts`). Cuando las plantillas tengan el bloque legal, se
 puede restaurar la promesa y actualizar el test.
 **Evidencia:** commits `df4af2d` (copy), `f2d5b86` (test); `src/app/_landing/copy.ts:108`.
+
+---
+
+## D-41 — El precio incluye un dominio estándar con tope; el dominio siempre va a nombre del cliente
+
+**Fecha:** 2026-09-26 · **Estado:** vigente
+**Contexto:** la landing promete "Con tu dominio" y "Dominio a tu nombre", y el precio
+incluía "tu dominio configurado (.cl o .com)" sin límite. Hay dominios premium cuyo costo
+Devalpo no puede absorber dentro de un pago único de $149.990.
+**Decisión (Agustín):** si el cliente trae dominio, se usa ese. Si no, el precio incluye
+un dominio `.cl` o `.com` estándar de hasta `TOPE_DOMINIO_ANUAL` ($15.000 al año, IVA
+incluido); un dominio premium o más caro lo paga el cliente por la diferencia, al
+registrarlo y en cada renovación. En todos los casos el dominio se registra a nombre del
+negocio del cliente.
+**Por qué:** protege el margen sin tocar la promesa principal de la landing. Se descartó
+dejar a los clientes sin dominio en un subdominio o una ruta de un dominio de Devalpo:
+obligaba a reescribir el titular y el sello "Dominio a tu nombre", que es un argumento de
+confianza frente a agencias que retienen dominios.
+**Consecuencia:** la oferta de la landing y `/terminos` §6 dicen lo mismo, y el tope vive
+en una sola constante. Si cambia el costo de los dominios estándar, se ajusta
+`TOPE_DOMINIO_ANUAL` y ambos textos lo reflejan solos.
+**Evidencia:** `src/app/_landing/precios.ts` (`TOPE_DOMINIO_ANUAL`);
+`src/app/_landing/copy.ts` (FAQ "¿Y si ya tengo dominio?"); commit `42d4e21`.
