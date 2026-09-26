@@ -1187,3 +1187,47 @@ queda confirmado como fila horizontal con scroll, sin hamburguesa — la misma d
 D-24 ya había diferido.
 **Evidencia:** `docs/design_handoff_plantillas_webbot/handoff_bloques/README.md:1-38`;
 commit `b97febb`.
+
+---
+
+## D-39 — Se excluye el derecho a retracto, compensado con una garantía de publicación
+
+**Fecha:** 2026-09-26 · **Estado:** vigente
+**Contexto:** WebBot se vende a distancia (chat + link de Mercado Pago), y la Ley 19.496
+(art. 3 bis, letra b) le da al consumidor 10 días para retractarse, salvo que el
+proveedor lo excluya expresamente antes de contratar. Hasta hoy no había términos ni
+aviso de ningún tipo.
+**Decisión (Agustín):** el retracto **no aplica**, y se informa antes del pago. A cambio,
+Devalpo garantiza devolver el pago íntegro si el sitio no queda publicado en el dominio
+del cliente dentro de 10 días corridos desde la confirmación del pago, por causas
+atribuibles a Devalpo.
+**Por qué:** el cliente ve y aprueba su sitio terminado **antes** de pagar ("No pagas
+nada hasta ver tu sitio listo"): cuando paga, el trabajo ya está hecho. Un retracto de 10
+días le permitiría pedir el dinero con el sitio ya entregado. La garantía cubre el único
+riesgo real que corre el cliente, que es que Devalpo no publique.
+**Consecuencia:** el aviso tiene que ir **antes** del botón de pago del chat, no solo en
+`/terminos`, porque la exclusión solo vale si se informó antes de contratar. Si algún día
+el pago ocurre antes de ver el sitio, esta decisión pierde su fundamento y hay que
+revisarla. Los textos son un borrador sin revisión de abogado.
+**Evidencia:** `src/app/terminos/page.tsx` §7; `src/app/chat/DemoCTA.tsx` (aviso sobre el
+botón, `a0e3b2f`); commits `a8d862d`, `70174e6`; Engram `odd/paginas-legales-webbot/tasks`.
+
+---
+
+## D-40 — La landing no promete un bloque legal en los sitios de clientes hasta que exista
+
+**Fecha:** 2026-09-26 · **Estado:** vigente
+**Contexto:** la tarjeta "¿Te piden un sitio web?" de la landing prometía que el sitio del
+cliente sale "con lo que exige la ley chilena del consumidor … y tus términos y
+condiciones". Ninguna de las 5 plantillas muestra términos, razón social ni RUT.
+**Decisión:** las páginas legales se hacen en dos alcances. Primero las de WebBot mismo
+(`/terminos`, `/privacidad` e identificación del proveedor en el footer). El bloque legal
+dentro de las plantillas de cliente queda para la tanda de Bloques. Mientras tanto la
+tarjeta describe solo lo que se entrega.
+**Por qué:** el bloqueador de venta era la falta de términos de WebBot mismo; el bloque de
+las plantillas toca las 5 plantillas y el chat (tendría que pedir razón social y RUT al
+cliente), así que conviene hacerlo junto con el rediseño.
+**Consecuencia:** un test impide que la promesa vuelva al copy sin el bloque
+(`tests/unit/app/landing/copy.test.ts`). Cuando las plantillas tengan el bloque legal, se
+puede restaurar la promesa y actualizar el test.
+**Evidencia:** commits `df4af2d` (copy), `f2d5b86` (test); `src/app/_landing/copy.ts:108`.
