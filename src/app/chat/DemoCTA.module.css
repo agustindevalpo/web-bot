@@ -139,6 +139,22 @@
   text-align: center;
 }
 
+.retracto {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.retracto a {
+  color: #15defa;
+  font-weight: 600;
+}
+
 .disclaimer {
   margin: 0;
   font-size: 0.7rem;
