@@ -80,14 +80,8 @@ export function DemoCTA({ subdominioDemo }: { subdominioDemo: string }) {
           <span className={styles.precioDetalle}>Pago único</span>
         </div>
 
-        <a
-          href={ENLACE_PAGO.href}
-          className={styles.boton}
-          {...(ENLACE_PAGO.externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        >
-          Quiero mi sitio real →
-        </a>
-
+        {/* Antes del botón, no después: la exclusión del retracto (art. 3 bis b,
+            Ley 19.496) tiene que informarse antes de contratar. */}
         <p className={styles.retracto}>
           Al pagar aceptas los{' '}
           <a href="/terminos" target="_blank" rel="noopener noreferrer">
@@ -96,6 +90,14 @@ export function DemoCTA({ subdominioDemo }: { subdominioDemo: string }) {
           . Como revisas y apruebas tu sitio antes de pagar, no aplica el derecho a retracto (art. 3 bis, Ley
           19.496). Si no lo publicamos en 10 días por causas nuestras, te devolvemos el pago.
         </p>
+
+        <a
+          href={ENLACE_PAGO.href}
+          className={styles.boton}
+          {...(ENLACE_PAGO.externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
+          Quiero mi sitio real →
+        </a>
 
         <p className={styles.disclaimer}>
           {ENLACE_PAGO.externo && (
