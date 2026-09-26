@@ -280,6 +280,36 @@ describe('parseSiteConfig — sobreNosotros', () => {
   })
 })
 
+// `destacados` (T2, plantilla-landing-spa) es un campo aditivo-opcional del
+// DTO que este slice deja sin productor a propósito: el prompt de
+// extracción no lo pide, y parseSiteConfig arma el objeto de salida campo a
+// campo (no hace spread de `raw`), así que aunque el JSON crudo de Claude
+// trajera "destacados" igual queda afuera. Este test guarda ese contrato
+// para que un futuro cambio no lo filtre sin querer.
+describe('parseSiteConfig — destacados (fuera de alcance del productor)', () => {
+  function jsonBase(overrides: Record<string, unknown> = {}): string {
+    return JSON.stringify({
+      nombre: 'Panadería El Trigal',
+      rubro: 'panaderia',
+      descripcion: 'Pan artesanal',
+      servicios: ['Pan', 'Tortas'],
+      ciudad: 'Viña del Mar',
+      contacto: { telefono: '+56911112222', email: 'a@a.cl' },
+      redes: { instagram: null, facebook: null },
+      estilo: 'moderno',
+      highlight: '20 años',
+      ...overrides,
+    })
+  }
+
+  it('no extrae destacados aunque el JSON crudo lo traiga', () => {
+    const datos = parseSiteConfig(
+      jsonBase({ destacados: [{ valor: '20+', etiqueta: 'años de experiencia' }] }),
+    )
+    expect(datos.destacados).toBeUndefined()
+  })
+})
+
 describe('parseSiteConfig — contacto.formulario', () => {
   function jsonBase(overrides: Record<string, unknown> = {}): string {
     return JSON.stringify({

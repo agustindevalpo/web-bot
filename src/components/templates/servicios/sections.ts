@@ -1,5 +1,6 @@
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { buildWhatsAppUrl, buildTelUrl, buildInstagramUrl, buildMailtoUrl } from '@/components/templates/shared/enlaces'
+import { nombreDeServicio } from '@/components/templates/shared/servicios'
 
 // Constructores puros de props por sección (Decisión D4 en design.md) —
 // ninguno hace fetch ni toca el DOM, todos toleran un config que solo trae
@@ -65,10 +66,17 @@ export function buildAbout(config: SiteConfigDTO): AboutProps | null {
   return texto ? { texto } : null
 }
 
+// `nombreDeServicio` deja pasar un string sin tocarlo (ver
+// `shared/servicios.ts`), así que para cualquier config con `servicios` en
+// forma legada (string[], la única que existe hoy en producción) el
+// resultado es idéntico al de antes de que el DTO aceptara el shape objeto.
 export function buildServicios(config: SiteConfigDTO): ServiciosProps | null {
   const items = config.servicios ?? []
   if (items.length === 0) return null
-  return { etiqueta: ETIQUETA_SERVICIOS, items: items.map((texto, i) => ({ numero: i + 1, texto })) }
+  return {
+    etiqueta: ETIQUETA_SERVICIOS,
+    items: items.map((item, i) => ({ numero: i + 1, texto: nombreDeServicio(item) ?? '' })),
+  }
 }
 
 export function buildContacto(config: SiteConfigDTO): ContactoSeccionProps {

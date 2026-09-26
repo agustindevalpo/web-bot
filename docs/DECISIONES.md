@@ -1006,3 +1006,184 @@ warnings preexistentes y ajenos a este cambio (los mismos que en `963a63e`).
 `b92ab20`, `9e29f2f`, `fd7eb64` (ramas `feature/paleta-derivada-del-acento` y
 `feature/paleta-contrato-un-color`); `odd/tasks/paleta-derivada-del-acento.md`; Engram obs
 #744 (mapeo de impacto) y #745 (espejo del documento ODD).
+
+---
+
+## D-33 — LANDING pasa a scroll largo con nav de anclas, apartándose del handoff
+
+**Fecha:** 2026-09-20 · **Estado:** vigente
+**Contexto:** el handoff de plantillas define las 6 SPA como pestañas: *"Toda la página es
+una sola ruta. El header intercambia secciones sin recargar y sin scroll largo."*
+(`docs/design_handoff_plantillas_webbot/README.md:133`). S1 (`LANDING`) se construyó así
+primero. Al verla terminada, Agustín encontró que la home quedaba pobre: mostraba solo el
+hero, porque las otras tres secciones vivían detrás de pestañas.
+**Decisión:** `LANDING` pasa a scroll largo con navegación por anclas (`<a href="#id">`),
+header sticky, scroll suave con guarda de `prefers-reduced-motion` y scrollspy por
+`IntersectionObserver` (`resolverSeccionActiva`, extraída como función pura). El cambio se
+hizo en el shell compartido `src/components/templates/shared/SeccionesSPA.tsx`, así que
+las otras cinco plantillas lo heredan al migrar, sin decidirlo cada una de nuevo.
+**Por qué:** una pyme necesita mostrar su oferta completa sin pedirle un clic al
+visitante; esconder tres de cuatro secciones detrás de pestañas contradice el objetivo
+comercial de la página. Argumento que el handoff no consideró: el revelado en cascada de
+`motion.css` está construido sobre un `IntersectionObserver` pensado para revelar al
+scrollear — en modo pestañas esa maquinaria quedaba desaprovechada, porque toda la sección
+activa entraba de golpe. La decisión quedó **convalidada después** por el propio
+diseñador: al presentar tres direcciones nuevas de LANDING (Editorial, Oscuro, Bloques),
+las tres son de scroll largo, ninguna de pestañas (ver D-38).
+**Consecuencia:** el "Comportamiento SPA" que describe `README.md` queda desactualizado
+para todo el rediseño, no solo para `LANDING` — cualquier plantilla que migre después
+hereda scroll largo del shell compartido, no pestañas. Se probó primero en la plantilla
+más segura (fallback de rubros desconocidos, la de más tráfico) antes de comprometer las
+otras cinco, siguiendo el orden que fija D-23. Dos defectos de scrollspy —la última
+sección no podía marcarse activa, y una carrera cuando dos secciones intersectan la banda
+de detección a la vez— se encontraron midiendo en el navegador, no en los tests, y quedan
+fijados con tests sobre la función pura.
+**Evidencia:** `docs/design_handoff_plantillas_webbot/README.md:133`;
+`src/components/templates/shared/SeccionesSPA.tsx`;
+`src/components/templates/shared/scrollspy.ts`;
+`odd/tasks/plantilla-landing-spa.md` (sección "Desvío deliberado del handoff"); commits
+`b72c27e`, `34ed6a3`, `0df353e`.
+
+---
+
+## D-34 — `LANDING` elimina el fallback `sobreNosotros → descripcion`
+
+**Fecha:** 2026-09-20 · **Estado:** vigente
+**Contexto:** `buildAbout`, la función anterior a la SPA, mostraba en "Nosotros" el
+párrafo de `sobreNosotros` o, si faltaba, caía a `descripcion`. Tenía sentido en el scroll
+largo viejo, donde el hero (que ya muestra `descripcion`) y "Nosotros" quedaban a miles de
+píxeles de distancia. Al pasar a la SPA de cuatro secciones, quedaron a un clic de nav
+aparte: Nosotros repetía el mismo párrafo que el hero ya mostró, bajo un H2 que además
+repetía el nombre del negocio del H1.
+**Decisión:** `buildNosotros` (`src/components/templates/landing/sections.ts`) deja de
+tener fallback: el párrafo de "Nosotros" solo existe si `sobreNosotros` tiene contenido
+propio. El H2 deja de ser el nombre del negocio y pasa a ser chrome de sección ("Quiénes
+somos"), igual que "Qué ofrecemos" en Servicios. Si la sección queda sin texto propio y
+sin fotos de galería, desaparece del nav (vía `filtrarSecciones`, D-24).
+**Por qué:** el fallback compensaba distancia visual entre bloques; en una SPA de
+secciones a un clic, repetir el mismo texto bajo un título que también se repite se lee
+como un error, no como contenido. Las otras cuatro plantillas conservan su propio
+fallback: cada una tiene su `sections.ts` independiente y ninguna migró todavía a la SPA.
+**Consecuencia:** un sitio sin `sobreNosotros` propio muestra "Nosotros" solo con fotos de
+galería, si las tiene, o no muestra la sección. `SiteConfigDTO.sobreNosotros` deja de
+funcionar como alias silencioso de `descripcion` en `LANDING` — sigue siéndolo en
+SERVICIOS, RESTAURANTE, PORTFOLIO y TIENDA hasta que cada una migre.
+**Evidencia:** `src/components/templates/landing/sections.ts` (`buildNosotros`,
+`comoStringNoVacio`); `odd/tasks/plantilla-landing-spa.md` (sección "T3 a T6 cerradas");
+commit `34ed6a3`.
+
+---
+
+## D-35 — `servicios` admite descripción por ítem, sin migrar datos existentes
+
+**Fecha:** 2026-09-20 · **Estado:** vigente
+**Contexto:** las tres direcciones nuevas del rediseño (`Plantillas WebBot v2.dc.html`) le
+dan a cada servicio una frase de descripción junto al nombre; el handoff original ya la
+pedía (`README.md:201`) pero nunca se implementó porque `SiteConfigDTO` no tenía dónde
+guardarla.
+**Decisión:** `servicios` pasa de `string[]` a `ServicioDTO[]`, donde
+`ServicioDTO = string | { nombre: string; descripcion?: string }`
+(`src/application/dtos/SiteConfigDTO.ts`). Es una unión, no un campo paralelo: `string[]`
+es subtipo de `ServicioDTO[]`, así que todo productor existente (los dos servicios de
+chat, el seed) sigue compilando y devolviendo exactamente lo mismo. La normalización vive
+en el borde (`shared/servicios.ts`), no en el DTO.
+**Por qué:** mismo patrón que D-32 aplicó al color — extender el tipo sin exigir
+migración de datos. Ningún módulo valida `configJson` en runtime
+(`src/app/sites/renderizarSitio.ts:18` es un cast pelado), así que una entrada de
+cualquiera de las dos formas puede llegar hasta el render sin romper nada mientras la
+normalización esté en el borde correcto.
+**Consecuencia:** las filas de `Sitio` en producción, que guardan `servicios` como
+arreglo de strings, siguen funcionando sin tocarlas. Ningún productor (chat real, chat
+demo, seed) llena `descripcion` todavía — el campo queda disponible pero vacío hasta que
+alguno lo use.
+**Evidencia:** `src/application/dtos/SiteConfigDTO.ts` (`ServicioDTO`);
+`src/components/templates/shared/servicios.ts`;
+`docs/design_handoff_plantillas_webbot/README.md:201`; commit `0c158b5`.
+
+---
+
+## D-36 — Momento 2 mixto: el texto se pide antes de pagar, el material gráfico después
+
+**Fecha:** 2026-09-20 · **Estado:** vigente
+**Contexto:** el rediseño de plantillas necesita más contenido del cliente del que el
+chat de 8-9 preguntas recolecta hoy (`docs/brief-rediseno-chat-onboarding.md`, escrito
+para llevarle el inventario exacto al diseñador). Faltaba decidir en qué momento del
+embudo pedir ese contenido adicional sin romper la promesa de velocidad de la demo. El
+diseñador aceptó la hipótesis de los dos momentos y agregó un movimiento que el brief no
+proponía: el chat no crece, se acorta, de 8-9 preguntas a 6.
+**Decisión:** momento mixto. El texto (descripciones de servicio, testimonio, las
+micro-preguntas de "sobre nosotros") se pide al dejar los datos de contacto, **antes** de
+pagar. El logo y las fotos reales se piden **después** de pagar.
+**Por qué:** quien ya invirtió energía completando el chat quiere ver el resultado — ahí
+el texto adicional le sale barato, y cuanto más invirtió más le cuesta abandonar. El logo
+y las fotos reales son justo lo que más trabajo le ahorran a Devalpo armando el sitio, así
+que no corresponde pedirlos antes de que el cliente esté comprometido con la compra.
+**Consecuencia:** el flujo de captura queda partido en dos momentos con datos distintos;
+el chat todavía no implementa ninguno de los dos, queda para un cambio posterior. Queda
+anotado un hueco que el diseñador no nombró: las "ranuras rotuladas" de foto que propone
+implican que `imagenes` deje de ser un arreglo plano en `SiteConfigDTO`.
+**Evidencia:** `docs/brief-rediseno-chat-onboarding.md`; commit `98dc90c`.
+
+---
+
+## D-37 — Sistema de monograma de marca en vez del cuadrado con la inicial
+
+**Fecha:** 2026-09-20 · **Estado:** vigente
+**Contexto:** el header de cada sitio pintaba un cuadrado de color relleno con la primera
+letra del nombre del negocio cuando el cliente no tenía logo — "el gesto que grita que el
+cliente no puso su logo", en palabras del diseñador. El handoff (bloque 3c de la maqueta
+v3) pide reemplazarlo por un sistema de marca real.
+**Decisión:** cuatro reglas del handoff, implementadas en
+`src/components/templates/shared/{iniciales.ts,Monograma.tsx,Monograma.module.css}`:
+(1) dos iniciales, no una — un nombre de una sola palabra usa sus dos primeras letras,
+porque dos letras se leen como marca y una como ícono de aplicación; (2) el monograma
+hereda la tipografía de su plantilla, por eso son cuatro variantes visuales y no una
+(serif calado en Landing y Profesional, círculo pleno en Servicios, itálica sobre negro
+en Restaurante, sans pesado en Portfolio y Tienda); (3) nunca un cuadrado redondeado con
+relleno plano — `.marcaInicial` se elimina por completo, sin ningún respaldo con esa
+forma; (4) cuando llega un logo real, ocupa el mismo espacio (tope 30px escritorio / 26px
+móvil, `object-fit: contain`) sin mover nada alrededor — se agrega `logo?` a
+`SiteConfigDTO`, aditivo y sin productor todavía, mismo patrón que `destacados` (S1).
+**Por qué:** una pyme sin logo igual necesita verse como una marca, no como un ícono de
+app genérico. Convertirlo en sistema (reglas + variantes), en vez de un parche puntual,
+evita que cada plantilla nueva improvise su propia solución al migrar.
+**Consecuencia:** las reglas de derivación de iniciales que el handoff no cubría quedan
+fijadas en `iniciales.ts`, documentadas ahí porque es el único lugar donde se toman: se
+descartan artículos y preposiciones cortas ("El Rincón del Sabor" → "RS"), salvo que el
+nombre sea *todo* artículos, caso en que se usan las palabras sin filtrar; un nombre de
+una sola letra devuelve esa letra sin inventar una segunda; los acentos se conservan
+("Ávila" → "ÁV"). Hoy solo `LANDING` tiene marca en el header — las otras cuatro
+plantillas siguen con scroll largo viejo y sin marca, y la heredan recién al migrar.
+**Evidencia:** `src/components/templates/shared/iniciales.ts`,
+`src/components/templates/shared/Monograma.tsx`; `src/application/dtos/SiteConfigDTO.ts`
+(`logo?`); commit `2ff6dd3`.
+
+---
+
+## D-38 — Dirección "Bloques" elegida para el rediseño de plantillas
+
+**Fecha:** 2026-09-20 · **Estado:** vigente
+**Contexto:** el diseñador presentó tres direcciones competidoras de LANDING scrolleable
+—Editorial (papel cálido), Oscuro (premium) y Bloques— en `Plantillas WebBot v2.dc.html`,
+sin terminar (sin móvil ni estados de hover). Había que elegir una para continuar el
+rediseño de plantillas.
+**Decisión:** se elige Bloques. El diseñador entregó después un paquete autocontenido en
+`docs/design_handoff_plantillas_webbot/handoff_bloques/`, con un README de 369 líneas que
+pasa a ser la fuente autoritativa (sistema, secciones de escritorio y móvil, campos del
+DTO, arquitectura y alcance) para `LANDING` y, más adelante, las otras cinco plantillas.
+**Por qué:** es la dirección que mejor aguanta un cliente con poco material y la que se ve
+más cara con menos esfuerzo de llenado — criterio explícito del propio handoff. El diseño
+anterior se veía genérico y apretado por geometría, no por gusto: Bloques sube de golpe el
+padding de sección, el gutter y el tamaño de display, y ese contraste de escala es lo que
+hace la diferencia.
+**Consecuencia:** `docs/design_handoff_plantillas_webbot/README.md` (el handoff original,
+de pestañas) queda parcialmente obsoleto para S2-S6: sus líneas 31 y 80, que dicen que el
+acento sale de `colores.primario`, ya estaban desactualizadas desde D-27 (ver D-32) y
+ahora además pierden autoridad de sistema visual frente a `handoff_bloques/README.md`
+para `LANDING`. El README viejo se conserva porque sigue siendo la única fuente que
+especifica las otras cinco plantillas (SERVICIOS, RESTAURANTE, PORTFOLIO, TIENDA y
+PROFESIONAL); solo `LANDING`-Bloques queda cubierta por el paquete nuevo. El nav móvil
+queda confirmado como fila horizontal con scroll, sin hamburguesa — la misma decisión que
+D-24 ya había diferido.
+**Evidencia:** `docs/design_handoff_plantillas_webbot/handoff_bloques/README.md:1-38`;
+commit `b97febb`.

@@ -7,7 +7,7 @@
 
 ## Estado general
 
-**Última sesión:** 2026-09-19/20 — **D-31 resuelta por el camino (3): `primario`, `secundario` y `texto` se derivan del acento en vez de persistirse (D-32)**, ruta ODD, y **desplegado a producción el mismo 20/09**: PR #35 y #36 mergeados a `develop` (`c0c1c17`, `f669651`) y `develop` → `main` (`ed2788e`), Railway redeployó en ~90 s. `main` = `ed2788e` y `develop` = `f669651` (el release solo agrega ese commit sobre lo mergeado), y los sitios publicados ya sirven la paleta derivada, verificado en vivo. Ver [Paleta derivada del acento — D-31 resuelta por D-32](#paleta-derivada-del-acento--d-31-resuelta-por-d-32-ruta-odd-2026-09-20) y [Deploy a producción de la paleta derivada del acento](#deploy-a-producción-de-la-paleta-derivada-del-acento-d-31d-32-2026-09-20). Sesión anterior: 2026-09-13 — **Acento derivado del estilo (D-27), detección local de rubro con fallback neutro (D-28), opciones clicables en el chat (D-29) y precarga del correo en login (D-30)**, todo desplegado: `main` = `develop` = `ac079d7`, sin nada esperando. S0a y S0b del rediseño de plantillas también llegaron a producción; **S1 (LANDING) quedó desbloqueado pero pendiente de D-31**. Ver [Acento por estilo, detección de rubro y despliegue al día](#acento-por-estilo-detección-de-rubro-y-despliegue-al-día-2026-09-13). Sesión anterior: 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
+**Última sesión:** 2026-09-20 — **S1 del rediseño de plantillas: `LANDING` reescrita sobre la dirección "Bloques"** (scroll largo con nav de anclas, D-33; sistema de monograma de marca, D-37; descripción por servicio, D-35; momento 2 mixto para capturar contenido adicional, D-36), cadena de 3 PRs (#37, #38, #39) **mergeada a `develop`** (`5f0aef8`) el mismo día — **`main` no avanzó**, sigue en `23ed10b` con solo el deploy de D-32. 876 tests, 63 suites, 0 skipped. Ver [S1 del rediseño de plantillas: LANDING sobre la dirección Bloques](#s1-del-rediseño-de-plantillas-landing-sobre-la-dirección-bloques-2026-09-20). Mismo día, sesión anterior: 2026-09-19/20 — **D-31 resuelta por el camino (3): `primario`, `secundario` y `texto` se derivan del acento en vez de persistirse (D-32)**, ruta ODD, y **desplegado a producción el mismo 20/09**: PR #35 y #36 mergeados a `develop` (`c0c1c17`, `f669651`) y `develop` → `main` (`ed2788e`), Railway redeployó en ~90 s. `main` = `ed2788e` y `develop` = `f669651` (el release solo agrega ese commit sobre lo mergeado), y los sitios publicados ya sirven la paleta derivada, verificado en vivo. Ver [Paleta derivada del acento — D-31 resuelta por D-32](#paleta-derivada-del-acento--d-31-resuelta-por-d-32-ruta-odd-2026-09-20) y [Deploy a producción de la paleta derivada del acento](#deploy-a-producción-de-la-paleta-derivada-del-acento-d-31d-32-2026-09-20). Sesión anterior: 2026-09-13 — **Acento derivado del estilo (D-27), detección local de rubro con fallback neutro (D-28), opciones clicables en el chat (D-29) y precarga del correo en login (D-30)**, todo desplegado: `main` = `develop` = `ac079d7`, sin nada esperando. S0a y S0b del rediseño de plantillas también llegaron a producción; **S1 (LANDING) quedó desbloqueado pero pendiente de D-31**. Ver [Acento por estilo, detección de rubro y despliegue al día](#acento-por-estilo-detección-de-rubro-y-despliegue-al-día-2026-09-13). Sesión anterior: 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
 **Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 **Seguimiento también en Jira:** proyecto **WB (Web-Bot)** en `devalpo-team.atlassian.net` — espejo del roadmap. Estaba desactualizado respecto a esta bitácora al empezar la sesión del 14/08 (varios tickets de Fase 2 seguían en "Tareas por hacer" ya terminados); si no se sincronizó todavía en esta sesión, hacerlo antes de dar por buena la vista de Jira.
@@ -1151,6 +1151,117 @@ ese commit sobre lo mergeado). La línea de `ESTADO.md` que fijaba la producció
 `main`/`develop` nuevos, la paleta derivada en producción y los campos huérfanos de
 `configJson` en filas viejas. `docs/DECISIONES.md` no sumó entradas nuevas — D-31 y D-32
 ya quedaron registradas en la jornada anterior y siguen vigentes tal cual.
+
+---
+
+## S1 del rediseño de plantillas: LANDING sobre la dirección Bloques (2026-09-20)
+
+**Contexto.** Con D-32 desplegado (sección anterior), S1 (`LANDING`) del rediseño de
+plantillas quedó desbloqueado. Mismo día, se encaró: reescribir `LANDING` como la SPA de
+cuatro secciones que valida el patrón completo —sistema de diseño, `SeccionesSPA`, clamp
+de contraste, responsivo— antes de replicarlo en las otras cinco. Ruta ODD, no un ciclo
+SDD; documento de trabajo `odd/tasks/plantilla-landing-spa.md`. RDD quedó **apagado a
+nivel clon** para este ciclo a pedido de Agustín (el global siguió en `on`), con el
+compromiso de reactivarlo antes de abrir el PR y de poner la verificación funcional en
+manos del orquestador mientras tanto.
+
+### Lo que se construyó, en orden
+
+1. **T1 + T2 — cimientos** (`b72c27e`): constructor de mensaje de WhatsApp
+   (`buildWhatsAppUrlConMensaje`) y el campo opcional `destacados?` en `SiteConfigDTO`,
+   sin productor todavía — la fila de 3 cifras no se ve en ningún sitio hasta que el chat
+   lo pregunte.
+2. **T3 a T6 — la plantilla en SPA de pestañas** (`34ed6a3`): `landing/sections.ts`
+   reescrito a las cuatro secciones que consume `filtrarSecciones`, alta fidelidad del
+   handoff, footer propio. Mirando la plantilla terminada en el navegador —no en los
+   tests— aparecieron dos defectos más allá de lo que 843 tests en verde alcanzaban a
+   ver: un hueco gris en la grilla de Servicios con 4+1 celdas en una grilla de 6, y
+   "Nosotros" repitiendo el hero palabra por palabra. El primero se arregló extendiendo la
+   celda de CTA; el segundo llevó a **eliminar el fallback `sobreNosotros → descripcion`**
+   para esta plantilla (D-34).
+3. **Vacío de 280px bajo el footer** (`1ece70a`): en Servicios, Nosotros y Contacto
+   quedaba un vacío grande de blanco — la raíz de la plantilla no sostenía el alto de la
+   ventana. Arreglado en el shell compartido (`SeccionesSPA`), no en `LANDING`, así que
+   las otras cinco lo heredan gratis.
+4. **Desvío deliberado del handoff: scroll largo en vez de pestañas** (`0df353e`) — ver
+   D-33. Encontrados midiendo en el navegador: la última sección nunca podía marcarse
+   activa (resuelto con un centinela de 1px al final del documento) y una carrera del
+   scrollspy con saltos de scroll mayores a ~230px.
+5. **Grilla de Nosotros colapsada a 32,6px** (`c828fc2`): bug heredado de la conversión a
+   scroll largo — las filas `1fr` del handoff necesitan un alto resuelto del contenedor
+   que en flujo normal nadie volvía a anclar. Arreglado con `aspect-ratio` en las celdas.
+   De paso, una segunda revisión propia destapó que se renderizaban 4 fotos donde la
+   maqueta pide 3, y se cerraron brechas de fidelidad menores (estados de hover
+   faltantes, sombra de tarjeta oscura mal asignada, tamaños de H2 inconsistentes).
+6. **Descripción por servicio** (`0c158b5`) — ver D-35.
+7. **Brief para el diseñador y su respuesta** (`c32ce0c`, `98dc90c`): inventario
+   verificado contra el código de lo que el chat pregunta hoy y lo que el rediseño
+   necesita y no tiene. El diseñador aceptó la hipótesis de los dos momentos y propuso
+   acortar el chat de 8-9 a 6 preguntas; Agustín decidió el momento 2 mixto — ver D-36.
+8. **Las maquetas v2 y v3 viajan por su propia rama** (`5699a65`, `a7b9914`): 3.123 líneas
+   de referencia de diseño que, mezcladas con el código de S1, dejaban el candidato de
+   revisión en 5.820 líneas —por encima del presupuesto de contexto del revisor y del de
+   un revisor humano—. Se movieron a `docs/handoff-maquetas-v2-v3`, dejando el código de
+   S1 en 2.303 líneas, lo que de verdad había que revisar.
+9. **Los dos hallazgos CRITICAL de la revisión adversarial** (`044cd9d`): el formulario de
+   contacto tenía dos caminos de falla silenciosa —sin URL de WhatsApp posible no se abría
+   nada y no se avisaba nada; y con el popup bloqueado, `reset()` corría igual y borraba lo
+   que la persona había escrito—. Alcanzable con datos reales en la plantilla de más
+   tráfico. Se corrigió con `resolverEnvioContacto`, función pura que decide el mensaje y
+   si corresponde limpiar el formulario, y solo limpia cuando algo realmente se abrió. El
+   segundo hallazgo fijó con tests los cuatro comportamientos del scrollspy que se habían
+   verificado a ojo pero nunca quedaron pineados.
+10. **Sistema de monograma de marca** (`2ff6dd3`) — ver D-37.
+11. **Handoff autocontenido de la dirección Bloques** (`b97febb`) — ver D-38.
+
+### Cadena de 3 PRs, mergeada a `develop`, sin llegar a `main`
+
+| PR | Rama | Contenido |
+|---|---|---|
+| #37 | `docs/handoff-maquetas-v2-v3` | Maquetas v2/v3 de referencia (`5699a65`) |
+| #38 | `feature/plantilla-landing-spa` | T1-T6, scroll largo, servicios, brief, fix CRITICAL (`b72c27e`…`044cd9d`) |
+| #39 | `feature/monograma-marca` | Sistema de monograma + handoff Bloques (`2ff6dd3`, `b97febb`) |
+
+Mergeados en orden a `develop` (`5f0aef8`). **`main` no se tocó**: sigue en `23ed10b`,
+sirviendo la `LANDING` de antes del rediseño. Las otras 4 plantillas quedaron intactas en
+ambas ramas.
+
+### Lo que costó tiempo real
+
+- **Los tests, el ojo y la revisión adversarial vieron cosas distintas.** 843 tests en
+  verde convivieron, en distintos momentos de esta misma jornada, con una sección de
+  Nosotros colapsada a 32,6px de alto y con 280px de blanco vacío bajo el footer — ningún
+  test los detectó porque ninguno afirmaba nada sobre layout medido. Y la revisión
+  adversarial encontró que el formulario de contacto se tragaba envíos en silencio, un bug
+  que nadie había probado porque solo se verificaba que el caso feliz funcionara. Lección:
+  para layout y manejo de errores del camino infeliz, medir en el navegador y revisar
+  adversarialmente encuentran lo que un test de comportamiento no ve si nadie escribió esa
+  aserción.
+- **Una pestaña de Chrome en segundo plano estrangula `IntersectionObserver` y el
+  repintado.** Con `document.visibilityState === 'hidden'`, un observer de control recibió
+  cero eventos, y eso produjo tres diagnósticos falsos seguidos en cadena: "el scrollspy
+  está roto", "la sección no termina de revelarse" y "la página no scrollea" —esta última
+  porque `window.scrollTo({behavior:'auto'})` hereda `scroll-behavior: smooth` del CSS y
+  anima, así que leer `scrollY` en la línea siguiente devuelve el valor viejo; hay que usar
+  `behavior: 'instant'`. Antes de diagnosticar cualquier cosa medida en el navegador:
+  comprobar `document.visibilityState` y `document.hasFocus()`.
+- El móvil no se pudo verificar: Chrome no aplica el achique de ventana por debajo de
+  ~500px desde la automatización de esta sesión. El breakpoint de 768px quedó escrito en
+  el CSS pero nadie lo vio renderizado.
+
+### Verificación (estado de `develop` al cierre, no de producción)
+
+`npm run test:unit` → **876 tests, 63 suites, 0 skipped** (venía de 812 tras D-32, subió
+por T1+T2, T3-T6 y las correcciones posteriores). `npx tsc --noEmit` limpio. `npm run
+lint` → 0 errores, 21 warnings preexistentes y ajenos a los archivos tocados.
+
+### Documentación
+
+`docs/DECISIONES.md` suma D-33 a D-38 (scroll largo, fallback de Nosotros, servicios con
+descripción, momento 2 mixto, monograma, dirección Bloques). `docs/ESTADO.md` se
+regeneró completo: arquitectura (piezas compartidas nuevas bajo `templates/shared/`),
+producción sin cambios (`main` = `23ed10b`) separada explícitamente de lo que hay en
+`develop` sin desplegar, y el conteo de tests.
 
 ---
 

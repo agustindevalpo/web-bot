@@ -32,7 +32,15 @@
   }
 }
 
-/* Cambio de sección: dvFade corre de inmediato sobre el contenedor entrante. */
+/* dvFade: pensado para el fundido de la sección entrante en un cambio de
+ * pestaña. Sin importador desde WB-plantillas-landing-spa S1 — SeccionesSPA
+ * dejó de tener "cambio de sección" para pasar a scroll largo (contradice a
+ * propósito el handoff, ver docs/DECISIONES.md) y ya no setea
+ * `data-dv-anim="fade"` en ningún elemento. Se mantiene como primitiva
+ * disponible del contrato `data-dv-anim` (comentario de cabecera de este
+ * archivo), igual que otras piezas de S0 sin consumidor a propósito
+ * (`fuentes.ts`, `contraste.ts`) — no es dead code a eliminar, es una pieza
+ * del sistema que otro consumidor puede volver a cablear. */
 [data-dv-anim='fade'] {
   animation: dvFade 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   animation-delay: var(--dv-delay, 0ms);
@@ -53,17 +61,16 @@
   animation-delay: var(--dv-delay, 0ms);
 }
 
-/* Visibilidad de sección inactiva. Las 4 secciones de cada plantilla SIEMPRE
- * se renderizan (nunca se desmontan) para no sacar contenido del HTML — un
- * sitio que se vende como "tu sitio, en Google" no puede tener 3 de 4
- * secciones ausentes del marcado. `display:none` → mostrado reinicia una
- * animación CSS por spec, así que dvFade y la cascada de hijos corren de
- * nuevo gratis en cada cambio de sección, sin lógica adicional.
- * Gateado en `data-dv-ready`: sin JS, las 4 secciones quedan visibles como
- * scroll largo y los enlaces del nav (`<a href="#id">`) siguen funcionando.
+/* Scroll suave de los saltos de ancla del nav de SeccionesSPA
+ * (WB-plantillas-landing-spa, S1 — desvío deliberado del handoff que pedía
+ * pestañas sin scroll largo, README.md:133, ver docs/DECISIONES.md). Global
+ * a propósito, como el resto de este archivo: `/chat` y `/admin` no tienen
+ * anclas internas, así que la regla no les cambia nada. Revertido a `auto`
+ * bajo `prefers-reduced-motion: reduce`, junto al resto de los guards de
+ * movimiento reducido más abajo.
  */
-[data-dv-ready] [data-dv-section]:not([data-dv-active]) {
-  display: none;
+html {
+  scroll-behavior: smooth;
 }
 
 /* MUST — prefers-reduced-motion (spec.md, Requirement "Motion Primitives and
@@ -77,5 +84,9 @@
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
   }
 }

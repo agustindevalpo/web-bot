@@ -9,7 +9,7 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-20 · `main` = `ed2788e` · `develop` = `f669651`
+> **Última regeneración:** 2026-09-20 · `main` = `23ed10b` · `develop` = `5f0aef8`
 
 ---
 
@@ -24,7 +24,8 @@ promesa **"tu sitio web en un día, en producción, con tu propio dominio"**.
   (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`), sin webhook: Agustín confirma el pago a mano
   desde `/admin` y eso activa al cliente.
 - **Precios vigentes** (`src/app/_landing/precios.ts`): $149.990 sitio, $119.990 promo
-  para los primeros 10 cupos, $249.990 multipágina, $39.990 renovación anual.
+  para los primeros 10 cupos (0 vendidos hasta hoy), $249.990 multipágina, $39.990
+  renovación anual.
 - **Embudo:** aviso → landing → chat demo → el visitante deja nombre y correo → se le
   revela su sitio demo → paga → Devalpo le asigna el dominio.
 - **Equipo:** Agustín Romero, solo.
@@ -58,7 +59,7 @@ src/
 ├── infrastructure/   adaptadores: db (Prisma), auth, claude, demo, email, cloudflare,
 │                     notifications, payments, railway, routing, templates
 ├── app/              rutas del App Router (capa delgada: llama casos de uso)
-├── components/       los 5 templates de sitio + registry/resolver
+├── components/       los 5 templates de sitio + shared/ + registry/resolver
 └── proxy.ts          entrada multitenant (Next 16 renombró middleware.ts → proxy.ts)
 ```
 
@@ -73,34 +74,41 @@ src/
 - **Templates:** `rubroTemplates.ts` mapea los 10 rubros a 5 `Template`; `resolver.ts`
   (puro) y `registry.ts` (JSX) están separados; fallback a `LANDING`, que es lo que recibe
   el rubro neutro `otro` cuando la deducción local no reconoce el negocio (D-28).
+  `components/templates/shared/` reúne lo que las plantillas comparten al migrar al
+  rediseño: `SeccionesSPA.tsx`/`scrollspy.ts` (shell de scroll largo con nav de anclas),
+  `Monograma.tsx`/`iniciales.ts` (marca cuando no hay logo, D-37) y `servicios.ts`
+  (normaliza `servicios: string | {nombre, descripcion?}`, D-35) — hoy **solo `LANDING`
+  las consume, y solo en `develop`**; las otras cuatro plantillas siguen sin migrar.
 - **Paleta:** `configJson.colores` guarda **solo** `acento` (D-32) — `primario`,
   `secundario` y `texto` ya no se persisten, se derivan al renderizar con
   `derivarPaletaDesdeAcento()` (`src/domain/color/paletaDerivada.ts`) y
   `palette.ts` sigue emitiendo las cuatro variables CSS que las 5 plantillas vivas
   consumen.
 - **Persistencia:** esquema en `src/infrastructure/db/prisma/schema.prisma`, 3
-  migraciones en `prisma/migrations/`; D-32 no agregó ninguna.
+  migraciones en `prisma/migrations/`; ni D-32 ni el ciclo de LANDING-Bloques agregaron
+  ninguna — ambos extienden tipos de TypeScript sobre el mismo `configJson: Json`.
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `ed2788e`, desplegado y verificado en vivo el 2026-09-20):**
-landing con precio único y promo · chat demo que genera un `Sitio` real · gate de lead
-(nombre + correo antes de revelar el sitio) · los 5 templates · dominios propios vía
-Cloudflare · panel `/admin` (pausar, reactivar, asignar dominio, editar `configJson`,
-confirmar pago y activar) · link de pago de Mercado Pago · metadata y Open Graph
-propios por sitio · **fundaciones del rediseño de plantillas** (tokens estructurales,
-motion.css, clamp de contraste en OKLCH, SeccionesSPA — S0a y S0b de D-23, sin plantilla
-visible todavía) · **acento derivado del estilo que el cliente elige** (D-27) ·
-**deducción de rubro sobre descripción y servicios, con fallback neutro y pregunta guiada**
-(D-28) · **opciones del chat clicables** (D-29) · **login que precarga el correo de la
-demo** (D-30) · **paleta de cada sitio derivada de un único acento** — `primario`,
-`secundario` y `texto` dejaron de persistirse y se calculan del acento en cada render
-(D-32); efecto visible: los sitios ya publicados cambiaron de `--primario`/`--secundario`,
-verificado en vivo (`demo-veterinaria` y `demo-tienda` sirven la paleta derivada).
+**En producción (`main` = `23ed10b`, desplegado y verificado en vivo el 2026-09-20):**
+capacidad de generar un sitio real por chat demo con gate de lead (nombre + correo antes
+de revelar el sitio) · 5 templates de sitio elegidos por rubro · dominios propios vía
+Cloudflare · panel `/admin` para pausar, reactivar, asignar dominio, editar `configJson`
+y confirmar pago · cobro por link de Mercado Pago con activación manual · metadata y
+Open Graph propios por sitio (no la copia de la landing comercial) · paleta de cada sitio
+derivada de un único acento en OKLCH, con `primario`/`secundario`/`texto` calculados en
+cada render en vez de leídos de la base (D-32) · acento derivado del estilo que el
+cliente elige en el chat (D-27) · deducción de rubro sobre descripción y servicios, con
+fallback neutro y pregunta guiada si no alcanza (D-28) · opciones del chat clicables
+(D-29) · login que precarga el correo de quien ya dejó el lead (D-30).
 
-**En `develop`, sin adelanto sobre producción:** `develop` = `f669651` es el mismo
-contenido que `main`; `ed2788e` solo agrega el commit de release. S1 (LANDING) del
-rediseño de plantillas queda **desbloqueado** por D-32, pero no arrancado.
+**En `develop`, sin adelanto sobre producción — S1 del rediseño de plantillas
+(PRs #37, #38, #39):** `LANDING` reescrita sobre la dirección de diseño "Bloques": scroll
+largo con nav de anclas en vez de pestañas (D-33), sistema de monograma de marca (D-37),
+descripción por servicio (D-35), formulario de contacto que nunca descarta un envío en
+silencio. Nada de esto es visible todavía en ningún sitio real: **`main` sigue sirviendo
+la `LANDING` anterior**, sin marca ni scroll largo. Las otras 4 plantillas siguen intactas
+en ambas ramas — nadie las tocó.
 
 **No construido / inerte:**
 
@@ -115,6 +123,9 @@ rediseño de plantillas queda **desbloqueado** por D-32, pero no arrancado.
 - `pausarSitioUC`, `reactivarSitioUC` y `verificarDominioUC` están compuestos en el
   container pero ninguna ruta los consume (verificado por grep).
 - Páginas legales (términos, privacidad, bloque legal): no existen.
+- Captura de contenido adicional para el rediseño (logo, fotos reales, descripción por
+  servicio): decidido el momento —texto antes de pagar, material gráfico después (D-36)—
+  pero el chat todavía no pide ninguno de los dos.
 
 ## 5. Bloqueado, y en qué exactamente
 
@@ -126,6 +137,7 @@ rediseño de plantillas queda **desbloqueado** por D-32, pero no arrancado.
 | Activación automática por pago | Deploy del motor de pagos de Devalpo. |
 | T9 de `site-metadata` | Pegar un link de sitio real en WhatsApp y pasarlo por el Sharing Debugger de Facebook — solo se puede probar en vivo. |
 | Limpiar el sitio de prueba `demo-cea59ef1` | Es un `UPDATE` contra la Postgres de producción; falta que Agustín decida corregir o borrar. |
+| S2-S6 del rediseño de plantillas | Que S1 (`LANDING`, ya mergeada en `develop`) llegue a `main` primero. |
 
 ## 6. Cómo correrlo
 
@@ -150,7 +162,7 @@ propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya pues
 **Tests:**
 
 ```bash
-npm run test:unit          # Jest — 61 suites / 812 tests en verde
+npm run test:unit          # Jest — 63 suites / 876 tests en verde
 npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
 npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
 npm run test:all            # jest + cucumber
@@ -176,9 +188,10 @@ No existe un script `test` a secas.
   producción usa Resend por HTTP.
 - El túnel SSH de Railway (`railway connect Postgres --tunnel-only`) no funciona en
   Windows en esta máquina; se usa Public Access de Postgres.
-- La acción `computer type` de claude-in-chrome mutila texto con acentos (borra todo lo
-  anterior al primer carácter no ASCII); usar `form_input`. Ya dejó datos corruptos en
-  `configJson` del sitio `demo-cea59ef1` en producción.
+- Una pestaña de Chrome en segundo plano estrangula `IntersectionObserver` y el repintado:
+  produce diagnósticos falsos ("el scrollspy no funciona", "la página no scrollea").
+  Comprobar `document.visibilityState`/`document.hasFocus()` antes de diagnosticar nada
+  medido en el navegador.
 - `docs/historico/` es archivo muerto por diseño: describe el proyecto de agosto de 2026
   (suscripciones, N8N, Python, equipo de tres). Nunca citarlo como fuente de un hecho
   actual.

@@ -1,6 +1,7 @@
 import {
   soloDigitos,
   buildWhatsAppUrl,
+  buildWhatsAppUrlConMensaje,
   buildTelUrl,
   buildInstagramUrl,
   buildMailtoUrl,
@@ -15,6 +16,56 @@ describe('soloDigitos', () => {
 describe('buildWhatsAppUrl', () => {
   it('arma un link wa.me con solo dígitos', () => {
     expect(buildWhatsAppUrl('+56 9 1234 5678')).toBe('https://wa.me/56912345678')
+  })
+})
+
+describe('buildWhatsAppUrlConMensaje', () => {
+  it('arma un link wa.me con el mensaje codificado en "text"', () => {
+    expect(buildWhatsAppUrlConMensaje('+56 9 1234 5678', 'Hola, quiero cotizar')).toBe(
+      `https://wa.me/56912345678?text=${encodeURIComponent('Hola, quiero cotizar')}`,
+    )
+  })
+
+  it('codifica saltos de línea y "&" para que no rompan el query string', () => {
+    const mensaje = 'Hola!\nQuiero cotizar & agendar una visita'
+    const url = buildWhatsAppUrlConMensaje('56912345678', mensaje)
+
+    expect(url).toBe(`https://wa.me/56912345678?text=${encodeURIComponent(mensaje)}`)
+    expect(url).not.toContain('\n')
+    // el "&" del mensaje debe ir codificado (%26), no como separador real de query params
+    expect(url?.split('&').length).toBe(1)
+  })
+
+  it('codifica acentos y "#" correctamente', () => {
+    const mensaje = 'Consulta sobre el ítem #3, ¿está disponible?'
+    expect(buildWhatsAppUrlConMensaje('56912345678', mensaje)).toBe(
+      `https://wa.me/56912345678?text=${encodeURIComponent(mensaje)}`,
+    )
+  })
+
+  it('codifica emoji', () => {
+    const mensaje = 'Hola 👋 quiero cotizar 🎉'
+    expect(buildWhatsAppUrlConMensaje('56912345678', mensaje)).toBe(
+      `https://wa.me/56912345678?text=${encodeURIComponent(mensaje)}`,
+    )
+  })
+
+  it('degrada al link simple cuando el mensaje es vacío', () => {
+    expect(buildWhatsAppUrlConMensaje('56912345678', '')).toBe('https://wa.me/56912345678')
+  })
+
+  it('degrada al link simple cuando el mensaje es solo espacios', () => {
+    expect(buildWhatsAppUrlConMensaje('56912345678', '   \n  ')).toBe('https://wa.me/56912345678')
+  })
+
+  it('rechaza (null) un teléfono sin dígitos utilizables', () => {
+    expect(buildWhatsAppUrlConMensaje('abc', 'Hola')).toBeNull()
+  })
+
+  it('extrae solo los dígitos de un teléfono con caracteres de formato', () => {
+    expect(buildWhatsAppUrlConMensaje('+56 (9) 1234-5678', 'Hola')).toBe(
+      `https://wa.me/56912345678?text=${encodeURIComponent('Hola')}`,
+    )
   })
 })
 
