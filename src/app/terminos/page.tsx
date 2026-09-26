@@ -8,6 +8,7 @@ import {
   PRECIO_PROMO,
   PRECIO_SITIO,
   RENOVACION_ANUAL,
+  TOPE_DOMINIO_ANUAL,
   formatCLP,
 } from '../_landing/precios'
 
@@ -77,7 +78,16 @@ export default function TerminosPage() {
       </LegalSeccion>
 
       <LegalSeccion titulo="6. Dominio">
-        <p>El dominio de tu sitio se registra a nombre de tu negocio, no a nombre de Devalpo.</p>
+        <p>
+          Si ya tienes un dominio, publicamos tu sitio en ese dominio. Si no tienes uno, el precio incluye el
+          registro de un dominio <strong>.cl o .com estándar</strong> cuyo costo anual no supere{' '}
+          <strong>{formatCLP(TOPE_DOMINIO_ANUAL)}</strong> (IVA incluido). Si eliges un dominio premium o de mayor
+          costo, pagas la diferencia, tanto al registrarlo como en cada renovación.
+        </p>
+        <p>
+          En todos los casos el dominio se registra <strong>a nombre de tu negocio</strong>, no a nombre de
+          Devalpo, y sigue siendo tuyo aunque dejes de trabajar con nosotros.
+        </p>
       </LegalSeccion>
 
       <LegalSeccion titulo="7. Derecho a retracto y garantía de publicación">

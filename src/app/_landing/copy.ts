@@ -73,7 +73,7 @@ export const PRECIO = {
   etiquetaPagoUnico: 'pago único',
   incluye: [
     'Diseño con los datos de tu negocio',
-    'Tu dominio configurado (.cl o .com)',
+    'Tu dominio .cl o .com, a tu nombre y configurado',
     'Hosting y certificado SSL el primer año',
     'Textos e imágenes listos para publicar',
     'Una ronda de ajustes antes de publicar',
@@ -126,7 +126,7 @@ export const FAQ = {
     },
     {
       q: '¿Y si ya tengo dominio?',
-      a: 'Sirve igual. Si ya tienes un dominio registrado, lo configuramos para que apunte a tu sitio nuevo; solo necesitamos acceso al panel donde lo registraste. El dominio queda a nombre de tu negocio y sigue siendo tuyo, trabajes con nosotros o no.',
+      a: 'Sirve igual. Si ya tienes un dominio registrado, lo configuramos para que apunte a tu sitio nuevo; solo necesitamos acceso al panel donde lo registraste. El dominio queda a nombre de tu negocio y sigue siendo tuyo, trabajes con nosotros o no. Si aún no tienes uno, el precio incluye un dominio .cl o .com estándar; si quieres uno premium o de mayor costo, pagas solo la diferencia.',
     },
     {
       q: '¿Puedo pedir cambios?',
