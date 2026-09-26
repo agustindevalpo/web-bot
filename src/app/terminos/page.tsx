@@ -69,8 +69,10 @@ export default function TerminosPage() {
         <p>
           Desde el segundo año, el servicio tiene una renovación anual de <strong>{formatCLP(RENOVACION_ANUAL)}</strong>{' '}
           que cubre el hosting y el dominio por doce meses más. Te avisaremos con anticipación antes de que venza la
-          renovación. Si no la pagas, tu sitio puede quedar pausado hasta que se regularice el pago; te
-          notificaremos antes de que eso ocurra.
+          renovación. Desde el vencimiento tienes un plazo de gracia de <strong>30 días corridos</strong> para
+          pagarla, durante el cual tu sitio sigue publicado. Si al término de ese plazo la renovación no se ha
+          pagado, el sitio se pausa hasta que se regularice el pago. El dominio sigue registrado a nombre de tu
+          negocio.
         </p>
       </LegalSeccion>
 
