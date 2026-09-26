@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { filtrarSecciones, type SeccionSPA } from './navegacion'
 import { resolverSeccionActiva } from './scrollspy'
+import { calcularScrollNavHorizontal } from './navScroll'
 import styles from './SeccionesSPA.module.css'
 
 export type SeccionesSPAProps = {
@@ -26,7 +27,27 @@ const UMBRAL_OBSERVER_CASCADA = 0.06
 // header fijo. Duplicado a propósito en JS y CSS — no hay forma barata de
 // leer un custom property de CSS module desde acá sin un `getComputedStyle`
 // que no compra nada para un valor que ya es una constante del diseño.
-const ALTO_HEADER_PX = 78
+//
+// Dos valores, no uno (S1-fix, odd/tasks/nav-movil-seccionesspa.md): en
+// móvil el header sticky solo deja pineada la fila del nav (44px, la marca
+// desaparece al pegarse — README.md:303), así que el offset correcto para
+// el `rootMargin` de abajo cambia con el viewport. Se lee una sola vez al
+// montar (`matchMedia`, en el efecto de abajo) — no hace falta reaccionar a
+// un resize en vivo para esto, igual que el resto de las constantes de este
+// componente.
+const ALTO_HEADER_DESKTOP_PX = 78
+const ALTO_HEADER_MOBIL_PX = 44
+// Alto de la fila 1 del header móvil (marca + accion,
+// `--wb-spa-header-fila1-alto` en el CSS) — el centinela `centinelaPegado`
+// de abajo usa esto como `rootMargin` superior de SU PROPIO observer (el
+// del header pegado, no el del scrollspy) para no marcar "pegado" hasta
+// que esa fila termine de esconderse detrás del header sticky.
+const ALTO_FILA1_MOBIL_PX = 38
+// Debe calzar con `scroll-padding-inline` del `.nav` móvil (CSS,
+// README.md:302) — el ítem activo nunca queda pegado al canto de la fila
+// cuando el efecto de scroll-al-activo de abajo lo centra.
+const PADDING_SCROLL_NAV_PX = 18
+const CONSULTA_MEDIA_MOBIL = '(max-width: 767px)'
 
 // Único componente cliente bajo `templates/` (handoff, "Implicancia
 // arquitectónica"; design.md Q1). Header, footer y el contenido de cada
@@ -90,6 +111,20 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
   // problema, así que la franja no es el lugar para arreglarlo. Ver el
   // razonamiento completo del observer más abajo.
   const finPaginaRef = useRef<HTMLDivElement>(null)
+  // Nodo real del `<header>` — el observer del centinela pegado (efecto de
+  // abajo) le pone/saca `data-pegado` a mano, imperativo, en vez de pasar
+  // por `useState`: es un cambio puramente visual (la sombra del header
+  // móvil, README.md:303) que no necesita re-render de React en cada
+  // transición, a diferencia de `activaId` que sí decide qué se pinta.
+  const headerRef = useRef<HTMLElement>(null)
+  // Centinela de 1px justo antes del header (ver `.centinelaPegado` en el
+  // CSS y el efecto de abajo): detecta cuándo el header sticky móvil ya
+  // pegó, para mostrar su sombra.
+  const centinelaPegadoRef = useRef<HTMLDivElement>(null)
+  // `<nav>` real — el efecto de scroll-al-activo de más abajo lo desplaza
+  // horizontalmente con `nav.scrollTo`, nunca con `scrollIntoView` sobre el
+  // documento (README.md:305).
+  const navRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const raiz = raizRef.current
@@ -114,7 +149,7 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
     raiz.querySelectorAll('[data-dv-anim="up"]').forEach((elemento) => observerCascada.observe(elemento))
 
     // `rootMargin` recorta el viewport de intersección a una franja angosta
-    // pegada bajo el header: arriba, `-ALTO_HEADER_PX` para no contar el
+    // pegada bajo el header: arriba, `-altoHeaderPx` para no contar el
     // espacio que el header sticky tapa; abajo, `-65%` para que la sección
     // se marque activa cuando su borde superior cruza cerca del techo de la
     // pantalla, no apenas asoma por abajo. `threshold: 0` porque lo que
@@ -184,6 +219,14 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
       )
     }
 
+    // Móvil pinea solo la fila del nav (44px), no el header completo (78px)
+    // — ver el comentario de `ALTO_HEADER_DESKTOP_PX`/`ALTO_HEADER_MOBIL_PX`
+    // más arriba. Una sola lectura al montar: si la ventana cruza el
+    // breakpoint después (rotación, resize manual) el rootMargin queda con
+    // el valor de montaje, mismo compromiso que ya asumía la constante
+    // única de antes de este fix.
+    const altoHeaderPx = window.matchMedia(CONSULTA_MEDIA_MOBIL).matches ? ALTO_HEADER_MOBIL_PX : ALTO_HEADER_DESKTOP_PX
+
     const observerScrollspy = new IntersectionObserver(
       (entradas) => {
         for (const entrada of entradas) {
@@ -191,9 +234,29 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
         }
         recalcularActiva()
       },
-      { rootMargin: `-${ALTO_HEADER_PX}px 0px -65% 0px`, threshold: 0 },
+      { rootMargin: `-${altoHeaderPx}px 0px -65% 0px`, threshold: 0 },
     )
     seccionNodos.current.forEach((nodo) => observerScrollspy.observe(nodo))
+
+    // Sombra del header pegado en móvil (README.md:303) — activa/desactiva
+    // `data-pegado` a mano sobre el nodo real del header (ver el comentario
+    // de `headerRef` más arriba: no pasa por `useState` a propósito).
+    // `rootMargin` superior = alto de la fila 1 móvil: el centinela deja de
+    // intersectar justo cuando esa fila termina de esconderse detrás del
+    // header sticky, ni un frame antes ni después. En escritorio esto igual
+    // corre (no hay `matchMedia` acá: no hace falta, el atributo no tiene
+    // ninguna regla CSS fuera del `@media (max-width: 767px)` del módulo,
+    // así que ponerlo/sacarlo en escritorio no cambia nada visible).
+    const observerPegado = new IntersectionObserver(
+      (entradas) => {
+        const entrada = entradas[0]
+        if (!entrada || !headerRef.current) return
+        if (entrada.isIntersecting) headerRef.current.removeAttribute('data-pegado')
+        else headerRef.current.setAttribute('data-pegado', '')
+      },
+      { rootMargin: `-${ALTO_FILA1_MOBIL_PX}px 0px 0px 0px`, threshold: 0 },
+    )
+    if (centinelaPegadoRef.current) observerPegado.observe(centinelaPegadoRef.current)
 
     // Defecto real encontrado en el navegador (no en tests): una sección
     // final más baja que `viewport − fin de la franja` nunca llega a cruzar
@@ -222,9 +285,37 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
     return () => {
       observerCascada.disconnect()
       observerScrollspy.disconnect()
+      observerPegado.disconnect()
       observerFinPagina.disconnect()
     }
   }, [])
+
+  // Al cambiar la sección activa, desplaza la fila del nav para que el
+  // ítem correspondiente quede visible — SOLO dentro de la fila
+  // (`nav.scrollTo`), nunca `scrollIntoView` sobre el documento, que
+  // scrollearía la página entera (README.md:305). Cálculo puro extraído a
+  // `calcularScrollNavHorizontal` (shared/navScroll.ts) — pineado con tests
+  // unitarios ahí, mismo criterio que `resolverSeccionActiva`.
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const itemActivo = nav.querySelector<HTMLAnchorElement>('a[aria-current="true"]')
+    if (!itemActivo) return
+
+    const scrollLeftDeseado = calcularScrollNavHorizontal({
+      anchoNav: nav.clientWidth,
+      scrollActual: nav.scrollLeft,
+      offsetItem: itemActivo.offsetLeft,
+      anchoItem: itemActivo.offsetWidth,
+      paddingScroll: PADDING_SCROLL_NAV_PX,
+    })
+    // Ya visible entre ambos paddings: no llamar `scrollTo` (evita un
+    // scroll de no-op que igual podría disparar eventos de scroll).
+    if (scrollLeftDeseado === nav.scrollLeft) return
+
+    const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    nav.scrollTo({ left: scrollLeftDeseado, behavior: prefiereMovimientoReducido ? 'auto' : 'smooth' })
+  }, [activaId])
 
   // Después de los hooks, nunca antes: React exige que se ejecuten siempre en
   // el mismo orden.
@@ -232,9 +323,14 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
 
   return (
     <div ref={raizRef} className={className ? `${styles.shell} ${className}` : styles.shell}>
-      <header className={claseHeader ?? styles.header}>
+      {/* Centinela del header pegado (ver `.centinelaPegado` en el CSS y
+          el efecto de arriba) — tiene que ir ANTES del header en el
+          documento para que el observer detecte el momento exacto en que
+          la fila 1 móvil se esconde detrás del header sticky. */}
+      <div ref={centinelaPegadoRef} className={styles.centinelaPegado} aria-hidden="true" />
+      <header ref={headerRef} className={claseHeader ?? styles.header}>
         <div className={styles.marca}>{marca}</div>
-        <nav className={styles.nav}>
+        <nav ref={navRef} className={styles.nav}>
           {seccionesVisibles.map((seccion) => (
             // `<a href="#id">`, no botón: funciona sin JS (salto de ancla
             // nativo) y es enlazable/compartible. El resaltado del link

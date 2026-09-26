@@ -37,12 +37,25 @@
  * Móvil (<768px): fila horizontal con scroll, NO un botón hamburguesa. La
  * decisión se tomó de entrada al armar tasks.md, no como contingencia — el
  * hamburguesa (README.md:164) queda diferido a S1 (ver docs/DECISIONES.md).
+ *
+ * `min-width: 0` es el fix del defecto real encontrado en navegador a
+ * 390px (odd/tasks/nav-movil-seccionesspa.md): `overflow-x: auto` le pone
+ * a este flex item un `min-width: auto` automático que, en la fila única
+ * que este selector compartía con `.marca`/`.accion` antes de S1-fix, lo
+ * dejaba encoger hasta 0px cuando el resto de la fila no le sobraba
+ * espacio — los cuatro links quedaban con ancho renderizado 0 y fuera de
+ * pantalla. En móvil el nav ya no comparte fila (ver `@media` de abajo,
+ * pasa a su propia línea), pero `min-width: 0` queda de todas formas: es
+ * la propiedad correcta para un contenedor `overflow-x: auto` sin importar
+ * el layout que lo rodee.
  */
 .nav {
   display: flex;
   align-items: center;
   gap: 30px;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  min-width: 0;
   scrollbar-width: none;
 }
 
@@ -107,8 +120,9 @@
  *
  * `--wb-spa-header-alto` es la única fuente del alto del header (lo consume
  * `.header` más abajo) y del offset de `scroll-margin-top` de cada sección.
- * Duplicado en JS como `ALTO_HEADER_PX` (SeccionesSPA.tsx) para el
- * `rootMargin` del scrollspy — ver el comentario de esa constante.
+ * Duplicado en JS como `ALTO_HEADER_DESKTOP_PX`/`ALTO_HEADER_MOBIL_PX`
+ * (SeccionesSPA.tsx) para el `rootMargin` del scrollspy — ver el comentario
+ * de esas constantes.
  */
 .shell {
   --wb-spa-header-alto: 78px;
@@ -176,12 +190,123 @@
   flex-shrink: 0;
 }
 
+/*
+ * Centinela del header pegado (SeccionesSPA.tsx): mismo criterio que
+ * `.finPagina` de arriba (1px real, no 0, para no depender de cómo cada
+ * motor resuelve la intersección de un elemento de área cero). Va ANTES
+ * de `.header` en el documento — el IntersectionObserver que lo observa
+ * usa un `rootMargin` superior igual al alto de la fila 1 móvil
+ * (`--wb-spa-header-fila1-alto`), así que deja de intersectar en el
+ * momento exacto en que esa fila termina de esconderse detrás del header
+ * sticky, no apenas arranca el scroll.
+ */
+.centinelaPegado {
+  height: 1px;
+  flex-shrink: 0;
+}
+
+/*
+ * Nav móvil (S1-fix, odd/tasks/nav-movil-seccionesspa.md) — handoff_bloques
+ * README.md §"Nav — fila horizontal con scroll. Sin hamburguesa." (líneas
+ * 293-305). Header pasa de una fila a dos SIN tocar el TSX: `.marca`,
+ * `.nav` y `.accion` siguen siendo los mismos tres hijos directos de
+ * `.header` en el mismo orden del documento (marca, nav, accion) — acá
+ * solo se activa `flex-wrap` y se reordena con `order`, que en flexbox
+ * decide la fila/posición visual con independencia del orden del DOM.
+ * Fila 1 = marca (order 1) + accion (order 2); fila 2 = nav (order 3,
+ * `flex-basis: 100%` fuerza el salto de línea porque no le queda hueco en
+ * la fila 1 una vez puestos marca+accion).
+ */
 @media (max-width: 767px) {
+  .shell {
+    /* Alto pineado real en móvil (ver `.header` más abajo): el header
+     * sticky solo deja la fila del nav (44px) enganchada arriba, así que
+     * el offset de `scroll-margin-top` de cada sección tiene que ser ese,
+     * no los 78px de escritorio. Duplicado en JS como `ALTO_HEADER_MOBIL_PX`
+     * (SeccionesSPA.tsx, mismo criterio de duplicación que ya usaba
+     * `ALTO_HEADER_DESKTOP_PX`). */
+    --wb-spa-header-alto: 44px;
+    /* Alto de la fila 1 (marca + accion) — el `top` negativo de `.header`
+     * de abajo necesita saber cuánto tiene que subirse la fila 1 para que
+     * solo quede pineada la fila 2. Duplicado en JS como
+     * `ALTO_FILA1_MOBIL_PX` (SeccionesSPA.tsx) para el centinela del
+     * IntersectionObserver que detecta cuándo el header ya está pegado. */
+    --wb-spa-header-fila1-alto: 38px;
+  }
+
   .header {
+    flex-wrap: wrap;
+    align-content: flex-start;
+    height: auto;
     padding: 0 22px;
+    /* `gap` de escritorio (24px) es horizontal ahí (una sola fila); acá con
+     * `flex-wrap` ese mismo `gap` también se metería COMO fila (separación
+     * entre línea 1 y línea 2), que rompería la cuenta exacta de `top` de
+     * abajo — la fila 1 tiene que medir justo `--wb-spa-header-fila1-alto`
+     * sin nada de por medio, no ese alto MÁS un gap. La separación
+     * horizontal marca↔accion dentro de la fila 1 ya la da
+     * `justify-content: space-between` heredado, no el `gap`. */
+    gap: 0;
+    /*
+     * El logo/marca desaparece al pegarse (README.md:303): en vez de subir
+     * TODO el header con `top: 0` (que dejaría marca+accion tapados detrás
+     * del contenido al hacer scroll), se sube el header exactamente el
+     * alto de su fila 1 — la fila 1 queda oculta arriba del viewport y solo
+     * la fila 2 (el nav, 44px) sigue pineada en `top: 0` real.
+     */
+    top: calc(-1 * var(--wb-spa-header-fila1-alto));
+  }
+
+  /* Línea 1 con alto fijo (38px, `--wb-spa-header-fila1-alto`) para que el
+   * cálculo de `top` de arriba sea exacto sin importar si el monograma
+   * (26px) o el botón Hablemos (más alto en escritorio) son más chicos que
+   * eso — `align-items: center` (heredado de `.header`) centra el
+   * contenido real dentro de esta línea. */
+  .marca,
+  .accion {
+    min-height: var(--wb-spa-header-fila1-alto);
+  }
+
+  .marca {
+    order: 1;
+  }
+
+  .accion {
+    order: 2;
   }
 
   .nav {
-    gap: 20px;
+    order: 3;
+    flex: 1 0 100%;
+    /* Sangra a los bordes del viewport (cancela el padding de `.header`):
+     * el corte seco del último ítem visible tiene que tocar el canto real
+     * de la pantalla (README.md:302, "sin degradado de desvanecido"), no
+     * quedar a 22px de él. `scroll-padding-inline` de abajo es lo que evita
+     * que el ítem activo quede pegado a ESE canto al centrarlo. */
+    margin-inline: -22px;
+    padding: 0 18px 8px;
+    gap: 22px;
+    height: 44px;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 18px;
+  }
+
+  .navItem {
+    /* Alinea el inicio de cada ítem al snap (README.md:305, "snap al
+     * inicio de cada ítem") — no `center`: un snap centrado competiría con
+     * el corte seco que el punto 2 del handoff pide a propósito. */
+    scroll-snap-align: start;
+    font-size: 12.5px;
+  }
+
+  /*
+   * Sombra SOLO mientras el header está pegado (README.md:303) — el único
+   * lugar de todo el diseño con sombra, por eso se activa condicionalmente
+   * en vez de ser una propiedad fija de `.header`. `data-pegado` lo pone
+   * SeccionesSPA.tsx vía IntersectionObserver sobre un centinela, nunca un
+   * listener de `scroll` (más barato, no repinta en cada frame).
+   */
+  .header[data-pegado] {
+    box-shadow: 0 6px 16px rgba(16, 19, 26, 0.07);
   }
 }
