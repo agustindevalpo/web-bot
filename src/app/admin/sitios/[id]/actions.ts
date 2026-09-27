@@ -8,7 +8,9 @@ import {
   asignarDominioPropioUC,
   actualizarConfigSitioUC,
   confirmarPagoSitioUC,
+  subirImagenSitioUC,
 } from '@/infrastructure/container'
+import { CampoImagenSitio } from '@/application/use-cases/SubirImagenSitio.usecase'
 import { DominioInvalidoException } from '@/domain/exceptions/DominioInvalidoException'
 import { ConfigSitioInvalidaException } from '@/domain/exceptions/ConfigSitioInvalidaException'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
@@ -16,6 +18,7 @@ import { ClienteNoEncontradoException } from '@/domain/exceptions/ClienteNoEncon
 import { CompradorInvalidoException } from '@/domain/exceptions/CompradorInvalidoException'
 import { etiquetaCliente } from './etiquetaCliente'
 import { parsearFormularioPago } from './formularioPago'
+import { parametrosSubidaImagen } from './subirImagen'
 
 // Todas las actions terminan en redirect (que lanza internamente), por eso
 // el try/catch solo envuelve el trabajo y el redirect queda afuera.
@@ -138,6 +141,32 @@ export async function confirmarPagoAction(sitioId: string, formData: FormData): 
       revalidatePath('/admin')
       revalidatePath(`/admin/sitios/${sitioId}`)
       params = { ok: 'pago_confirmado', cliente: etiquetaCliente(resultado) }
+    } catch (error) {
+      params = { error: mensajeDeError(error) }
+    }
+  }
+
+  irA(sitioId, params)
+}
+
+// Server action de subida de imágenes: bindeada por campo (logo, hero,
+// imagenes) desde el form correspondiente en page.tsx. El archivo llega
+// como File dentro del FormData — Next serializa el form automáticamente
+// como multipart cuando hay un input[type=file].
+export async function subirImagenSitioAction(sitioId: string, campo: CampoImagenSitio, formData: FormData): Promise<void> {
+  await exigirAdmin()
+
+  const archivo = formData.get('archivo')
+
+  let params: Record<string, string>
+  if (!(archivo instanceof File) || archivo.size === 0) {
+    params = { error: 'Selecciona un archivo para subir.' }
+  } else {
+    try {
+      const bytes = new Uint8Array(await archivo.arrayBuffer())
+      const resultado = await subirImagenSitioUC.execute(sitioId, campo, bytes)
+      params = parametrosSubidaImagen(resultado, campo)
+      if (resultado.tipo === 'ok') revalidar(sitioId, resultado.sitio.subdominio)
     } catch (error) {
       params = { error: mensajeDeError(error) }
     }

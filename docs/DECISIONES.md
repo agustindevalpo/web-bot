@@ -1254,3 +1254,29 @@ en una sola constante. Si cambia el costo de los dominios estándar, se ajusta
 `TOPE_DOMINIO_ANUAL` y ambos textos lo reflejan solos.
 **Evidencia:** `src/app/_landing/precios.ts` (`TOPE_DOMINIO_ANUAL`);
 `src/app/_landing/copy.ts` (FAQ "¿Y si ya tengo dominio?"); commit `42d4e21`.
+
+---
+
+## D-42 — Las imágenes de los clientes se guardan en Cloudflare R2 y se suben desde `/admin`
+
+**Fecha:** 2026-09-27 · **Estado:** vigente
+**Contexto:** D-36 fijó que el logo y las fotos se piden después del pago, pero no existía
+ningún almacenamiento de archivos: un sitio vendido salía con fotos de stock y la única
+forma de cambiarlas era pegar URLs en el JSON del panel.
+**Decisión (Agustín):** los archivos van a un bucket público de Cloudflare R2 servido desde
+un dominio propio (`R2_PUBLIC_URL`). Primero los sube Agustín desde `/admin` con lo que el
+cliente manda por WhatsApp; la subida por el propio cliente queda para después sobre el
+mismo puerto `IAlmacenamientoArchivos`. Se aceptan JPEG, PNG y WebP de hasta 5 MB,
+validados por sus primeros bytes; SVG no. La foto principal se escribe en
+`configJson.imagenes[0]`, que es de donde la leen todas las plantillas; no existe un campo
+aparte.
+**Por qué:** R2 no cobra egreso, trae CDN y entrega URLs públicas que `next/image` usa
+directo. Se descartó Railway Buckets porque son privados y obligaban a pasar cada imagen
+por una ruta de la app. Escribir la portada en `imagenes[0]` evitó tocar cuatro plantillas.
+**Consecuencia:** sin las cinco variables `R2_*` el panel responde "almacenamiento no
+configurado" y no escribe nada. `R2_PUBLIC_URL` se lee en `next.config.ts`: si cambia, hay
+que volver a desplegar. Los archivos reemplazados quedan huérfanos en el bucket.
+**Evidencia:** `src/application/use-cases/SubirImagenSitio.usecase.ts`;
+`src/infrastructure/storage/R2AlmacenamientoArchivos.ts`; `next.config.ts`
+(`remotePatternsImagenes`); commits `8ecc8ad`, `6586ba2`, `5caa784`, `a02166c`; Engram
+`odd/subida-imagenes-admin/decision-storage`.

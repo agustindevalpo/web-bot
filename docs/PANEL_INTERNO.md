@@ -11,7 +11,7 @@ responde en el dominio de la app (`webbot.devalpo.cl`, `localhost` o
 |---|---|
 | `/admin/login` | Ingreso con la contraseña compartida del equipo. |
 | `/admin` | Lista todos los sitios (nombre, subdominio con link de vista previa, template, estado, dominio propio, fecha) y permite cerrar sesión. |
-| `/admin/sitios/[id]` | Gestiona un sitio: **pausar/reactivar**, **confirmar el pago y activar al cliente**, **asignar o quitar dominio propio** (con registro en Cloudflare si está configurado) y **editar el contenido** (`configJson`) como JSON. |
+| `/admin/sitios/[id]` | Gestiona un sitio: **pausar/reactivar**, **confirmar el pago y activar al cliente**, **asignar o quitar dominio propio** (con registro en Cloudflare si está configurado), **subir logo, foto principal y fotos de galería** (a Cloudflare R2) y **editar el contenido** (`configJson`) como JSON. |
 
 Toda la lógica de negocio está en use cases de `src/application/use-cases/`
 (`ListarSitios`, `CambiarEstadoSitio`, `ActivarCliente`, `ConfirmarPagoSitio`,
@@ -38,6 +38,40 @@ CLOUDFLARE_ZONE_ID=
 | `ADMIN_SECRET` | Contraseña del panel. Se compara en tiempo constante; usa un valor largo y aleatorio (`openssl rand -base64 32`). |
 | `CLOUDFLARE_API_TOKEN` | Token de API con permiso `SSL and Certificates: Edit` sobre la zona. Nunca se loguea ni se muestra en el panel. |
 | `CLOUDFLARE_ZONE_ID` | ID de la zona de Cloudflare donde viven los custom hostnames (la zona de `devalpo.cl`). |
+
+### Imágenes de los sitios (Cloudflare R2)
+
+```dotenv
+# Cloudflare R2 — logo y fotos que se suben desde /admin. Sin las cinco variables,
+# el panel responde "almacenamiento no configurado" y no escribe nada.
+R2_ACCOUNT_ID=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_BUCKET=
+R2_PUBLIC_URL=
+```
+
+| Variable | Descripción |
+|---|---|
+| `R2_ACCOUNT_ID` | Account ID de Cloudflare (columna derecha de **R2 → Overview**). |
+| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Credenciales de un token de R2 (**R2 → Manage API tokens**) con permiso *Object Read & Write* limitado al bucket. Nunca se loguean ni se muestran. |
+| `R2_BUCKET` | Nombre del bucket, tal como aparece en la lista de R2. |
+| `R2_PUBLIC_URL` | URL pública del bucket, sin barra final (p. ej. `https://media.devalpo.cl`, dominio conectado en **Settings → Custom Domains** del bucket). |
+
+**Ojo:** `next.config.ts` lee `R2_PUBLIC_URL` al compilar y al arrancar para permitir ese host en
+`next/image`. Si la variable se carga o cambia después de un deploy, hay que volver a
+desplegar; si no, las imágenes subidas se guardan pero el sitio no las muestra.
+
+Qué hace cada campo al subir (JPEG, PNG o WebP, hasta 5 MB, validado por contenido y no
+por extensión):
+
+- **Logo** reemplaza `configJson.logo`.
+- **Foto principal** reemplaza `configJson.imagenes[0]`: todas las plantillas toman de ahí
+  la foto de portada.
+- **Galería** agrega la URL al final de `configJson.imagenes`. Para quitar o reordenar
+  fotos se edita el JSON.
+
+Los archivos reemplazados no se borran del bucket.
 
 La sesión del panel reutiliza `AUTH_SECRET` (ya existente) para firmar su
 propio JWT; no hace falta otra clave.
