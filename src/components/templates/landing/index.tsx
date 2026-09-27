@@ -223,18 +223,16 @@ export default async function Landing({ config }: TemplateProps) {
   ])
 
   // Regla 04 del handoff (bloque 3c): cuando llega el logo, ocupa el mismo
-  // espacio que el monograma — nada más se mueve alrededor. `.marcaLogoBox`
-  // fija ese espacio (30px alto en escritorio, 26px en móvil,
-  // `Landing.module.css`) para que `Image fill` + `object-fit: contain`
-  // escale el logo del cliente sin recortarlo ni deformarlo. Sin logo,
+  // espacio que el monograma — nada más se mueve alrededor. `.marcaLogoImg`
+  // fija el alto (44px en escritorio, 34px en móvil, `Landing.module.css`) y
+  // deja que el ancho siga la proporción del logo con un tope, sin recortarlo
+  // ni deformarlo. `width`/`height` solo dan la proporción inicial. Sin logo,
   // `Monograma` (variante "serifCalado" — regla 02, LANDING es editorial)
   // ocupa ese mismo slot derivado de `marca.iniciales`.
   const marcaSlot = (
     <>
       {marca.logo ? (
-        <span className={styles.marcaLogoBox}>
-          <Image src={marca.logo} alt={marca.nombre} fill sizes="160px" className={styles.marcaLogoImg} />
-        </span>
+        <Image src={marca.logo} alt={marca.nombre} width={180} height={44} sizes="180px" className={styles.marcaLogoImg} />
       ) : (
         <Monograma iniciales={marca.iniciales} variante="serifCalado" />
       )}
