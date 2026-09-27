@@ -1265,6 +1265,99 @@ producción sin cambios (`main` = `23ed10b`) separada explícitamente de lo que 
 
 ---
 
+## Navegación móvil de S1, S1 en producción y páginas legales (2026-09-26)
+
+Jornada de punta a punta, ruta ODD: se miró S1 en móvil por primera vez, se arregló lo
+que apareció, se llevó S1 a producción y se publicaron las páginas legales de WebBot.
+Documentos de seguimiento: `odd/tasks/nav-movil-seccionesspa.md` y
+`odd/tasks/paginas-legales-webbot.md`.
+
+### 1. S1 en móvil: la navegación no existía
+
+Primera vez que alguien vio S1 renderizado a 390px (`demo-consultora`). Las secciones
+estaban bien, pero **no había forma de navegar**: el `.nav` del header medía 0px (un ítem
+flex con `overflow-x: auto` tiene `min-width` automático 0 y se encoge hasta desaparecer)
+y «Hablemos» quedaba cortado. Agustín preguntó por la hamburguesa del handoff viejo
+(`README.md:164`); el handoff de Bloques la descarta explícitamente
+(`handoff_bloques/README.md:293-305`) y manda: fila horizontal deslizable, sin hamburguesa.
+
+Arreglado en el PR #41: header móvil en dos filas (marca + CTA, y la fila de secciones),
+al bajar queda pegada solo la fila con sombra, el ítem activo se mantiene visible
+desplazando la fila (`shared/navScroll.ts`, con tests), y el `key` que faltaba en el slot
+`pie`. Por pedido de Agustín: la fila 1 sube de 38 a 52px para darle aire a «Hablemos»
+(se aparta del total de 82px del handoff), el logo queda a la izquierda como dice el
+handoff, y el footer se centra en móvil.
+
+**Dos bugs viejos que solo aparecieron al mirar en el navegador:**
+- **El header sticky nunca se pegó, ni en escritorio.** `overflow-x: hidden` en `html` y
+  `body` convertía a `body` en contenedor de scroll; el `sticky` se pegaba a una caja que
+  no se mueve. Arreglo: `overflow-x: clip` en `globals.css` (`4eb59d0`).
+- **El monograma medía 50px en vez de 38.** El shorthand `font:` de cada variante
+  reiniciaba `line-height` a `normal` y pisaba el `line-height: 1` de la clase base
+  (`700f9ec`).
+
+Mergeado a `develop` y liberado a `main` (`3f60b9b`); deploy en ~105s, verificado en vivo
+en escritorio y a 390px.
+
+### 2. Páginas legales de WebBot (PR #42)
+
+Alcance elegido por Agustín: las páginas de **WebBot mismo** (el bloqueador de venta de
+`ESTADO.md` §5). El bloque legal **dentro de los sitios de clientes** queda para Bloques;
+mientras tanto la landing dejó de prometerlo (D-40), y un test impide que la promesa
+vuelva.
+
+Publicado: `/terminos`, `/privacidad`, identificación del proveedor en el footer
+(Devalpo Soluciones Tecnológicas SpA, RUT 77.119.936-4, Reñaca Norte 265 of. 510, Viña del
+Mar) y el aviso de retracto **encima** del botón de pago del chat. Decisiones de Agustín
+en la jornada:
+
+- **Sin derecho a retracto** (art. 3 bis b, Ley 19.496), con garantía de devolución si
+  el sitio no queda publicado en 10 días por causas de Devalpo (D-39).
+- **Precios con IVA incluido.** Agustín los pensaba sin IVA, pero el link de Mercado
+  Pago cobra exactamente $149.990, y el art. 30 de la Ley 19.496 exige informar el precio
+  total con impuestos (aplica también a micro y pequeñas empresas por la Ley 20.416). Así
+  que $149.990 **es** el total: el IVA sale de ahí (neto $126.042). Tema para su contador.
+- **Renovación:** 30 días corridos de gracia; después el sitio se pausa (hoy, a mano
+  desde `/admin`).
+- **Dominio:** Agustín propuso que el dominio pagado por Devalpo fuera de Devalpo. Se
+  descartó porque rompe la promesa «Dominio a tu nombre» de la landing. Quedó así: dominio
+  `.cl`/`.com` estándar incluido hasta `TOPE_DOMINIO_ANUAL` ($15.000/año), siempre a
+  nombre del cliente; uno premium paga la diferencia (D-41). La idea de un dominio
+  genérico tipo `miweb.cl/negocio` que Agustín mencionó no estaba registrada en ningún
+  lado.
+
+Liberado a `main` (`6852d39`); deploy en ~75s, verificado en vivo en
+`panel.sitios.devalpo.cl`.
+
+### Lo que costó tiempo real
+
+- **Un test filtrado escondió un test roto.** Al suavizar la frase de la landing se corrió
+  `jest -t "copy|..."` y se reportó en verde; el filtro no incluía justo el test que
+  exigía la frase vieja. Lo encontró el writer al correr la suite completa. Regla: antes
+  de decir "en verde", la suite completa.
+- **`resize_window` no achica una ventana maximizada**, así que el móvil se midió dentro
+  de un `<iframe>` de 390px del mismo origen, que respeta los media queries.
+- **El clasificador de permisos bloquea `gh pr merge`** hasta que Agustín lo autoriza en
+  un mensaje propio, aunque ya haya pedido "llévalo a main". Pasó en las dos releases.
+
+### Verificación
+
+`main` = `develop` = `1ae1833`. `npm run test:unit` → **884 tests, 65 suites**. `npx tsc
+--noEmit` limpio. `npm run lint` → 0 errores (21 warnings preexistentes). `npm run build`
+con `/terminos` y `/privacidad` estáticas.
+
+### Pendiente
+
+- Revisión de un abogado de `/terminos` y `/privacidad` antes de tráfico pagado.
+- Ver en pantalla el aviso de retracto del chat (solo se revisó el código) y probar S1
+  en un celular real (la sombra del header pegado no se volvió a observar tras el último
+  ajuste).
+- `ESTADO.md` va en 213 líneas, sobre el tope de dos pantallas: falta el arreglo
+  estructural.
+- Siguiente trabajo grande: Bloques (S2-S6 ya no están bloqueados).
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
@@ -1347,12 +1440,11 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 
 ## Cómo retomar
 
-**Estado al cierre del 2026-09-08.** La cadena `demo-lead-capture` está **mergeada en `develop`** (PRs #22 → #23 → #24, `develop` = `d793f10`, 483 tests en verde) y el flujo demo → lead → revelación quedó verificado end to end contra un entorno local — ver [Cierre de la cadena demo-lead-capture](#cierre-de-la-cadena-demo-lead-capture-y-click-through-en-local-2026-09-08). `main` sigue en `15e941d`: **el gate de lead todavía no está en producción**.
-
-**Lo primero al retomar es Railway.** Todo el proyecto parece suspendido desde el 2026-09-06 (servicio en `Failed`, Postgres rechazando conexiones, sitios en 404); mientras eso no se resuelva no hay producción a la que desplegar ni base a la que pegarle desde local con el `.env` del repo. Si hace falta trabajar igual, la receta de Docker + Postgres local está en esa misma sección y funciona sin Railway.
-
-Después de eso quedan: el click-through **visual** en navegador (el de esta sesión fue por HTTP; la extensión de Chrome no se conectó) y el merge de `develop` → `main`.
-
+**Estado al cierre del 2026-09-26.** `main` = `develop`, nada mergeado esperando deploy.
+Producción tiene S1 de `LANDING` con navegación móvil y las páginas legales — ver
+[la entrada del 2026-09-26](#navegación-móvil-de-s1-s1-en-producción-y-páginas-legales-2026-09-26).
+Lo siguiente es Bloques. La lista de abajo es histórica (2026-09-08): para el estado
+actual, `ESTADO.md` manda.
 
 1. Leer `ESTADO.md` (qué es WebBot hoy) y `DECISIONES.md` (por qué). Esta bitácora es el registro cronológico, no el mapa.
 2. `main` y `develop` están sincronizados (2026-09-05): los 7 PRs de WB-22 ya están mergeados y en producción, con el seed demo corrido — ver [5 templates de sitio](#5-templates-de-sitio-fase-3-tarea-31--wb-22--cadena-de-7-prs-2026-09-0405). **El plan vigente es la FASE 5 (Jira WB-40)** — ver [Reposicionamiento](#reposicionamiento-fábrica-de-sitios-2026-09-05): lo siguiente es el dominio propio por sitio (WB-26). `git status` debería estar limpio; si no, revisar qué quedó a medio commitear antes de seguir.

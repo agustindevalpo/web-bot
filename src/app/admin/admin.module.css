@@ -251,3 +251,24 @@
   padding: 0.1rem 0.35rem;
   border-radius: 0.25rem;
 }
+
+.imagenBloque {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.imagenPreview {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid #e0e2ee;
+  background: #f4f5fa;
+}
+
+.galeria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

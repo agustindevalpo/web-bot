@@ -123,6 +123,101 @@ describe('container — getCustomHostnameService', () => {
   })
 })
 
+describe('container — getAlmacenamientoArchivos', () => {
+  const TODAS_LAS_CREDENCIALES = {
+    R2_ACCOUNT_ID: 'cuenta-1',
+    R2_ACCESS_KEY_ID: 'ak',
+    R2_SECRET_ACCESS_KEY: 'sk',
+    R2_BUCKET: 'bucket',
+    R2_PUBLIC_URL: 'https://media.devalpo.cl',
+  }
+
+  function limpiarEnvR2(env: NodeJS.ProcessEnv): void {
+    delete env.R2_ACCOUNT_ID
+    delete env.R2_ACCESS_KEY_ID
+    delete env.R2_SECRET_ACCESS_KEY
+    delete env.R2_BUCKET
+    delete env.R2_PUBLIC_URL
+  }
+
+  it('devuelve el Noop cuando no hay ninguna credencial de R2', async () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV }
+    limpiarEnvR2(process.env)
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getAlmacenamientoArchivos } = require('@/infrastructure/container')
+
+    const resultado = await getAlmacenamientoArchivos().subir({
+      clave: 'x',
+      contenido: new Uint8Array([1]),
+      tipoContenido: 'image/png',
+    })
+
+    expect(resultado.tipo).toBe('no_configurado')
+  })
+
+  it.each(Object.keys(TODAS_LAS_CREDENCIALES))('devuelve el Noop si falta solo %s', async (faltante) => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV, ...TODAS_LAS_CREDENCIALES }
+    limpiarEnvR2(process.env)
+    process.env = {
+      ...process.env,
+      ...Object.fromEntries(Object.entries(TODAS_LAS_CREDENCIALES).filter(([clave]) => clave !== faltante)),
+    }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getAlmacenamientoArchivos } = require('@/infrastructure/container')
+
+    const resultado = await getAlmacenamientoArchivos().subir({
+      clave: 'x',
+      contenido: new Uint8Array([1]),
+      tipoContenido: 'image/png',
+    })
+
+    expect(resultado.tipo).toBe('no_configurado')
+  })
+
+  it.each(['media.devalpo.cl', 'no es una url', 'ftp://media.devalpo.cl'])(
+    'devuelve el Noop si R2_PUBLIC_URL no es una URL http(s) absoluta (%s)',
+    async (urlInvalida) => {
+      jest.resetModules()
+      process.env = { ...ORIGINAL_ENV, ...TODAS_LAS_CREDENCIALES, R2_PUBLIC_URL: urlInvalida }
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getAlmacenamientoArchivos } = require('@/infrastructure/container')
+
+      const resultado = await getAlmacenamientoArchivos().subir({
+        clave: 'x',
+        contenido: new Uint8Array([1]),
+        tipoContenido: 'image/png',
+      })
+
+      expect(resultado.tipo).toBe('no_configurado')
+    },
+  )
+
+  it('devuelve la implementación de R2 (memoizada) con las cinco credenciales', () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV, ...TODAS_LAS_CREDENCIALES }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getAlmacenamientoArchivos } = require('@/infrastructure/container')
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { R2AlmacenamientoArchivos } = require('@/infrastructure/storage/R2AlmacenamientoArchivos')
+
+    const primera = getAlmacenamientoArchivos()
+
+    expect(primera).toBeInstanceOf(R2AlmacenamientoArchivos)
+    expect(getAlmacenamientoArchivos()).toBe(primera)
+  })
+
+  it('exporta subirImagenSitioUC', () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const container = require('@/infrastructure/container')
+
+    expect(container.subirImagenSitioUC).toBeDefined()
+  })
+})
+
 // Triangulation skipped: re-export estructural de un singleton sin ramas —
 // un solo resultado posible, cubierto en TemplateService.test.ts.
 describe('container — templateService', () => {
