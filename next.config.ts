@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
-// Fotos de los sitios de cliente (config.imagenes, config.logo,
-// config.imagenHero): Unsplash para el seed de demo, más el host público de
+// Fotos de los sitios de cliente (config.imagenes, config.logo): Unsplash para el seed de demo, más el host público de
 // R2 (subida de imágenes desde /admin, ver
 // odd/tasks/subida-imagenes-admin.md) cuando R2_PUBLIC_URL está configurada.
 // Sin la env var no se agrega el segundo pattern — R2AlmacenamientoArchivos
