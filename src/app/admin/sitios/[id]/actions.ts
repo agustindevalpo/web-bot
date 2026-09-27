@@ -149,7 +149,7 @@ export async function confirmarPagoAction(sitioId: string, formData: FormData): 
   irA(sitioId, params)
 }
 
-// Server action de subida de imágenes: bindeada por campo (logo, imagenHero,
+// Server action de subida de imágenes: bindeada por campo (logo, hero,
 // imagenes) desde el form correspondiente en page.tsx. El archivo llega
 // como File dentro del FormData — Next serializa el form automáticamente
 // como multipart cuando hay un input[type=file].

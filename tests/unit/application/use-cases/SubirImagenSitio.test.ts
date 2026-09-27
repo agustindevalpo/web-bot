@@ -98,7 +98,7 @@ describe('SubirImagenSitio UseCase', () => {
     expect(subida.tipoContenido).toBe(mime)
   })
 
-  it('logo/imagenHero: reemplazan el campo en configJson y devuelven el sitio actualizado', async () => {
+  it('logo: reemplaza el campo en configJson y devuelve el sitio actualizado', async () => {
     const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: 'https://media.devalpo.cl/logo.png' })
     const useCase = new SubirImagenSitioUseCase(repo, almacenamiento)
 
@@ -115,14 +115,39 @@ describe('SubirImagenSitio UseCase', () => {
     })
   })
 
-  it('imagenHero reemplaza (no acumula) igual que logo', async () => {
-    sitio.configJson = { nombre: 'Vieja pyme', imagenHero: 'https://media.devalpo.cl/vieja.png' }
+  it('hero: crea imagenes = [url] cuando configJson no trae imagenes', async () => {
     const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: 'https://media.devalpo.cl/nueva.png' })
     const useCase = new SubirImagenSitioUseCase(repo, almacenamiento)
 
-    await useCase.execute('sitio-1', 'imagenHero', bytesPng())
+    const resultado = await useCase.execute('sitio-1', 'hero', bytesPng())
 
-    expect((await repo.findById('sitio-1'))?.configJson.imagenHero).toBe('https://media.devalpo.cl/nueva.png')
+    expect(resultado.tipo).toBe('ok')
+    expect((await repo.findById('sitio-1'))?.configJson.imagenes).toEqual(['https://media.devalpo.cl/nueva.png'])
+  })
+
+  it('hero: reemplaza el índice 0 de imagenes y conserva el resto', async () => {
+    sitio.configJson = {
+      nombre: 'Vieja pyme',
+      imagenes: ['https://media.devalpo.cl/vieja-0.png', 'https://media.devalpo.cl/vieja-1.png'],
+    }
+    const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: 'https://media.devalpo.cl/nueva.png' })
+    const useCase = new SubirImagenSitioUseCase(repo, almacenamiento)
+
+    await useCase.execute('sitio-1', 'hero', bytesPng())
+
+    expect((await repo.findById('sitio-1'))?.configJson.imagenes).toEqual([
+      'https://media.devalpo.cl/nueva.png',
+      'https://media.devalpo.cl/vieja-1.png',
+    ])
+  })
+
+  it('la clave del objeto para hero usa el prefijo "hero"', async () => {
+    const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: 'https://media.devalpo.cl/nueva.png' })
+    const useCase = new SubirImagenSitioUseCase(repo, almacenamiento)
+
+    await useCase.execute('sitio-1', 'hero', bytesPng())
+
+    expect(almacenamiento.llamadas[0].clave).toMatch(/^sitios\/sitio-1\/hero-[0-9a-f-]{36}\.png$/)
   })
 
   it('imagenes: agrega (append) sin borrar las existentes', async () => {

@@ -11,9 +11,9 @@ describe('parametrosSubidaImagen', () => {
     expect(parametrosSubidaImagen(resultado, 'logo')).toEqual({ ok: 'logo' })
   })
 
-  it('imagenHero ok devuelve el código de mensaje "imagen_hero"', () => {
+  it('hero ok devuelve el código de mensaje "imagen_hero"', () => {
     const resultado: ResultadoSubirImagenSitio = { tipo: 'ok', url: 'https://media.devalpo.cl/x.png', sitio: SITIO }
-    expect(parametrosSubidaImagen(resultado, 'imagenHero')).toEqual({ ok: 'imagen_hero' })
+    expect(parametrosSubidaImagen(resultado, 'hero')).toEqual({ ok: 'imagen_hero' })
   })
 
   it('imagenes ok devuelve el código de mensaje "imagen_galeria"', () => {
@@ -30,7 +30,7 @@ describe('parametrosSubidaImagen', () => {
 
   it('archivo_muy_grande devuelve un mensaje que nombra el campo y el límite', () => {
     const resultado: ResultadoSubirImagenSitio = { tipo: 'archivo_muy_grande' }
-    const params = parametrosSubidaImagen(resultado, 'imagenHero')
+    const params = parametrosSubidaImagen(resultado, 'hero')
     expect(params.error).toContain('Foto principal')
     expect(params.error).toContain('5 MB')
   })

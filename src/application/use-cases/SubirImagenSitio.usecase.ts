@@ -7,10 +7,17 @@ import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontrad
 // imágenes, ver odd/tasks/subida-imagenes-admin.md).
 const MAX_BYTES = 5 * 1024 * 1024
 
-export type CampoImagenSitio = 'logo' | 'imagenHero' | 'imagenes'
+// `hero` no es un campo propio de configJson: los templates derivan la foto
+// principal de `imagenes[0]` (ninguno lee un `imagenHero` separado —
+// verificado por grep, la premisa original de este feature estaba mal). Por
+// eso `hero` reemplaza el índice 0 de `imagenes` (o lo crea si está vacío)
+// en vez de escribir una clave nueva; solo sirve para nombrar la clave del
+// objeto en el storage (`sitios/<id>/hero-<uuid>.<ext>`) y el mensaje en
+// /admin. No se toca ningún template.
+export type CampoImagenSitio = 'logo' | 'hero' | 'imagenes'
 
-// `logo`/`imagenHero` no lanzan (para que el llamador solo maneje mensajes,
-// no excepciones) porque son entradas esperables de un cliente subiendo un
+// `logo`/`hero` no lanzan (para que el llamador solo maneje mensajes, no
+// excepciones) porque son entradas esperables de un cliente subiendo un
 // archivo cualquiera desde WhatsApp — formato equivocado, SVG, archivo
 // pesado. `no_configurado`/`error` replican el shape de
 // IAlmacenamientoArchivos.subir. `sitioId` inexistente sigue lanzando
@@ -66,13 +73,22 @@ function aplicarImagen(
   campo: CampoImagenSitio,
   url: string,
 ): Record<string, unknown> {
+  if (campo === 'logo') {
+    return { ...config, logo: url }
+  }
+
+  const actuales = Array.isArray(config.imagenes)
+    ? (config.imagenes as unknown[]).filter((valor): valor is string => typeof valor === 'string')
+    : []
+
   if (campo === 'imagenes') {
-    const actuales = Array.isArray(config.imagenes)
-      ? (config.imagenes as unknown[]).filter((valor): valor is string => typeof valor === 'string')
-      : []
     return { ...config, imagenes: [...actuales, url] }
   }
-  return { ...config, [campo]: url }
+
+  // campo === 'hero': reemplaza el índice 0 (o lo crea si `imagenes` está
+  // vacío/ausente) en vez de acumular.
+  const nuevasImagenes = actuales.length === 0 ? [url] : [url, ...actuales.slice(1)]
+  return { ...config, imagenes: nuevasImagenes }
 }
 
 // Detección por magic bytes, no por el Content-Type que manda el browser

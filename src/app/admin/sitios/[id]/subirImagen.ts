@@ -7,13 +7,13 @@ import { ResultadoSubirImagenSitio, CampoImagenSitio } from '@/application/use-c
 
 const ETIQUETA_CAMPO: Record<CampoImagenSitio, string> = {
   logo: 'Logo',
-  imagenHero: 'Foto principal',
+  hero: 'Foto principal',
   imagenes: 'Foto de galería',
 }
 
 const OK_POR_CAMPO: Record<CampoImagenSitio, string> = {
   logo: 'logo',
-  imagenHero: 'imagen_hero',
+  hero: 'imagen_hero',
   imagenes: 'imagen_galeria',
 }
 

@@ -80,10 +80,14 @@ export default async function AdminSitioPage({
   const configBonito = JSON.stringify(sitio.configJson, null, 2)
 
   const logoActual = typeof sitio.configJson.logo === 'string' ? sitio.configJson.logo : null
-  const imagenHeroActual = typeof sitio.configJson.imagenHero === 'string' ? sitio.configJson.imagenHero : null
-  const galeriaActual = Array.isArray(sitio.configJson.imagenes)
+  // La foto principal es siempre imagenes[0] — ningún template lee un campo
+  // "imagenHero" separado (verificado por grep). El resto del array es la
+  // galería propiamente dicha.
+  const imagenesActuales = Array.isArray(sitio.configJson.imagenes)
     ? sitio.configJson.imagenes.filter((valor): valor is string => typeof valor === 'string')
     : []
+  const fotoPrincipalActual = imagenesActuales[0] ?? null
+  const galeriaActual = imagenesActuales.slice(1)
 
   return (
     <div className={styles.page}>
@@ -354,13 +358,17 @@ export default async function AdminSitioPage({
 
           <div className={styles.imagenBloque}>
             <strong>Foto principal</strong>
+            <p className={styles.ayuda}>
+              Es la primera foto de la galería. Subir una foto principal nueva reemplaza esa primera foto (o
+              la crea si todavía no hay ninguna).
+            </p>
             <div className={styles.fila}>
-              {imagenHeroActual && (
-                <img src={imagenHeroActual} alt="Foto principal actual" className={styles.imagenPreview} />
+              {fotoPrincipalActual && (
+                <img src={fotoPrincipalActual} alt="Foto principal actual" className={styles.imagenPreview} />
               )}
               <form
                 className={styles.form}
-                action={subirImagenSitioAction.bind(null, sitio.id, 'imagenHero')}
+                action={subirImagenSitioAction.bind(null, sitio.id, 'hero')}
                 encType="multipart/form-data"
               >
                 <input
@@ -380,8 +388,8 @@ export default async function AdminSitioPage({
           <div className={styles.imagenBloque}>
             <strong>Galería</strong>
             <p className={styles.ayuda}>
-              Cada subida agrega una foto nueva a la galería. Para quitar una foto existente, edítala en el
-              JSON de la sección Contenido.
+              El resto de las fotos, sin contar la principal. Cada subida agrega una foto nueva al final; para
+              quitar una foto existente, edítala en el JSON de la sección Contenido.
             </p>
             {galeriaActual.length > 0 && (
               <div className={styles.galeria}>
