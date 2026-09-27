@@ -9,7 +9,8 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-26 · `main` = `6852d39` · `develop` = `6852d39`
+> **Última regeneración:** 2026-09-27 · `main` = `607aaa4` · `develop` = `6ee6c16`
+> (mismo árbol; `main` suma solo el commit de release)
 
 ---
 
@@ -43,6 +44,7 @@ promesa **"tu sitio web en un día, en producción, con tu propio dominio"**.
 | Auth | Magic link con `jose` (JWT), cookie `webbot_auth`; panel admin con cookie `webbot_admin` |
 | Correo | Resend (HTTP) en producción, Gmail SMTP en local, consola sin credenciales |
 | Dominios propios | Cloudflare for SaaS + Worker (`infra/cloudflare/worker`) delante de Railway |
+| Imágenes de clientes | Cloudflare R2 (bucket `webbot-media`, público en `media.devalpo.cl`) vía `@aws-sdk/client-s3` |
 | Tests | Jest 30 + ts-jest (unit) y Cucumber 13 + **Playwright** (e2e) |
 | Deploy | Railway, plan Hobby, un solo servicio multitenant, auto-deploy desde `main` |
 
@@ -58,18 +60,22 @@ src/
 ├── domain/           entidades, value objects, excepciones, puertos I*Repository,
 │                     color/ (OKLCH: contraste, derivación del acento por estilo,
 │                     y derivación de primario/secundario/texto desde el acento)
-├── application/      DTOs, mappers, 13 casos de uso (*.usecase.ts), puertos I*Service
+├── application/      DTOs, mappers, 14 casos de uso (*.usecase.ts), puertos I*Service
 ├── infrastructure/   adaptadores: db (Prisma), auth, claude, demo, email, cloudflare,
-│                     notifications, payments, railway, routing, templates
+│                     notifications, payments, railway, routing, storage, templates
 ├── app/              rutas del App Router (capa delgada: llama casos de uso)
 ├── components/       los 5 templates de sitio + shared/ + registry/resolver
 └── proxy.ts          entrada multitenant (Next 16 renombró middleware.ts → proxy.ts)
 ```
 
 - **Composition root:** `src/infrastructure/container.ts`, DI manual. Repositorios y
-  casos de uso se instancian ahí de forma *eager*; `getChatServiceReal()` y
-  `getCustomHostnameService()` son perezosos y memoizados porque leen variables de
-  entorno que pueden faltar.
+  casos de uso se instancian ahí de forma *eager*; `getChatServiceReal()`,
+  `getCustomHostnameService()` y `getAlmacenamientoArchivos()` son perezosos y
+  memoizados porque leen variables de entorno que pueden faltar.
+- **Imágenes:** `SubirImagenSitioUseCase` acepta JPEG/PNG/WebP de hasta 5 MB
+  (validados por sus primeros bytes), los sube a R2 y escribe la URL en `configJson`:
+  `logo`, `imagenes[0]` (la foto principal de todas las plantillas) o al final de
+  `imagenes` (galería). No existe un campo `imagenHero` (D-42).
 - **Enrutado:** `src/proxy.ts` es un adaptador delgado sobre `resolverDestino()`
   (`src/infrastructure/routing/resolverDestino.ts`, pura y testeada). Clasifica el host
   en `app` / `subdominio` / `dominioPropio` y reescribe a `/sites/[subdominio]` o
@@ -94,7 +100,7 @@ src/
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `3f60b9b`, desplegado y verificado en vivo el 2026-09-26):**
+**En producción (`main` = `607aaa4`, desplegado el 2026-09-27):**
 capacidad de generar un sitio real por chat demo con gate de lead (nombre + correo antes
 de revelar el sitio) · 5 templates de sitio elegidos por rubro · dominios propios vía
 Cloudflare · panel `/admin` para pausar, reactivar, asignar dominio, editar `configJson`
@@ -109,10 +115,12 @@ rediseño**: `LANDING` como página de scroll largo con nav de anclas (D-33), mo
 marca (D-37), descripción por servicio (D-35), formulario de contacto que nunca descarta
 un envío en silencio, y navegación móvil con header pegado y footer centrado (PR #41) ·
 **páginas legales** `/terminos` y `/privacidad`, e identificación del proveedor (razón
-social, RUT, domicilio) en el footer de la landing (PR #42).
-Las otras 4 plantillas siguen con el diseño anterior.
+social, RUT, domicilio) en el footer de la landing (PR #42) · **subida de logo, foto
+principal y galería desde `/admin` a Cloudflare R2** (PR #44, D-42; la primera subida
+real en producción está pendiente de probar).
+Las otras 4 plantillas siguen con el diseño anterior y no muestran el logo.
 
-`develop` y `main` están en el mismo commit: no hay nada mergeado esperando deploy.
+`develop` y `main` tienen el mismo árbol: no hay nada mergeado esperando deploy.
 
 **No construido / inerte:**
 
@@ -128,9 +136,9 @@ Las otras 4 plantillas siguen con el diseño anterior.
   container pero ninguna ruta los consume (verificado por grep).
 - Bloque legal dentro de los sitios de clientes (términos, razón social, RUT): no existe;
   la landing ya no lo promete (D-40). Va con la tanda de Bloques.
-- Captura de contenido adicional para el rediseño (logo, fotos reales, descripción por
-  servicio): decidido el momento —texto antes de pagar, material gráfico después (D-36)—
-  pero el chat todavía no pide ninguno de los dos.
+- Captura de contenido adicional para el rediseño: el logo y las fotos ya se cargan a
+  mano desde `/admin` (D-42), pero el cliente no puede subirlos él mismo y el chat
+  todavía no pide la descripción por servicio (D-36).
 
 ## 5. Bloqueado, y en qué exactamente
 
@@ -166,7 +174,7 @@ propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya pues
 **Tests:**
 
 ```bash
-npm run test:unit          # Jest — 65 suites / 884 tests en verde
+npm run test:unit          # Jest — 69 suites / 925 tests en verde
 npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
 npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
 npm run test:all            # jest + cucumber
@@ -203,6 +211,10 @@ No existe un script `test` a secas.
 - `docs/historico/` es archivo muerto por diseño: describe el proyecto de agosto de 2026
   (suscripciones, N8N, Python, equipo de tres). Nunca citarlo como fuente de un hecho
   actual.
+- `R2_PUBLIC_URL` se lee en `next.config.ts` al compilar y arrancar: si cambia, hay que
+  volver a desplegar o `next/image` rechaza las fotos subidas. Si no es una URL
+  `http(s)` absoluta, el panel queda en "almacenamiento no configurado". `R2_ACCOUNT_ID`
+  son 32 caracteres hexadecimales; cualquier otra cosa hace fallar toda subida.
 - El panel `/admin` lee `ADMIN_SECRET`, no `ADMIN_PASSWORD`. Ese nombre viejo estuvo en
   `.env.example` hasta el 2026-09-12 sin que ningún módulo lo leyera, y es el tipo de
   variable fantasma que hace perder una tarde: se carga, no pasa nada, y no hay error.
