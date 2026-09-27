@@ -17,6 +17,9 @@ import { TemplateService } from './templates/TemplateService'
 import { ICustomHostnameService } from '@/application/services/ICustomHostnameService'
 import { CloudflareCustomHostnameService } from './cloudflare/CloudflareCustomHostnameService'
 import { NoopCustomHostnameService } from './cloudflare/NoopCustomHostnameService'
+import { IAlmacenamientoArchivos } from '@/application/services/IAlmacenamientoArchivos'
+import { R2AlmacenamientoArchivos } from './storage/R2AlmacenamientoArchivos'
+import { NoopAlmacenamientoArchivos } from './storage/NoopAlmacenamientoArchivos'
 
 import { GenerarSitioUseCase } from '@/application/use-cases/GenerarSitio.usecase'
 import { ListarSitiosUseCase } from '@/application/use-cases/ListarSitios.usecase'
@@ -104,6 +107,28 @@ export function getCustomHostnameService(): ICustomHostnameService {
 const customHostnameServiceDiferido: ICustomHostnameService = {
   asegurarHostname: (dominio) => getCustomHostnameService().asegurarHostname(dominio),
   eliminarHostname: (dominio) => getCustomHostnameService().eliminarHostname(dominio),
+}
+
+// Almacenamiento de archivos (logo/fotos de sitio) — mismo patrón perezoso
+// y memoizado que getCustomHostnameService(): Cloudflare R2 solo cuando
+// están las cinco credenciales, si no un Noop que responde
+// `no_configurado` sin escribir nada.
+let almacenamientoArchivos: IAlmacenamientoArchivos | undefined
+
+export function getAlmacenamientoArchivos(): IAlmacenamientoArchivos {
+  if (almacenamientoArchivos !== undefined) return almacenamientoArchivos
+
+  const accountId = process.env.R2_ACCOUNT_ID
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
+  const bucket = process.env.R2_BUCKET
+  const urlPublica = process.env.R2_PUBLIC_URL
+
+  almacenamientoArchivos =
+    accountId && accessKeyId && secretAccessKey && bucket && urlPublica
+      ? new R2AlmacenamientoArchivos({ accountId, accessKeyId, secretAccessKey, bucket, urlPublica })
+      : new NoopAlmacenamientoArchivos()
+  return almacenamientoArchivos
 }
 
 // Use Cases del panel interno (/admin)
