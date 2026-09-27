@@ -12,6 +12,7 @@ import {
   quitarDominioAction,
   guardarContenidoAction,
   confirmarPagoAction,
+  subirImagenSitioAction,
 } from './actions'
 import styles from '../../admin.module.css'
 
@@ -24,6 +25,9 @@ const MENSAJES_OK: Record<string, string> = {
   dominio_quitado: 'Dominio propio quitado.',
   contenido: 'Contenido guardado.',
   pago_confirmado: 'Pago confirmado. El cliente quedó activo.',
+  logo: 'Logo actualizado.',
+  imagen_hero: 'Foto principal actualizada.',
+  imagen_galeria: 'Foto agregada a la galería.',
 }
 
 const FECHA_CL = new Intl.DateTimeFormat('es-CL', { dateStyle: 'long', timeZone: 'America/Santiago' })
@@ -74,6 +78,12 @@ export default async function AdminSitioPage({
       : sitio.subdominio
 
   const configBonito = JSON.stringify(sitio.configJson, null, 2)
+
+  const logoActual = typeof sitio.configJson.logo === 'string' ? sitio.configJson.logo : null
+  const imagenHeroActual = typeof sitio.configJson.imagenHero === 'string' ? sitio.configJson.imagenHero : null
+  const galeriaActual = Array.isArray(sitio.configJson.imagenes)
+    ? sitio.configJson.imagenes.filter((valor): valor is string => typeof valor === 'string')
+    : []
 
   return (
     <div className={styles.page}>
@@ -309,6 +319,93 @@ export default async function AdminSitioPage({
             hacia <code>www</code> desde el proveedor DNS.
             <br />
             El certificado SSL se emite solo cuando el DNS ya apunta a nosotros; puede tardar unos minutos.
+          </div>
+        </section>
+
+        <section className={styles.seccion}>
+          <h2 className={styles.seccionTitulo}>Imágenes</h2>
+          <p className={styles.ayuda}>
+            JPEG, PNG o WebP, máximo 5 MB. Si el almacenamiento de imágenes no está configurado en este
+            entorno, la subida se rechaza con un mensaje claro y no se guarda nada.
+          </p>
+
+          <div className={styles.imagenBloque}>
+            <strong>Logo</strong>
+            <div className={styles.fila}>
+              {logoActual && <img src={logoActual} alt="Logo actual" className={styles.imagenPreview} />}
+              <form
+                className={styles.form}
+                action={subirImagenSitioAction.bind(null, sitio.id, 'logo')}
+                encType="multipart/form-data"
+              >
+                <input
+                  className={styles.input}
+                  type="file"
+                  name="archivo"
+                  accept="image/jpeg,image/png,image/webp"
+                  required
+                />
+                <button type="submit" className={styles.boton}>
+                  Subir logo
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div className={styles.imagenBloque}>
+            <strong>Foto principal</strong>
+            <div className={styles.fila}>
+              {imagenHeroActual && (
+                <img src={imagenHeroActual} alt="Foto principal actual" className={styles.imagenPreview} />
+              )}
+              <form
+                className={styles.form}
+                action={subirImagenSitioAction.bind(null, sitio.id, 'imagenHero')}
+                encType="multipart/form-data"
+              >
+                <input
+                  className={styles.input}
+                  type="file"
+                  name="archivo"
+                  accept="image/jpeg,image/png,image/webp"
+                  required
+                />
+                <button type="submit" className={styles.boton}>
+                  Subir foto principal
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div className={styles.imagenBloque}>
+            <strong>Galería</strong>
+            <p className={styles.ayuda}>
+              Cada subida agrega una foto nueva a la galería. Para quitar una foto existente, edítala en el
+              JSON de la sección Contenido.
+            </p>
+            {galeriaActual.length > 0 && (
+              <div className={styles.galeria}>
+                {galeriaActual.map((url) => (
+                  <img key={url} src={url} alt="Foto de la galería" className={styles.imagenPreview} />
+                ))}
+              </div>
+            )}
+            <form
+              className={styles.form}
+              action={subirImagenSitioAction.bind(null, sitio.id, 'imagenes')}
+              encType="multipart/form-data"
+            >
+              <input
+                className={styles.input}
+                type="file"
+                name="archivo"
+                accept="image/jpeg,image/png,image/webp"
+                required
+              />
+              <button type="submit" className={styles.boton}>
+                Agregar foto a la galería
+              </button>
+            </form>
           </div>
         </section>
 
