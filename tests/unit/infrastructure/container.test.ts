@@ -189,6 +189,15 @@ describe('container — getAlmacenamientoArchivos', () => {
     expect(primera).toBeInstanceOf(R2AlmacenamientoArchivos)
     expect(getAlmacenamientoArchivos()).toBe(primera)
   })
+
+  it('exporta subirImagenSitioUC', () => {
+    jest.resetModules()
+    process.env = { ...ORIGINAL_ENV }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const container = require('@/infrastructure/container')
+
+    expect(container.subirImagenSitioUC).toBeDefined()
+  })
 })
 
 // Triangulation skipped: re-export estructural de un singleton sin ramas —

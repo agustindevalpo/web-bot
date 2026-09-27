@@ -34,6 +34,7 @@ import { SolicitarAccesoUseCase } from '@/application/use-cases/SolicitarAcceso.
 import { VerificarAccesoUseCase } from '@/application/use-cases/VerificarAcceso.usecase'
 import { ConfirmarPagoSitioUseCase } from '@/application/use-cases/ConfirmarPagoSitio.usecase'
 import { CapturarLeadDemoUseCase } from '@/application/use-cases/CapturarLeadDemo.usecase'
+import { SubirImagenSitioUseCase } from '@/application/use-cases/SubirImagenSitio.usecase'
 import { CLIENTE_DEMO_ID } from './demo/rubroDefaults'
 
 // Repositorios
@@ -131,6 +132,13 @@ export function getAlmacenamientoArchivos(): IAlmacenamientoArchivos {
   return almacenamientoArchivos
 }
 
+// Adaptador que difiere la resolución del storage real a la primera
+// llamada, mismo motivo que customHostnameServiceDiferido: el use case se
+// construye eager sin leer el env al bootear.
+const almacenamientoArchivosDiferido: IAlmacenamientoArchivos = {
+  subir: (archivo) => getAlmacenamientoArchivos().subir(archivo),
+}
+
 // Use Cases del panel interno (/admin)
 export const listarSitiosUC = new ListarSitiosUseCase(sitioRepo)
 export const cambiarEstadoSitioUC = new CambiarEstadoSitioUseCase(sitioRepo)
@@ -138,3 +146,4 @@ export const asignarDominioPropioUC = new AsignarDominioPropioUseCase(sitioRepo,
 export const actualizarConfigSitioUC = new ActualizarConfigSitioUseCase(sitioRepo)
 export const confirmarPagoSitioUC = new ConfirmarPagoSitioUseCase(sitioRepo, clienteRepo, activarClienteUC, CLIENTE_DEMO_ID)
 export const capturarLeadDemoUC = new CapturarLeadDemoUseCase(sesionRepo, sitioRepo, clienteRepo, CLIENTE_DEMO_ID)
+export const subirImagenSitioUC = new SubirImagenSitioUseCase(sitioRepo, almacenamientoArchivosDiferido)

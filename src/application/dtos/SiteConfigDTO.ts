@@ -60,4 +60,9 @@ export interface SiteConfigDTO {
   // archivos en el chat ni en `/admin`): nace siempre ausente hasta que esa
   // superficie exista.
   logo?: string
+  // URL de la foto hero (subida de imágenes desde /admin, ver
+  // odd/tasks/subida-imagenes-admin.md). Mismo patrón aditivo-opcional que
+  // `logo`: cuando falta, los templates que leen `imagenHero` caen a su
+  // imagen por defecto — nunca un hueco ni un ícono roto.
+  imagenHero?: string
 }
