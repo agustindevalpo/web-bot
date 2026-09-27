@@ -9,7 +9,7 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-27 · `main` = `607aaa4` · `develop` = `6ee6c16`
+> **Última regeneración:** 2026-09-27 · `main` = `7306c62` · `develop` = `4270079`
 > (mismo árbol; `main` suma solo el commit de release)
 
 ---
@@ -100,7 +100,7 @@ src/
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `607aaa4`, desplegado el 2026-09-27):**
+**En producción (`main` = `7306c62`, desplegado el 2026-09-27):**
 capacidad de generar un sitio real por chat demo con gate de lead (nombre + correo antes
 de revelar el sitio) · 5 templates de sitio elegidos por rubro · dominios propios vía
 Cloudflare · panel `/admin` para pausar, reactivar, asignar dominio, editar `configJson`
@@ -116,8 +116,9 @@ marca (D-37), descripción por servicio (D-35), formulario de contacto que nunca
 un envío en silencio, y navegación móvil con header pegado y footer centrado (PR #41) ·
 **páginas legales** `/terminos` y `/privacidad`, e identificación del proveedor (razón
 social, RUT, domicilio) en el footer de la landing (PR #42) · **subida de logo, foto
-principal y galería desde `/admin` a Cloudflare R2** (PR #44, D-42; la primera subida
-real en producción está pendiente de probar).
+principal y galería desde `/admin` a Cloudflare R2** (PR #44, D-42; probado en vivo en
+`test.sitios.devalpo.cl`) · logo del header de `LANDING` con alto fijo y ancho según su
+proporción (PR #45; los logos verticales quedan angostos).
 Las otras 4 plantillas siguen con el diseño anterior y no muestran el logo.
 
 `develop` y `main` tienen el mismo árbol: no hay nada mergeado esperando deploy.
