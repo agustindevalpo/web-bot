@@ -176,6 +176,24 @@ describe('container — getAlmacenamientoArchivos', () => {
     expect(resultado.tipo).toBe('no_configurado')
   })
 
+  it.each(['media.devalpo.cl', 'no es una url', 'ftp://media.devalpo.cl'])(
+    'devuelve el Noop si R2_PUBLIC_URL no es una URL http(s) absoluta (%s)',
+    async (urlInvalida) => {
+      jest.resetModules()
+      process.env = { ...ORIGINAL_ENV, ...TODAS_LAS_CREDENCIALES, R2_PUBLIC_URL: urlInvalida }
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getAlmacenamientoArchivos } = require('@/infrastructure/container')
+
+      const resultado = await getAlmacenamientoArchivos().subir({
+        clave: 'x',
+        contenido: new Uint8Array([1]),
+        tipoContenido: 'image/png',
+      })
+
+      expect(resultado.tipo).toBe('no_configurado')
+    },
+  )
+
   it('devuelve la implementación de R2 (memoizada) con las cinco credenciales', () => {
     jest.resetModules()
     process.env = { ...ORIGINAL_ENV, ...TODAS_LAS_CREDENCIALES }

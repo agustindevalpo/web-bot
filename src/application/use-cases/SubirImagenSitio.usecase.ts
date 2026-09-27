@@ -61,7 +61,11 @@ export class SubirImagenSitioUseCase {
       return resultadoSubida
     }
 
-    const configActualizado = aplicarImagen(sitio.configJson, campo, resultadoSubida.url)
+    // La subida tarda segundos: se vuelve a leer el sitio para no pisar con
+    // la copia vieja lo que otra subida o un guardado del JSON escribió
+    // mientras tanto. Achica la ventana de carrera; no la elimina.
+    const sitioVigente = (await this.sitioRepo.findById(sitioId)) ?? sitio
+    const configActualizado = aplicarImagen(sitioVigente.configJson, campo, resultadoSubida.url)
     const sitioActualizado = await this.sitioRepo.update(sitioId, { configJson: configActualizado })
 
     return { tipo: 'ok', url: resultadoSubida.url, sitio: sitioActualizado }

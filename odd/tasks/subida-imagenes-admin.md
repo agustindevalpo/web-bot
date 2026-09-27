@@ -95,6 +95,14 @@ resizing, deleting orphaned objects.
   Re-verified: `tsc --noEmit` clean, `lint` 0 errors (same pre-existing warnings + 3
   `no-img-element`), `test:unit` 921 tests passed, `build` succeeds.
 
+- 2026-09-27: `/code-review medium` on PR #44 found 3 issues, all verified and fixed inline:
+  (1) photos over 6 MB hit Next's body-limit page instead of the 5 MB message → `bodySizeLimit`
+  and `proxyClientMaxBodySize` raised to 25 MB (`/admin` goes through `proxy.ts`, default 10 MB);
+  (2) stale `configJson` snapshot across the upload → re-read the site after uploading (test fails
+  without the fix); (3) `R2_PUBLIC_URL` without scheme enabled R2 and would write relative URLs that
+  break `next/image` → container requires an absolute http(s) URL, else Noop. Checks: `tsc` clean,
+  `lint` 0 errors, `test:unit` 925 passed, `build` ok. `.env.example` dropped from scope (Agustín).
+
 **Resolution — hero photo is `imagenes[0]`, not a separate field:** the four templates that
 show a hero photo (`tienda`, `servicios`, `landing`, `restaurante` —
 `src/components/templates/*/sections.ts`) derive it from `configJson.imagenes[0]`; none reads

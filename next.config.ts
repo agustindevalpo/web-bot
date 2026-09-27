@@ -30,12 +30,15 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     // Los uploads de imagen (logo/hero/galería) van como multipart en el
-    // body del Server Action; el default de 1 MB se queda corto para un
-    // archivo de hasta 5 MB (ver Decisión 2026-09-27 del feature de subida
-    // de imágenes). 6mb deja margen para el overhead de multipart.
+    // body del Server Action. El máximo real es 5 MB y lo valida
+    // SubirImagenSitioUseCase con un mensaje claro; estos límites son más
+    // altos a propósito para que una foto de celular de 8-12 MB llegue a esa
+    // validación en vez de cortarse antes con la página de error de Next.
+    // /admin pasa por proxy.ts, que también bufferea el body (default 10 MB).
     serverActions: {
-      bodySizeLimit: '6mb',
+      bodySizeLimit: '25mb',
     },
+    proxyClientMaxBodySize: '25mb',
   },
 };
 

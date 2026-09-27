@@ -116,6 +116,21 @@ const customHostnameServiceDiferido: ICustomHostnameService = {
 // `no_configurado` sin escribir nada.
 let almacenamientoArchivos: IAlmacenamientoArchivos | undefined
 
+// Una R2_PUBLIC_URL sin esquema (`media.devalpo.cl`) produciría URLs relativas
+// en configJson y next/image rompería el render del sitio público. Si no es
+// una URL http(s) absoluta, se trata como ausente (Noop) — el mismo criterio
+// que usa next.config.ts para no agregar el remotePattern.
+function urlPublicaValida(valor: string | undefined): string | undefined {
+  if (!valor) return undefined
+  try {
+    const url = new URL(valor)
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return undefined
+    return valor.replace(/\/+$/, '')
+  } catch {
+    return undefined
+  }
+}
+
 export function getAlmacenamientoArchivos(): IAlmacenamientoArchivos {
   if (almacenamientoArchivos !== undefined) return almacenamientoArchivos
 
@@ -123,7 +138,7 @@ export function getAlmacenamientoArchivos(): IAlmacenamientoArchivos {
   const accessKeyId = process.env.R2_ACCESS_KEY_ID
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY
   const bucket = process.env.R2_BUCKET
-  const urlPublica = process.env.R2_PUBLIC_URL
+  const urlPublica = urlPublicaValida(process.env.R2_PUBLIC_URL)
 
   almacenamientoArchivos =
     accountId && accessKeyId && secretAccessKey && bucket && urlPublica

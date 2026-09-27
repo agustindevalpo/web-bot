@@ -164,6 +164,32 @@ describe('SubirImagenSitio UseCase', () => {
     ])
   })
 
+  it('imagenes: no pisa una imagen que otra subida escribió mientras esta subía', async () => {
+    const almacenamiento: IAlmacenamientoArchivos = {
+      async subir() {
+        // Reemplaza el objeto guardado (como haría una base real) en vez de
+        // mutarlo: así el snapshot leído antes de subir queda realmente viejo.
+        const store = (repo as unknown as { store: Map<string, Sitio> }).store
+        store.set(
+          'sitio-1',
+          new Sitio('sitio-1', 'cliente-1', 'testpyme', Template.LANDING, {
+            nombre: 'Vieja pyme',
+            imagenes: ['https://media.devalpo.cl/concurrente.png'],
+          }),
+        )
+        return { tipo: 'ok', url: 'https://media.devalpo.cl/esta.png' }
+      },
+    }
+    const useCase = new SubirImagenSitioUseCase(repo, almacenamiento)
+
+    await useCase.execute('sitio-1', 'imagenes', bytesPng())
+
+    expect((await repo.findById('sitio-1'))?.configJson.imagenes).toEqual([
+      'https://media.devalpo.cl/concurrente.png',
+      'https://media.devalpo.cl/esta.png',
+    ])
+  })
+
   it('imagenes: parte de un array vacío cuando configJson no trae imagenes', async () => {
     const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: 'https://media.devalpo.cl/a.png' })
     const useCase = new SubirImagenSitioUseCase(repo, almacenamiento)
