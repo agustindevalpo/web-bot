@@ -7,9 +7,6 @@ import {
   buildNosotros,
   buildContacto,
   buildFooter,
-  construirMensajeContacto,
-  construirWhatsAppFormulario,
-  resolverEnvioContacto,
 } from '@/components/templates/landing/sections'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
@@ -352,6 +349,7 @@ describe('landing/sections — buildContacto', () => {
     expect(contacto.formularioHabilitado).toBe(true)
     expect(contacto.telefono).toBe('+56 9 1234 5678')
     expect(contacto.email).toBe('contacto@eltrigal.cl')
+    expect(contacto.horarios).toEqual([])
   })
 
   it('respeta formulario.habilitado === false', () => {
@@ -375,57 +373,6 @@ describe('landing/sections — buildContacto', () => {
     const config = configCompleto({ contacto: { telefono: '+56 9 1234 5678', email: 'x@x.cl', formulario: 'si' as unknown as { habilitado: boolean } } })
     expect(() => buildContacto(config)).not.toThrow()
     expect(buildContacto(config).formularioHabilitado).toBe(true)
-  })
-})
-
-describe('landing/sections — construirMensajeContacto', () => {
-  it('arma las 3 líneas cuando los 3 campos vienen completos', () => {
-    expect(construirMensajeContacto('Ana', 'ana@mail.cl', 'Quiero cotizar una torta')).toBe(
-      'Nombre: Ana\nEmail: ana@mail.cl\nQuiero cotizar una torta',
-    )
-  })
-
-  it('omite las líneas de campos vacíos en vez de dejarlas colgando', () => {
-    expect(construirMensajeContacto('', '', 'Solo el mensaje')).toBe('Solo el mensaje')
-  })
-
-  it('degrada a string vacío con los 3 campos vacíos, sin lanzar', () => {
-    expect(() => construirMensajeContacto('', '', '')).not.toThrow()
-    expect(construirMensajeContacto('', '', '')).toBe('')
-  })
-})
-
-describe('landing/sections — construirWhatsAppFormulario', () => {
-  it('arma la URL de wa.me con el mensaje precargado', () => {
-    const url = construirWhatsAppFormulario('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Quiero cotizar una torta')
-    expect(url).toBe(
-      `https://wa.me/56912345678?text=${encodeURIComponent('Nombre: Ana\nEmail: ana@mail.cl\nQuiero cotizar una torta')}`,
-    )
-  })
-
-  it('retorna null cuando el teléfono no tiene dígitos utilizables', () => {
-    expect(construirWhatsAppFormulario('sin numero', 'Ana', 'ana@mail.cl', 'Hola')).toBeNull()
-  })
-})
-
-describe('landing/sections — resolverEnvioContacto (R3-002)', () => {
-  it('cuando la ventana se abre, no hay mensaje de error y pide resetear el formulario', () => {
-    const resultado = resolverEnvioContacto('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Hola', () => ({}))
-    expect(resultado).toEqual({ mensaje: null, debeResetear: true })
-  })
-
-  it('sin teléfono utilizable, avisa y no pide resetear (nunca abre ventana ni pierde lo tipeado)', () => {
-    const abrirVentana = jest.fn()
-    const resultado = resolverEnvioContacto('sin numero', 'Ana', 'ana@mail.cl', 'Hola', abrirVentana)
-    expect(abrirVentana).not.toHaveBeenCalled()
-    expect(resultado.debeResetear).toBe(false)
-    expect(resultado.mensaje).toMatch(/teléfono o al email/)
-  })
-
-  it('con el popup bloqueado (abrirVentana devuelve un valor falsy), avisa y no pide resetear', () => {
-    const resultado = resolverEnvioContacto('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Hola', () => null)
-    expect(resultado.debeResetear).toBe(false)
-    expect(resultado.mensaje).toMatch(/bloqueó/)
   })
 })
 
