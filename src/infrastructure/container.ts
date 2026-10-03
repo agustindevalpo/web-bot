@@ -152,13 +152,15 @@ export function getAlmacenamientoArchivos(): IAlmacenamientoArchivos {
 // construye eager sin leer el env al bootear.
 const almacenamientoArchivosDiferido: IAlmacenamientoArchivos = {
   subir: (archivo) => getAlmacenamientoArchivos().subir(archivo),
+  eliminar: (clave) => getAlmacenamientoArchivos().eliminar(clave),
+  urlPublicaBase: () => getAlmacenamientoArchivos().urlPublicaBase(),
 }
 
 // Use Cases del panel interno (/admin)
 export const listarSitiosUC = new ListarSitiosUseCase(sitioRepo)
 export const cambiarEstadoSitioUC = new CambiarEstadoSitioUseCase(sitioRepo)
 export const asignarDominioPropioUC = new AsignarDominioPropioUseCase(sitioRepo, customHostnameServiceDiferido)
-export const actualizarConfigSitioUC = new ActualizarConfigSitioUseCase(sitioRepo)
+export const actualizarConfigSitioUC = new ActualizarConfigSitioUseCase(sitioRepo, almacenamientoArchivosDiferido)
 export const confirmarPagoSitioUC = new ConfirmarPagoSitioUseCase(sitioRepo, clienteRepo, activarClienteUC, CLIENTE_DEMO_ID)
 export const capturarLeadDemoUC = new CapturarLeadDemoUseCase(sesionRepo, sitioRepo, clienteRepo, CLIENTE_DEMO_ID)
 export const subirImagenSitioUC = new SubirImagenSitioUseCase(sitioRepo, almacenamientoArchivosDiferido)

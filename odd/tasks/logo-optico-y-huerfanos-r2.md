@@ -49,7 +49,7 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
   store `logoDimensiones`, render the logo with real `width`/`height` and a height derived from
   its aspect ratio around the 44/34px base, clamped. Fallback to today's rendering when
   dimensions are missing.
-- [ ] **T2 — R2 orphan cleanup.** Route: delegated (port, R2 and Noop adapters, use case, admin
+- [x] **T2 — R2 orphan cleanup.** Route: delegated (port, R2 and Noop adapters, use case, admin
   JSON save, tests). Add `eliminar` to `IAlmacenamientoArchivos`; delete the previous object when
   an upload replaces the logo or `imagenes[0]`, and delete owned objects that disappear from
   `configJson` when it is saved from the JSON editor.
@@ -60,7 +60,21 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
 
 - 2026-10-03: T1 done (delegated writer). Header parser `src/domain/imagen/dimensionesImagen.ts`,
   scale `shared/logoOptico.ts` (clamp(sqrt(4/ratio), 0.75, 1.5)), `logoDimensiones` stored at upload.
-  tsc, lint, test:unit (961), build green. Commit: see git log (one `feat(landing)` commit).
+  tsc, lint, test:unit (961), build green. Commit `4f32a14` on `feat/logo-optico-y-huerfanos-r2`.
+
+- 2026-10-03: T2 done (delegated writer), branch `feat/limpieza-huerfanos-r2` stacked on T1. Port gains
+  `eliminar` + `urlPublicaBase`; pure ownership helper `domain/imagen/imagenesPropias.ts`; best-effort
+  cleanup after the DB write in upload and JSON save; stale `logoDimensiones` dropped. tsc, lint,
+  test:unit (998), build green. Commit `a8b22e2`.
+
+- 2026-10-03: parent review of T2 found an upload replacing the logo/hero would delete a URL still
+  referenced elsewhere in the config (e.g. also in the gallery). Fixed inline in `200f7a4` with a
+  test; tsc + test:unit (999) green. Delivery: PR 1 = T1 to `develop`, PR 2 = T2 stacked on PR 1.
+
+- 2026-10-03: Chrome check (local next dev + local Postgres, 1036px and 390px). 4:1 unchanged (176x44),
+  vertical 30x66 desktop. Two limits found and fixed with Agustin's OK in `c4d8c9a` (on T1 branch;
+  T2 rebased on it): desktop max-width 180 -> 240px (a 8:1 logo was capped at 22px tall) and mobile
+  height capped at 46px (51px touched the 52px row edge).
 
 - 2026-10-03: T3 applied (delegated writer): `altosLogo`/`esLogotipo` in `shared/logoOptico.ts`,
   `--logo-alto`/`--logo-alto-movil`, name hidden for logotypes. Commit: see git log.
@@ -73,4 +87,5 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
 
 ## Next step
 
-T2.
+Push and open the two PRs
+(Agustín authorizes push).
