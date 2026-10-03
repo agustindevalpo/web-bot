@@ -696,8 +696,11 @@
     padding: 44px 24px 32px;
   }
 
+  /* H2 de sección en móvil: 34px / 1.06 / -.04em (README.md:273). */
   .serviciosTitulo {
-    font-size: 28px;
+    font-size: 34px;
+    line-height: 1.06;
+    letter-spacing: -0.04em;
   }
 
   .banda {
