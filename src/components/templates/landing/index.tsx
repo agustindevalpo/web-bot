@@ -8,7 +8,8 @@ import { tramoDisplay, type TramoDisplay } from '@/components/templates/shared/d
 import Monograma from '@/components/templates/shared/Monograma'
 import BandaDatos from '@/components/templates/shared/BandaDatos'
 import BloqueNosotros from '@/components/templates/shared/BloqueNosotros'
-import { buildMarca, buildInicio, buildDestacados, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
+import { buildMarca, buildInicio, buildDestacados, buildServicios, buildNosotros, buildContacto } from './sections'
+import FooterBloques from '@/components/templates/shared/FooterBloques'
 import FormularioContacto from '@/components/templates/shared/FormularioContacto'
 import SeccionContacto from '@/components/templates/shared/SeccionContacto'
 import ContactoDatos from '@/components/templates/shared/ContactoDatos'
@@ -36,7 +37,6 @@ export default async function Landing({ config }: TemplateProps) {
   const servicios = buildServicios(config)
   const nosotros = buildNosotros(config)
   const contacto = buildContacto(config)
-  const footer = buildFooter(config)
   const formulario = contacto.formularioHabilitado && contacto.telefono ? <FormularioContacto telefono={contacto.telefono} /> : null
 
   const tramo = tramoDisplay(inicio.nombre)
@@ -206,17 +206,9 @@ export default async function Landing({ config }: TemplateProps) {
     </a>
   ) : undefined
 
-  const pie = (
-    <footer className={styles.footer}>
-      <div className={styles.footerNombre}>{footer.nombre}</div>
-      <div className={styles.footerDatos}>
-        {footer.ciudad && <span>{footer.ciudad}</span>}
-        {footer.telefono && <span>{footer.telefono}</span>}
-        {footer.email && <span>{footer.email}</span>}
-      </div>
-      <div className={styles.footerCredito}>Hecho con WebBot · Devalpo</div>
-    </footer>
-  )
+  // Mismas secciones que el nav: el pie las lista tal cual.
+  const pie = <FooterBloques config={config} secciones={secciones.map(({ id, etiqueta }) => ({ id, etiqueta }))} anio={new Date().getFullYear()} />
+
 
   return (
     <div data-template="LANDING" style={estiloRaiz}>

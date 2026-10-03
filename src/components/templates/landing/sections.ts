@@ -230,22 +230,3 @@ export function buildContacto(config: SiteConfigDTO): ContactoProps {
     horarios: comoHorarios(config.horarios),
   }
 }
-
-export type FooterProps = {
-  nombre: string
-  ciudad: string | null
-  telefono: string | null
-  email: string | null
-}
-
-// El footer propio de LANDING (T6) no lleva redes — el handoff
-// (README.md:207) solo pide nombre, datos de contacto y crédito, a
-// diferencia del `shared/Footer.tsx` que consumían las otras 3 plantillas.
-export function buildFooter(config: SiteConfigDTO): FooterProps {
-  return {
-    nombre: config.nombre,
-    ciudad: comoStringNoVacio(config.ciudad),
-    telefono: comoStringNoVacio(config.contacto?.telefono),
-    email: comoStringNoVacio(config.contacto?.email),
-  }
-}
