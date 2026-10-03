@@ -4,7 +4,6 @@ import { TemplateProps } from '@/components/templates/shared/types'
 import { buildPaletteStyle } from '@/components/templates/shared/palette'
 import SeccionesSPA from '@/components/templates/shared/SeccionesSPA'
 import { filtrarSecciones, estiloCascada, type SeccionSPA } from '@/components/templates/shared/navegacion'
-import { instrumentSerif } from '@/components/templates/shared/fuentes'
 import Monograma from '@/components/templates/shared/Monograma'
 import { buildMarca, buildInicio, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
 import FormularioContacto from './FormularioContacto'
@@ -218,7 +217,7 @@ export default async function Landing({ config }: TemplateProps) {
   // (regla T3, `shared/logoOptico.ts`) y llegan como `--logo-alto` /
   // `--logo-alto-movil`; sin ellas, 44px / 34px de siempre. Un logotipo
   // (proporción >= 1.6) reemplaza también al nombre visible; el `alt` lo
-  // conserva. Sin logo, `Monograma` (variante "serifCalado" — regla 02) ocupa
+  // conserva. Sin logo, `Monograma` (Sans pesado, T4) ocupa
   // ese mismo slot derivado de `marca.iniciales`.
   const marcaSlot = (
     <>
@@ -237,7 +236,7 @@ export default async function Landing({ config }: TemplateProps) {
           }
         />
       ) : (
-        <Monograma iniciales={marca.iniciales} variante="serifCalado" />
+        <Monograma iniciales={marca.iniciales} />
       )}
       {marca.mostrarNombre && <span className={styles.marcaNombre}>{marca.nombre}</span>}
     </>
@@ -262,7 +261,7 @@ export default async function Landing({ config }: TemplateProps) {
   )
 
   return (
-    <div data-template="LANDING" className={instrumentSerif.variable} style={estiloRaiz}>
+    <div data-template="LANDING" style={estiloRaiz}>
       <SeccionesSPA secciones={secciones} marca={marcaSlot} accionHeader={accionHeader} pie={pie} className={styles.page} />
 
       {inicio.whatsappUrl && (

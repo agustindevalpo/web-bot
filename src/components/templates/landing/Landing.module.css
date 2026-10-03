@@ -31,7 +31,7 @@
 /* ── Marca (slot `marca` del header, shell en SeccionesSPA.module.css) ──
  * El cuadrado con la inicial y relleno plano (`.marcaInicial`) se reemplazó
  * por el monograma compartido (`shared/Monograma.tsx`, variante
- * "serifCalado" — handoff bloque 3c, regla 03: ese cuadrado es justo "el
+ * "Sans pesado" — T4, handoff Bloques v2, y antes regla 03: ese cuadrado es justo "el
  * gesto que grita 'no puso su logo'"). `.marcaLogoImg` es
  * el otro lado de la regla 04: cuando el cliente sube logo, ocupa el mismo
  * espacio que el monograma ocupaba, nada se mueve alrededor.
@@ -106,8 +106,8 @@
 }
 
 .inicioTitulo {
-  font: 400 58px/1.06 var(--font-instrument-serif), serif;
-  letter-spacing: -0.015em;
+  font: 800 58px/1.06 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.048em;
   max-width: 12ch;
   margin: 0 0 22px;
   color: var(--wb-tpl-ink);
@@ -172,7 +172,8 @@
 }
 
 .statValor {
-  font: 400 30px/1 var(--font-instrument-serif), serif;
+  font: 800 30px/1 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
   color: var(--acento);
 }
 
@@ -232,7 +233,8 @@
 }
 
 .tarjetaFrase {
-  font: 400 19px/1.4 var(--font-instrument-serif), serif;
+  font: 800 19px/1.4 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
   color: #fff;
   margin: 0;
 }
@@ -244,7 +246,8 @@
 }
 
 .serviciosTitulo {
-  font: 400 40px/1.1 var(--font-instrument-serif), serif;
+  font: 800 40px/1.1 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
   max-width: 18ch;
   margin: 0 0 40px;
   color: var(--wb-tpl-ink);
@@ -296,7 +299,8 @@
 }
 
 .servicioCtaFrase {
-  font: 400 19px/1.35 var(--font-instrument-serif), serif;
+  font: 800 19px/1.35 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
   color: #fff;
   margin: 0 0 16px;
 }
@@ -342,7 +346,8 @@
 }
 
 .nosotrosTitulo {
-  font: 400 38px/1.12 var(--font-instrument-serif), serif;
+  font: 800 38px/1.12 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
   margin: 0 0 18px;
   color: var(--wb-tpl-ink);
 }
@@ -432,11 +437,12 @@
 .contactoTitulo {
   /* README.md no repite el tamaño explícitamente para esta sección; el
      prototipo sí ("Plantillas WebBot.dc.html:139"): `400 38px/1.12
-     'Instrument Serif' margin:0 0 30px`, igual que el H2 de Nosotros
+     'Montserrat' 800 margin:0 0 30px`, igual que el H2 de Nosotros
      (README.md:203). El `32px/1.15` y `margin: 0 0 24px` anteriores eran un
      desvío de transcripción, no una decisión — las otras tres secciones
      (Servicios, Inicio, Nosotros) ya coinciden con su spec al pixel. */
-  font: 400 38px/1.12 var(--font-instrument-serif), serif;
+  font: 800 38px/1.12 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
   margin: 0 0 30px;
   color: var(--wb-tpl-ink);
 }
