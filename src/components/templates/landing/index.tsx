@@ -4,7 +4,7 @@ import { TemplateProps } from '@/components/templates/shared/types'
 import { buildPaletteStyle } from '@/components/templates/shared/palette'
 import SeccionesSPA from '@/components/templates/shared/SeccionesSPA'
 import { filtrarSecciones, estiloCascada, type SeccionSPA } from '@/components/templates/shared/navegacion'
-import { tramoDisplay, type TramoDisplay } from '@/components/templates/shared/displayHero'
+import HeroBloques from '@/components/templates/shared/HeroBloques'
 import Monograma from '@/components/templates/shared/Monograma'
 import BandaDatos from '@/components/templates/shared/BandaDatos'
 import BloqueNosotros from '@/components/templates/shared/BloqueNosotros'
@@ -20,12 +20,6 @@ import styles from './Landing.module.css'
 // esta plantilla es `SeccionesSPA` (el switch de secciones) más el
 // formulario de contacto (`FormularioContacto`), que no convierte el resto
 // del árbol a cliente (README.md, "Implicancia arquitectónica").
-const CLASE_TRAMO: Record<TramoDisplay, string> = {
-  grande: styles.tramoGrande,
-  medio: styles.tramoMedio,
-  chico: styles.tramoChico,
-}
-
 export default async function Landing({ config }: TemplateProps) {
   // Con `bloques: true`, `buildPaletteStyle` emite `--acento` clampeado a
   // >= 4.5:1 contra blanco (T2): LANDING no clampea por su cuenta.
@@ -39,7 +33,6 @@ export default async function Landing({ config }: TemplateProps) {
   const contacto = buildContacto(config)
   const formulario = contacto.formularioHabilitado && contacto.telefono ? <FormularioContacto telefono={contacto.telefono} /> : null
 
-  const tramo = tramoDisplay(inicio.nombre)
   const eyebrowInicio = [inicio.rubro, inicio.ciudad].filter((valor): valor is string => valor !== null).join(' · ')
 
   const secciones: SeccionSPA[] = filtrarSecciones([
@@ -48,41 +41,14 @@ export default async function Landing({ config }: TemplateProps) {
       etiqueta: 'Inicio',
       contenido: (
         <>
-          <section className={inicio.imagenHero ? styles.inicio : `${styles.inicio} ${styles.inicioSinFoto}`}>
-            <div className={styles.inicioIzquierda}>
-              {eyebrowInicio && (
-                <div className={styles.eyebrowHero} data-dv-anim="up" style={estiloCascada(0)}>
-                  {eyebrowInicio}
-                </div>
-              )}
-              <h1 className={`${styles.inicioTitulo} ${CLASE_TRAMO[tramo.tramo]}`} data-dv-anim="up" style={estiloCascada(1)}>
-                {inicio.nombre}
-              </h1>
-              {inicio.descripcion && (
-                <p className={styles.inicioParrafo} data-dv-anim="up" style={estiloCascada(2)}>
-                  {inicio.descripcion}
-                </p>
-              )}
-              <div className={styles.ctas} data-dv-anim="up" style={estiloCascada(3)}>
-                {inicio.whatsappUrl && (
-                  <a href={inicio.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimaria}>
-                    Escribir por WhatsApp
-                  </a>
-                )}
-                {inicio.telUrl && (
-                  <a href={inicio.telUrl} className={styles.ctaSecundaria}>
-                    Llamar · {inicio.telefonoDisplay}
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {inicio.imagenHero && (
-              <div className={styles.inicioFoto}>
-                <Image src={inicio.imagenHero} alt={inicio.nombre} fill sizes="(max-width: 767px) 100vw, 50vw" className={styles.fotoImg} priority />
-              </div>
-            )}
-          </section>
+          <HeroBloques
+            eyebrow={eyebrowInicio || null}
+            nombre={inicio.nombre}
+            descripcion={inicio.descripcion}
+            foto={inicio.imagenHero}
+            ctaPrimario={inicio.whatsappUrl ? { texto: 'Escribir por WhatsApp', href: inicio.whatsappUrl } : null}
+            ctaSecundario={inicio.telUrl ? { texto: `Llamar · ${inicio.telefonoDisplay}`, href: inicio.telUrl } : null}
+          />
           {/* Banda de cifras (U5): no es una sección del nav, vive dentro de
               'inicio' justo después del hero. Sin destacados no renderiza. */}
           <BandaDatos items={destacados.map(({ valor, etiqueta }) => ({ valor, etiqueta }))} />
