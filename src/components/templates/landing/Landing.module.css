@@ -475,6 +475,14 @@
     line-height: 1.1;
   }
 
+  /* Cuerpo móvil de Bloques: 13.5px/1.8 (README.md:276), igual que las
+   * descripciones de las bandas con varios servicios. */
+  .bandaDescripcionUnica {
+    font-size: 13.5px;
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+
   .bandaUnica.bandaUnicaFoto {
     grid-template-columns: 1fr;
     min-height: 0;
