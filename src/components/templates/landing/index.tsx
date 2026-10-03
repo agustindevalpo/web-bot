@@ -6,7 +6,8 @@ import SeccionesSPA from '@/components/templates/shared/SeccionesSPA'
 import { filtrarSecciones, estiloCascada, type SeccionSPA } from '@/components/templates/shared/navegacion'
 import { tramoDisplay, type TramoDisplay } from '@/components/templates/shared/displayHero'
 import Monograma from '@/components/templates/shared/Monograma'
-import { buildMarca, buildInicio, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
+import BandaDatos from '@/components/templates/shared/BandaDatos'
+import { buildMarca, buildInicio, buildDestacados, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
 import FormularioContacto from './FormularioContacto'
 import styles from './Landing.module.css'
 
@@ -28,6 +29,7 @@ export default async function Landing({ config }: TemplateProps) {
 
   const marca = buildMarca(config)
   const inicio = buildInicio(config)
+  const destacados = buildDestacados(config)
   const servicios = buildServicios(config)
   const nosotros = buildNosotros(config)
   const contacto = buildContacto(config)
@@ -41,41 +43,46 @@ export default async function Landing({ config }: TemplateProps) {
       id: 'inicio',
       etiqueta: 'Inicio',
       contenido: (
-        <section className={inicio.imagenHero ? styles.inicio : `${styles.inicio} ${styles.inicioSinFoto}`}>
-          <div className={styles.inicioIzquierda}>
-            {eyebrowInicio && (
-              <div className={styles.eyebrowHero} data-dv-anim="up" style={estiloCascada(0)}>
-                {eyebrowInicio}
+        <>
+          <section className={inicio.imagenHero ? styles.inicio : `${styles.inicio} ${styles.inicioSinFoto}`}>
+            <div className={styles.inicioIzquierda}>
+              {eyebrowInicio && (
+                <div className={styles.eyebrowHero} data-dv-anim="up" style={estiloCascada(0)}>
+                  {eyebrowInicio}
+                </div>
+              )}
+              <h1 className={`${styles.inicioTitulo} ${CLASE_TRAMO[tramo.tramo]}`} data-dv-anim="up" style={estiloCascada(1)}>
+                {inicio.nombre}
+              </h1>
+              {inicio.descripcion && (
+                <p className={styles.inicioParrafo} data-dv-anim="up" style={estiloCascada(2)}>
+                  {inicio.descripcion}
+                </p>
+              )}
+              <div className={styles.ctas} data-dv-anim="up" style={estiloCascada(3)}>
+                {inicio.whatsappUrl && (
+                  <a href={inicio.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimaria}>
+                    Escribir por WhatsApp
+                  </a>
+                )}
+                {inicio.telUrl && (
+                  <a href={inicio.telUrl} className={styles.ctaSecundaria}>
+                    Llamar · {inicio.telefonoDisplay}
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {inicio.imagenHero && (
+              <div className={styles.inicioFoto}>
+                <Image src={inicio.imagenHero} alt={inicio.nombre} fill sizes="(max-width: 767px) 100vw, 50vw" className={styles.fotoImg} priority />
               </div>
             )}
-            <h1 className={`${styles.inicioTitulo} ${CLASE_TRAMO[tramo.tramo]}`} data-dv-anim="up" style={estiloCascada(1)}>
-              {inicio.nombre}
-            </h1>
-            {inicio.descripcion && (
-              <p className={styles.inicioParrafo} data-dv-anim="up" style={estiloCascada(2)}>
-                {inicio.descripcion}
-              </p>
-            )}
-            <div className={styles.ctas} data-dv-anim="up" style={estiloCascada(3)}>
-              {inicio.whatsappUrl && (
-                <a href={inicio.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimaria}>
-                  Escribir por WhatsApp
-                </a>
-              )}
-              {inicio.telUrl && (
-                <a href={inicio.telUrl} className={styles.ctaSecundaria}>
-                  Llamar · {inicio.telefonoDisplay}
-                </a>
-              )}
-            </div>
-          </div>
-
-          {inicio.imagenHero && (
-            <div className={styles.inicioFoto}>
-              <Image src={inicio.imagenHero} alt={inicio.nombre} fill sizes="(max-width: 767px) 100vw, 50vw" className={styles.fotoImg} priority />
-            </div>
-          )}
-        </section>
+          </section>
+          {/* Banda de cifras (U5): no es una sección del nav, vive dentro de
+              'inicio' justo después del hero. Sin destacados no renderiza. */}
+          <BandaDatos items={destacados.map(({ valor, etiqueta }) => ({ valor, etiqueta }))} />
+        </>
       ),
     },
     {

@@ -57,7 +57,7 @@ unit, merged as each one is ready; production only moves on an explicit release.
   heights; CSS vars and the JS constants in `SeccionesSPA.tsx` changed together, with a test. SHARED.
 - [x] **U4 — Hero.** 3-tier display scale by `nombre.length` (pure, tested), 150px padding, 720px photo
   with `24px 0 0 24px` radius, eyebrow pill, mobile photo-above-title. SHARED helper `shared/displayHero.ts`.
-- [ ] **U5 — Data band.** `BandaDatos` on `--ink` (0/1/2/3 degradation); `destacados` leave the hero.
+- [x] **U5 — Data band.** `BandaDatos` on `--ink` (0/1/2/3 degradation); `destacados` leave the hero.
   SHARED (horarios in S2, credenciales in S6).
 - [ ] **U6 — Service bands.** Header + bands form A (giant number) / B (`servicios[].foto`),
   white/`#F2F1ED` alternation; remove card grid and CTA cell; update unit tests and the e2e H2.
@@ -84,6 +84,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
 - 2026-10-03: U3 done on `feat/bloques-u3-header`: header 96px (`--wb-spa-header-alto` + JS constants moved to `shared/headerGeometria.ts`, pinned by a test that reads the CSS), gutter 96px, nav gap 42px, hover color-only, active item `--ink`, `--line-soft` border, LANDING "Hablemos" accent pill with `--acento-hover`; mobile gutter 24px (nav bleed follows), row heights unchanged. tsc, eslint (0 errors), 1070 unit tests, build green.
 - 2026-10-03: U4 done on `feat/bloques-u4-hero`: `shared/displayHero.ts` (`tramoDisplay(nombre)` -> grande/medio/chico, 104/78/56px), hero grid 1fr 1fr with 150px padding, 96px gutter, 720px photo `24px 0 0 24px`, eyebrow pill, 18px/1.85 paragraph, two pill buttons (primary `--acento-hover`, secondary border+4% tint, no transform), mobile photo above title via `order`, 44px display, stacked 46px buttons. Stats row and highlight card removed from the hero: **until U5/U7, `destacados` and `highlight` are temporarily absent from LANDING on develop** (data reachable via `buildDestacados`/`buildHighlight` in `landing/sections.ts`). No-photo hero is single column.
 
+- 2026-10-03: U5 done on `feat/bloques-u5-banda-datos`: `shared/BandaDatos.tsx` (+ `.module.css`, Server Component; props `items`, `rotulo?`, `variante: 'cifras' | 'horarios'`) and pure `shared/layoutBanda.ts` (`layoutBanda(n)` -> una/dos/tres/null, pinned with a CSS-values test). `--ink` #101218, 76px/72px 96px padding, value cyan via `--wb-color-highlight`, mobile stacked (44px 24px) or horarios row form. LANDING renders it inside the `inicio` section right after the hero from `buildDestacados` (no nav anchor); `destacados` are back on the page. tsc, eslint (0 errors), 1108 unit tests, build green. Helper file is `layoutBanda.ts`, not `bandaDatos.ts`: it collided in casing with `BandaDatos.tsx` on Windows.
+
 ## Next step
 
-U5 (Data band) on a new branch stacked on U4.
+U6 (Service bands) on a new branch stacked on U5.

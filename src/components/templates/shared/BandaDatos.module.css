@@ -1,0 +1,150 @@
+/*
+ * Banda de datos sobre `--ink` (handoff Bloques, "Banda de cifras", y
+ * 00-DECISIONES-TRANSVERSALES T1/T2). Compartida: cifras (LANDING), horarios
+ * (SERVICIOS) y credenciales (PROFESIONAL). Sobre `--ink` el color de datos es
+ * `--wb-cyan` (#15DEFA), nunca el acento del cliente (T2).
+ *
+ * `#101218` es `--ink` del handoff, hardcodeado como el resto de valores
+ * exactos de la maqueta. Un solo breakpoint: 768px.
+ */
+
+.banda {
+  background: #101218;
+  color: #fff;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.cifras {
+  padding: 76px 96px;
+}
+
+.horarios {
+  padding: 72px 96px;
+}
+
+/* Fila centrada que se reparte el ancho (no una reja fija de 3 columnas). */
+.fila {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 72px;
+}
+
+.item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.item + .item {
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  padding-left: 72px;
+}
+
+/* Una sola cifra: grande, centrada, con la glosa al costado. */
+.una .item {
+  flex: 0 1 auto;
+  flex-direction: row;
+  align-items: center;
+}
+
+.valor {
+  font-weight: 800;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--wb-color-highlight, #15defa);
+}
+
+.horarios .valor {
+  font-size: 44px;
+}
+
+.etiqueta {
+  margin: 0;
+  max-width: 16ch;
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.horarios .etiqueta {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.rotulo {
+  flex: none;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@media (max-width: 767px) {
+  .cifras {
+    padding: 44px 24px;
+  }
+
+  .horarios {
+    padding: 28px 24px;
+  }
+
+  .fila {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 28px;
+  }
+
+  .item,
+  .una .item {
+    flex: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .item + .item {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    padding-top: 28px;
+  }
+
+  .valor {
+    font-size: 44px;
+  }
+
+  .etiqueta {
+    max-width: none;
+  }
+
+  /* SERVICIOS en móvil: lista vertical, glosa (día) a la izquierda y valor
+   * (rango) a la derecha. */
+  .horarios .fila {
+    gap: 16px;
+  }
+
+  .horarios .item {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .horarios .item + .item {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .horarios .valor {
+    font-size: 22px;
+  }
+
+  .horarios .etiqueta {
+    font-size: 12.5px;
+  }
+}
