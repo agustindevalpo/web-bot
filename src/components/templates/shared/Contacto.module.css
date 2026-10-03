@@ -139,10 +139,17 @@
   padding: 32px;
 }
 
+/* `auto 1fr` y no `1fr 1fr`: el teléfono ocupa lo que mide y el correo se
+ * queda con el resto. Con mitades iguales un correo corriente
+ * ("hola@consultoravega.cl" a 15px) se partía en dos líneas a 1280px. */
 .tarjetas {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto 1fr;
   gap: 20px;
+}
+
+.tarjetas > :only-child {
+  grid-column: 1 / -1;
 }
 
 .tarjeta {
