@@ -116,7 +116,7 @@ describe('landing/sections — buildInicio', () => {
 
     expect(inicio.nombre).toBe('Panadería El Trigal')
     expect(inicio.descripcion).toBe('Pan artesanal con más de 20 años de tradición.')
-    expect(inicio.rubro).toBe('PANADERIA')
+    expect(inicio.rubro).toBe('Panadería')
     expect(inicio.ciudad).toBe('Viña del Mar')
     expect(inicio.imagenHero).toBe('https://images.unsplash.com/hero.jpg')
     expect(inicio.whatsappUrl).toBe('https://wa.me/56912345678')

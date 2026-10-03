@@ -1,4 +1,5 @@
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
+import { rubroVisible } from '@/components/templates/shared/rubroVisible'
 import { buildWhatsAppUrl, buildTelUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
 import { nombreDeServicio, descripcionDeServicio } from '@/components/templates/shared/servicios'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
@@ -150,7 +151,7 @@ export type InicioProps = {
 export function buildInicio(config: SiteConfigDTO): InicioProps {
   const telefono = comoStringNoVacio(config.contacto?.telefono)
   const rubroCrudo = comoStringNoVacio(config.rubro)
-  const rubro = rubroCrudo && rubroCrudo !== 'demo' ? rubroCrudo.toUpperCase() : null
+  const rubro = rubroCrudo && rubroCrudo !== 'demo' ? rubroVisible(rubroCrudo) : null
   const [imagenHero] = comoArrayDeStrings(config.imagenes)
 
   return {
