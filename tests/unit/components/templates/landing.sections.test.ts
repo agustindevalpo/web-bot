@@ -51,14 +51,14 @@ describe('landing/sections — buildMarca', () => {
   it('arma las dos iniciales en mayúscula desde el nombre, saltando el artículo', () => {
     // "Panadería El Trigal": "El" es la única palabra de 2 letras — se salta
     // (shared/iniciales.ts) y las iniciales salen de Panadería + Trigal.
-    expect(buildMarca(configCompleto())).toEqual({ nombre: 'Panadería El Trigal', iniciales: 'PT', logo: null, logoDimensiones: null, logoEscala: null })
+    expect(buildMarca(configCompleto())).toEqual({ nombre: 'Panadería El Trigal', iniciales: 'PT', logo: null, logoDimensiones: null, logoAltos: null, mostrarNombre: true })
   })
 
   it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
     expect(() => buildMarca(configSoloNombre())).not.toThrow()
     // "Sitio E2E": ambas palabras tienen más de 2 letras y ninguna es
     // artículo/preposición — iniciales de las dos palabras tal cual.
-    expect(buildMarca(configSoloNombre())).toEqual({ nombre: 'Sitio E2E', iniciales: 'SE', logo: null, logoDimensiones: null, logoEscala: null })
+    expect(buildMarca(configSoloNombre())).toEqual({ nombre: 'Sitio E2E', iniciales: 'SE', logo: null, logoDimensiones: null, logoAltos: null, mostrarNombre: true })
   })
 
   it('expone `logo` cuando config.logo viene con contenido', () => {
@@ -67,14 +67,27 @@ describe('landing/sections — buildMarca', () => {
       iniciales: 'PT',
       logo: 'https://cdn.example.com/logo.png',
       logoDimensiones: null,
-      logoEscala: null,
+      logoAltos: null, mostrarNombre: true,
     })
   })
 
-  it('expone dimensiones y escala óptica cuando config.logoDimensiones es válido', () => {
-    const marca = buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: { ancho: 400, alto: 100 } }))
-    expect(marca.logoDimensiones).toEqual({ ancho: 400, alto: 100 })
-    expect(marca.logoEscala).toBe(1)
+  it('expone dimensiones y altos ópticos cuando config.logoDimensiones es válido', () => {
+    const marca = buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: { ancho: 300, alto: 100 } }))
+    expect(marca.logoDimensiones).toEqual({ ancho: 300, alto: 100 })
+    expect(marca.logoAltos).toEqual({ escritorio: 44, movil: 34 })
+  })
+
+  it.each([
+    ['isotipo r<1.6', { ancho: 100, alto: 100 }, true],
+    ['borde r=1.6', { ancho: 160, alto: 100 }, false],
+    ['logotipo r>=1.6', { ancho: 400, alto: 100 }, false],
+  ])('mostrarNombre con %s', (_n, dims, mostrar) => {
+    expect(buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: dims })).mostrarNombre).toBe(mostrar)
+  })
+
+  it('mantiene el nombre visible sin dimensiones o sin logo', () => {
+    expect(buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png' })).mostrarNombre).toBe(true)
+    expect(buildMarca(configCompleto({ logoDimensiones: { ancho: 400, alto: 100 } })).mostrarNombre).toBe(true)
   })
 
   it.each([
@@ -87,7 +100,7 @@ describe('landing/sections — buildMarca', () => {
   ])('descarta logoDimensiones inválido (%s) sin lanzar', (_nombre, invalido) => {
     const config = configCompleto({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: invalido as never })
     expect(() => buildMarca(config)).not.toThrow()
-    expect(buildMarca(config)).toMatchObject({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: null, logoEscala: null })
+    expect(buildMarca(config)).toMatchObject({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: null, logoAltos: null, mostrarNombre: true })
   })
 
   it('`logo` es null cuando config.logo es solo espacios', () => {

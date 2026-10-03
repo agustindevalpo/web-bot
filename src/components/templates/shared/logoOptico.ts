@@ -1,17 +1,22 @@
-// Tamaño óptico del logo del cliente. Un alto fijo hace que un logo ancho
-// pese demasiado y uno angosto o vertical se vea diminuto; esto escala el
-// alto base (44px escritorio / 34px móvil, `Landing.module.css`) según la
-// proporción del logo.
+// Tamaño óptico del logo del cliente: regla T3 del handoff de Bloques
+// (docs/design_handoff_plantillas_webbot/handoff_bloquesV2, 2026-10-03).
+// Un logo se ve del mismo tamaño cuando ocupa la misma área, no el mismo alto.
+// Con r = ancho / alto:
 //
-//   escala = clamp(sqrt(PROPORCION_REFERENCIA / (ancho / alto)), MIN, MAX)
+//   escritorio: alto = clamp(28, sqrt(5808 / r), 60); si alto * r > 180 -> 180 / r
+//   móvil:      alto = clamp(22, sqrt(3468 / r), 46); si alto * r > 140 -> 140 / r
 //
-// La raíz cuadrada reparte el ajuste entre alto y ancho para que el área
-// visual se mantenga parecida. 4:1 es la caja con la que se diseñó el header
-// (escala 1). Un logo cuadrado o vertical sube hasta 1.5x; uno muy ancho baja
-// hasta 0.75x.
-const PROPORCION_REFERENCIA = 4
-const ESCALA_MIN = 0.75
-const ESCALA_MAX = 1.5
+// 5808 = 44^2 * 3 y 3468 = 34^2 * 3: el área de un logo 3:1 a 44px / 34px.
+// El tope de ancho entra en la fórmula, así la caja de la imagen coincide con
+// el logo y no queda hueco. Los altos se redondean a px enteros.
+const AREA_ESCRITORIO = 5808
+const AREA_MOVIL = 3468
+const TOPES_ESCRITORIO = { min: 28, max: 60, anchoMax: 180 }
+const TOPES_MOVIL = { min: 22, max: 46, anchoMax: 140 }
+
+// Bajo esta proporción el logo es un isotipo (símbolo sin texto) y el nombre
+// del negocio se muestra al lado; desde aquí el logo ya contiene el nombre.
+export const PROPORCION_LOGOTIPO = 1.6
 
 export type DimensionesLogo = { ancho: number; alto: number }
 
@@ -22,8 +27,23 @@ export function comoDimensionesLogo(valor: unknown): DimensionesLogo | null {
   return esLado(ancho) && esLado(alto) ? { ancho, alto } : null
 }
 
-export function escalaLogo(dimensiones: DimensionesLogo): number {
-  const proporcion = dimensiones.ancho / dimensiones.alto
-  const escala = Math.sqrt(PROPORCION_REFERENCIA / proporcion)
-  return Math.round(Math.min(ESCALA_MAX, Math.max(ESCALA_MIN, escala)) * 1000) / 1000
+type Topes = { min: number; max: number; anchoMax: number }
+
+function altoOptico(proporcion: number, area: number, topes: Topes): number {
+  const alto = Math.min(topes.max, Math.max(topes.min, Math.sqrt(area / proporcion)))
+  return Math.round(alto * proporcion > topes.anchoMax ? topes.anchoMax / proporcion : alto)
+}
+
+export type AltosLogo = { escritorio: number; movil: number }
+
+export function altosLogo({ ancho, alto }: DimensionesLogo): AltosLogo {
+  const proporcion = ancho / alto
+  return {
+    escritorio: altoOptico(proporcion, AREA_ESCRITORIO, TOPES_ESCRITORIO),
+    movil: altoOptico(proporcion, AREA_MOVIL, TOPES_MOVIL),
+  }
+}
+
+export function esLogotipo({ ancho, alto }: DimensionesLogo): boolean {
+  return ancho / alto >= PROPORCION_LOGOTIPO
 }
