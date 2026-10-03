@@ -286,72 +286,62 @@ describe('landing/sections — buildServicios', () => {
 })
 
 describe('landing/sections — buildNosotros', () => {
-  it('usa sobreNosotros cuando está presente', () => {
-    expect(buildNosotros(configCompleto())?.texto).toBe('Nacimos en 2003 con un horno a leña y mucho cariño.')
+  it('usa sobreNosotros como párrafo cuando está presente', () => {
+    expect(buildNosotros(configCompleto()).texto).toBe('Nacimos en 2003 con un horno a leña y mucho cariño.')
   })
 
-  it('el H2 es chrome de sección ("Quiénes somos"), no el nombre del negocio', () => {
-    // Antes del fix, el H2 repetía `marca.nombre` — el mismo string que el
-    // H1 del hero ya muestra. En la SPA (un clic de nav de distancia, no
-    // miles de píxeles como en el long-scroll viejo) esa repetición lee como
-    // bug, no como refuerzo de marca.
-    expect(buildNosotros(configCompleto())?.titulo).toBe('Quiénes somos')
+  it('cae a descripcion cuando sobreNosotros está ausente', () => {
+    expect(buildNosotros(configCompleto({ sobreNosotros: undefined })).texto).toBe('Pan artesanal con más de 20 años de tradición.')
   })
 
-  // Reemplaza el test que fijaba `sobreNosotros → descripcion → null`: ese
-  // fallback era correcto en el long-scroll viejo, donde Inicio y Nosotros
-  // quedaban lejísimos en la página. En la SPA de 4 secciones son un solo
-  // clic de nav aparte, y el fallback hacía que el párrafo de Nosotros
-  // repitiera literalmente `descripcion`, el mismo texto que el hero ya
-  // muestra arriba. Decisión (handoff de esta tarea): sin fallback — el
-  // párrafo de Nosotros solo existe cuando `sobreNosotros` tiene contenido
-  // propio.
-  it('NO cae a descripcion cuando sobreNosotros está ausente — el párrafo queda null', () => {
-    const nosotros = buildNosotros(configCompleto({ sobreNosotros: undefined }))
-    expect(nosotros?.texto).toBeNull()
+  it('el H2 es "{nombre} en {ciudad}", o solo el nombre sin ciudad', () => {
+    expect(buildNosotros(configCompleto()).titulo).toBe('Panadería El Trigal en Viña del Mar')
+    expect(buildNosotros(configCompleto({ ciudad: undefined })).titulo).toBe('Panadería El Trigal')
   })
 
-  it('sin sobreNosotros pero con fotos de galería, la sección igual se muestra (solo fotos, sin párrafo)', () => {
-    const nosotros = buildNosotros(configCompleto({ sobreNosotros: undefined }))
-    expect(nosotros).not.toBeNull()
-    expect(nosotros?.texto).toBeNull()
-    expect(nosotros?.imagenes.some((imagen) => imagen !== null)).toBe(true)
+  it('nunca es null: con un config que solo trae { nombre } sigue habiendo bloque', () => {
+    const nosotros = buildNosotros(configSoloNombre())
+    expect(nosotros).toEqual({ titulo: 'Sitio E2E', texto: null, tarjetas: [], frase: null, autor: null })
   })
 
-  it('retorna null (oculta la sección, desaparece del nav) cuando NI sobreNosotros NI fotos de galería existen', () => {
-    expect(buildNosotros(configSoloNombre())).toBeNull()
-    // Config explícito: sin sobreNosotros, sin descripcion-como-fallback (ya
-    // no aplica), y sin imágenes de galería (la única imagen que trae es la
-    // del hero, que `buildNosotros` excluye).
-    const config = configCompleto({ sobreNosotros: undefined, imagenes: ['https://images.unsplash.com/hero.jpg'] })
-    expect(buildNosotros(config)).toBeNull()
-  })
-
-  // Tres cupos, no cuatro: la grilla de la maqueta (README.md:203) es de dos
-  // columnas por dos filas y su primera celda abarca dos filas, así que solo
-  // quedan dos casillas libres además de la grande. Con un cuarto cupo la
-  // grilla se desbordaba a una tercera fila inexistente en el diseño y la
-  // sección terminaba más alta que el hero (medido: 955px contra 652px).
-  it('excluye la primera imagen (usada en el hero) y completa hasta 3 cupos con null', () => {
-    const nosotros = buildNosotros(configCompleto())
-    expect(nosotros?.imagenes).toEqual([
-      'https://images.unsplash.com/galeria1.jpg',
-      'https://images.unsplash.com/galeria2.jpg',
-      null,
+  it('las tarjetas salen de sobreNosotrosPartes en orden fijo, sin las vacías', () => {
+    const nosotros = buildNosotros(
+      configCompleto({ sobreNosotrosPartes: { distinto: 'Horno a leña', desde: '2003', quien: '   ' } }),
+    )
+    expect(nosotros.tarjetas).toEqual([
+      { clave: 'desde', texto: '2003' },
+      { clave: 'distinto', texto: 'Horno a leña' },
     ])
   })
 
-  it('deja los 3 cupos de imagen en null cuando no hay imágenes de galería', () => {
-    const nosotros = buildNosotros(configCompleto({ sobreNosotros: 'Somos una panadería familiar.', imagenes: undefined }))
-    expect(nosotros?.imagenes).toEqual([null, null, null])
+  it('la frase destacada y su autor viajan al bloque (C3)', () => {
+    const nosotros = buildNosotros(configCompleto({ highlightAutor: { nombre: 'Ana Rojas', cargo: 'Maestra panadera' } }))
+    expect(nosotros.frase).toBe('Horneamos tres veces al día.')
+    expect(nosotros.autor).toEqual({ nombre: 'Ana Rojas', cargo: 'Maestra panadera' })
   })
 
-  describe('contra forma equivocada (imagenes malformado)', () => {
-    it('trata un imagenes que es un string (no array) como sin fotos, sin lanzar', () => {
-      const config = configCompleto({ imagenes: 'no soy un array' as unknown as string[] })
-      expect(() => buildNosotros(config)).not.toThrow()
-      expect(buildNosotros(config)?.imagenes).toEqual([null, null, null])
+  it('sin frase no hay cita, aunque haya autor', () => {
+    const nosotros = buildNosotros(configCompleto({ highlight: undefined, highlightAutor: { nombre: 'Ana Rojas' } }))
+    expect(nosotros.frase).toBeNull()
+    expect(nosotros.autor).toBeNull()
+  })
+
+  it('con frase pero sin autor, la cita queda sin firma', () => {
+    expect(buildNosotros(configCompleto()).autor).toBeNull()
+  })
+
+  it('ya no expone fotos: imagenes[1..] no entran a Nosotros', () => {
+    expect(buildNosotros(configCompleto())).not.toHaveProperty('imagenes')
+  })
+
+  it('tolera formas equivocadas de sobreNosotrosPartes y highlightAutor sin lanzar', () => {
+    const config = configCompleto({
+      sobreNosotrosPartes: 'no soy un objeto' as unknown as SiteConfigDTO['sobreNosotrosPartes'],
+      highlightAutor: 42 as unknown as SiteConfigDTO['highlightAutor'],
     })
+    expect(() => buildNosotros(config)).not.toThrow()
+    expect(buildNosotros(config).tarjetas).toEqual([])
+    expect(buildNosotros(config).autor).toBeNull()
   })
 })
 
