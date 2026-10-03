@@ -100,7 +100,6 @@ const ETIQUETA_SERVICIOS = 'Qué ofrecemos'
 // nombre del negocio, que el hero ya muestra a un clic de distancia en la
 // SPA).
 const ETIQUETA_NOSOTROS = 'Quiénes somos'
-const ETIQUETA_FOTO_HERO = 'Nuestro trabajo'
 const FRASE_CTA_SERVICIOS = '¿Conversamos sobre tu proyecto?'
 const TEXTO_ENLACE_CTA_SERVICIOS = 'Escríbenos →'
 
@@ -146,9 +145,6 @@ export type InicioProps = {
   telUrl: string | null
   telefonoDisplay: string | null
   imagenHero: string | null
-  etiquetaFoto: string
-  highlight: string | null
-  destacados: Destacado[]
 }
 
 export function buildInicio(config: SiteConfigDTO): InicioProps {
@@ -166,10 +162,19 @@ export function buildInicio(config: SiteConfigDTO): InicioProps {
     telUrl: telefono ? buildTelUrl(telefono) : null,
     telefonoDisplay: telefono,
     imagenHero: imagenHero ?? null,
-    etiquetaFoto: ETIQUETA_FOTO_HERO,
-    highlight: comoStringNoVacio(config.highlight),
-    destacados: comoDestacados(config.destacados).slice(0, MAX_DESTACADOS),
   }
+}
+
+// Las cifras y la frase destacada ya no viven en el hero (Bloques): `destacados`
+// pasan a la banda de datos (U5) y `highlight` al bloque Nosotros (U7, C3).
+// Se exponen aparte, con el mismo saneo defensivo, para que esas secciones los
+// consuman sin volver a tocar `buildInicio`.
+export function buildDestacados(config: SiteConfigDTO): Destacado[] {
+  return comoDestacados(config.destacados).slice(0, MAX_DESTACADOS)
+}
+
+export function buildHighlight(config: SiteConfigDTO): string | null {
+  return comoStringNoVacio(config.highlight)
 }
 
 // `descripcion` nace siempre ausente hoy (ningún productor del chat la

@@ -4,6 +4,7 @@ import { TemplateProps } from '@/components/templates/shared/types'
 import { buildPaletteStyle } from '@/components/templates/shared/palette'
 import SeccionesSPA from '@/components/templates/shared/SeccionesSPA'
 import { filtrarSecciones, estiloCascada, type SeccionSPA } from '@/components/templates/shared/navegacion'
+import { tramoDisplay, type TramoDisplay } from '@/components/templates/shared/displayHero'
 import Monograma from '@/components/templates/shared/Monograma'
 import { buildMarca, buildInicio, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
 import FormularioContacto from './FormularioContacto'
@@ -14,6 +15,12 @@ import styles from './Landing.module.css'
 // esta plantilla es `SeccionesSPA` (el switch de secciones) más el
 // formulario de contacto (`FormularioContacto`), que no convierte el resto
 // del árbol a cliente (README.md, "Implicancia arquitectónica").
+const CLASE_TRAMO: Record<TramoDisplay, string> = {
+  grande: styles.tramoGrande,
+  medio: styles.tramoMedio,
+  chico: styles.tramoChico,
+}
+
 export default async function Landing({ config }: TemplateProps) {
   // Con `bloques: true`, `buildPaletteStyle` emite `--acento` clampeado a
   // >= 4.5:1 contra blanco (T2): LANDING no clampea por su cuenta.
@@ -26,6 +33,7 @@ export default async function Landing({ config }: TemplateProps) {
   const contacto = buildContacto(config)
   const footer = buildFooter(config)
 
+  const tramo = tramoDisplay(inicio.nombre)
   const eyebrowInicio = [inicio.rubro, inicio.ciudad].filter((valor): valor is string => valor !== null).join(' · ')
 
   const secciones: SeccionSPA[] = filtrarSecciones([
@@ -33,14 +41,14 @@ export default async function Landing({ config }: TemplateProps) {
       id: 'inicio',
       etiqueta: 'Inicio',
       contenido: (
-        <section className={styles.inicio}>
+        <section className={inicio.imagenHero ? styles.inicio : `${styles.inicio} ${styles.inicioSinFoto}`}>
           <div className={styles.inicioIzquierda}>
             {eyebrowInicio && (
-              <div className={styles.eyebrow} data-dv-anim="up" style={estiloCascada(0)}>
+              <div className={styles.eyebrowHero} data-dv-anim="up" style={estiloCascada(0)}>
                 {eyebrowInicio}
               </div>
             )}
-            <h1 className={styles.inicioTitulo} data-dv-anim="up" style={estiloCascada(1)}>
+            <h1 className={`${styles.inicioTitulo} ${CLASE_TRAMO[tramo.tramo]}`} data-dv-anim="up" style={estiloCascada(1)}>
               {inicio.nombre}
             </h1>
             {inicio.descripcion && (
@@ -60,33 +68,13 @@ export default async function Landing({ config }: TemplateProps) {
                 </a>
               )}
             </div>
-            {inicio.destacados.length > 0 && (
-              <div className={styles.statsRow} data-dv-anim="up" style={estiloCascada(4)}>
-                {inicio.destacados.map((destacado) => (
-                  <div key={destacado.etiqueta} className={styles.statItem}>
-                    <div className={styles.statValor}>{destacado.valor}</div>
-                    <div className={styles.statEtiqueta}>{destacado.etiqueta}</div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
-          <div className={styles.inicioDerecha}>
-            <div className={styles.fotoPlaceholder}>
-              {inicio.imagenHero && (
-                <Image src={inicio.imagenHero} alt={inicio.nombre} fill sizes="420px" className={styles.fotoImg} priority />
-              )}
-              <span className={styles.fotoEtiqueta}>{inicio.etiquetaFoto}</span>
+          {inicio.imagenHero && (
+            <div className={styles.inicioFoto}>
+              <Image src={inicio.imagenHero} alt={inicio.nombre} fill sizes="(max-width: 767px) 100vw, 50vw" className={styles.fotoImg} priority />
             </div>
-
-            {inicio.highlight && (
-              <div className={styles.tarjetaDestacado}>
-                <div className={styles.tarjetaEyebrow}>Destacado</div>
-                <p className={styles.tarjetaFrase}>{inicio.highlight}</p>
-              </div>
-            )}
-          </div>
+          )}
         </section>
       ),
     },

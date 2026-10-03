@@ -1,6 +1,8 @@
 import {
   buildMarca,
   buildInicio,
+  buildDestacados,
+  buildHighlight,
   buildServicios,
   buildNosotros,
   buildContacto,
@@ -120,12 +122,9 @@ describe('landing/sections — buildInicio', () => {
     expect(inicio.whatsappUrl).toBe('https://wa.me/56912345678')
     expect(inicio.telUrl).toBe('tel:+56 9 1234 5678')
     expect(inicio.telefonoDisplay).toBe('+56 9 1234 5678')
-    expect(inicio.highlight).toBe('Horneamos tres veces al día.')
-    expect(inicio.destacados).toEqual([
-      { valor: '20+', etiqueta: 'años' },
-      { valor: '500+', etiqueta: 'clientes' },
-      { valor: '15', etiqueta: 'productos' },
-    ])
+    // Bloques: ni cifras ni frase destacada en el hero (U5 / U7).
+    expect(inicio).not.toHaveProperty('destacados')
+    expect(inicio).not.toHaveProperty('highlight')
   })
 
   it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
@@ -139,16 +138,31 @@ describe('landing/sections — buildInicio', () => {
     expect(inicio.imagenHero).toBeNull()
     expect(inicio.whatsappUrl).toBeNull()
     expect(inicio.telUrl).toBeNull()
-    expect(inicio.highlight).toBeNull()
-    expect(inicio.destacados).toEqual([])
   })
 
   it('no muestra el badge de rubro cuando rubro es "demo"', () => {
     expect(buildInicio(configCompleto({ rubro: 'demo' })).rubro).toBeNull()
   })
+})
+
+describe('landing/sections — buildDestacados / buildHighlight', () => {
+  it('expone las cifras y la frase destacada fuera del hero', () => {
+    const config = configCompleto()
+    expect(buildDestacados(config)).toEqual([
+      { valor: '20+', etiqueta: 'años' },
+      { valor: '500+', etiqueta: 'clientes' },
+      { valor: '15', etiqueta: 'productos' },
+    ])
+    expect(buildHighlight(config)).toBe('Horneamos tres veces al día.')
+  })
+
+  it('degrada con un config que solo trae { nombre }', () => {
+    expect(buildDestacados(configSoloNombre())).toEqual([])
+    expect(buildHighlight(configSoloNombre())).toBeNull()
+  })
 
   it('recorta a 3 destacados cuando llegan más de los que muestra el hero', () => {
-    const inicio = buildInicio(
+    const inicio = buildDestacados(
       configCompleto({
         destacados: [
           { valor: '1', etiqueta: 'uno' },
@@ -158,14 +172,14 @@ describe('landing/sections — buildInicio', () => {
         ],
       }),
     )
-    expect(inicio.destacados).toHaveLength(3)
+    expect(inicio).toHaveLength(3)
   })
 
   describe('contra forma equivocada (destacados malformado)', () => {
     it('trata un destacados que es un string (no array) como ausente, sin lanzar', () => {
       const config = configCompleto({ destacados: 'no soy un array' as unknown as SiteConfigDTO['destacados'] })
-      expect(() => buildInicio(config)).not.toThrow()
-      expect(buildInicio(config).destacados).toEqual([])
+      expect(() => buildDestacados(config)).not.toThrow()
+      expect(buildDestacados(config)).toEqual([])
     })
 
     it('descarta entradas de destacados sin etiqueta o sin valor, sin lanzar', () => {
@@ -178,8 +192,8 @@ describe('landing/sections — buildInicio', () => {
           null as unknown as { valor: string; etiqueta: string },
         ],
       })
-      expect(() => buildInicio(config)).not.toThrow()
-      expect(buildInicio(config).destacados).toEqual([{ valor: '20+', etiqueta: 'años' }])
+      expect(() => buildDestacados(config)).not.toThrow()
+      expect(buildDestacados(config)).toEqual([{ valor: '20+', etiqueta: 'años' }])
     })
   })
 })

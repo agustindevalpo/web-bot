@@ -55,8 +55,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
   removed from LANDING and `Monograma.module.css`; headings Montserrat 800 with Bloques tracking. SHARED.
 - [x] **U3 — Header (C6).** 96px desktop, gutter 96, nav gap 42, "Hablemos" pill; mobile rest/stuck
   heights; CSS vars and the JS constants in `SeccionesSPA.tsx` changed together, with a test. SHARED.
-- [ ] **U4 — Hero.** 3-tier display scale by `nombre.length` (pure, tested), 150px padding, 720px photo
-  with `24px 0 0 24px` radius, eyebrow pill, mobile photo-above-title.
+- [x] **U4 — Hero.** 3-tier display scale by `nombre.length` (pure, tested), 150px padding, 720px photo
+  with `24px 0 0 24px` radius, eyebrow pill, mobile photo-above-title. SHARED helper `shared/displayHero.ts`.
 - [ ] **U5 — Data band.** `BandaDatos` on `--ink` (0/1/2/3 degradation); `destacados` leave the hero.
   SHARED (horarios in S2, credenciales in S6).
 - [ ] **U6 — Service bands.** Header + bands form A (giant number) / B (`servicios[].foto`),
@@ -82,7 +82,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
   when it migrates to Bloques. Pre-U1 default-accent tests restored.
 - 2026-10-03: U2 done on `feat/bloques-u2-monograma-fuente`: `Monograma` is Sans pesado only (`tamano` prop: `cabecera` 36px / 26px under 768px, `pie` 34px), Instrument Serif and `shared/fuentes.ts` deleted, LANDING headings Montserrat 800 with tracking -.048/-.042/-.03em, sizes unchanged. tsc, eslint (0 errors), 1067 unit tests, build green.
 - 2026-10-03: U3 done on `feat/bloques-u3-header`: header 96px (`--wb-spa-header-alto` + JS constants moved to `shared/headerGeometria.ts`, pinned by a test that reads the CSS), gutter 96px, nav gap 42px, hover color-only, active item `--ink`, `--line-soft` border, LANDING "Hablemos" accent pill with `--acento-hover`; mobile gutter 24px (nav bleed follows), row heights unchanged. tsc, eslint (0 errors), 1070 unit tests, build green.
+- 2026-10-03: U4 done on `feat/bloques-u4-hero`: `shared/displayHero.ts` (`tramoDisplay(nombre)` -> grande/medio/chico, 104/78/56px), hero grid 1fr 1fr with 150px padding, 96px gutter, 720px photo `24px 0 0 24px`, eyebrow pill, 18px/1.85 paragraph, two pill buttons (primary `--acento-hover`, secondary border+4% tint, no transform), mobile photo above title via `order`, 44px display, stacked 46px buttons. Stats row and highlight card removed from the hero: **until U5/U7, `destacados` and `highlight` are temporarily absent from LANDING on develop** (data reachable via `buildDestacados`/`buildHighlight` in `landing/sections.ts`). No-photo hero is single column.
 
 ## Next step
 
-U4 (Hero) on a new branch stacked on U3.
+U5 (Data band) on a new branch stacked on U4.
