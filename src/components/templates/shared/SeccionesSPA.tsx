@@ -19,6 +19,10 @@ export type SeccionesSPAProps = {
   // Override puntual del shell de header (p. ej. TIENDA suma la franja de
   // promo y baja a 74px) — el resto de las plantillas usa el shell por defecto.
   claseHeader?: string
+  // URL de WhatsApp del botón flotante (círculo verde, abajo a la derecha).
+  // Sin URL no se renderiza. Se oculta mientras la sección `contacto` está en
+  // pantalla (efecto de abajo).
+  whatsappFlotanteUrl?: string | null
 }
 
 // Altura del header sticky (`.header`, SeccionesSPA.module.css, mismo valor
@@ -71,7 +75,7 @@ const CONSULTA_MEDIA_MOBIL = '(max-width: 767px)'
 //   Compartir el observer de cascada le impondría su `threshold` de
 //   revelado-de-elemento-suelto y su `unobserve` de una sola vez a un
 //   trabajo que necesita lo contrario en ambos ejes.
-export default function SeccionesSPA({ secciones, marca, accionHeader, pie, className, claseHeader }: SeccionesSPAProps) {
+export default function SeccionesSPA({ secciones, marca, accionHeader, pie, className, claseHeader, whatsappFlotanteUrl }: SeccionesSPAProps) {
   // Re-filtra en el cliente aunque el server ya filtró antes de llamar acá
   // (Q2 en design.md): defensa en profundidad para el Requirement
   // "Data-Driven Navigation" — si un template olvidara filtrar, el wrapper
@@ -122,6 +126,9 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
   // horizontalmente con `nav.scrollTo`, nunca con `scrollIntoView` sobre el
   // documento (README.md:305).
   const navRef = useRef<HTMLElement>(null)
+  // Botón flotante de WhatsApp: el observer de la sección Contacto le pone/saca
+  // `data-oculto` a mano (visual, sin re-render), igual que `data-pegado`.
+  const flotanteRef = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
     const raiz = raizRef.current
@@ -279,7 +286,22 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
     )
     if (finPaginaRef.current) observerFinPagina.observe(finPaginaRef.current)
 
+    // Oculta el botón flotante mientras Contacto está (aunque sea en parte) en
+    // pantalla. Sin sección `contacto`, el botón queda siempre visible.
+    const nodoContacto = seccionNodos.current.get('contacto')
+    const observerContacto = new IntersectionObserver(
+      (entradas) => {
+        const entrada = entradas[entradas.length - 1]
+        if (!entrada || !flotanteRef.current) return
+        if (entrada.isIntersecting) flotanteRef.current.setAttribute('data-oculto', '')
+        else flotanteRef.current.removeAttribute('data-oculto')
+      },
+      { threshold: 0 },
+    )
+    if (nodoContacto) observerContacto.observe(nodoContacto)
+
     return () => {
+      observerContacto.disconnect()
       observerCascada.disconnect()
       observerScrollspy.disconnect()
       observerPegado.disconnect()
@@ -395,6 +417,21 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
           un marcador de layout — la lupa de accesibilidad no tiene nada
           que leer acá. */}
       <div ref={finPaginaRef} className={styles.finPagina} aria-hidden="true" />
+
+      {whatsappFlotanteUrl && (
+        <a
+          ref={flotanteRef}
+          href={whatsappFlotanteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Escríbenos por WhatsApp"
+          className={styles.flotante}
+        >
+          <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z" />
+          </svg>
+        </a>
+      )}
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { rubroVisible } from '@/components/templates/shared/rubroVisible'
 import { buildTelUrl, buildMailtoUrl, buildInstagramUrl } from '@/components/templates/shared/enlaces'
 import { comoHorarios, comoLegal, type DatosLegales, type Horario } from '@/components/templates/shared/contenido'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
-import { altosLogo, comoDimensionesLogo, esLogotipo, type DimensionesLogo } from '@/components/templates/shared/logoOptico'
+import { altosLogo, altoLogoMovilPie, comoDimensionesLogo, esLogotipo, type DimensionesLogo } from '@/components/templates/shared/logoOptico'
 
 // Datos puros del pie Bloques (T3, T4, T7). Nada acá toca el DOM ni lanza con
 // un config que solo trae `{ nombre }`. Vive en `pieBloques.ts` (no
@@ -20,8 +20,13 @@ export type AltosLogoPie = { escritorio: number; movil: number }
 
 export function altosLogoPie(dimensiones: DimensionesLogo | null): AltosLogoPie {
   if (!dimensiones) return { escritorio: ALTO_LOGO_PIE_SIN_DIMENSIONES, movil: ALTO_LOGO_PIE_SIN_DIMENSIONES }
-  const { escritorio, movil } = altosLogo(dimensiones)
-  return { escritorio: Math.round(escritorio * FACTOR_LOGO_PIE), movil: Math.round(movil * FACTOR_LOGO_PIE) }
+  // Móvil: la cabecera ahora topa en 34px, pero el pie conserva la fórmula
+  // anterior (tope 46, 01-RESPUESTAS...): sobre la placa blanca no hay
+  // restricción de alto, así que el pie no cambia.
+  return {
+    escritorio: Math.round(altosLogo(dimensiones).escritorio * FACTOR_LOGO_PIE),
+    movil: Math.round(altoLogoMovilPie(dimensiones) * FACTOR_LOGO_PIE),
+  }
 }
 
 function comoTexto(valor: unknown): string | null {

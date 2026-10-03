@@ -21,7 +21,7 @@ const [cssBase, cssMovil] = css.split('@media (max-width: 767px)')
 
 describe('headerGeometria vs SeccionesSPA.module.css', () => {
   it('pins the documented values', () => {
-    expect([ALTO_HEADER_DESKTOP_PX, ALTO_HEADER_MOBIL_PX, ALTO_FILA1_MOBIL_PX]).toEqual([96, 44, 52])
+    expect([ALTO_HEADER_DESKTOP_PX, ALTO_HEADER_MOBIL_PX, ALTO_FILA1_MOBIL_PX]).toEqual([96, 44, 42])
   })
 
   it('desktop header height matches --wb-spa-header-alto', () => {

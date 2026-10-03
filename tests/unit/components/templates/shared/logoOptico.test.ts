@@ -1,13 +1,13 @@
-import { altosLogo, esLogotipo, comoDimensionesLogo } from '@/components/templates/shared/logoOptico'
+import { altosLogo, altoLogoMovilPie, esLogotipo, comoDimensionesLogo } from '@/components/templates/shared/logoOptico'
 
 describe('altosLogo (regla T3)', () => {
   it.each([
     ['6:1', 600, 100, 30, 23],
     ['4:1', 400, 100, 38, 29],
     ['3:1', 300, 100, 44, 34],
-    ['2:1', 200, 100, 54, 42],
-    ['1:1', 100, 100, 60, 46],
-    ['1:2', 100, 200, 60, 46],
+    ['2:1', 200, 100, 54, 34],
+    ['1:1', 100, 100, 60, 34],
+    ['1:2', 100, 200, 60, 34],
   ])('%s', (_n, ancho, alto, escritorio, movil) => {
     expect(altosLogo({ ancho, alto })).toEqual({ escritorio, movil })
   })
@@ -20,6 +20,18 @@ describe('altosLogo (regla T3)', () => {
 
   it('un logo extremadamente ancho limita por ancho aun bajo el piso', () => {
     expect(altosLogo({ ancho: 1000, alto: 50 })).toEqual({ escritorio: 9, movil: 7 })
+  })
+})
+
+describe('altoLogoMovilPie (el pie conserva el tope móvil de 46)', () => {
+  it.each([
+    ['6:1', 600, 100, 23],
+    ['3:1', 300, 100, 34],
+    ['2:1', 200, 100, 42],
+    ['1:1', 100, 100, 46],
+    ['1:2', 100, 200, 46],
+  ])('%s', (_n, ancho, alto, esperado) => {
+    expect(altoLogoMovilPie({ ancho, alto })).toBe(esperado)
   })
 })
 

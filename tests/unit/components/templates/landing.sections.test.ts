@@ -7,6 +7,7 @@ import {
   buildNosotros,
   buildContacto,
 } from '@/components/templates/landing/sections'
+import { filtrarSecciones } from '@/components/templates/shared/navegacion'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
 
@@ -245,6 +246,45 @@ describe('landing/sections — buildServicios', () => {
 
   it('retorna null cuando no hay servicios (config { nombre } only)', () => {
     expect(buildServicios(configSoloNombre())).toBeNull()
+  })
+
+  describe('un solo servicio (respuestas del diseñador 2026-10-03)', () => {
+    it('la sección se queda: eyebrow en singular, sin H2 de sección, banda sin número', () => {
+      const servicios = buildServicios(configCompleto({ servicios: ['Tortas'] }))
+      expect(servicios).toMatchObject({ unico: true, eyebrow: 'Servicio', etiqueta: null, enlaceTexto: 'Consultar por este servicio' })
+      expect(servicios?.bandas).toHaveLength(1)
+    })
+
+    it('con la foto de servicios[0] conserva la foto (forma B)', () => {
+      const servicios = buildServicios(configCompleto({ servicios: [{ nombre: 'Tortas', foto: 'https://cdn.example/t.jpg' }] }))
+      expect(servicios?.unico).toBe(true)
+      expect(servicios?.bandas[0].foto).toBe('https://cdn.example/t.jpg')
+    })
+
+    it('con varios servicios nada cambia: "Servicios", H2 "Qué ofrecemos", enlace de siempre', () => {
+      expect(buildServicios(configCompleto())).toMatchObject({
+        unico: false,
+        eyebrow: 'Servicios',
+        etiqueta: 'Qué ofrecemos',
+        enlaceTexto: 'Consultar por WhatsApp',
+      })
+    })
+  })
+
+  describe('cero servicios', () => {
+    it.each([
+      ['ausente', configSoloNombre()],
+      ['arreglo vacío', configCompleto({ servicios: [] })],
+    ])('la sección no se renderiza y "Servicios" sale del nav (%s)', (_caso, config) => {
+      expect(buildServicios(config)).toBeNull()
+      const nav = filtrarSecciones([
+        { id: 'inicio', etiqueta: 'Inicio', contenido: 'x' },
+        { id: 'servicios', etiqueta: 'Servicios', contenido: buildServicios(config) && 'x' },
+        { id: 'nosotros', etiqueta: 'Nosotros', contenido: 'x' },
+        { id: 'contacto', etiqueta: 'Contacto', contenido: 'x' },
+      ]).map(({ etiqueta }) => etiqueta)
+      expect(nav).toEqual(['Inicio', 'Nosotros', 'Contacto'])
+    })
   })
 
   it('no recorta: muestra una banda por cada servicio', () => {

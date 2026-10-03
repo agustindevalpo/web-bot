@@ -30,13 +30,10 @@ what must be shared).
 - New DTO fields are optional and read defensively at the `sections.ts` boundary: `servicios[].foto`,
   `sobreNosotrosPartes`, `highlightAutor`, `legal`, `horarios`.
 
-**Questions for the designer (do not block U1-U5):**
-- Single service: README says the section is not rendered and the service is "absorbed into the hero
-  as a third line", but T1 says the nav always has 4 labels. Until answered: render one band.
-- Mobile header 82px at rest (C6): 82 = 38px row + 44px nav, but today's row holds the 46px
-  "Hablemos" button. The 5a mockup shows no button in that row. Needed before U3 mobile.
-  U3 keeps today's mobile heights, 52px row 1 + 44px nav (96px at rest, 44px stuck), because the 82px
-  target leaves no room for "Hablemos". Pending designer answer.
+**Questions for the designer (both ANSWERED 2026-10-03, see
+`handoff_bloques_v2/01-RESPUESTAS-UN-SERVICIO-Y-HEADER-MOVIL.md`; applied in U11):**
+- ~~Single service~~ -> section kept, no number, single-column band, eyebrow "Servicio", no H2.
+- ~~Mobile header 82px~~ -> 86px = 42px brand row + 44px nav, no "Hablemos" on mobile.
 
 **Scope:** U1-U10 below, LANDING only plus new shared components. **Out of scope:** S2-S6 templates,
 chat redesign / momento 2 capture (fields are rendered when present but nothing fills them yet),
@@ -73,6 +70,13 @@ unit, merged as each one is ready; production only moves on an explicit release.
 - [x] **U10 — Motion + mobile polish.** Threshold .12, 80ms cascade, reduced motion, remaining mobile
   values, dead CSS removal.
 
+- [x] **U11 — Designer answers (2026-10-03).** Per `handoff_bloques_v2/01-RESPUESTAS-UN-SERVICIO-Y-HEADER-MOVIL.md`
+  (supersedes the README single-service rule and C6): one service → section kept, no number, single-column
+  band (eyebrow "Servicio", no H2); zero services → section and nav label removed; mobile header 86px
+  (42px brand row + 44px nav), no "Hablemos" on mobile, name up to 2 lines with ellipsis; mobile header
+  logo cap 34px (footer keeps the 46px formula); floating WhatsApp button spec (52/48px, no shadow,
+  28/18px offsets, hidden while Contacto is on screen, `aria-label`).
+
 ## Progress
 
 - 2026-10-03: gap analysis done (delegated read-only mapper); document created.
@@ -94,6 +98,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
 - 2026-10-03: U9 done on `feat/bloques-u9-footer`: shared `FooterBloques` (+ `.module.css`, Server Component; props `config`, `secciones` = the same list the nav gets, `anio`) fed by pure `shared/pieBloques.ts` (`construirPie`, `altosLogoPie`, `glosaPie`, `lineaLegal`; not `footerBloques.ts`, casing collision on Windows). `#101218`, 100px 96px 44px, grid 1.4fr 1fr 1fr; logo always on a white plate (no radius), 80% of header logo height, logotype hides the name, no logo -> `Monograma tamano="pie"` + name; glosa `{Rubro} en {ciudad}.` + horarios as text; Secciones/Contacto columns (tel:, mailto: via `buildMailtoUrl`, Instagram via `buildInstagramUrl`), legal line from `comoLegal` (T7), all micro-text >= .66 white; mobile single column, plate 10px 13px, monogram stays 34px (API has no mobile 28px). LANDING's inline footer, `buildFooter` and its CSS/tests deleted; `shared/Footer.tsx` untouched. tsc, eslint (0 errors), 1130 unit tests, build green. Not visually checked in Chrome.
 - 2026-10-03: U10 done on `feat/bloques-u10-pulido`: reveal contract aligned with the README (`dvUp .7s`, `PASO_CASCADA_MS = 80`, `UMBRAL_OBSERVER_CASCADA = 0.12`, both exported from `shared/navegacion.ts` and pinned by a test; motion.css is global so the other templates take the same timing); reduced motion and the `data-dv-ready` gate were already correct. Hover audit: no `transform`/elevation on any `:hover` in LANDING or the shared Bloques CSS (only the static WhatsApp float shadow remains, not hover). Mobile: Nosotros body line-height 1.8, service header and service text padding 44px, mobile "Hablemos" now 44px touch height. No dead selectors found (dynamic `styles[...]` variants verified); `Destacado`, `MarcaProps`, `InicioProps`, `ServicioBanda` no longer exported from `landing/sections.ts`. `docs/ESTADO.md` untouched: it describes production, not the Bloques look. tsc, eslint (0 errors), 1131 unit tests, build green.
 
+- 2026-10-03: U11 done on `feat/bloques-u11-respuestas-disenador`: `buildServicios` returns `{ eyebrow, etiqueta | null, enlaceTexto, unico, bandas }`; one service renders eyebrow "Servicio", no section H2, a single-column `#F2F1ED` band (name as the h2, 52px/32px mobile, "Consultar por este servicio", no number; with `foto` form B two columns); zero services already dropped the section and the nav label (and the footer list, which reuses the same array), now pinned by tests. Mobile header 86px: `--wb-spa-header-fila1-alto` and `ALTO_FILA1_MOBIL_PX` = 42, brand row `padding 0 18px`, header mobile gutter removed so the brand and the nav items share the 18px edge (nav bleed margin dropped), `.accion` hidden below 768px, name 12.5px/1.2 with 2-line clamp. Header logo mobile cap 34 (`TOPES_MOVIL`); footer keeps the old cap 46 through `altoLogoMovilPie` (80% scaling unchanged). Floating WhatsApp moved into `SeccionesSPA` (`whatsappFlotanteUrl` prop, `.flotante` in its module CSS): 52/48px, #25D366, no shadow, 28/18px offsets, `aria-label` "Escríbenos por WhatsApp", hidden via `data-oculto` (opacity + `visibility:hidden`) while Contacto intersects, no fade under reduced motion, visible without JS. Footer bottom padding stays 84px (48 + 18 offset + 18 air). tsc, eslint (0 errors), 1142 unit tests, build green. Not visually checked in Chrome.
+
 ## Next step
 
-Feature complete on develop. Pending designer questions (single service; mobile header 82px). Then S2 SERVICIOS.
+Feature complete on develop once U11 is merged. Then S2 SERVICIOS.

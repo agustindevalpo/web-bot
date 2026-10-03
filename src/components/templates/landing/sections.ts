@@ -78,6 +78,12 @@ const MAX_DESTACADOS = 3
 // que "Qué ofrecemos" ya lo era antes de este rediseño.
 const ETIQUETA_SERVICIOS = 'Qué ofrecemos'
 const TEXTO_ENLACE_SERVICIO = 'Consultar por WhatsApp'
+// Un solo servicio (respuestas del diseñador 2026-10-03, 01-RESPUESTAS...): la
+// sección se queda, sin número ni H2 (el nombre del servicio hace de título),
+// con el rótulo en singular y el enlace nombrando este servicio.
+const ETIQUETA_SERVICIO_UNICO = 'Servicio'
+const EYEBROW_SERVICIOS = 'Servicios'
+const TEXTO_ENLACE_SERVICIO_UNICO = 'Consultar por este servicio'
 
 // `iniciales` reemplaza a la vieja `inicial` (una sola letra, cuadrado con
 // relleno plano — handoff bloque 3c, regla 03) por las dos iniciales del
@@ -168,23 +174,33 @@ type ServicioBanda = {
 }
 
 export type ServiciosProps = {
-  etiqueta: string
+  // Rotulo sobre la seccion: "Servicios", o "Servicio" con uno solo.
+  eyebrow: string
+  // H2 de la seccion ("Qué ofrecemos"); `null` con un solo servicio: ahi el
+  // nombre del servicio es el encabezado y no se renderiza otro H2.
+  etiqueta: string | null
   enlaceTexto: string
+  // Un solo servicio: banda de una columna, sin numero.
+  unico: boolean
   bandas: ServicioBanda[]
 }
 
 // Campo opcional ausente → sección ausente (regla transversal del plan): sin
-// servicios utilizables, `null` esconde la pestaña entera vía
-// `filtrarSecciones`.
+// servicios utilizables, `null` esconde la sección y su etiqueta del nav vía
+// `filtrarSecciones` (el pie lista las mismas secciones que el nav).
 export function buildServicios(config: SiteConfigDTO): ServiciosProps | null {
   const servicios = comoServicios(config.servicios)
   if (servicios.length === 0) return null
 
   const telefono = comoStringNoVacio(config.contacto?.telefono)
 
+  const unico = servicios.length === 1
+
   return {
-    etiqueta: ETIQUETA_SERVICIOS,
-    enlaceTexto: TEXTO_ENLACE_SERVICIO,
+    eyebrow: unico ? ETIQUETA_SERVICIO_UNICO : EYEBROW_SERVICIOS,
+    etiqueta: unico ? null : ETIQUETA_SERVICIOS,
+    enlaceTexto: unico ? TEXTO_ENLACE_SERVICIO_UNICO : TEXTO_ENLACE_SERVICIO,
+    unico,
     bandas: servicios.map((servicio, indice) => ({
       numero: indice + 1,
       nombre: servicio.nombre,
