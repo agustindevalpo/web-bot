@@ -1,7 +1,7 @@
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { rubroVisible } from '@/components/templates/shared/rubroVisible'
 import { buildWhatsAppUrl, buildTelUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
-import { nombreDeServicio, descripcionDeServicio } from '@/components/templates/shared/servicios'
+import { nombreDeServicio, descripcionDeServicio, fotoDeServicio } from '@/components/templates/shared/servicios'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
 import { comoDimensionesLogo, altosLogo, esLogotipo, AltosLogo, DimensionesLogo } from '@/components/templates/shared/logoOptico'
 
@@ -36,7 +36,7 @@ function comoArrayDeStrings(valor: unknown): string[] {
 // reconocible (`nombreDeServicio`/`descripcionDeServicio` de
 // `shared/servicios.ts`, que ya tratan el dato como forma no confiable y
 // nunca lanzan).
-type ServicioNormalizado = { nombre: string; descripcion: string | null }
+type ServicioNormalizado = { nombre: string; descripcion: string | null; foto: string | null }
 
 function comoServicios(valor: unknown): ServicioNormalizado[] {
   if (!Array.isArray(valor)) return []
@@ -45,7 +45,7 @@ function comoServicios(valor: unknown): ServicioNormalizado[] {
     const nombreCrudo = nombreDeServicio(item)
     const nombre = typeof nombreCrudo === 'string' ? nombreCrudo.trim() : ''
     if (nombre === '') continue
-    resultado.push({ nombre, descripcion: descripcionDeServicio(item) })
+    resultado.push({ nombre, descripcion: descripcionDeServicio(item), foto: fotoDeServicio(item) })
   }
   return resultado
 }
@@ -66,31 +66,10 @@ function comoDestacados(valor: unknown): Destacado[] {
   })
 }
 
-// Techos de la maqueta (README.md:190-207): 3 cifras en el hero, grilla de
-// 5 servicios + la celda de CTA, 3 fotos en el grid asimétrico de Nosotros.
-//
-// Las 3 fotos salen de la aritmética del grid, no de un gusto: README.md:203
-// pide «grid `1fr 1fr` × `1fr 1fr` ... con la primera celda ocupando
-// `grid-row: span 2`». Dos columnas por dos filas son cuatro casillas, y la
-// celda que abarca dos filas se come dos, así que quedan dos libres: una
-// grande y dos chicas. Con un cuarto cupo la grilla se desborda a una tercera
-// fila que la maqueta nunca tuvo, y la sección pasa a ser más alta que el
-// hero — medido: 955px contra 652px del hero, antes de corregirlo.
+// Techo de la maqueta (README, banda de datos): 3 cifras. Los servicios no
+// tienen techo: una banda por servicio, todos se muestran.
 const MAX_DESTACADOS = 3
-const MAX_SERVICIOS_GRID = 5
 const MAX_IMAGENES_NOSOTROS = 3
-
-// La grilla de Servicios es de 3 columnas (Landing.module.css
-// `.serviciosGrid`) y la celda de CTA es siempre la última. Con un número
-// cualquiera de servicios (incluido cualquiera de los 1-5 que deja
-// `MAX_SERVICIOS_GRID`), la fila final puede quedar incompleta: sin corregir
-// eso, la celda vacía sobrante se pinta gris y lee como un bug de layout, no
-// como espacio deliberado (defecto encontrado mirando `demo-consultora` con
-// 4 servicios: 5 celdas en una grilla de 3×2 dejan la sexta gris). La
-// corrección: la celda de CTA extiende su `grid-column` para absorber las
-// columnas que le quedan libres en su fila — ver `ctaSpan` más abajo y su
-// consumo en `index.tsx` (`gridColumn: span ${servicios.ctaSpan}`).
-const COLUMNAS_GRID_SERVICIOS = 3
 
 // Microcopy estructural del template — no es dato de cliente (como
 // `ETIQUETA_SERVICIOS` ya lo era en la versión anterior), así que no pasa
@@ -101,8 +80,7 @@ const ETIQUETA_SERVICIOS = 'Qué ofrecemos'
 // nombre del negocio, que el hero ya muestra a un clic de distancia en la
 // SPA).
 const ETIQUETA_NOSOTROS = 'Quiénes somos'
-const FRASE_CTA_SERVICIOS = '¿Conversamos sobre tu proyecto?'
-const TEXTO_ENLACE_CTA_SERVICIOS = 'Escríbenos →'
+const TEXTO_ENLACE_SERVICIO = 'Consultar por WhatsApp'
 
 // `iniciales` reemplaza a la vieja `inicial` (una sola letra, cuadrado con
 // relleno plano — handoff bloque 3c, regla 03) por las dos iniciales del
@@ -178,48 +156,46 @@ export function buildHighlight(config: SiteConfigDTO): string | null {
   return comoStringNoVacio(config.highlight)
 }
 
-// `descripcion` nace siempre ausente hoy (ningún productor del chat la
-// pregunta ni la extrae, ver `SiteConfigDTO.ts`), pero el tipo la expone
-// desde ya para que la celda de Servicios la pinte apenas exista.
-export type ServicioItem = { numero: number; titulo: string; descripcion: string | null }
+// Una banda por servicio (Bloques, README "Bandas de servicio"). La forma se
+// decide por banda leyendo `foto`: con foto, forma B (la foto llena la celda
+// visual); sin ella, forma A (el número gigante). Nunca se usa `imagenes[]`:
+// una foto de banco en una banda afirma algo falso sobre ese servicio.
+// `descripcion` nace ausente hoy (ningún productor del chat la pregunta).
+export type ServicioBanda = {
+  numero: number
+  nombre: string
+  descripcion: string | null
+  foto: string | null
+  // WhatsApp con el nombre del servicio precargado; `null` sin teléfono (la
+  // banda no pinta el enlace).
+  whatsappUrl: string | null
+}
 
 export type ServiciosProps = {
   etiqueta: string
-  items: ServicioItem[]
-  ctaFrase: string
-  ctaEnlaceTexto: string
-  whatsappUrl: string | null
-  // Columnas que la celda de CTA debe extender (`grid-column: span N`) para
-  // terminar de llenar su fila en la grilla de 3 columnas — nunca deja una
-  // celda vacía, para cualquier cantidad de servicios. Ver el comentario de
-  // `COLUMNAS_GRID_SERVICIOS` más arriba.
-  ctaSpan: number
+  enlaceTexto: string
+  bandas: ServicioBanda[]
 }
 
 // Campo opcional ausente → sección ausente (regla transversal del plan): sin
 // servicios utilizables, `null` esconde la pestaña entera vía
-// `filtrarSecciones`. Con cero servicios la sección desaparece entera (no
-// solo la grilla): no tiene sentido mostrar una celda de CTA sola sin ningún
-// servicio alrededor, y es coherente con esta misma regla.
+// `filtrarSecciones`.
 export function buildServicios(config: SiteConfigDTO): ServiciosProps | null {
-  const servicios = comoServicios(config.servicios).slice(0, MAX_SERVICIOS_GRID)
+  const servicios = comoServicios(config.servicios)
   if (servicios.length === 0) return null
 
   const telefono = comoStringNoVacio(config.contacto?.telefono)
-  const restoFila = servicios.length % COLUMNAS_GRID_SERVICIOS
-  const ctaSpan = restoFila === 0 ? COLUMNAS_GRID_SERVICIOS : COLUMNAS_GRID_SERVICIOS - restoFila
 
   return {
     etiqueta: ETIQUETA_SERVICIOS,
-    items: servicios.map((servicio, indice) => ({
+    enlaceTexto: TEXTO_ENLACE_SERVICIO,
+    bandas: servicios.map((servicio, indice) => ({
       numero: indice + 1,
-      titulo: servicio.nombre,
+      nombre: servicio.nombre,
       descripcion: servicio.descripcion,
+      foto: servicio.foto,
+      whatsappUrl: telefono ? buildWhatsAppUrlConMensaje(telefono, `Hola, quiero consultar por ${servicio.nombre}`) : null,
     })),
-    ctaFrase: FRASE_CTA_SERVICIOS,
-    ctaEnlaceTexto: TEXTO_ENLACE_CTA_SERVICIOS,
-    whatsappUrl: telefono ? buildWhatsAppUrl(telefono) : null,
-    ctaSpan,
   }
 }
 

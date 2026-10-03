@@ -218,87 +218,108 @@
   object-fit: cover;
 }
 
-/* ── Servicios ── */
+/* ── Servicios (bandas Bloques) ──
+ * Encabezado 140px 96px 84px y una banda a sangre por servicio, 400px mínimo,
+ * fondo alternando blanco / #F2F1ED. Grid .85fr 1.15fr con la celda visual
+ * SIEMPRE a la izquierda: la alternancia vive en el color de fondo, no en el
+ * lado (README "Bandas de servicio"). La celda visual toma el fondo contrario
+ * al de su banda. Sin hover de bloque: solo el enlace. */
 
-.servicios {
-  padding: 56px 44px;
+.serviciosEncabezado {
+  padding: 140px 96px 84px;
+}
+
+.eyebrowServicios {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--acento);
+  margin: 0 0 20px;
 }
 
 .serviciosTitulo {
-  font: 800 40px/1.1 var(--font-montserrat), sans-serif;
+  font: 800 68px/1.04 var(--font-montserrat), sans-serif;
   letter-spacing: -0.042em;
-  max-width: 18ch;
-  margin: 0 0 40px;
+  max-width: 22ch;
+  margin: 0;
   color: var(--wb-tpl-ink);
 }
 
-.serviciosGrid {
+.banda {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  background: #ecedf1;
-  border: 1px solid #ecedf1;
+  grid-template-columns: 0.85fr 1.15fr;
+  min-height: 400px;
+  background: #fff;
 }
 
-.servicioCelda {
-  background: var(--wb-tpl-surface);
-  padding: 30px 26px 34px;
+.bandaHueso {
+  background: #f2f1ed;
 }
 
-.servicioNumero {
-  font: 400 13px var(--font-montserrat), sans-serif;
-  color: #c7c3ba;
-  margin: 0 0 44px;
+.bandaVisual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f2f1ed;
 }
 
-.servicioTitulo {
-  font: 600 16px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
+.bandaHueso .bandaVisual {
+  background: #fff;
 }
 
-/* `300 13px/1.65 Montserrat` (README.md:201) — nace ausente hoy (ningún
-   productor del chat completa `servicios[].descripcion` todavía, ver
-   `SiteConfigDTO.ts`), así que en la práctica esta clase no se pinta en
-   ningún sitio real por ahora. `index.tsx` solo la renderiza cuando el
-   servicio trae descripción propia; sin ella la celda queda igual que hoy
-   (número + título), que es el estado que ya se ve en producción y se
-   verificó en navegador — no un placeholder ni un hueco. */
-.servicioDescripcion {
-  font: 300 13px/1.65 var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink-muted);
-  margin: 8px 0 0;
+.bandaNumeroGigante {
+  font: 800 220px/1 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.06em;
+  color: var(--acento-18);
+  user-select: none;
 }
 
-.servicioCtaCelda {
-  background: var(--acento);
-  padding: 30px 26px 34px;
+.bandaTexto {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 100px 96px;
 }
 
-.servicioCtaFrase {
-  font: 800 19px/1.35 var(--font-montserrat), sans-serif;
+.bandaNumero {
+  font: 800 15px var(--font-montserrat), sans-serif;
+  color: var(--acento);
+  margin: 0 0 40px;
+}
+
+.bandaTitulo {
+  font: 700 38px/1.15 var(--font-montserrat), sans-serif;
   letter-spacing: -0.03em;
-  color: #fff;
-  margin: 0 0 16px;
+  color: var(--wb-tpl-ink);
+  margin: 0;
 }
 
-.servicioCtaEnlace {
+.bandaDescripcion {
+  font: 300 16px/1.85 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  max-width: 40ch;
+  margin: 20px 0 0;
+}
+
+.bandaEnlace {
   font: 600 12.5px var(--font-montserrat), sans-serif;
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--acento);
+  border-bottom: 1.5px solid var(--acento-28);
   width: fit-content;
-  transition: filter 0.2s ease;
+  margin-top: 32px;
+  transition: border-color 0.2s ease;
 }
 
-.servicioCtaEnlace:hover {
-  filter: brightness(0.85);
+.bandaEnlace:hover {
+  border-color: var(--acento);
 }
 
-.servicioCtaEnlace:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+.bandaEnlace:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 4px;
 }
 
 /* ── Nosotros ── */
@@ -664,18 +685,54 @@
     padding: 16px 24px;
   }
 
-  .servicios,
   .nosotros,
   .contacto {
     padding: 40px 22px;
   }
 
-  .serviciosTitulo {
-    font-size: 28px;
+  /* Bandas: siempre visual arriba / texto abajo (la forma A apila el número
+   * en una celda de 170px). La foto de la forma B conserva la misma altura. */
+  .serviciosEncabezado {
+    padding: 44px 24px 32px;
   }
 
-  .serviciosGrid {
+  /* H2 de sección en móvil: 34px / 1.06 / -.04em (README.md:273). */
+  .serviciosTitulo {
+    font-size: 34px;
+    line-height: 1.06;
+    letter-spacing: -0.04em;
+  }
+
+  .banda {
     grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .bandaVisual {
+    height: 170px;
+  }
+
+  .bandaNumeroGigante {
+    font-size: 120px;
+  }
+
+  .bandaTexto {
+    padding: 32px 24px 44px;
+  }
+
+  .bandaNumero {
+    margin-bottom: 20px;
+  }
+
+  .bandaTitulo {
+    font-size: 25px;
+    line-height: 1.18;
+  }
+
+  .bandaDescripcion {
+    font-size: 13.5px;
+    line-height: 1.8;
+    margin-top: 14px;
   }
 
   .nosotros {
