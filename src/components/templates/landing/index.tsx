@@ -224,13 +224,13 @@ export default async function Landing({ config }: TemplateProps) {
 
   // Regla 04 del handoff (bloque 3c): cuando llega el logo, ocupa el mismo
   // espacio que el monograma — nada más se mueve alrededor. `.marcaLogoImg`
-  // fija el alto (44px en escritorio, 34px en móvil, `Landing.module.css`) y
-  // deja que el ancho siga la proporción del logo con un tope, sin recortarlo
-  // ni deformarlo. `width`/`height` son las reales cuando hay `logoDimensiones`
-  // (sin salto de layout) y `--logo-escala` ajusta el alto base según la
-  // proporción (`shared/logoOptico.ts`); sin dimensiones, 180x44 y escala 1. Sin logo,
-  // `Monograma` (variante "serifCalado" — regla 02, LANDING es editorial)
-  // ocupa ese mismo slot derivado de `marca.iniciales`.
+  // deja que el ancho siga la proporción del logo, sin recortarlo ni
+  // deformarlo. Con `logoDimensiones` el servidor calcula los altos ópticos
+  // (regla T3, `shared/logoOptico.ts`) y llegan como `--logo-alto` /
+  // `--logo-alto-movil`; sin ellas, 44px / 34px de siempre. Un logotipo
+  // (proporción >= 1.6) reemplaza también al nombre visible; el `alt` lo
+  // conserva. Sin logo, `Monograma` (variante "serifCalado" — regla 02) ocupa
+  // ese mismo slot derivado de `marca.iniciales`.
   const marcaSlot = (
     <>
       {marca.logo ? (
@@ -239,14 +239,18 @@ export default async function Landing({ config }: TemplateProps) {
           alt={marca.nombre}
           width={marca.logoDimensiones?.ancho ?? 180}
           height={marca.logoDimensiones?.alto ?? 44}
-          sizes="240px"
+          sizes="180px"
           className={styles.marcaLogoImg}
-          style={marca.logoEscala ? ({ '--logo-escala': marca.logoEscala } as CSSProperties) : undefined}
+          style={
+            marca.logoAltos
+              ? ({ '--logo-alto': `${marca.logoAltos.escritorio}px`, '--logo-alto-movil': `${marca.logoAltos.movil}px` } as CSSProperties)
+              : undefined
+          }
         />
       ) : (
         <Monograma iniciales={marca.iniciales} variante="serifCalado" />
       )}
-      <span className={styles.marcaNombre}>{marca.nombre}</span>
+      {marca.mostrarNombre && <span className={styles.marcaNombre}>{marca.nombre}</span>}
     </>
   )
 

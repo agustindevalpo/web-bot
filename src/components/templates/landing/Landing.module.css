@@ -36,28 +36,29 @@
  * el otro lado de la regla 04: cuando el cliente sube logo, ocupa el mismo
  * espacio que el monograma ocupaba, nada se mueve alrededor.
  *
- * El alto es fijo y el ancho sigue la proporción del logo (hasta un tope).
+ * El alto es el óptico (T3), o 44px/34px sin dimensiones; el ancho sigue la
+ * proporción del logo (hasta un tope).
  * Una caja fija de 160×30 dejaba un logo casi cuadrado en ~44×30 px con un
  * hueco vacío a la derecha antes del nombre (visto en test.sitios.devalpo.cl,
  * 2026-09-27). 44px entra holgado en el header de escritorio. */
 
 .marcaLogoImg {
   display: block;
-  /* --logo-escala la fija index.tsx desde las dimensiones guardadas del logo
-   * (shared/logoOptico.ts); sin ella vale 1 y el alto es el de siempre. */
-  height: calc(44px * var(--logo-escala, 1));
+  /* --logo-alto la fija index.tsx desde las dimensiones guardadas del logo
+   * (regla T3, shared/logoOptico.ts) con el tope de ancho ya aplicado: la caja
+   * coincide con la imagen. Sin ella, el alto de siempre. */
+  height: var(--logo-alto, 44px);
   width: auto;
-  /* 240px y no 180: con 180 el ancho topaba antes que la escala y un logo
-   * muy ancho (8:1) quedaba de 22px de alto (revisión visual 2026-10-03). */
-  max-width: 240px;
+  max-width: 180px;
   object-fit: contain;
   object-position: left center;
   flex: none;
 }
 
 .marcaNombre {
-  font: 600 14.5px var(--font-montserrat), sans-serif;
-  letter-spacing: -0.01em;
+  font: 700 16px var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  margin-left: 3px; /* gap de .marca (11px) + 3px = 14px del handoff T3 */
   color: var(--wb-tpl-ink);
 }
 
@@ -600,10 +601,8 @@
 
 @media (max-width: 767px) {
   .marcaLogoImg {
-    /* Tope de 46px (~1.35x): la fila 1 móvil mide 52px y con 1.5x (51px) el
-     * logo vertical quedaba pegado al borde. */
-    height: min(calc(34px * var(--logo-escala, 1)), 46px);
-    max-width: 130px;
+    height: var(--logo-alto-movil, 34px);
+    max-width: 140px;
   }
 
   /*

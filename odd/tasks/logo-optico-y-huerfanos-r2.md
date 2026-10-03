@@ -20,6 +20,10 @@ for the designer agent is written separately.
 **Decisions (2026-10-03):**
 - Logo base height stays **44px desktop / 34px mobile** (Agustín's choice in PR #45, 2026-09-27),
   not the 36px of `handoff_bloques/README.md:247-260`. Optical sizing scales around that base.
+- Logo sizing now follows the designer's rule T3 (handoff_bloquesV2 brief, 2026-10-03): constant
+  area, heights clamp(28..60) desktop / clamp(22..46) mobile with the width cap (180/140px) folded
+  into the formula, replacing the earlier sqrt(4/r) scale and the 240px/46px tweak. r < 1.6 shows
+  the business name beside the logo; r >= 1.6 hides it (alt keeps it).
 - Dimensions are stored in a **parallel optional field** (`logoDimensiones?: { ancho, alto }`) so
   `logo` stays a string and every existing `configJson` keeps parsing. Logos uploaded before this
   change have no dimensions and keep today's rendering until re-uploaded.
@@ -57,6 +61,9 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
 - 2026-10-03: T1 done (delegated writer). Header parser `src/domain/imagen/dimensionesImagen.ts`,
   scale `shared/logoOptico.ts` (clamp(sqrt(4/ratio), 0.75, 1.5)), `logoDimensiones` stored at upload.
   tsc, lint, test:unit (961), build green. Commit: see git log (one `feat(landing)` commit).
+
+- 2026-10-03: T3 applied (delegated writer): `altosLogo`/`esLogotipo` in `shared/logoOptico.ts`,
+  `--logo-alto`/`--logo-alto-movil`, name hidden for logotypes. Commit: see git log.
 
 ## Next step
 
