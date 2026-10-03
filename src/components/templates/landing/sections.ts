@@ -2,6 +2,7 @@ import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { rubroVisible } from '@/components/templates/shared/rubroVisible'
 import { buildWhatsAppUrl, buildTelUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
 import { nombreDeServicio, descripcionDeServicio, fotoDeServicio } from '@/components/templates/shared/servicios'
+import { construirNosotros, type NosotrosProps } from '@/components/templates/shared/nosotros'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
 import { comoDimensionesLogo, altosLogo, esLogotipo, AltosLogo, DimensionesLogo } from '@/components/templates/shared/logoOptico'
 
@@ -69,17 +70,12 @@ function comoDestacados(valor: unknown): Destacado[] {
 // Techo de la maqueta (README, banda de datos): 3 cifras. Los servicios no
 // tienen techo: una banda por servicio, todos se muestran.
 const MAX_DESTACADOS = 3
-const MAX_IMAGENES_NOSOTROS = 3
 
 // Microcopy estructural del template — no es dato de cliente (como
 // `ETIQUETA_SERVICIOS` ya lo era en la versión anterior), así que no pasa
 // por los helpers defensivos de arriba: es texto fijo de la plantilla, igual
 // que "Qué ofrecemos" ya lo era antes de este rediseño.
 const ETIQUETA_SERVICIOS = 'Qué ofrecemos'
-// Chrome del H2 de Nosotros (ver `buildNosotros` más abajo: ya no repite el
-// nombre del negocio, que el hero ya muestra a un clic de distancia en la
-// SPA).
-const ETIQUETA_NOSOTROS = 'Quiénes somos'
 const TEXTO_ENLACE_SERVICIO = 'Consultar por WhatsApp'
 
 // `iniciales` reemplaza a la vieja `inicial` (una sola letra, cuadrado con
@@ -145,9 +141,8 @@ export function buildInicio(config: SiteConfigDTO): InicioProps {
 }
 
 // Las cifras y la frase destacada ya no viven en el hero (Bloques): `destacados`
-// pasan a la banda de datos (U5) y `highlight` al bloque Nosotros (U7, C3).
-// Se exponen aparte, con el mismo saneo defensivo, para que esas secciones los
-// consuman sin volver a tocar `buildInicio`.
+// pasan a la banda de datos (U5) y `highlight` a la cita del bloque Nosotros
+// (U7, C3), con el mismo saneo defensivo.
 export function buildDestacados(config: SiteConfigDTO): Destacado[] {
   return comoDestacados(config.destacados).slice(0, MAX_DESTACADOS)
 }
@@ -199,49 +194,13 @@ export function buildServicios(config: SiteConfigDTO): ServiciosProps | null {
   }
 }
 
-export type NosotrosProps = {
-  // Chrome de sección, no dato de cliente — ver `ETIQUETA_NOSOTROS` más
-  // arriba y el porqué en el comentario de `buildNosotros`.
-  titulo: string
-  // `null` cuando `sobreNosotros` no tiene contenido propio: la sección
-  // igual puede existir (con solo fotos), pero el párrafo no se pinta. Ver
-  // `buildNosotros`.
-  texto: string | null
-  // Longitud fija MAX_IMAGENES_NOSOTROS: `null` es un cupo vacío que el
-  // template pinta con `--wb-tpl-placeholder` en vez de recortar el grid.
-  imagenes: (string | null)[]
-}
-
-// La versión anterior (buildAbout, y esta misma T3 hasta que se encontró en
-// navegador) caía de `sobreNosotros` a `descripcion` cuando el primero
-// faltaba. Ese fallback era correcto en el long-scroll viejo, donde Inicio y
-// Nosotros quedaban a miles de píxeles de distancia. En esta SPA son un solo
-// clic de nav aparte: con el fallback, Nosotros repetía literalmente el
-// mismo párrafo que el hero ya mostró (`descripcion`) bajo un H2 que además
-// repetía el nombre del negocio del H1. Decisión: sin fallback. El párrafo
-// de Nosotros solo existe cuando `sobreNosotros` tiene contenido propio, y
-// el H2 deja de ser el nombre del negocio para ser chrome de sección (mismo
-// patrón que `ETIQUETA_SERVICIOS`).
-//
-// Consecuencia: con `sobreNosotros` ausente pero fotos de galería
-// presentes, la sección igual se muestra (solo fotos, sin párrafo) — el
-// contenido "propio" de esta sección es sobreNosotros O imágenes, no ambos
-// a la vez. Solo cuando NINGUNO de los dos existe, `null` esconde la
-// sección entera (y "Nosotros" desaparece del nav vía `filtrarSecciones`).
-export function buildNosotros(config: SiteConfigDTO): NosotrosProps | null {
-  const texto = comoStringNoVacio(config.sobreNosotros)
-
-  // Excluye la primera imagen (reservada para el hero de Inicio), mismo
-  // criterio que la `buildGaleria` de la versión anterior.
-  const disponibles = comoArrayDeStrings(config.imagenes).slice(1)
-  if (!texto && disponibles.length === 0) return null
-
-  const imagenes: (string | null)[] = Array.from(
-    { length: MAX_IMAGENES_NOSOTROS },
-    (_, indice) => disponibles[indice] ?? null,
-  )
-
-  return { titulo: ETIQUETA_NOSOTROS, texto, imagenes }
+// Nosotros nunca es null (T5.3): el caso base usa `nombre`, `ciudad` y
+// `descripcion`, así que "Nosotros" siempre está en el nav. Las fotos de
+// `imagenes[1..]` ya no se muestran acá (README: es un borrado, no una
+// migración). La lógica vive en `shared/nosotros.ts` para reusarla en las
+// demás plantillas; acá solo se le pasa la frase destacada (C3).
+export function buildNosotros(config: SiteConfigDTO): NosotrosProps {
+  return construirNosotros(config, buildHighlight(config))
 }
 
 export type ContactoProps = {

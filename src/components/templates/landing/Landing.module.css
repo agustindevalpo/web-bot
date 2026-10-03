@@ -322,100 +322,6 @@
   outline-offset: 4px;
 }
 
-/* ── Nosotros ── */
-
-.nosotros {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 52px;
-  padding: 56px 44px;
-}
-
-/* `index.tsx` ya referenciaba esta clase (columna izquierda de Nosotros) sin
-   que existiera acá — resolvía a `undefined`. Se agrega en vez de borrar la
-   referencia: el prototipo especifica ese wrapper como
-   `display:flex;flex-direction:column;justify-content:center`
-   (`Plantillas WebBot.dc.html:113`), y es gratis reproducirlo con fidelidad
-   aunque hoy no cambie nada visible (`.nosotros` ya no tiene alto resuelto
-   en el scroll largo, así que el `justify-content:center` no tiene espacio
-   extra que repartir todavía). */
-.nosotrosIzquierda {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.nosotrosTitulo {
-  font: 800 38px/1.12 var(--font-montserrat), sans-serif;
-  letter-spacing: -0.042em;
-  margin: 0 0 18px;
-  color: var(--wb-tpl-ink);
-}
-
-.nosotrosTexto {
-  font: 300 14.5px/1.75 var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink-muted);
-}
-
-.nosotrosGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 14px;
-}
-
-/*
- * `1fr` rows need a resolved container height to distribute — they had one
- * in the old tabbed layout (`height:100%` on the tab pane), but the SPA
- * conversion put `#nosotros` in natural document flow, and both children of
- * a cell (`next/image` con `fill`, y el placeholder) son `position:absolute`
- * y no aportan altura intrínseca. Resultado medido en `demo-consultora`:
- * filas de 32.675px/0px, grilla de fotos prácticamente plana.
- *
- * Fix: darle a la celda un `aspect-ratio` propio. Con la altura del
- * contenedor indefinida, el algoritmo de grid trata `1fr` como si fuera
- * `auto` (se basa en la contribución de max-content de cada celda) — el
- * `aspect-ratio` es justo lo que le da a esa celda, vacía salvo por hijos
- * absolutos, una altura preferida real. Es el mismo mecanismo que ya usa
- * `.fotoPlaceholder` en móvil (línea de abajo), aplicado acá porque el
- * problema es el mismo: una caja sin contenido intrínseco dentro de un
- * contenedor sin alto resuelto.
- *
- * Las 4 celdas del grid son de longitud fija (`MAX_IMAGENES_NOSOTROS = 4` en
- * `sections.ts`), rellenas con `null` → placeholder cuando falta una foto:
- * el grid siempre tiene 4 celdas, con 1, 2, 3 o 4 fotos reales entre ellas.
- * Este `aspect-ratio` no distingue foto real de placeholder (ambos hijos son
- * `position:absolute;inset:0`), así que el fix vale para cualquier
- * combinación.
- */
-.nosotrosImgCelda {
-  position: relative;
-  border-radius: 4px;
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-}
-
-/*
- * La celda principal ocupa `grid-row: span 2` — necesita el doble de alto
- * que una celda simple (más el gap entre filas), no el mismo `aspect-ratio`.
- * Usarlo igual la dejaría pidiendo la altura de UNA fila mientras ocupa dos,
- * y el grid la achicaría a la mitad de lo que se ve en la maqueta. `2 / 3`
- * es `4 / 3` con el alto duplicado (0.75× el ancho → 1.5× el ancho), así que
- * la celda principal lee proporcionalmente el doble de alta que sus 3
- * vecinas, sin distorsión (el `object-fit: cover` de `.fotoImg` hace el
- * recorte final).
- */
-.nosotrosImgPrincipal {
-  grid-row: span 2;
-  aspect-ratio: 2 / 3;
-}
-
-.nosotrosImgPlaceholder {
-  position: absolute;
-  inset: 0;
-  background: var(--wb-tpl-placeholder);
-}
-
 /* ── Contacto ── */
 
 .contacto {
@@ -425,9 +331,7 @@
   padding: 56px 44px;
 }
 
-/* Mismo caso que `.nosotrosIzquierda` de arriba: `index.tsx` ya la
-   referenciaba (columna izquierda de Contacto) y no existía. El prototipo
-   especifica el mismo wrapper (`Plantillas WebBot.dc.html:137`). */
+/* Columna izquierda de Contacto (prototipo, `Plantillas WebBot.dc.html:137`). */
 .contactoIzquierda {
   display: flex;
   flex-direction: column;
@@ -685,7 +589,6 @@
     padding: 16px 24px;
   }
 
-  .nosotros,
   .contacto {
     padding: 40px 22px;
   }
@@ -733,18 +636,6 @@
     font-size: 13.5px;
     line-height: 1.8;
     margin-top: 14px;
-  }
-
-  .nosotros {
-    grid-template-columns: 1fr;
-  }
-
-  .nosotrosTitulo {
-    font-size: 27px;
-  }
-
-  .nosotrosGrid {
-    grid-template-columns: 1fr 1fr;
   }
 
   .contacto {

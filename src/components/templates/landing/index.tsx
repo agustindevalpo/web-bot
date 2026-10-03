@@ -7,6 +7,7 @@ import { filtrarSecciones, estiloCascada, type SeccionSPA } from '@/components/t
 import { tramoDisplay, type TramoDisplay } from '@/components/templates/shared/displayHero'
 import Monograma from '@/components/templates/shared/Monograma'
 import BandaDatos from '@/components/templates/shared/BandaDatos'
+import BloqueNosotros from '@/components/templates/shared/BloqueNosotros'
 import { buildMarca, buildInicio, buildDestacados, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
 import FormularioContacto from './FormularioContacto'
 import styles from './Landing.module.css'
@@ -148,40 +149,7 @@ export default async function Landing({ config }: TemplateProps) {
     {
       id: 'nosotros',
       etiqueta: 'Nosotros',
-      contenido: nosotros && (
-        <section className={styles.nosotros}>
-          <div className={styles.nosotrosIzquierda}>
-            <div className={styles.eyebrow} data-dv-anim="up" style={estiloCascada(0)}>
-              Nosotros
-            </div>
-            <h2 className={styles.nosotrosTitulo} data-dv-anim="up" style={estiloCascada(1)}>
-              {nosotros.titulo}
-            </h2>
-            {nosotros.texto && (
-              <p className={styles.nosotrosTexto} data-dv-anim="up" style={estiloCascada(2)}>
-                {nosotros.texto}
-              </p>
-            )}
-          </div>
-
-          <div className={styles.nosotrosGrid}>
-            {nosotros.imagenes.map((imagen, indice) => (
-              <div
-                key={indice}
-                className={indice === 0 ? `${styles.nosotrosImgCelda} ${styles.nosotrosImgPrincipal}` : styles.nosotrosImgCelda}
-                data-dv-anim="up"
-                style={estiloCascada(indice + 1)}
-              >
-                {imagen ? (
-                  <Image src={imagen} alt={marca.nombre} fill sizes="(max-width: 767px) 50vw, 25vw" className={styles.fotoImg} />
-                ) : (
-                  <div className={styles.nosotrosImgPlaceholder} />
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      ),
+      contenido: <BloqueNosotros {...nosotros} />,
     },
     {
       id: 'contacto',
