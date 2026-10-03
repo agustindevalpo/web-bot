@@ -31,7 +31,7 @@ describe('buildPaletteStyle', () => {
   it('con solo colores.acento, deriva las otras tres y las cuatro variables quedan pobladas', () => {
     const style = buildPaletteStyle(baseConfig({ colores: { acento: '#333333' } }))
 
-    expect(style).toEqual({
+    expect(style).toMatchObject({
       '--primario': '#1b1b1b',
       '--secundario': '#555555',
       '--acento': '#333333',
@@ -51,7 +51,7 @@ describe('buildPaletteStyle', () => {
     } as unknown as Partial<SiteConfigDTO>
     const style = buildPaletteStyle(baseConfig(filaVieja))
 
-    expect(style).toEqual({
+    expect(style).toMatchObject({
       '--primario': '#1b1b1b',
       '--secundario': '#555555',
       '--acento': '#333333',
@@ -62,10 +62,10 @@ describe('buildPaletteStyle', () => {
   it('sin config.colores, cae al acento por defecto y deriva desde ahí', () => {
     const style = buildPaletteStyle(baseConfig())
 
-    expect(style).toEqual({
+    expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15defa',
+      '--acento': '#008294',
       '--texto': '#ffffff',
     })
   })
@@ -79,10 +79,10 @@ describe('buildPaletteStyle', () => {
   it('con un acento inválido, las cuatro variables quedan coherentes con el acento de reserva', () => {
     const style = buildPaletteStyle(baseConfig({ colores: { acento: 'no-es-un-color' } }))
 
-    expect(style).toEqual({
+    expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15defa',
+      '--acento': '#008294',
       '--texto': '#ffffff',
     })
   })
@@ -97,10 +97,10 @@ describe('buildPaletteStyle', () => {
     const filaSinAcento = { colores: {} } as unknown as Partial<SiteConfigDTO>
     const style = buildPaletteStyle(baseConfig(filaSinAcento))
 
-    expect(style).toEqual({
+    expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15defa',
+      '--acento': '#008294',
       '--texto': '#ffffff',
     })
   })
@@ -114,11 +114,46 @@ describe('buildPaletteStyle', () => {
   it('con acento como string vacío, cae al acento por defecto y deriva desde ahí', () => {
     const style = buildPaletteStyle(baseConfig({ colores: { acento: '' } }))
 
-    expect(style).toEqual({
+    expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#15defa',
+      '--acento': '#008294',
       '--texto': '#ffffff',
+    })
+  })
+
+  // T2: `palette.ts` es el único lugar que clampea el acento (>= 4.5:1 contra
+  // blanco). Los literales de salida son los que LANDING ya producía con su
+  // clamp propio (`clampAcento(--acento, '#FFFFFF', 4.5)` en landing/index.tsx
+  // antes de U1): LANDING no debe cambiar de color.
+  it.each([
+    ['#FFD000', '#8f7400'],
+    ['#15DEFA', '#008294'],
+    ['#FF8C00', '#b46100'],
+    ['#f80', '#b66000'],
+    ['#ffffff', '#767676'],
+  ])('clampea el acento claro %s a %s (>= 4.5:1 contra blanco)', (acento, esperado) => {
+    expect(buildPaletteStyle(baseConfig({ colores: { acento } }))).toMatchObject({ '--acento': esperado })
+  })
+
+  it.each(['#333333', '#0B5FFF', '#1a7f37', '#000000'])('un acento que ya cumple (%s) pasa sin cambios', (acento) => {
+    expect(buildPaletteStyle(baseConfig({ colores: { acento } }))).toMatchObject({ '--acento': acento.toLowerCase() })
+  })
+
+  it('primario y texto se derivan del acento tal cual, el clamp solo toca --acento', () => {
+    expect(buildPaletteStyle(baseConfig({ colores: { acento: '#FFD000' } }))).toMatchObject({
+      '--primario': '#221a00',
+      '--texto': '#ffffff',
+      '--acento': '#8f7400',
+    })
+  })
+
+  it('expone los derivados CSS de T2 sobre var(--acento)', () => {
+    expect(buildPaletteStyle(baseConfig({ colores: { acento: '#333333' } }))).toMatchObject({
+      '--acento-07': 'color-mix(in oklch, var(--acento) 7%, white)',
+      '--acento-18': 'color-mix(in oklch, var(--acento) 18%, white)',
+      '--acento-28': 'color-mix(in oklch, var(--acento) 28%, white)',
+      '--acento-hover': 'oklch(from var(--acento) calc(l - .08) c h)',
     })
   })
 })

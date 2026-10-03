@@ -11,7 +11,21 @@ import { Estilo } from '@/domain/value-objects/Estilo'
 // entrada de cualquier forma puede llegar hasta el render — se normaliza en
 // el borde (`shared/servicios.ts`), no acá, mismo patrón que D-32 con el
 // color.
-export type ServicioDTO = string | { nombre: string; descripcion?: string }
+//
+// Handoff Bloques v2 (README "Campos del SiteConfigDTO"): el objeto gana
+// `foto` (URL; imagen de la banda B del servicio) y `precioDesde` (texto
+// libre, se imprime tal cual, p. ej. "Desde $25.000"). Ambos opcionales y
+// leídos de forma defensiva (`shared/servicios.ts`).
+export type ServicioDTO = string | { nombre: string; descripcion?: string; foto?: string; precioDesde?: string }
+
+// Las tres tarjetas del bloque Nosotros (handoff_bloques/README.md, "Campos
+// del SiteConfigDTO"; U7). Cada parte es opcional: la plantilla dibuja de 0 a
+// 3 tarjetas según cuántas vengan. Orden fijo: desde, quien, distinto.
+export interface SobreNosotrosPartesDTO {
+  desde?: string
+  quien?: string
+  distinto?: string
+}
 
 export interface SiteConfigDTO {
   nombre: string
@@ -66,4 +80,19 @@ export interface SiteConfigDTO {
   // leer: el header cae al render de alto fijo. Un valor inválido (llegado por
   // el editor JSON) se descarta al leerlo, nunca rompe el render.
   logoDimensiones?: { ancho: number; alto: number }
+  // Bloques v2 (aditivos, todos opcionales; nada los completa todavía, nacen
+  // ausentes y cada plantilla degrada sin ellos). Se leen defensivamente en
+  // `shared/contenido.ts` porque `configJson` no se valida en runtime.
+  //
+  // Tarjetas del bloque Nosotros (README "Campos del SiteConfigDTO").
+  sobreNosotrosPartes?: SobreNosotrosPartesDTO
+  // Autor de la cita `highlight` (C3, 00-DECISIONES-TRANSVERSALES.md). Sin
+  // `nombre` no se muestra atribución.
+  highlightAutor?: { nombre: string; cargo?: string }
+  // Datos legales para el footer (T7): solo se muestran con razón social Y
+  // RUT; nunca medio RUT.
+  legal?: { razonSocial: string; rut: string }
+  // Horarios para la banda de datos y el contacto (C1/T9). El tope de la
+  // banda (3) es decisión de la plantilla, no del DTO.
+  horarios?: { dia: string; rango: string }[]
 }

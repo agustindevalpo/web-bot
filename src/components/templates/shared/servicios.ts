@@ -31,3 +31,23 @@ export function descripcionDeServicio(item: unknown): string | null {
   }
   return null
 }
+
+// Campo de texto opcional del shape objeto, trimeado; null si el shape no es
+// objeto, el campo no es string o queda vacío. Nunca lanza.
+function textoDeServicio(item: unknown, campo: 'foto' | 'precioDesde'): string | null {
+  if (item === null || typeof item !== 'object') return null
+  const valor = (item as Record<string, unknown>)[campo]
+  if (typeof valor !== 'string') return null
+  const limpio = valor.trim()
+  return limpio !== '' ? limpio : null
+}
+
+// URL de la foto de la banda B (Bloques v2). Solo el shape objeto la tiene.
+export function fotoDeServicio(item: unknown): string | null {
+  return textoDeServicio(item, 'foto')
+}
+
+// Texto libre "desde" que se imprime tal cual (p. ej. "Desde $25.000").
+export function precioDeServicio(item: unknown): string | null {
+  return textoDeServicio(item, 'precioDesde')
+}

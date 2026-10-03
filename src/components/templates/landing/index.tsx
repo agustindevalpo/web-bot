@@ -5,13 +5,10 @@ import { buildPaletteStyle } from '@/components/templates/shared/palette'
 import SeccionesSPA from '@/components/templates/shared/SeccionesSPA'
 import { filtrarSecciones, estiloCascada, type SeccionSPA } from '@/components/templates/shared/navegacion'
 import { instrumentSerif } from '@/components/templates/shared/fuentes'
-import { clampAcento, OBJETIVO_TEXTO } from '@/domain/color/contraste'
 import Monograma from '@/components/templates/shared/Monograma'
 import { buildMarca, buildInicio, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
 import FormularioContacto from './FormularioContacto'
 import styles from './Landing.module.css'
-
-const FONDO_LANDING = '#FFFFFF'
 
 // Primer consumidor de `SeccionesSPA` (S0a, sin importador hasta acá) y de
 // `clampAcento` (S0b, ídem). Server Component async — el único cliente de
@@ -19,17 +16,9 @@ const FONDO_LANDING = '#FFFFFF'
 // formulario de contacto (`FormularioContacto`), que no convierte el resto
 // del árbol a cliente (README.md, "Implicancia arquitectónica").
 export default async function Landing({ config }: TemplateProps) {
-  const paletteStyle = buildPaletteStyle(config)
-  // LANDING pinta el acento sobre blanco (README.md:94): necesita el techo,
-  // no el piso — bajar `L` si el acento del cliente viene demasiado claro
-  // para cumplir 4.5:1 de texto. Se sobreescribe `--acento` con el valor ya
-  // clampeado: es la única variable de acento que esta plantilla consume
-  // (no depende de `--primario`/`--secundario`/`--texto`), así que un solo
-  // punto de cableado alcanza para eyebrows, botones, subrayado del nav,
-  // cifras, check-icons, pin del mapa y enlaces.
-  const acentoBase = (paletteStyle as Record<string, string>)['--acento']
-  const acentoTexto = clampAcento(acentoBase, FONDO_LANDING, OBJETIVO_TEXTO)
-  const estiloRaiz = { ...paletteStyle, '--acento': acentoTexto } as CSSProperties
+  // `buildPaletteStyle` ya emite `--acento` clampeado a >= 4.5:1 contra blanco
+  // (T2): LANDING no clampea por su cuenta.
+  const estiloRaiz: CSSProperties = buildPaletteStyle(config)
 
   const marca = buildMarca(config)
   const inicio = buildInicio(config)

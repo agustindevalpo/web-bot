@@ -47,7 +47,7 @@ unit, merged as each one is ready; production only moves on an explicit release.
 
 ## Tasks
 
-- [ ] **U1 — Foundations.** DTO fields above + defensive readers/helpers (`shared/servicios.ts`),
+- [x] **U1 — Foundations.** DTO fields above + defensive readers/helpers (`shared/servicios.ts`),
   `palette.ts` clamp for all templates. No visual change. SHARED.
 - [ ] **U2 — Monogram + font (T1, T4).** Monograma reduced to Sans pesado 36/34/26; Instrument Serif
   removed from LANDING and `Monograma.module.css`; headings Montserrat 800 with Bloques tracking. SHARED.
@@ -71,7 +71,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
 ## Progress
 
 - 2026-10-03: gap analysis done (delegated read-only mapper); document created.
+- 2026-10-03: U1 done on `feat/bloques-u1-fundaciones`: DTO fields, `shared/contenido.ts` + `fotoDeServicio`/`precioDeServicio`, clamp moved into `buildPaletteStyle` (LANDING colors unchanged; other templates now clamp `--acento`), `--acento-07/18/28/hover` exposed. tsc, eslint, 1066 unit tests, build green.
 
 ## Next step
 
-U1 on `feat/bloques-u1-fundaciones`.
+U2 (Monogram + font) on a new branch from `develop` (stacked on U1 until it merges).
