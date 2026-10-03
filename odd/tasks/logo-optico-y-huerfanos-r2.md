@@ -61,13 +61,18 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
 - 2026-10-03: T2 done (delegated writer), branch `feat/limpieza-huerfanos-r2` stacked on T1. Port gains
   `eliminar` + `urlPublicaBase`; pure ownership helper `domain/imagen/imagenesPropias.ts`; best-effort
   cleanup after the DB write in upload and JSON save; stale `logoDimensiones` dropped. tsc, lint,
-  test:unit (998), build green. Commit `e3a2d1f`.
+  test:unit (998), build green. Commit `a8b22e2`.
 
 - 2026-10-03: parent review of T2 found an upload replacing the logo/hero would delete a URL still
-  referenced elsewhere in the config (e.g. also in the gallery). Fixed inline in `8679dbd` with a
+  referenced elsewhere in the config (e.g. also in the gallery). Fixed inline in `200f7a4` with a
   test; tsc + test:unit (999) green. Delivery: PR 1 = T1 to `develop`, PR 2 = T2 stacked on PR 1.
+
+- 2026-10-03: Chrome check (local next dev + local Postgres, 1036px and 390px). 4:1 unchanged (176x44),
+  vertical 30x66 desktop. Two limits found and fixed with Agustin's OK in `c4d8c9a` (on T1 branch;
+  T2 rebased on it): desktop max-width 180 -> 240px (a 8:1 logo was capped at 22px tall) and mobile
+  height capped at 46px (51px touched the 52px row edge).
 
 ## Next step
 
-Visual check of LANDING with a wide and a narrow logo, then push and open the two PRs
+Push and open the two PRs
 (Agustín authorizes push).
