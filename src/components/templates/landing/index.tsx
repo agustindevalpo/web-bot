@@ -239,7 +239,7 @@ export default async function Landing({ config }: TemplateProps) {
           alt={marca.nombre}
           width={marca.logoDimensiones?.ancho ?? 180}
           height={marca.logoDimensiones?.alto ?? 44}
-          sizes="180px"
+          sizes="240px"
           className={styles.marcaLogoImg}
           style={marca.logoEscala ? ({ '--logo-escala': marca.logoEscala } as CSSProperties) : undefined}
         />

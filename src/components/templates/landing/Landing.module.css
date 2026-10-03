@@ -47,7 +47,9 @@
    * (shared/logoOptico.ts); sin ella vale 1 y el alto es el de siempre. */
   height: calc(44px * var(--logo-escala, 1));
   width: auto;
-  max-width: 180px;
+  /* 240px y no 180: con 180 el ancho topaba antes que la escala y un logo
+   * muy ancho (8:1) quedaba de 22px de alto (revisión visual 2026-10-03). */
+  max-width: 240px;
   object-fit: contain;
   object-position: left center;
   flex: none;
@@ -598,7 +600,9 @@
 
 @media (max-width: 767px) {
   .marcaLogoImg {
-    height: calc(34px * var(--logo-escala, 1));
+    /* Tope de 46px (~1.35x): la fila 1 móvil mide 52px y con 1.5x (51px) el
+     * logo vertical quedaba pegado al borde. */
+    height: min(calc(34px * var(--logo-escala, 1)), 46px);
     max-width: 130px;
   }
 
