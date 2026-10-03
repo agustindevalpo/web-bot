@@ -57,7 +57,7 @@
 }
 
 [data-dv-anim='up'][data-dv-in] {
-  animation: dvUp 0.62s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: dvUp 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   animation-delay: var(--dv-delay, 0ms);
 }
 
