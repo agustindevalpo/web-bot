@@ -6,7 +6,6 @@ import {
   buildServicios,
   buildNosotros,
   buildContacto,
-  buildFooter,
 } from '@/components/templates/landing/sections'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
@@ -373,25 +372,5 @@ describe('landing/sections — buildContacto', () => {
     const config = configCompleto({ contacto: { telefono: '+56 9 1234 5678', email: 'x@x.cl', formulario: 'si' as unknown as { habilitado: boolean } } })
     expect(() => buildContacto(config)).not.toThrow()
     expect(buildContacto(config).formularioHabilitado).toBe(true)
-  })
-})
-
-describe('landing/sections — buildFooter', () => {
-  it('arma el footer desde un config lleno', () => {
-    const footer = buildFooter(configCompleto())
-
-    expect(footer.nombre).toBe('Panadería El Trigal')
-    expect(footer.ciudad).toBe('Viña del Mar')
-    expect(footer.telefono).toBe('+56 9 1234 5678')
-    expect(footer.email).toBe('contacto@eltrigal.cl')
-  })
-
-  it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
-    expect(() => buildFooter(configSoloNombre())).not.toThrow()
-    const footer = buildFooter(configSoloNombre())
-    expect(footer.nombre).toBe('Sitio E2E')
-    expect(footer.ciudad).toBeNull()
-    expect(footer.telefono).toBeNull()
-    expect(footer.email).toBeNull()
   })
 })

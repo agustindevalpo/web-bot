@@ -1,0 +1,133 @@
+/*
+ * Pie Bloques (T2, T3, T4, T7). Fondo #101218 fijo. Todo texto secundario va
+ * a >= rgba(255,255,255,.66) (T2). El logo siempre sobre una placa blanca sin
+ * radio; el monograma va directo sobre la tinta, sin placa. Un breakpoint: 768px.
+ */
+
+.pie {
+  background: #101218;
+  padding: 100px 96px 44px;
+  font-family: var(--font-montserrat), sans-serif;
+  color: #fff;
+}
+
+.grilla {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 72px;
+  padding-bottom: 80px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.marcaFila {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.placa {
+  display: inline-flex;
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 0;
+}
+
+.logo {
+  display: block;
+  width: auto;
+  height: var(--logo-alto);
+  object-fit: contain;
+}
+
+.nombre {
+  font: 700 19px var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.glosa {
+  margin-top: 24px;
+  max-width: 32ch;
+  font: 300 14px/1.8 var(--font-montserrat), sans-serif;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.titulo {
+  margin-bottom: 24px;
+  font: 600 10.5px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.enlace {
+  font: 300 14px var(--font-montserrat), sans-serif;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 0.2s ease;
+}
+
+.enlace:hover {
+  color: #fff;
+}
+
+.enlace:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.legal {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 36px;
+  font: 300 11.5px var(--font-montserrat), sans-serif;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+@media (max-width: 767px) {
+  /* El padding inferior deja libre el botón flotante de WhatsApp (48px + 26px). */
+  .pie {
+    padding: 34px 24px 84px;
+  }
+
+  .grilla {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding-bottom: 28px;
+  }
+
+  .placa {
+    padding: 10px 13px;
+  }
+
+  .logo {
+    height: var(--logo-alto-movil);
+  }
+
+  .glosa {
+    margin-top: 16px;
+  }
+
+  .titulo {
+    margin-bottom: 16px;
+  }
+
+  .legal {
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 22px;
+    font-size: 10.5px;
+    line-height: 1.6;
+  }
+}

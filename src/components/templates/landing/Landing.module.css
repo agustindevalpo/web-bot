@@ -313,38 +313,6 @@
   outline-offset: 4px;
 }
 
-/* ── Footer propio de LANDING (T6) — el compartido queda intacto ── */
-
-.footer {
-  height: 76px;
-  padding: 0 44px;
-  display: flex;
-  align-items: center;
-  gap: 26px;
-  background: var(--wb-tpl-ink);
-}
-
-.footerNombre {
-  font: 600 13px var(--font-montserrat), sans-serif;
-  color: #fff;
-  flex: none;
-}
-
-.footerDatos {
-  display: flex;
-  gap: 26px;
-  flex: 1;
-  flex-wrap: wrap;
-  font: 300 11.5px var(--font-montserrat), sans-serif;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.footerCredito {
-  font: 300 10.5px var(--font-montserrat), sans-serif;
-  color: rgba(255, 255, 255, 0.35);
-  flex: none;
-}
-
 /* ── Botón flotante de WhatsApp (README.md:167-171) ── */
 
 .whatsappFlotante {
@@ -500,26 +468,6 @@
     margin-top: 14px;
   }
 
-
-
-  /* Centrado en móvil (decisión de Agustín, 2026-09-26 — el handoff de
-   * Bloques no fija la alineación móvil del footer). El padding inferior
-   * deja libre la zona del botón flotante de WhatsApp (48px + 26px de
-   * `bottom`) para que no tape la última línea del crédito. */
-  .footer {
-    height: auto;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 10px;
-    padding: 24px 22px 84px;
-  }
-
-  .footerDatos {
-    justify-content: center;
-    column-gap: 18px;
-    row-gap: 6px;
-  }
 
   .whatsappFlotante {
     right: 18px;

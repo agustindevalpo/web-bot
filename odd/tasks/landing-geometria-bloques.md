@@ -24,6 +24,9 @@ what must be shared).
 - No `logoRatio` field: `logoDimensiones` already stores width and height (T3 is implemented).
 - C2 answer: stock photos are Unsplash URLs and own photos live under `R2_PUBLIC_URL`
   (`domain/imagen/imagenesPropias.ts` already tells them apart), so no `/banco/` prefix is needed.
+- Footer logo (U9): "80% of the header" means 80% of the header LOGO height from `altosLogo()`
+  (`round(escritorio*0.8)` / `round(movil*0.8)`; the S2 prototype draws a 132x44 header logo as 106x35).
+  No dimensions: 35px high, auto width, max 180px.
 - New DTO fields are optional and read defensively at the `sections.ts` boundary: `servicios[].foto`,
   `sobreNosotrosPartes`, `highlightAutor`, `legal`, `horarios`.
 
@@ -65,7 +68,7 @@ unit, merged as each one is ready; production only moves on an explicit release.
   never null, C3 highlight quote with `highlightAutor`; delete the photo grid. SHARED.
 - [x] **U8 — Contact (C1).** No map; right column = horarios card (if any) + phone/email cards;
   `FormularioContacto` gets an optional `servicios` prop for S2. SHARED.
-- [ ] **U9 — Footer (T3, T7).** `FooterBloques`: columns, logo on white plate, legal line, >=66% white
+- [x] **U9 — Footer (T3, T7).** `FooterBloques`: columns, logo on white plate, legal line, >=66% white
   micro-text. Old `shared/Footer.tsx` stays for the not-yet-migrated templates. SHARED.
 - [ ] **U10 — Motion + mobile polish.** Threshold .12, 80ms cascade, reduced motion, remaining mobile
   values, dead CSS removal.
@@ -88,7 +91,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
 - 2026-10-03: U6 done on `feat/bloques-u6-bandas-servicio`: `buildServicios` now returns `{ etiqueta, enlaceTexto, bandas: ServicioBanda[] }` (`numero, nombre, descripcion, foto, whatsappUrl` with the service name prefilled; no trim, no CTA cell, no `ctaSpan`). One full-bleed band per service, `.85fr 1.15fr`, white / `#F2F1ED` alternation by background colour with the visual cell always on the left (README: alternation moved from the photo side to the background colour; mobile always stacks visual-on-top), form A giant `aria-hidden` number in `--acento-18` on the opposite background, form B `next/image` fill from `fotoDeServicio` only (never `imagenes[]`), 15px real number above the title, link with `--acento-28` underline. H2 kept as "Qué ofrecemos" (e2e). Single service still renders one band (designer question open). tsc, eslint (0 errors), 1104 unit tests, build green.
 - 2026-10-03: U7 done on `feat/bloques-u7-nosotros`: `shared/BloqueNosotros.tsx` (+ `.module.css`, Server Component) fed by pure `shared/nosotros.ts` (`construirNosotros(config, frase)`, `layoutNosotros(n)` -> columna/fila/dos). Full-bleed `--acento`, 150px 96px, all text #FFF (alpha only on card backgrounds and the quote rule). Paragraph = `sobreNosotros` else `descripcion`; H2 `{nombre} en {ciudad}`; cards title-only from `comoPartesNosotros`; C3 quote from `buildHighlight` + `comoAutorHighlight` (**highlight is back on develop**). Never null, so "Nosotros" is always in the nav. LANDING's photo grid, its CSS and the fixed "Quiénes somos" H2 are deleted (`imagenes[1..]` no longer shown there); `buildNosotros` rewritten with its tests. e2e did not pin the old H2 or the grid. tsc, eslint (0 errors), 1112 unit tests, build green.
 - 2026-10-03: U8 done on `feat/bloques-u8-contacto`: shared `SeccionContacto` (140px 96px, 1fr 1fr, gap 96px; H2 800 56px; mobile 44px 24px, H2 34px), `FormularioContacto` moved to `shared/` with optional `servicios` prop (select + "¿Qué día te acomoda?", S2 message) and `Contacto.module.css` (1.5px #E2E0EC fields, 12px radius, focus border + 12% accent halo, accent pill with `--acento-hover`, >=52px touch on mobile), `ContactoDatos` (horarios card only if `comoHorarios` non-empty + phone/email cards as tel:/mailto:, stacked on mobile, `overflow-wrap: anywhere`), pure `contactoEnvio.ts` (both message builders + `resolverEnvioContacto(telefono, mensaje, abrir)`) and `vistaContacto.ts` (visibility helper; not `contactoDatos.ts`, casing collision with `ContactoDatos.tsx`). Map placeholder, pin and old contact CSS deleted from LANDING; `buildContacto` now carries `horarios`; added intro paragraph "Cuéntanos qué necesitas y te respondemos por WhatsApp." (shown only with the form). tsc, eslint (0 errors), 1119 unit tests, build green. Not visually checked in Chrome.
+- 2026-10-03: U9 done on `feat/bloques-u9-footer`: shared `FooterBloques` (+ `.module.css`, Server Component; props `config`, `secciones` = the same list the nav gets, `anio`) fed by pure `shared/pieBloques.ts` (`construirPie`, `altosLogoPie`, `glosaPie`, `lineaLegal`; not `footerBloques.ts`, casing collision on Windows). `#101218`, 100px 96px 44px, grid 1.4fr 1fr 1fr; logo always on a white plate (no radius), 80% of header logo height, logotype hides the name, no logo -> `Monograma tamano="pie"` + name; glosa `{Rubro} en {ciudad}.` + horarios as text; Secciones/Contacto columns (tel:, mailto: via `buildMailtoUrl`, Instagram via `buildInstagramUrl`), legal line from `comoLegal` (T7), all micro-text >= .66 white; mobile single column, plate 10px 13px, monogram stays 34px (API has no mobile 28px). LANDING's inline footer, `buildFooter` and its CSS/tests deleted; `shared/Footer.tsx` untouched. tsc, eslint (0 errors), 1130 unit tests, build green. Not visually checked in Chrome.
 
 ## Next step
 
-U9 (Footer, T3/T7) on a new branch stacked on U8.
+U10 (Motion + mobile polish) on a new branch stacked on U9.
