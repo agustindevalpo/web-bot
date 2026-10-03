@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { filtrarSecciones, type SeccionSPA } from './navegacion'
+import { filtrarSecciones, UMBRAL_OBSERVER_CASCADA, type SeccionSPA } from './navegacion'
 import { resolverSeccionActiva } from './scrollspy'
 import { calcularScrollNavHorizontal } from './navScroll'
 import { ALTO_FILA1_MOBIL_PX, ALTO_HEADER_DESKTOP_PX, ALTO_HEADER_MOBIL_PX } from './headerGeometria'
@@ -21,7 +21,6 @@ export type SeccionesSPAProps = {
   claseHeader?: string
 }
 
-const UMBRAL_OBSERVER_CASCADA = 0.06
 // Altura del header sticky (`.header`, SeccionesSPA.module.css, mismo valor
 // que `--wb-spa-header-alto`) usada como `rootMargin` superior del scrollspy:
 // una sección no se marca activa hasta que su borde cruza por debajo del

@@ -23,8 +23,13 @@ export function filtrarSecciones(entradas: SeccionSPA[]): SeccionSPA[] {
 // negativos o no enteros se normalizan a un delay no negativo: `Math.trunc`
 // descarta la parte decimal y `Math.max(0, …)` evita un `animation-delay`
 // negativo si algún llamador pasa un índice inválido.
+// Contrato de revelado del handoff Bloques (README "Animación"): 80ms entre
+// hijos y IntersectionObserver a 0.12. motion.css lleva la duración (.7s).
+export const PASO_CASCADA_MS = 80
+export const UMBRAL_OBSERVER_CASCADA = 0.12
+
 export function estiloCascada(indice: number): CSSProperties {
   const pasos = Math.max(0, Math.trunc(indice))
 
-  return { '--dv-delay': `${pasos * 70}ms` } as CSSProperties
+  return { '--dv-delay': `${pasos * PASO_CASCADA_MS}ms` } as CSSProperties
 }

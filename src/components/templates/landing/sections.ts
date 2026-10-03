@@ -52,7 +52,7 @@ function comoServicios(valor: unknown): ServicioNormalizado[] {
   return resultado
 }
 
-export type Destacado = { valor: string; etiqueta: string }
+type Destacado = { valor: string; etiqueta: string }
 
 function comoDestacados(valor: unknown): Destacado[] {
   if (!Array.isArray(valor)) return []
@@ -89,7 +89,7 @@ const TEXTO_ENLACE_SERVICIO = 'Consultar por WhatsApp'
 // dimensiones válidas (logo subido antes de guardarlas): el template mantiene
 // entonces el render de alto fijo y el nombre visible. `mostrarNombre` es false
 // solo para un logotipo (proporción >= 1.6, ya trae el nombre). Ver `shared/logoOptico.ts`.
-export type MarcaProps = {
+type MarcaProps = {
   nombre: string
   iniciales: string
   logo: string | null
@@ -112,7 +112,7 @@ export function buildMarca(config: SiteConfigDTO): MarcaProps {
   }
 }
 
-export type InicioProps = {
+type InicioProps = {
   rubro: string | null
   ciudad: string | null
   nombre: string
@@ -157,7 +157,7 @@ export function buildHighlight(config: SiteConfigDTO): string | null {
 // visual); sin ella, forma A (el número gigante). Nunca se usa `imagenes[]`:
 // una foto de banco en una banda afirma algo falso sobre ese servicio.
 // `descripcion` nace ausente hoy (ningún productor del chat la pregunta).
-export type ServicioBanda = {
+type ServicioBanda = {
   numero: number
   nombre: string
   descripcion: string | null
