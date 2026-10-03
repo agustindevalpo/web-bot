@@ -203,15 +203,12 @@ describe('landing/sections — buildServicios', () => {
     expect(buildServicios(configCompleto())?.etiqueta).toBe('Qué ofrecemos')
   })
 
-  // Forma legada — la única que existe hoy en producción (D-19 nunca se
-  // implementó): un array de strings, sin descripción. `descripcion: null`
-  // en cada item, no el campo ausente, porque `ServicioItem.descripcion` es
-  // `string | null`, no opcional (T-servicios-descripcion).
-  it('numera los servicios del config desde 1 (forma legada: strings, sin descripción)', () => {
-    expect(buildServicios(configCompleto())?.items).toEqual([
-      { numero: 1, titulo: 'Pan artesanal', descripcion: null },
-      { numero: 2, titulo: 'Tortas', descripcion: null },
-      { numero: 3, titulo: 'Hallullas', descripcion: null },
+  // Forma legada (strings): sin descripción ni foto → forma A (número gigante).
+  it('una banda por servicio, numerada desde 1 (forma legada: strings)', () => {
+    expect(buildServicios(configCompleto())?.bandas).toEqual([
+      { numero: 1, nombre: 'Pan artesanal', descripcion: null, foto: null, whatsappUrl: 'https://wa.me/56912345678?text=Hola%2C%20quiero%20consultar%20por%20Pan%20artesanal' },
+      { numero: 2, nombre: 'Tortas', descripcion: null, foto: null, whatsappUrl: 'https://wa.me/56912345678?text=Hola%2C%20quiero%20consultar%20por%20Tortas' },
+      { numero: 3, nombre: 'Hallullas', descripcion: null, foto: null, whatsappUrl: 'https://wa.me/56912345678?text=Hola%2C%20quiero%20consultar%20por%20Hallullas' },
     ])
   })
 
@@ -219,59 +216,46 @@ describe('landing/sections — buildServicios', () => {
     const servicios = buildServicios(
       configCompleto({ servicios: [{ nombre: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' }] }),
     )
-    expect(servicios?.items).toEqual([{ numero: 1, titulo: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' }])
+    expect(servicios?.bandas[0]).toMatchObject({ numero: 1, nombre: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' })
   })
 
-  it('objeto sin descripción propia también queda con descripcion: null — la celda no lee como error', () => {
+  it('objeto sin descripción propia queda con descripcion: null', () => {
     const servicios = buildServicios(configCompleto({ servicios: [{ nombre: 'Tortas' }] }))
-    expect(servicios?.items).toEqual([{ numero: 1, titulo: 'Tortas', descripcion: null }])
+    expect(servicios?.bandas[0]).toMatchObject({ nombre: 'Tortas', descripcion: null, foto: null })
   })
 
-  it('mezcla de strings y objetos en el mismo array, cada uno con su propia descripción o sin ella', () => {
+  it('cada banda decide su forma por su propia foto: forma B con foto, forma A sin ella', () => {
     const servicios = buildServicios(
       configCompleto({
-        servicios: ['Pan artesanal', { nombre: 'Tortas', descripcion: 'A pedido, con 48h de anticipación.' }, 'Hallullas'],
+        servicios: [{ nombre: 'Pan artesanal', foto: 'https://cdn.example/pan.jpg' }, 'Tortas', { nombre: 'Hallullas', foto: '  ' }],
       }),
     )
-    expect(servicios?.items).toEqual([
-      { numero: 1, titulo: 'Pan artesanal', descripcion: null },
-      { numero: 2, titulo: 'Tortas', descripcion: 'A pedido, con 48h de anticipación.' },
-      { numero: 3, titulo: 'Hallullas', descripcion: null },
-    ])
+    expect(servicios?.bandas.map((banda) => banda.foto)).toEqual(['https://cdn.example/pan.jpg', null, null])
   })
 
-  it('arma el link de WhatsApp de la celda CTA cuando hay teléfono', () => {
-    expect(buildServicios(configCompleto())?.whatsappUrl).toBe('https://wa.me/56912345678')
+  it('nunca toma la foto de imagenes[] (banco) para una banda', () => {
+    const servicios = buildServicios(configCompleto({ imagenes: ['https://images.unsplash.com/a', 'https://images.unsplash.com/b'] }))
+    expect(servicios?.bandas.every((banda) => banda.foto === null)).toBe(true)
+  })
+
+  it('el enlace de WhatsApp lleva el nombre del servicio; sin teléfono es null', () => {
+    const conTelefono = buildServicios(configCompleto({ servicios: ['Tortas'] }))
+    expect(conTelefono?.bandas[0].whatsappUrl).toContain('wa.me/56912345678?text=')
+    expect(decodeURIComponent(conTelefono?.bandas[0].whatsappUrl ?? '')).toContain('Tortas')
+
+    const sinTelefono = buildServicios(configCompleto({ servicios: ['Tortas'], contacto: { telefono: '', email: '' } }))
+    expect(sinTelefono?.bandas[0].whatsappUrl).toBeNull()
   })
 
   it('retorna null cuando no hay servicios (config { nombre } only)', () => {
     expect(buildServicios(configSoloNombre())).toBeNull()
   })
 
-  it('recorta a 5 celdas de servicio cuando llegan más de las que muestra la grilla', () => {
+  it('no recorta: muestra una banda por cada servicio', () => {
     const servicios = buildServicios(
       configCompleto({ servicios: ['uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete'] }),
     )
-    expect(servicios?.items).toHaveLength(5)
-  })
-
-  // La celda de CTA es siempre la última de la grilla de 3 columnas y debe
-  // extenderse (`grid-column: span N`) para llenar lo que le queda libre en
-  // su fila, así la grilla nunca deja una celda vacía gris (defecto visto en
-  // `demo-consultora` con 4 servicios: 5 celdas en una grilla de 3×2 dejaban
-  // la sexta sin pintar). `ctaSpan` fija ese cálculo para cada cantidad de
-  // servicios que la grilla puede recibir (1 a MAX_SERVICIOS_GRID = 5).
-  describe('ctaSpan — la celda de CTA nunca deja una celda vacía en la grilla de 3 columnas', () => {
-    it.each([
-      [1, 2], // fila: [item1] [CTA×2]
-      [2, 1], // fila: [item1] [item2] [CTA×1]
-      [3, 3], // fila 1 completa con items, CTA arranca fila propia y la llena entera
-      [4, 2], // fila 2: [item4] [CTA×2]  ← el caso observado en demo-consultora
-      [5, 1], // fila 2: [item4] [item5] [CTA×1]
-    ])('con %i servicios, ctaSpan es %i', (cantidad, ctaSpanEsperado) => {
-      const servicios = ['uno', 'dos', 'tres', 'cuatro', 'cinco'].slice(0, cantidad)
-      expect(buildServicios(configCompleto({ servicios }))?.ctaSpan).toBe(ctaSpanEsperado)
-    })
+    expect(servicios?.bandas).toHaveLength(7)
   })
 
   describe('contra forma equivocada (servicios malformado)', () => {
@@ -296,7 +280,7 @@ describe('landing/sections — buildServicios', () => {
         ],
       })
       expect(() => buildServicios(config)).not.toThrow()
-      expect(buildServicios(config)?.items).toEqual([{ numero: 1, titulo: 'Pan artesanal', descripcion: null }])
+      expect(buildServicios(config)?.bandas.map((banda) => banda.nombre)).toEqual(['Pan artesanal'])
     })
   })
 })

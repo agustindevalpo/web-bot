@@ -59,7 +59,7 @@ unit, merged as each one is ready; production only moves on an explicit release.
   with `24px 0 0 24px` radius, eyebrow pill, mobile photo-above-title. SHARED helper `shared/displayHero.ts`.
 - [x] **U5 — Data band.** `BandaDatos` on `--ink` (0/1/2/3 degradation); `destacados` leave the hero.
   SHARED (horarios in S2, credenciales in S6).
-- [ ] **U6 — Service bands.** Header + bands form A (giant number) / B (`servicios[].foto`),
+- [x] **U6 — Service bands.** Header + bands form A (giant number) / B (`servicios[].foto`),
   white/`#F2F1ED` alternation; remove card grid and CTA cell; update unit tests and the e2e H2.
 - [ ] **U7 — Nosotros block.** Full-bleed accent, cards from `sobreNosotrosPartes`, degradation chain,
   never null, C3 highlight quote with `highlightAutor`; delete the photo grid. SHARED.
@@ -85,7 +85,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
 - 2026-10-03: U4 done on `feat/bloques-u4-hero`: `shared/displayHero.ts` (`tramoDisplay(nombre)` -> grande/medio/chico, 104/78/56px), hero grid 1fr 1fr with 150px padding, 96px gutter, 720px photo `24px 0 0 24px`, eyebrow pill, 18px/1.85 paragraph, two pill buttons (primary `--acento-hover`, secondary border+4% tint, no transform), mobile photo above title via `order`, 44px display, stacked 46px buttons. Stats row and highlight card removed from the hero: **until U5/U7, `destacados` and `highlight` are temporarily absent from LANDING on develop** (data reachable via `buildDestacados`/`buildHighlight` in `landing/sections.ts`). No-photo hero is single column.
 
 - 2026-10-03: U5 done on `feat/bloques-u5-banda-datos`: `shared/BandaDatos.tsx` (+ `.module.css`, Server Component; props `items`, `rotulo?`, `variante: 'cifras' | 'horarios'`) and pure `shared/layoutBanda.ts` (`layoutBanda(n)` -> una/dos/tres/null, pinned with a CSS-values test). `--ink` #101218, 76px/72px 96px padding, value cyan via `--wb-color-highlight`, mobile stacked (44px 24px) or horarios row form. LANDING renders it inside the `inicio` section right after the hero from `buildDestacados` (no nav anchor); `destacados` are back on the page. tsc, eslint (0 errors), 1108 unit tests, build green. Helper file is `layoutBanda.ts`, not `bandaDatos.ts`: it collided in casing with `BandaDatos.tsx` on Windows.
+- 2026-10-03: U6 done on `feat/bloques-u6-bandas-servicio`: `buildServicios` now returns `{ etiqueta, enlaceTexto, bandas: ServicioBanda[] }` (`numero, nombre, descripcion, foto, whatsappUrl` with the service name prefilled; no trim, no CTA cell, no `ctaSpan`). One full-bleed band per service, `.85fr 1.15fr`, white / `#F2F1ED` alternation by background colour with the visual cell always on the left (README: alternation moved from the photo side to the background colour; mobile always stacks visual-on-top), form A giant `aria-hidden` number in `--acento-18` on the opposite background, form B `next/image` fill from `fotoDeServicio` only (never `imagenes[]`), 15px real number above the title, link with `--acento-28` underline. H2 kept as "Qué ofrecemos" (e2e). Single service still renders one band (designer question open). tsc, eslint (0 errors), 1104 unit tests, build green.
 
 ## Next step
 
-U6 (Service bands) on a new branch stacked on U5.
+U7 (Nosotros block) on a new branch stacked on U6.

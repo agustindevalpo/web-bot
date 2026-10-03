@@ -89,44 +89,59 @@ export default async function Landing({ config }: TemplateProps) {
       id: 'servicios',
       etiqueta: 'Servicios',
       contenido: servicios && (
-        <section className={styles.servicios}>
-          <div className={styles.eyebrow}>Servicios</div>
-          {/* `servicios.etiqueta` ("Qué ofrecemos") es el H2 que fija el e2e
-              existente (templates_por_sitio.feature: 'la página muestra la
-              sección "Qué ofrecemos"' → busca un <h2> con ese texto). */}
-          <h2 className={styles.serviciosTitulo}>{servicios.etiqueta}</h2>
-
-          <div className={styles.serviciosGrid}>
-            {servicios.items.map((item, indice) => (
-              <div
-                key={item.titulo}
-                className={styles.servicioCelda}
-                data-dv-anim="up"
-                style={estiloCascada(indice)}
-              >
-                <div className={styles.servicioNumero}>{String(item.numero).padStart(2, '0')}</div>
-                <div className={styles.servicioTitulo}>{item.titulo}</div>
-                {item.descripcion && <p className={styles.servicioDescripcion}>{item.descripcion}</p>}
-              </div>
-            ))}
-            <div
-              className={styles.servicioCtaCelda}
-              data-dv-anim="up"
-              style={{ ...estiloCascada(servicios.items.length), gridColumn: `span ${servicios.ctaSpan}` }}
-            >
-              <p className={styles.servicioCtaFrase}>{servicios.ctaFrase}</p>
-              {servicios.whatsappUrl && (
-                <a
-                  href={servicios.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.servicioCtaEnlace}
-                >
-                  {servicios.ctaEnlaceTexto}
-                </a>
-              )}
-            </div>
+        <section>
+          <div className={styles.serviciosEncabezado}>
+            <div className={styles.eyebrowServicios}>Servicios</div>
+            {/* `servicios.etiqueta` ("Qué ofrecemos") es el H2 que fija el e2e
+                existente (templates_por_sitio.feature: 'la página muestra la
+                sección "Qué ofrecemos"' → busca un <h2> con ese texto). */}
+            <h2 className={styles.serviciosTitulo}>{servicios.etiqueta}</h2>
           </div>
+
+          {servicios.bandas.map((banda, indice) => {
+            const numero = String(banda.numero).padStart(2, '0')
+            return (
+              <div
+                key={`${banda.numero}-${banda.nombre}`}
+                className={indice % 2 === 0 ? styles.banda : `${styles.banda} ${styles.bandaHueso}`}
+              >
+                <div className={styles.bandaVisual} data-dv-anim="up" style={estiloCascada(0)}>
+                  {banda.foto ? (
+                    <Image src={banda.foto} alt={banda.nombre} fill sizes="(max-width: 767px) 100vw, 42vw" className={styles.fotoImg} />
+                  ) : (
+                    <span className={styles.bandaNumeroGigante} aria-hidden="true">
+                      {numero}
+                    </span>
+                  )}
+                </div>
+                <div className={styles.bandaTexto}>
+                  <div className={styles.bandaNumero} data-dv-anim="up" style={estiloCascada(1)}>
+                    {numero}
+                  </div>
+                  <h3 className={styles.bandaTitulo} data-dv-anim="up" style={estiloCascada(2)}>
+                    {banda.nombre}
+                  </h3>
+                  {banda.descripcion && (
+                    <p className={styles.bandaDescripcion} data-dv-anim="up" style={estiloCascada(3)}>
+                      {banda.descripcion}
+                    </p>
+                  )}
+                  {banda.whatsappUrl && (
+                    <a
+                      href={banda.whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.bandaEnlace}
+                      data-dv-anim="up"
+                      style={estiloCascada(4)}
+                    >
+                      {servicios.enlaceTexto}
+                    </a>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </section>
       ),
     },
