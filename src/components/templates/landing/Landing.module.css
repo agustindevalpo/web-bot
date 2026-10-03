@@ -605,6 +605,12 @@
     max-width: 140px;
   }
 
+  /* 12.5px como en la maqueta móvil del handoff (5a): con 16px, un isotipo de
+   * 46px + nombre + "Hablemos" no entraban en 390px y el botón bajaba de fila. */
+  .marcaNombre {
+    font-size: 12.5px;
+  }
+
   /*
    * Fila 1 del header móvil (S1-fix, odd/tasks/nav-movil-seccionesspa.md):
    * `Hablemos` compite por ancho con la marca en una sola fila de 375-428px
