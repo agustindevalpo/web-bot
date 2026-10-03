@@ -96,7 +96,7 @@
 }
 
 @media (max-width: 767px) {
-  /* El padding inferior deja libre el botón flotante de WhatsApp (48px + 26px). */
+  /* El padding inferior deja libre el botón flotante de WhatsApp (48px + 18px de offset = 66px, más 18px de aire: 84px). */
   .pie {
     padding: 34px 24px 84px;
   }

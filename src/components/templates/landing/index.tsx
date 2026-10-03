@@ -94,39 +94,63 @@ export default async function Landing({ config }: TemplateProps) {
       etiqueta: 'Servicios',
       contenido: servicios && (
         <section>
-          <div className={styles.serviciosEncabezado}>
-            <div className={styles.eyebrowServicios}>Servicios</div>
+          <div className={servicios.unico ? `${styles.serviciosEncabezado} ${styles.serviciosEncabezadoUnico}` : styles.serviciosEncabezado}>
+            <div className={styles.eyebrowServicios}>{servicios.eyebrow}</div>
             {/* `servicios.etiqueta` ("Qué ofrecemos") es el H2 que fija el e2e
                 existente (templates_por_sitio.feature: 'la página muestra la
-                sección "Qué ofrecemos"' → busca un <h2> con ese texto). */}
-            <h2 className={styles.serviciosTitulo}>{servicios.etiqueta}</h2>
+                sección "Qué ofrecemos"' → busca un <h2> con ese texto). Con un
+                solo servicio no hay H2 de sección: el nombre del servicio es
+                el encabezado (h2 más abajo). */}
+            {servicios.etiqueta && <h2 className={styles.serviciosTitulo}>{servicios.etiqueta}</h2>}
           </div>
 
           {servicios.bandas.map((banda, indice) => {
             const numero = String(banda.numero).padStart(2, '0')
+            const claseBanda = [
+              styles.banda,
+              indice % 2 === 0 ? '' : styles.bandaHueso,
+              servicios.unico ? styles.bandaUnica : '',
+              servicios.unico && banda.foto ? styles.bandaUnicaFoto : '',
+            ]
+              .filter(Boolean)
+              .join(' ')
+            // Sin número en ningún lado con un solo servicio (un "01" sin "02"
+            // anuncia una serie que no existe); sin foto tampoco hay celda visual.
+            const celdaVisual = servicios.unico ? banda.foto !== null : true
+            const Titulo = servicios.unico ? 'h2' : 'h3'
+            const claseTitulo = !servicios.unico
+              ? styles.bandaTitulo
+              : banda.descripcion
+                ? styles.bandaTituloUnico
+                : `${styles.bandaTituloUnico} ${styles.bandaTituloUnicoSolo}`
             return (
-              <div
-                key={`${banda.numero}-${banda.nombre}`}
-                className={indice % 2 === 0 ? styles.banda : `${styles.banda} ${styles.bandaHueso}`}
-              >
-                <div className={styles.bandaVisual} data-dv-anim="up" style={estiloCascada(0)}>
-                  {banda.foto ? (
-                    <Image src={banda.foto} alt={banda.nombre} fill sizes="(max-width: 767px) 100vw, 42vw" className={styles.fotoImg} />
-                  ) : (
-                    <span className={styles.bandaNumeroGigante} aria-hidden="true">
-                      {numero}
-                    </span>
-                  )}
-                </div>
-                <div className={styles.bandaTexto}>
-                  <div className={styles.bandaNumero} data-dv-anim="up" style={estiloCascada(1)}>
-                    {numero}
+              <div key={`${banda.numero}-${banda.nombre}`} className={claseBanda}>
+                {celdaVisual && (
+                  <div className={styles.bandaVisual} data-dv-anim="up" style={estiloCascada(0)}>
+                    {banda.foto ? (
+                      <Image src={banda.foto} alt={banda.nombre} fill sizes="(max-width: 767px) 100vw, 42vw" className={styles.fotoImg} />
+                    ) : (
+                      <span className={styles.bandaNumeroGigante} aria-hidden="true">
+                        {numero}
+                      </span>
+                    )}
                   </div>
-                  <h3 className={styles.bandaTitulo} data-dv-anim="up" style={estiloCascada(2)}>
+                )}
+                <div className={styles.bandaTexto}>
+                  {!servicios.unico && (
+                    <div className={styles.bandaNumero} data-dv-anim="up" style={estiloCascada(1)}>
+                      {numero}
+                    </div>
+                  )}
+                  <Titulo className={claseTitulo} data-dv-anim="up" style={estiloCascada(2)}>
                     {banda.nombre}
-                  </h3>
+                  </Titulo>
                   {banda.descripcion && (
-                    <p className={styles.bandaDescripcion} data-dv-anim="up" style={estiloCascada(3)}>
+                    <p
+                      className={servicios.unico ? styles.bandaDescripcionUnica : styles.bandaDescripcion}
+                      data-dv-anim="up"
+                      style={estiloCascada(3)}
+                    >
                       {banda.descripcion}
                     </p>
                   )}
@@ -135,7 +159,7 @@ export default async function Landing({ config }: TemplateProps) {
                       href={banda.whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.bandaEnlace}
+                      className={servicios.unico ? `${styles.bandaEnlace} ${styles.bandaEnlaceUnico}` : styles.bandaEnlace}
                       data-dv-anim="up"
                       style={estiloCascada(4)}
                     >
@@ -212,21 +236,14 @@ export default async function Landing({ config }: TemplateProps) {
 
   return (
     <div data-template="LANDING" style={estiloRaiz}>
-      <SeccionesSPA secciones={secciones} marca={marcaSlot} accionHeader={accionHeader} pie={pie} className={styles.page} />
-
-      {inicio.whatsappUrl && (
-        <a
-          href={inicio.whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Escribir por WhatsApp"
-          className={styles.whatsappFlotante}
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z" />
-          </svg>
-        </a>
-      )}
+      <SeccionesSPA
+        secciones={secciones}
+        marca={marcaSlot}
+        accionHeader={accionHeader}
+        pie={pie}
+        className={styles.page}
+        whatsappFlotanteUrl={inicio.whatsappUrl}
+      />
     </div>
   )
 }

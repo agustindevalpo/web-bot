@@ -13,6 +13,11 @@ describe('pieBloques — altosLogoPie', () => {
     expect(altosLogoPie({ ancho: 300, alto: 100 }).movil).toBe(27)
   })
 
+  it('movil del pie conserva la fórmula con tope 46 (1:1 -> 37, no 27)', () => {
+    expect(altosLogoPie({ ancho: 100, alto: 100 }).movil).toBe(37)
+    expect(altosLogoPie({ ancho: 200, alto: 100 }).movil).toBe(34)
+  })
+
   it('sin dimensiones cae a 35px', () => {
     expect(altosLogoPie(null)).toEqual({ escritorio: 35, movil: 35 })
   })

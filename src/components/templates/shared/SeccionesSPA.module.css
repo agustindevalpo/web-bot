@@ -187,6 +187,58 @@
 }
 
 /*
+ * Botón flotante de WhatsApp (respuestas del diseñador 2026-10-03, igual en las
+ * seis plantillas): círculo de 52px, #25D366, ícono blanco de 26px, SIN sombra
+ * (la única sombra del sistema es la del header pegado). Mientras la sección
+ * Contacto está en pantalla, SeccionesSPA pone `data-oculto`: se desvanece y
+ * pasa a `visibility: hidden` (fuera del orden de tabulación, no solo
+ * invisible) para no tapar el botón "Enviar por WhatsApp" del formulario. Sin
+ * JS el atributo nunca se pone y el botón queda visible.
+ */
+.flotante {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #25d366;
+  transition:
+    opacity 0.2s ease,
+    visibility 0s linear 0s;
+}
+
+.flotante[data-oculto] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    visibility 0s linear 0.2s;
+}
+
+.flotante:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.flotante svg {
+  width: 26px;
+  height: 26px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flotante,
+  .flotante[data-oculto] {
+    transition: none;
+  }
+}
+
+/*
  * Centinela del scrollspy (SeccionesSPA.tsx): marca el fondo real de todo
  * el documento para que el IntersectionObserver del "fin de página" pueda
  * detectar el scroll máximo sin leer `scrollY`/`scrollHeight` a mano.
@@ -243,14 +295,18 @@
      * solo quede pineada la fila 2. Duplicado en JS como
      * `ALTO_FILA1_MOBIL_PX` (headerGeometria.ts) para el centinela del
      * IntersectionObserver que detecta cuándo el header ya está pegado. */
-    --wb-spa-header-fila1-alto: 52px;
+    --wb-spa-header-fila1-alto: 42px;
   }
 
   .header {
     flex-wrap: wrap;
     align-content: flex-start;
     height: auto;
-    padding: 0 24px;
+    /* Sin gutter propio: las dos filas llevan su padding de 18px (la marca
+     * abajo, el nav más abajo), así el nombre del negocio y el primer ítem del
+     * nav arrancan alineados en el mismo canto (respuestas del diseñador,
+     * 2026-10-03: fila de marca `padding: 0 18px`). */
+    padding: 0;
     /* `gap` de escritorio (24px) es horizontal ahí (una sola fila); acá con
      * `flex-wrap` ese mismo `gap` también se metería COMO fila (separación
      * entre línea 1 y línea 2), que rompería la cuenta exacta de `top` de
@@ -269,41 +325,36 @@
     top: calc(-1 * var(--wb-spa-header-fila1-alto));
   }
 
-  /* Línea 1 con alto fijo (52px, `--wb-spa-header-fila1-alto`) para que el
-   * cálculo de `top` de arriba sea exacto sin importar si el monograma
-   * (36px, 26px en móvil) o el botón Hablemos (más alto en escritorio) son más chicos que
-   * eso — `align-items: center` (heredado de `.header`) centra el
-   * contenido real dentro de esta línea. */
-  .marca,
-  .accion {
-    min-height: var(--wb-spa-header-fila1-alto);
-  }
-
-  /* `flex: 1 1 0` + `min-width: 0`: un nombre largo se parte en dos líneas
-   * dentro de la fila 1 en vez de empujar "Hablemos" a una fila propia (con
-   * 41 caracteres a 390px el header pasaba de 97px a 149px y rompía el
-   * `top` de arriba). Dos líneas de 12.5px entran en los 52px de la fila. */
+  /* Fila de marca (42px, `--wb-spa-header-fila1-alto`): alto FIJO para que el
+   * cálculo de `top` de arriba sea exacto, `padding: 0 18px`, gap 9px y nada
+   * más — la acción ("Hablemos") no va en móvil (ya hay CTA en el hero y el
+   * botón flotante). `flex: 1 1 0` + `min-width: 0` + `overflow: hidden`: un
+   * nombre largo se corta con elipsis a dos líneas (12.5px/1.2 = 30px entran
+   * en los 42px) en vez de crecer la fila. El nombre lo pinta el template
+   * (`.marcaNombre` en su módulo) con el line-clamp. */
   .marca {
     order: 1;
-    flex: 1 1 0;
+    flex: 1 1 100%;
     min-width: 0;
-    padding-right: 12px;
+    height: var(--wb-spa-header-fila1-alto);
+    padding: 0 18px;
+    gap: 9px;
+    overflow: hidden;
   }
 
   .accion {
-    order: 2;
+    display: none;
   }
 
   .nav {
     order: 3;
     flex: 1 0 100%;
-    /* Sangra a los bordes del viewport (cancela el padding de `.header`):
-     * el corte seco del último ítem visible tiene que tocar el canto real
-     * de la pantalla (README.md:302, "sin degradado de desvanecido"), no
-     * quedar a 24px de él (el margen negativo sigue al gutter de `.header`).
+    /* Ocupa el ancho completo del viewport (el `.header` móvil no tiene
+     * gutter): el corte seco del último ítem visible toca el canto real de la
+     * pantalla (README.md:302, "sin degradado de desvanecido").
      * `scroll-padding-inline` de abajo es lo que evita que el ítem activo
      * quede pegado a ESE canto al centrarlo. */
-    margin-inline: -24px;
+    margin-inline: 0;
     padding: 0 18px 8px;
     gap: 22px;
     height: 44px;
@@ -326,6 +377,18 @@
    * SeccionesSPA.tsx vía IntersectionObserver sobre un centinela, nunca un
    * listener de `scroll` (más barato, no repinta en cada frame).
    */
+  .flotante {
+    right: 18px;
+    bottom: 18px;
+    width: 48px;
+    height: 48px;
+  }
+
+  .flotante svg {
+    width: 24px;
+    height: 24px;
+  }
+
   .header[data-pegado] {
     box-shadow: 0 6px 16px rgba(16, 19, 26, 0.07);
   }

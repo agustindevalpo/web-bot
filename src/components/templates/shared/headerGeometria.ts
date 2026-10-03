@@ -8,5 +8,6 @@
 export const ALTO_HEADER_DESKTOP_PX = 96
 // Móvil: el sticky solo deja pineada la fila del nav (44px).
 export const ALTO_HEADER_MOBIL_PX = 44
-// Fila 1 móvil (marca + accion), la que se esconde al pegarse.
-export const ALTO_FILA1_MOBIL_PX = 52
+// Fila 1 móvil (solo la marca), la que se esconde al pegarse. 42 + 44 = 86px
+// en reposo (respuestas del diseñador 2026-10-03, reemplaza los 82px de C6).
+export const ALTO_FILA1_MOBIL_PX = 42
