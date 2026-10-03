@@ -3,6 +3,7 @@ import { IAlmacenamientoArchivos } from '@/application/services/IAlmacenamientoA
 import { Sitio } from '@/domain/entities/Sitio'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
 import { eliminarImagenesPropias } from '@/application/services/eliminarImagenesPropias'
+import { urlsImagenDeConfig } from '@/domain/imagen/imagenesPropias'
 import { leerDimensionesImagen, DimensionesImagen } from '@/domain/imagen/dimensionesImagen'
 
 // Máximo 5 MB por archivo (Decisión 2026-09-27 del feature de subida de
@@ -72,8 +73,9 @@ export class SubirImagenSitioUseCase {
     const configActualizado = aplicarImagen(sitioVigente.configJson, campo, resultadoSubida.url, dimensiones)
     const sitioActualizado = await this.sitioRepo.update(sitioId, { configJson: configActualizado })
 
-    // Recién con el guardado hecho se borra lo que quedó reemplazado.
-    if (reemplazada) {
+    // Recién con el guardado hecho se borra lo que quedó reemplazado, salvo que
+    // la misma URL siga referenciada en otro campo (p. ej. también en la galería).
+    if (reemplazada && !urlsImagenDeConfig(configActualizado).includes(reemplazada)) {
       await eliminarImagenesPropias(this.almacenamiento, sitioId, [reemplazada])
     }
 

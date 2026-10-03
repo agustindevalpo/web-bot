@@ -300,6 +300,15 @@ describe('SubirImagenSitio UseCase', () => {
       expect(almacenamiento.eliminadas).toEqual(['sitios/sitio-1/hero-viejo.jpg'])
     })
 
+    it('no borra el logo anterior si la misma URL sigue en la galería', async () => {
+      conConfig({ nombre: 'P', logo: URL_VIEJA, imagenes: [URL_VIEJA] })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
+
+      await new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'logo', bytesPng())
+
+      expect(almacenamiento.eliminadas).toEqual([])
+    })
+
     it('no borra un logo o foto externos (Unsplash)', async () => {
       conConfig({ nombre: 'P', logo: 'https://images.unsplash.com/x.png', imagenes: ['https://images.unsplash.com/y.jpg'] })
       const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
