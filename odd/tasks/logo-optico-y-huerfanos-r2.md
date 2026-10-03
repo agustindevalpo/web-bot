@@ -56,13 +56,18 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
 
 - 2026-10-03: T1 done (delegated writer). Header parser `src/domain/imagen/dimensionesImagen.ts`,
   scale `shared/logoOptico.ts` (clamp(sqrt(4/ratio), 0.75, 1.5)), `logoDimensiones` stored at upload.
-  tsc, lint, test:unit (961), build green. Commit: see git log (one `feat(landing)` commit).
+  tsc, lint, test:unit (961), build green. Commit `4f32a14` on `feat/logo-optico-y-huerfanos-r2`.
 
 - 2026-10-03: T2 done (delegated writer), branch `feat/limpieza-huerfanos-r2` stacked on T1. Port gains
   `eliminar` + `urlPublicaBase`; pure ownership helper `domain/imagen/imagenesPropias.ts`; best-effort
   cleanup after the DB write in upload and JSON save; stale `logoDimensiones` dropped. tsc, lint,
-  test:unit (998), build green.
+  test:unit (998), build green. Commit `e3a2d1f`.
+
+- 2026-10-03: parent review of T2 found an upload replacing the logo/hero would delete a URL still
+  referenced elsewhere in the config (e.g. also in the gallery). Fixed inline in `8679dbd` with a
+  test; tsc + test:unit (999) green. Delivery: PR 1 = T1 to `develop`, PR 2 = T2 stacked on PR 1.
 
 ## Next step
 
-Visual check + PRs.
+Visual check of LANDING with a wide and a narrow logo, then push and open the two PRs
+(Agustín authorizes push).
