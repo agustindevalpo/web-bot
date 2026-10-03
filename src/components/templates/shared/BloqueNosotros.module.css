@@ -100,6 +100,30 @@
   min-width: 0;
 }
 
+/* Una sola columna (`fila`, y todo móvil): el orden de lectura es párrafo →
+ * tarjetas → cita, como en las maquetas del diseñador (S2 móvil). La cita vive
+ * dentro de `.texto` para la columna izquierda de `dos`; con `display:
+ * contents` sus hijos pasan a ser ítems del bloque y `order` baja la cita
+ * debajo de las tarjetas sin duplicar el marcado. */
+.fila {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.fila .texto {
+  display: contents;
+}
+
+.fila .tarjetas {
+  order: 1;
+  margin-top: 44px;
+}
+
+.fila .cita {
+  order: 2;
+}
+
 .tarjeta {
   padding: 32px 34px;
   background: rgba(255, 255, 255, 0.14);
@@ -148,5 +172,26 @@
 
   .tarjeta {
     padding: 24px 24px;
+  }
+
+  .dos {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .dos .texto {
+    display: contents;
+  }
+
+  .dos .tarjetas,
+  .fila .tarjetas {
+    order: 1;
+    margin-top: 28px;
+  }
+
+  .dos .cita,
+  .fila .cita {
+    order: 2;
   }
 }
