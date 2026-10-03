@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { filtrarSecciones, type SeccionSPA } from './navegacion'
 import { resolverSeccionActiva } from './scrollspy'
 import { calcularScrollNavHorizontal } from './navScroll'
+import { ALTO_FILA1_MOBIL_PX, ALTO_HEADER_DESKTOP_PX, ALTO_HEADER_MOBIL_PX } from './headerGeometria'
 import styles from './SeccionesSPA.module.css'
 
 export type SeccionesSPAProps = {
@@ -35,14 +36,11 @@ const UMBRAL_OBSERVER_CASCADA = 0.06
 // montar (`matchMedia`, en el efecto de abajo) — no hace falta reaccionar a
 // un resize en vivo para esto, igual que el resto de las constantes de este
 // componente.
-const ALTO_HEADER_DESKTOP_PX = 78
-const ALTO_HEADER_MOBIL_PX = 44
-// Alto de la fila 1 del header móvil (marca + accion,
-// `--wb-spa-header-fila1-alto` en el CSS) — el centinela `centinelaPegado`
-// de abajo usa esto como `rootMargin` superior de SU PROPIO observer (el
-// del header pegado, no el del scrollspy) para no marcar "pegado" hasta
-// que esa fila termine de esconderse detrás del header sticky.
-const ALTO_FILA1_MOBIL_PX = 52
+// Las constantes (`ALTO_HEADER_DESKTOP_PX`, `ALTO_HEADER_MOBIL_PX`,
+// `ALTO_FILA1_MOBIL_PX`) viven en `./headerGeometria.ts`, con un test que las
+// compara contra el CSS. `ALTO_FILA1_MOBIL_PX` (fila 1 móvil, marca + accion)
+// es el `rootMargin` superior del observer del centinela `centinelaPegado`:
+// no marca "pegado" hasta que esa fila termine de esconderse detrás del header.
 // Debe calzar con `scroll-padding-inline` del `.nav` móvil (CSS,
 // README.md:302) — el ítem activo nunca queda pegado al canto de la fila
 // cuando el efecto de scroll-al-activo de abajo lo centra.
@@ -219,7 +217,7 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
       )
     }
 
-    // Móvil pinea solo la fila del nav (44px), no el header completo (78px)
+    // Móvil pinea solo la fila del nav (44px), no el header completo (96px)
     // — ver el comentario de `ALTO_HEADER_DESKTOP_PX`/`ALTO_HEADER_MOBIL_PX`
     // más arriba. Una sola lectura al montar: si la ventana cruza el
     // breakpoint después (rotación, resize manual) el rootMargin queda con
