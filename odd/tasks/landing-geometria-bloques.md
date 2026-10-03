@@ -73,6 +73,13 @@ unit, merged as each one is ready; production only moves on an explicit release.
 - [x] **U10 — Motion + mobile polish.** Threshold .12, 80ms cascade, reduced motion, remaining mobile
   values, dead CSS removal.
 
+- [ ] **U11 — Designer answers (2026-10-03).** Per `handoff_bloques_v2/01-RESPUESTAS-UN-SERVICIO-Y-HEADER-MOVIL.md`
+  (supersedes the README single-service rule and C6): one service → section kept, no number, single-column
+  band (eyebrow "Servicio", no H2); zero services → section and nav label removed; mobile header 86px
+  (42px brand row + 44px nav), no "Hablemos" on mobile, name up to 2 lines with ellipsis; mobile header
+  logo cap 34px (footer keeps the 46px formula); floating WhatsApp button spec (52/48px, no shadow,
+  28/18px offsets, hidden while Contacto is on screen, `aria-label`).
+
 ## Progress
 
 - 2026-10-03: gap analysis done (delegated read-only mapper); document created.
