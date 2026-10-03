@@ -22,9 +22,14 @@ const FONDO_ACENTO = '#FFFFFF'
 // `config.colores` (aunque la fila los traiga, quedan huérfanos) — se derivan
 // siempre del acento con `derivarPaletaDesdeAcento`.
 //
-// `--acento` se emite con el acento RESUELTO (hex válido o fallback) y, desde
-// T2, ya clampeado a >= 4.5:1 contra blanco: este es el ÚNICO lugar que
-// clampea, ninguna plantilla debe volver a hacerlo. `--primario`,
+// `--acento` se emite con el acento RESUELTO (hex válido o fallback). Con
+// `bloques: true` (T2) sale además clampeado a >= 4.5:1 contra blanco: este es
+// el ÚNICO lugar que clampea, ninguna plantilla debe volver a hacerlo. Es
+// opt-in por plantilla y no global porque RESTAURANTE y PORTFOLIO todavía no
+// son Bloques: pintan el acento sobre fondo oscuro y como fondo de un botón con
+// texto `--primario` oscuro, y oscurecer el acento ahí les bajaba el contraste
+// (con #FFD000, texto #221a00 sobre #8f7400). Cada plantilla lo activa al
+// migrar a Bloques. `--primario`,
 // `--secundario` y `--texto` se derivan del acento SIN clampear (igual que
 // hacía LANDING antes: el clamp solo sobrescribía `--acento`), así que no
 // cambian.
@@ -32,10 +37,13 @@ const FONDO_ACENTO = '#FFFFFF'
 // Los derivados `--acento-07/18/28/hover` (T2) se calculan en CSS con
 // color-mix / relative color a partir de `--acento` ya clampeado; no tocan
 // ningún CSS de plantilla (ninguna los consume todavía).
-export function buildPaletteStyle(config: SiteConfigDTO): CSSProperties {
+export function buildPaletteStyle(
+  config: SiteConfigDTO,
+  { bloques = false }: { bloques?: boolean } = {},
+): CSSProperties {
   const acentoEntrada = config.colores?.acento ?? ACENTO_DEFAULT
   const { primario, secundario, texto, acento } = derivarPaletaDesdeAcento(acentoEntrada)
-  const acentoClampeado = clampAcento(acento, FONDO_ACENTO, OBJETIVO_TEXTO)
+  const acentoClampeado = bloques ? clampAcento(acento, FONDO_ACENTO, OBJETIVO_TEXTO) : acento
 
   return {
     '--primario': primario,

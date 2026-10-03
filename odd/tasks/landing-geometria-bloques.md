@@ -73,6 +73,12 @@ unit, merged as each one is ready; production only moves on an explicit release.
 - 2026-10-03: gap analysis done (delegated read-only mapper); document created.
 - 2026-10-03: U1 done on `feat/bloques-u1-fundaciones`: DTO fields, `shared/contenido.ts` + `fotoDeServicio`/`precioDeServicio`, clamp moved into `buildPaletteStyle` (LANDING colors unchanged; other templates now clamp `--acento`), `--acento-07/18/28/hover` exposed. tsc, eslint, 1066 unit tests, build green.
 
+- 2026-10-03: parent review of U1 found that clamping the accent for every template darkened the
+  CTA background of RESTAURANTE and PORTFOLIO, which still draw dark `--primario` text on it (and
+  RESTAURANTE draws accent text on black): #FFD000 became #8f7400 under #221a00 text. Fixed: the clamp is
+  opt-in, `buildPaletteStyle(config, { bloques: true })`, LANDING passes it, each template turns it on
+  when it migrates to Bloques. Pre-U1 default-accent tests restored.
+
 ## Next step
 
 U2 (Monogram + font) on a new branch from `develop` (stacked on U1 until it merges).

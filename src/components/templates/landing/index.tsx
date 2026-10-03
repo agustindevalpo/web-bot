@@ -16,9 +16,9 @@ import styles from './Landing.module.css'
 // formulario de contacto (`FormularioContacto`), que no convierte el resto
 // del árbol a cliente (README.md, "Implicancia arquitectónica").
 export default async function Landing({ config }: TemplateProps) {
-  // `buildPaletteStyle` ya emite `--acento` clampeado a >= 4.5:1 contra blanco
-  // (T2): LANDING no clampea por su cuenta.
-  const estiloRaiz: CSSProperties = buildPaletteStyle(config)
+  // Con `bloques: true`, `buildPaletteStyle` emite `--acento` clampeado a
+  // >= 4.5:1 contra blanco (T2): LANDING no clampea por su cuenta.
+  const estiloRaiz: CSSProperties = buildPaletteStyle(config, { bloques: true })
 
   const marca = buildMarca(config)
   const inicio = buildInicio(config)

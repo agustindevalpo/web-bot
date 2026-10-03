@@ -65,7 +65,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#008294',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })
@@ -82,7 +82,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#008294',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })
@@ -100,7 +100,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#008294',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })
@@ -117,7 +117,7 @@ describe('buildPaletteStyle', () => {
     expect(style).toMatchObject({
       '--primario': '#001f25',
       '--secundario': '#00606e',
-      '--acento': '#008294',
+      '--acento': '#15defa',
       '--texto': '#ffffff',
     })
   })
@@ -133,19 +133,25 @@ describe('buildPaletteStyle', () => {
     ['#f80', '#b66000'],
     ['#ffffff', '#767676'],
   ])('clampea el acento claro %s a %s (>= 4.5:1 contra blanco)', (acento, esperado) => {
-    expect(buildPaletteStyle(baseConfig({ colores: { acento } }))).toMatchObject({ '--acento': esperado })
+    expect(buildPaletteStyle(baseConfig({ colores: { acento } }), { bloques: true })).toMatchObject({ '--acento': esperado })
   })
 
   it.each(['#333333', '#0B5FFF', '#1a7f37', '#000000'])('un acento que ya cumple (%s) pasa sin cambios', (acento) => {
-    expect(buildPaletteStyle(baseConfig({ colores: { acento } }))).toMatchObject({ '--acento': acento.toLowerCase() })
+    expect(buildPaletteStyle(baseConfig({ colores: { acento } }), { bloques: true })).toMatchObject({ '--acento': acento.toLowerCase() })
   })
 
   it('primario y texto se derivan del acento tal cual, el clamp solo toca --acento', () => {
-    expect(buildPaletteStyle(baseConfig({ colores: { acento: '#FFD000' } }))).toMatchObject({
+    expect(buildPaletteStyle(baseConfig({ colores: { acento: '#FFD000' } }), { bloques: true })).toMatchObject({
       '--primario': '#221a00',
       '--texto': '#ffffff',
       '--acento': '#8f7400',
     })
+  })
+
+  // Sin `bloques` (plantillas aún no migradas, algunas con fondo oscuro) el
+  // acento sale tal cual: oscurecerlo les bajaba el contraste del botón.
+  it('sin bloques no clampea: el acento claro sale igual', () => {
+    expect(buildPaletteStyle(baseConfig({ colores: { acento: '#FFD000' } }))).toMatchObject({ '--acento': '#ffd000' })
   })
 
   it('expone los derivados CSS de T2 sobre var(--acento)', () => {
