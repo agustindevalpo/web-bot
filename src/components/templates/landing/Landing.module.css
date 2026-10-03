@@ -78,15 +78,6 @@
   outline-offset: 2px;
 }
 
-/* Eyebrow compartido por las 4 secciones — color acento, mayúsculas. */
-.eyebrow {
-  font: 600 10.5px var(--font-montserrat), sans-serif;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--acento);
-  margin: 0 0 20px;
-}
-
 /* ── Inicio (hero Bloques) ──
  * Grid 1fr 1fr, 150px arriba. Columna izquierda con el gutter de 96px del
  * header; la foto (720px, radio 24px solo del lado interior) sangra a la
@@ -322,132 +313,6 @@
   outline-offset: 4px;
 }
 
-/* ── Contacto ── */
-
-.contacto {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 52px;
-  padding: 56px 44px;
-}
-
-/* Columna izquierda de Contacto (prototipo, `Plantillas WebBot.dc.html:137`). */
-.contactoIzquierda {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.contactoTitulo {
-  /* README.md no repite el tamaño explícitamente para esta sección; el
-     prototipo sí ("Plantillas WebBot.dc.html:139"): `400 38px/1.12
-     'Montserrat' 800 margin:0 0 30px`, igual que el H2 de Nosotros
-     (README.md:203). El `32px/1.15` y `margin: 0 0 24px` anteriores eran un
-     desvío de transcripción, no una decisión — las otras tres secciones
-     (Servicios, Inicio, Nosotros) ya coinciden con su spec al pixel. */
-  font: 800 38px/1.12 var(--font-montserrat), sans-serif;
-  letter-spacing: -0.042em;
-  margin: 0 0 30px;
-  color: var(--wb-tpl-ink);
-}
-
-.contactoForm {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.contactoInput,
-.contactoTextarea {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid var(--wb-tpl-line);
-  border-radius: 6px;
-  font: 400 13.5px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-  background: var(--wb-tpl-surface);
-}
-
-.contactoTextarea {
-  resize: vertical;
-}
-
-.contactoSubmit {
-  font: 600 12.5px var(--font-montserrat), sans-serif;
-  color: #fff;
-  background: var(--acento);
-  padding: 14px 24px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: filter 0.2s ease;
-}
-
-.contactoSubmit:hover {
-  filter: brightness(0.92);
-}
-
-.contactoEstado {
-  font: 400 12.5px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-}
-
-.contactoDerecha {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.mapaPlaceholder {
-  position: relative;
-  flex: 1;
-  min-height: 220px;
-  border-radius: 6px;
-  background-color: var(--wb-tpl-surface-soft);
-  background-image:
-    linear-gradient(#e6e4de 1px, transparent 1px),
-    linear-gradient(90deg, #e6e4de 1px, transparent 1px);
-  background-size: 38px 38px;
-}
-
-.mapaPin {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--acento);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 7px color-mix(in srgb, var(--acento) 18%, transparent);
-}
-
-.datosGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.datoCard {
-  padding: 16px;
-  border: 1px solid var(--wb-tpl-line);
-  border-radius: 6px;
-}
-
-.datoEtiqueta {
-  font: 500 10px var(--font-montserrat), sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--wb-tpl-ink-faint);
-  margin: 0 0 6px;
-}
-
-.datoValor {
-  font: 600 13.5px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-}
-
 /* ── Footer propio de LANDING (T6) — el compartido queda intacto ── */
 
 .footer {
@@ -589,9 +454,6 @@
     padding: 16px 24px;
   }
 
-  .contacto {
-    padding: 40px 22px;
-  }
 
   /* Bandas: siempre visual arriba / texto abajo (la forma A apila el número
    * en una celda de 170px). La foto de la forma B conserva la misma altura. */
@@ -638,13 +500,7 @@
     margin-top: 14px;
   }
 
-  .contacto {
-    grid-template-columns: 1fr;
-  }
 
-  .contactoTitulo {
-    font-size: 24px;
-  }
 
   /* Centrado en móvil (decisión de Agustín, 2026-09-26 — el handoff de
    * Bloques no fija la alineación móvil del footer). El padding inferior

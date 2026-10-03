@@ -9,7 +9,9 @@ import Monograma from '@/components/templates/shared/Monograma'
 import BandaDatos from '@/components/templates/shared/BandaDatos'
 import BloqueNosotros from '@/components/templates/shared/BloqueNosotros'
 import { buildMarca, buildInicio, buildDestacados, buildServicios, buildNosotros, buildContacto, buildFooter } from './sections'
-import FormularioContacto from './FormularioContacto'
+import FormularioContacto from '@/components/templates/shared/FormularioContacto'
+import SeccionContacto from '@/components/templates/shared/SeccionContacto'
+import ContactoDatos from '@/components/templates/shared/ContactoDatos'
 import styles from './Landing.module.css'
 
 // Primer consumidor de `SeccionesSPA` (S0a, sin importador hasta acá) y de
@@ -35,6 +37,7 @@ export default async function Landing({ config }: TemplateProps) {
   const nosotros = buildNosotros(config)
   const contacto = buildContacto(config)
   const footer = buildFooter(config)
+  const formulario = contacto.formularioHabilitado && contacto.telefono ? <FormularioContacto telefono={contacto.telefono} /> : null
 
   const tramo = tramoDisplay(inicio.nombre)
   const eyebrowInicio = [inicio.rubro, inicio.ciudad].filter((valor): valor is string => valor !== null).join(' · ')
@@ -155,35 +158,12 @@ export default async function Landing({ config }: TemplateProps) {
       id: 'contacto',
       etiqueta: 'Contacto',
       contenido: (
-        <section className={styles.contacto}>
-          <div className={styles.contactoIzquierda}>
-            <div className={styles.eyebrow}>Contacto</div>
-            <h2 className={styles.contactoTitulo}>Conversemos de tu proyecto</h2>
-            {contacto.formularioHabilitado && contacto.telefono && <FormularioContacto telefono={contacto.telefono} />}
-          </div>
-
-          <div className={styles.contactoDerecha}>
-            <div className={styles.mapaPlaceholder}>
-              <div className={styles.mapaPin} />
-            </div>
-            {(contacto.telefono || contacto.email) && (
-              <div className={styles.datosGrid}>
-                {contacto.telefono && (
-                  <div className={styles.datoCard}>
-                    <div className={styles.datoEtiqueta}>Teléfono</div>
-                    <div className={styles.datoValor}>{contacto.telefono}</div>
-                  </div>
-                )}
-                {contacto.email && (
-                  <div className={styles.datoCard}>
-                    <div className={styles.datoEtiqueta}>Correo</div>
-                    <div className={styles.datoValor}>{contacto.email}</div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
+        <SeccionContacto
+          titulo="Conversemos de tu proyecto"
+          parrafo={formulario ? 'Cuéntanos qué necesitas y te respondemos por WhatsApp.' : null}
+          formulario={formulario}
+          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} />}
+        />
       ),
     },
   ])

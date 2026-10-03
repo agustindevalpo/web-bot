@@ -3,6 +3,7 @@ import { rubroVisible } from '@/components/templates/shared/rubroVisible'
 import { buildWhatsAppUrl, buildTelUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
 import { nombreDeServicio, descripcionDeServicio, fotoDeServicio } from '@/components/templates/shared/servicios'
 import { construirNosotros, type NosotrosProps } from '@/components/templates/shared/nosotros'
+import { comoHorarios, type Horario } from '@/components/templates/shared/contenido'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
 import { comoDimensionesLogo, altosLogo, esLogotipo, AltosLogo, DimensionesLogo } from '@/components/templates/shared/logoOptico'
 
@@ -207,12 +208,14 @@ export type ContactoProps = {
   telefono: string | null
   email: string | null
   formularioHabilitado: boolean
+  horarios: Horario[]
 }
 
 // Sin `mailtoUrl`: la regla transversal del rediseño reemplaza el `mailto:`
 // por un mensaje de WhatsApp armado en el cliente (ver
-// `construirMensajeContacto` + `FormularioContacto.tsx`) — `telefono` es el
-// único dato que ese formulario necesita del server.
+// `shared/contactoEnvio.ts` + `shared/FormularioContacto.tsx`) — `telefono` es
+// el único dato que ese formulario necesita del server. `horarios` llega
+// crudo: `ContactoDatos` lo filtra con `comoHorarios`.
 export function buildContacto(config: SiteConfigDTO): ContactoProps {
   const formulario = config.contacto?.formulario
   const formularioHabilitado =
@@ -224,54 +227,8 @@ export function buildContacto(config: SiteConfigDTO): ContactoProps {
     telefono: comoStringNoVacio(config.contacto?.telefono),
     email: comoStringNoVacio(config.contacto?.email),
     formularioHabilitado,
+    horarios: comoHorarios(config.horarios),
   }
-}
-
-// Compone el mensaje de WhatsApp precargado desde los 3 campos del
-// formulario de Contacto (Criterio de aceptación 4). Función pura,
-// testeable sin renderizar `FormularioContacto.tsx` (cliente): ese
-// componente solo la llama y pasa el resultado a
-// `buildWhatsAppUrlConMensaje`. Cualquier campo vacío o solo espacios se
-// omite de la línea correspondiente en vez de dejar "Nombre: " colgando.
-export function construirMensajeContacto(nombre: string, email: string, mensaje: string): string {
-  const partes = [
-    comoStringNoVacio(nombre) ? `Nombre: ${nombre.trim()}` : null,
-    comoStringNoVacio(email) ? `Email: ${email.trim()}` : null,
-    comoStringNoVacio(mensaje)?.trim() ?? null,
-  ].filter((parte): parte is string => parte !== null)
-
-  return partes.join('\n')
-}
-
-export function construirWhatsAppFormulario(telefono: string, nombre: string, email: string, mensaje: string): string | null {
-  return buildWhatsAppUrlConMensaje(telefono, construirMensajeContacto(nombre, email, mensaje))
-}
-
-export type ResultadoEnvioContacto = { mensaje: string | null; debeResetear: boolean }
-
-const MENSAJE_SIN_TELEFONO = 'No pudimos preparar el mensaje de WhatsApp. Escríbenos al teléfono o al email de esta sección.'
-const MENSAJE_POPUP_BLOQUEADO = 'Tu navegador bloqueó la ventana de WhatsApp. Permite ventanas emergentes o escríbenos al teléfono o al email de esta sección.'
-
-// Decide qué feedback mostrar y si el formulario debe limpiarse, sin tocar el
-// DOM — `abrirVentana` es la única frontera con el navegador, inyectada para
-// poder pinear los 3 casos (sin teléfono, popup bloqueado, éxito) sin jsdom
-// (ver test). Nunca pide resetear salvo que `abrirVentana` haya devuelto algo
-// truthy: ni con teléfono inutilizable ni con el popup bloqueado se pierde lo
-// que la persona tipeó (R3-002).
-export function resolverEnvioContacto(
-  telefono: string,
-  nombre: string,
-  email: string,
-  mensaje: string,
-  abrirVentana: (url: string) => unknown,
-): ResultadoEnvioContacto {
-  const url = construirWhatsAppFormulario(telefono, nombre, email, mensaje)
-  if (!url) return { mensaje: MENSAJE_SIN_TELEFONO, debeResetear: false }
-
-  const ventana = abrirVentana(url)
-  if (!ventana) return { mensaje: MENSAJE_POPUP_BLOQUEADO, debeResetear: false }
-
-  return { mensaje: null, debeResetear: true }
 }
 
 export type FooterProps = {
