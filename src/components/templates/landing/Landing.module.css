@@ -15,11 +15,8 @@
  * `#ECEDF1`, `#D9DBE1`, `#9A968C`, `#C7C3BA`, `#E6E4DE` son valores exactos
  * de ESTA maqueta (no genéricos del sistema de diseño) — se hardcodean acá a
  * propósito, igual que ya hacía `Footer.module.css` con sus propios grises.
- * Excepción documentada: el borde inferior del header (`1px #ECEDF1` en la
- * maqueta) ya lo pinta el shell compartido `SeccionesSPA.module.css` con
- * `var(--wb-tpl-line)` (`#E3E5EA`) — ese archivo es de S0 y está fuera de
- * alcance de S1, así que el header queda con el tono ligeramente distinto
- * del resto de los separadores de esta plantilla.
+ * El borde inferior del header lo pinta el shell compartido
+ * `SeccionesSPA.module.css` (`#EFEEF4`, --line-soft de Bloques).
  */
 
 .page {
@@ -65,15 +62,15 @@
 .botonHablemos {
   font: 600 12px var(--font-montserrat), sans-serif;
   color: #fff;
-  background: var(--wb-tpl-ink);
-  padding: 11px 20px;
-  border-radius: 6px;
+  background: var(--acento);
+  padding: 15px 28px;
+  border-radius: 999px;
   white-space: nowrap;
-  transition: filter 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .botonHablemos:hover {
-  filter: brightness(0.92);
+  background: var(--acento-hover, var(--acento));
 }
 
 .botonHablemos:focus-visible {
@@ -95,7 +92,7 @@
 .inicio {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
-  min-height: calc(100vh - 78px);
+  min-height: calc(100vh - var(--wb-spa-header-alto, 96px));
 }
 
 .inicioIzquierda {

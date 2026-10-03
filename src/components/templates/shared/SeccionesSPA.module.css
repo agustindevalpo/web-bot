@@ -21,8 +21,8 @@
   justify-content: space-between;
   gap: 24px;
   height: var(--wb-spa-header-alto);
-  padding: 0 44px;
-  border-bottom: 1px solid var(--wb-tpl-line);
+  padding: 0 96px;
+  border-bottom: 1px solid #efeef4; /* --line-soft del handoff Bloques */
   background: var(--wb-tpl-surface);
 }
 
@@ -52,7 +52,7 @@
 .nav {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 42px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   min-width: 0;
@@ -77,6 +77,12 @@
   font: 500 12.5px var(--font-montserrat), sans-serif;
   color: var(--wb-tpl-ink-muted);
   white-space: nowrap;
+  /* Hover solo de color, sin movimiento (README Bloques, "Hover y foco"). */
+  transition: color 0.2s ease;
+}
+
+.navItem:hover {
+  color: var(--wb-tpl-ink);
 }
 
 /* Subrayado del ítem activo: crece desde la izquierda (README.md:139). El
@@ -97,7 +103,7 @@
 
 .navItemActivo {
   font-weight: 600;
-  color: var(--acento);
+  color: var(--wb-tpl-ink);
 }
 
 .navItemActivo::after {
@@ -127,11 +133,11 @@
  * `--wb-spa-header-alto` es la única fuente del alto del header (lo consume
  * `.header` más abajo) y del offset de `scroll-margin-top` de cada sección.
  * Duplicado en JS como `ALTO_HEADER_DESKTOP_PX`/`ALTO_HEADER_MOBIL_PX`
- * (SeccionesSPA.tsx) para el `rootMargin` del scrollspy — ver el comentario
- * de esas constantes.
+ * (headerGeometria.ts) para el `rootMargin` del scrollspy; un test compara
+ * ambos lados.
  */
 .shell {
-  --wb-spa-header-alto: 78px;
+  --wb-spa-header-alto: 96px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -166,7 +172,7 @@
 
 /*
  * Offset del salto de ancla: sin esto, `#servicios` etc. dejan el borde
- * superior de la sección tapado detrás del header sticky (78px) al saltar.
+ * superior de la sección tapado detrás del header sticky (96px) al saltar.
  * `scroll-margin-top` es exactamente para esto — desplaza el punto de
  * "llegada" del scroll sin tocar el layout ni el padding visual de la
  * sección.
@@ -228,14 +234,14 @@
     /* Alto pineado real en móvil (ver `.header` más abajo): el header
      * sticky solo deja la fila del nav (44px) enganchada arriba, así que
      * el offset de `scroll-margin-top` de cada sección tiene que ser ese,
-     * no los 78px de escritorio. Duplicado en JS como `ALTO_HEADER_MOBIL_PX`
-     * (SeccionesSPA.tsx, mismo criterio de duplicación que ya usaba
+     * no los 96px de escritorio. Duplicado en JS como `ALTO_HEADER_MOBIL_PX`
+     * (headerGeometria.ts, mismo criterio de duplicación que
      * `ALTO_HEADER_DESKTOP_PX`). */
     --wb-spa-header-alto: 44px;
     /* Alto de la fila 1 (marca + accion) — el `top` negativo de `.header`
      * de abajo necesita saber cuánto tiene que subirse la fila 1 para que
      * solo quede pineada la fila 2. Duplicado en JS como
-     * `ALTO_FILA1_MOBIL_PX` (SeccionesSPA.tsx) para el centinela del
+     * `ALTO_FILA1_MOBIL_PX` (headerGeometria.ts) para el centinela del
      * IntersectionObserver que detecta cuándo el header ya está pegado. */
     --wb-spa-header-fila1-alto: 52px;
   }
@@ -244,7 +250,7 @@
     flex-wrap: wrap;
     align-content: flex-start;
     height: auto;
-    padding: 0 22px;
+    padding: 0 24px;
     /* `gap` de escritorio (24px) es horizontal ahí (una sola fila); acá con
      * `flex-wrap` ese mismo `gap` también se metería COMO fila (separación
      * entre línea 1 y línea 2), que rompería la cuenta exacta de `top` de
@@ -265,7 +271,7 @@
 
   /* Línea 1 con alto fijo (52px, `--wb-spa-header-fila1-alto`) para que el
    * cálculo de `top` de arriba sea exacto sin importar si el monograma
-   * (26px) o el botón Hablemos (más alto en escritorio) son más chicos que
+   * (36px, 26px en móvil) o el botón Hablemos (más alto en escritorio) son más chicos que
    * eso — `align-items: center` (heredado de `.header`) centra el
    * contenido real dentro de esta línea. */
   .marca,
@@ -294,9 +300,10 @@
     /* Sangra a los bordes del viewport (cancela el padding de `.header`):
      * el corte seco del último ítem visible tiene que tocar el canto real
      * de la pantalla (README.md:302, "sin degradado de desvanecido"), no
-     * quedar a 22px de él. `scroll-padding-inline` de abajo es lo que evita
-     * que el ítem activo quede pegado a ESE canto al centrarlo. */
-    margin-inline: -22px;
+     * quedar a 24px de él (el margen negativo sigue al gutter de `.header`).
+     * `scroll-padding-inline` de abajo es lo que evita que el ítem activo
+     * quede pegado a ESE canto al centrarlo. */
+    margin-inline: -24px;
     padding: 0 18px 8px;
     gap: 22px;
     height: 44px;

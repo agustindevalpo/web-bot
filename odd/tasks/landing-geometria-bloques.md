@@ -32,6 +32,8 @@ what must be shared).
   as a third line", but T1 says the nav always has 4 labels. Until answered: render one band.
 - Mobile header 82px at rest (C6): 82 = 38px row + 44px nav, but today's row holds the 46px
   "Hablemos" button. The 5a mockup shows no button in that row. Needed before U3 mobile.
+  U3 keeps today's mobile heights, 52px row 1 + 44px nav (96px at rest, 44px stuck), because the 82px
+  target leaves no room for "Hablemos". Pending designer answer.
 
 **Scope:** U1-U10 below, LANDING only plus new shared components. **Out of scope:** S2-S6 templates,
 chat redesign / momento 2 capture (fields are rendered when present but nothing fills them yet),
@@ -51,7 +53,7 @@ unit, merged as each one is ready; production only moves on an explicit release.
   `palette.ts` clamp for all templates. No visual change. SHARED.
 - [x] **U2 — Monogram + font (T1, T4).** Monograma reduced to Sans pesado 36/34/26; Instrument Serif
   removed from LANDING and `Monograma.module.css`; headings Montserrat 800 with Bloques tracking. SHARED.
-- [ ] **U3 — Header (C6).** 96px desktop, gutter 96, nav gap 42, "Hablemos" pill; mobile rest/stuck
+- [x] **U3 — Header (C6).** 96px desktop, gutter 96, nav gap 42, "Hablemos" pill; mobile rest/stuck
   heights; CSS vars and the JS constants in `SeccionesSPA.tsx` changed together, with a test. SHARED.
 - [ ] **U4 — Hero.** 3-tier display scale by `nombre.length` (pure, tested), 150px padding, 720px photo
   with `24px 0 0 24px` radius, eyebrow pill, mobile photo-above-title.
@@ -79,7 +81,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
   opt-in, `buildPaletteStyle(config, { bloques: true })`, LANDING passes it, each template turns it on
   when it migrates to Bloques. Pre-U1 default-accent tests restored.
 - 2026-10-03: U2 done on `feat/bloques-u2-monograma-fuente`: `Monograma` is Sans pesado only (`tamano` prop: `cabecera` 36px / 26px under 768px, `pie` 34px), Instrument Serif and `shared/fuentes.ts` deleted, LANDING headings Montserrat 800 with tracking -.048/-.042/-.03em, sizes unchanged. tsc, eslint (0 errors), 1067 unit tests, build green.
+- 2026-10-03: U3 done on `feat/bloques-u3-header`: header 96px (`--wb-spa-header-alto` + JS constants moved to `shared/headerGeometria.ts`, pinned by a test that reads the CSS), gutter 96px, nav gap 42px, hover color-only, active item `--ink`, `--line-soft` border, LANDING "Hablemos" accent pill with `--acento-hover`; mobile gutter 24px (nav bleed follows), row heights unchanged. tsc, eslint (0 errors), 1070 unit tests, build green.
 
 ## Next step
 
-U3 (Header, C6) on a new branch stacked on U2.
+U4 (Hero) on a new branch stacked on U3.
