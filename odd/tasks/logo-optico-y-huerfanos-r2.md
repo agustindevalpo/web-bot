@@ -65,6 +65,12 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
 - 2026-10-03: T3 applied (delegated writer): `altosLogo`/`esLogotipo` in `shared/logoOptico.ts`,
   `--logo-alto`/`--logo-alto-movil`, name hidden for logotypes. Commit: see git log.
 
+- 2026-10-03: Chrome check of T3 (`b63809b`, local next dev + local Postgres). Heights match the designer
+  table at 1000px and 390px. Found on mobile: square isotype + name at 16px pushed "Hablemos" to its own
+  row (header 97 -> 149px); also a 41-character name did it even with the monogram (pre-existing in
+  production). Fixed: mobile name at 12.5px (handoff 5a) and `.marca` shrinks so the name wraps to two
+  lines inside the 52px row. All 7 test sites: 78px desktop / 97px mobile.
+
 ## Next step
 
 T2.
