@@ -2,6 +2,7 @@ import { ISitioRepository } from '@/domain/repositories/ISitioRepository'
 import { IAlmacenamientoArchivos } from '@/application/services/IAlmacenamientoArchivos'
 import { Sitio } from '@/domain/entities/Sitio'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
+import { leerDimensionesImagen, DimensionesImagen } from '@/domain/imagen/dimensionesImagen'
 
 // Máximo 5 MB por archivo (Decisión 2026-09-27 del feature de subida de
 // imágenes, ver odd/tasks/subida-imagenes-admin.md).
@@ -65,7 +66,8 @@ export class SubirImagenSitioUseCase {
     // la copia vieja lo que otra subida o un guardado del JSON escribió
     // mientras tanto. Achica la ventana de carrera; no la elimina.
     const sitioVigente = (await this.sitioRepo.findById(sitioId)) ?? sitio
-    const configActualizado = aplicarImagen(sitioVigente.configJson, campo, resultadoSubida.url)
+    const dimensiones = campo === 'logo' ? leerDimensionesImagen(bytes) : null
+    const configActualizado = aplicarImagen(sitioVigente.configJson, campo, resultadoSubida.url, dimensiones)
     const sitioActualizado = await this.sitioRepo.update(sitioId, { configJson: configActualizado })
 
     return { tipo: 'ok', url: resultadoSubida.url, sitio: sitioActualizado }
@@ -76,9 +78,14 @@ function aplicarImagen(
   config: Record<string, unknown>,
   campo: CampoImagenSitio,
   url: string,
+  dimensiones: DimensionesImagen | null,
 ): Record<string, unknown> {
   if (campo === 'logo') {
-    return { ...config, logo: url }
+    // Las dimensiones describen al logo anterior: se reemplazan, o se quitan
+    // si no se pudieron leer, para no dejar una proporción que ya no es.
+    const resto = { ...config }
+    delete resto.logoDimensiones
+    return dimensiones ? { ...resto, logo: url, logoDimensiones: dimensiones } : { ...resto, logo: url }
   }
 
   const actuales = Array.isArray(config.imagenes)

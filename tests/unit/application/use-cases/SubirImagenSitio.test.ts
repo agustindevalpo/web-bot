@@ -24,6 +24,15 @@ function bytesSvg(): Uint8Array {
   return new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"></svg>')
 }
 
+// PNG mínimo: firma + IHDR con el ancho/alto dados (el resto no importa).
+function bytesPngConDimensiones(ancho: number, alto: number): Uint8Array {
+  const b = new Uint8Array(24)
+  b.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52])
+  new DataView(b.buffer).setUint32(16, ancho)
+  new DataView(b.buffer).setUint32(20, alto)
+  return b
+}
+
 class FakeAlmacenamiento implements IAlmacenamientoArchivos {
   llamadas: ArchivoASubir[] = []
   constructor(private resultado: ResultadoSubida = { tipo: 'ok', url: 'https://media.devalpo.cl/x.png' }) {}
@@ -220,5 +229,50 @@ describe('SubirImagenSitio UseCase', () => {
 
     expect(resultado).toEqual({ tipo: 'error', detalle: 'boom' })
     expect(spyUpdate).not.toHaveBeenCalled()
+  })
+
+  describe('dimensiones del logo', () => {
+    const urlLogo = 'https://media.devalpo.cl/logo.png'
+    const viejo = { nombre: 'Vieja pyme', logo: 'https://media.devalpo.cl/vieja.png', logoDimensiones: { ancho: 10, alto: 10 } }
+
+    it('guarda logoDimensiones leídas de la cabecera al subir un logo', async () => {
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: urlLogo }))
+
+      await useCase.execute('sitio-1', 'logo', bytesPngConDimensiones(300, 120))
+
+      expect((await repo.findById('sitio-1'))?.configJson).toEqual({
+        nombre: 'Vieja pyme',
+        logo: urlLogo,
+        logoDimensiones: { ancho: 300, alto: 120 },
+      })
+    })
+
+    it('reemplaza las dimensiones del logo anterior', async () => {
+      sitio.configJson = { ...viejo }
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: urlLogo }))
+
+      await useCase.execute('sitio-1', 'logo', bytesPngConDimensiones(500, 100))
+
+      expect((await repo.findById('sitio-1'))?.configJson.logoDimensiones).toEqual({ ancho: 500, alto: 100 })
+    })
+
+    it('quita logoDimensiones viejas cuando el nuevo logo no se puede leer', async () => {
+      sitio.configJson = { ...viejo }
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: urlLogo }))
+
+      const resultado = await useCase.execute('sitio-1', 'logo', bytesPng()) // IHDR truncado
+
+      expect(resultado.tipo).toBe('ok')
+      expect((await repo.findById('sitio-1'))?.configJson).toEqual({ nombre: 'Vieja pyme', logo: urlLogo })
+    })
+
+    it('hero no toca logoDimensiones', async () => {
+      sitio.configJson = { ...viejo }
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: 'https://media.devalpo.cl/h.png' }))
+
+      await useCase.execute('sitio-1', 'hero', bytesPngConDimensiones(900, 600))
+
+      expect((await repo.findById('sitio-1'))?.configJson.logoDimensiones).toEqual({ ancho: 10, alto: 10 })
+    })
   })
 })

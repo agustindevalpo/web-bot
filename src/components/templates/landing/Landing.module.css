@@ -36,14 +36,18 @@
  * el otro lado de la regla 04: cuando el cliente sube logo, ocupa el mismo
  * espacio que el monograma ocupaba, nada se mueve alrededor.
  *
- * El alto es fijo y el ancho sigue la proporción del logo (hasta un tope).
+ * El alto es el óptico (T3), o 44px/34px sin dimensiones; el ancho sigue la
+ * proporción del logo (hasta un tope).
  * Una caja fija de 160×30 dejaba un logo casi cuadrado en ~44×30 px con un
  * hueco vacío a la derecha antes del nombre (visto en test.sitios.devalpo.cl,
  * 2026-09-27). 44px entra holgado en el header de escritorio. */
 
 .marcaLogoImg {
   display: block;
-  height: 44px;
+  /* --logo-alto la fija index.tsx desde las dimensiones guardadas del logo
+   * (regla T3, shared/logoOptico.ts) con el tope de ancho ya aplicado: la caja
+   * coincide con la imagen. Sin ella, el alto de siempre. */
+  height: var(--logo-alto, 44px);
   width: auto;
   max-width: 180px;
   object-fit: contain;
@@ -52,8 +56,9 @@
 }
 
 .marcaNombre {
-  font: 600 14.5px var(--font-montserrat), sans-serif;
-  letter-spacing: -0.01em;
+  font: 700 16px var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  margin-left: 3px; /* gap de .marca (11px) + 3px = 14px del handoff T3 */
   color: var(--wb-tpl-ink);
 }
 
@@ -596,8 +601,14 @@
 
 @media (max-width: 767px) {
   .marcaLogoImg {
-    height: 34px;
-    max-width: 130px;
+    height: var(--logo-alto-movil, 34px);
+    max-width: 140px;
+  }
+
+  /* 12.5px como en la maqueta móvil del handoff (5a): con 16px, un isotipo de
+   * 46px + nombre + "Hablemos" no entraban en 390px y el botón bajaba de fila. */
+  .marcaNombre {
+    font-size: 12.5px;
   }
 
   /*
