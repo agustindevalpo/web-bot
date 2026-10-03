@@ -2,6 +2,7 @@ import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { buildWhatsAppUrl, buildTelUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
 import { nombreDeServicio, descripcionDeServicio } from '@/components/templates/shared/servicios'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
+import { comoDimensionesLogo, escalaLogo, DimensionesLogo } from '@/components/templates/shared/logoOptico'
 
 // Constructores puros de props por sección del rediseño SPA (rediseño de
 // plantillas, S1) — de props planas a las cuatro entradas que consume
@@ -109,11 +110,27 @@ const TEXTO_ENLACE_CTA_SERVICIOS = 'Escríbenos →'
 // `config.logo` está ausente o vacío — la misma decisión pura que
 // `index.tsx` usa para elegir entre pintar el logo del cliente
 // (`object-fit: contain`, regla 04) o el monograma derivado del nombre.
-export type MarcaProps = { nombre: string; iniciales: string; logo: string | null }
+// `logoDimensiones`/`logoEscala` son `null` cuando el config no trae
+// dimensiones válidas (logo subido antes de guardarlas): el template mantiene
+// entonces el render de alto fijo. Ver `shared/logoOptico.ts`.
+export type MarcaProps = {
+  nombre: string
+  iniciales: string
+  logo: string | null
+  logoDimensiones: DimensionesLogo | null
+  logoEscala: number | null
+}
 
 export function buildMarca(config: SiteConfigDTO): MarcaProps {
   const nombre = comoStringNoVacio(config.nombre) ?? ''
-  return { nombre, iniciales: obtenerIniciales(nombre), logo: comoStringNoVacio(config.logo) }
+  const logoDimensiones = comoDimensionesLogo(config.logoDimensiones)
+  return {
+    nombre,
+    iniciales: obtenerIniciales(nombre),
+    logo: comoStringNoVacio(config.logo),
+    logoDimensiones,
+    logoEscala: logoDimensiones ? escalaLogo(logoDimensiones) : null,
+  }
 }
 
 export type InicioProps = {

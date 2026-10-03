@@ -43,7 +43,9 @@
 
 .marcaLogoImg {
   display: block;
-  height: 44px;
+  /* --logo-escala la fija index.tsx desde las dimensiones guardadas del logo
+   * (shared/logoOptico.ts); sin ella vale 1 y el alto es el de siempre. */
+  height: calc(44px * var(--logo-escala, 1));
   width: auto;
   max-width: 180px;
   object-fit: contain;
@@ -596,7 +598,7 @@
 
 @media (max-width: 767px) {
   .marcaLogoImg {
-    height: 34px;
+    height: calc(34px * var(--logo-escala, 1));
     max-width: 130px;
   }
 

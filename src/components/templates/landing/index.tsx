@@ -226,13 +226,23 @@ export default async function Landing({ config }: TemplateProps) {
   // espacio que el monograma — nada más se mueve alrededor. `.marcaLogoImg`
   // fija el alto (44px en escritorio, 34px en móvil, `Landing.module.css`) y
   // deja que el ancho siga la proporción del logo con un tope, sin recortarlo
-  // ni deformarlo. `width`/`height` solo dan la proporción inicial. Sin logo,
+  // ni deformarlo. `width`/`height` son las reales cuando hay `logoDimensiones`
+  // (sin salto de layout) y `--logo-escala` ajusta el alto base según la
+  // proporción (`shared/logoOptico.ts`); sin dimensiones, 180x44 y escala 1. Sin logo,
   // `Monograma` (variante "serifCalado" — regla 02, LANDING es editorial)
   // ocupa ese mismo slot derivado de `marca.iniciales`.
   const marcaSlot = (
     <>
       {marca.logo ? (
-        <Image src={marca.logo} alt={marca.nombre} width={180} height={44} sizes="180px" className={styles.marcaLogoImg} />
+        <Image
+          src={marca.logo}
+          alt={marca.nombre}
+          width={marca.logoDimensiones?.ancho ?? 180}
+          height={marca.logoDimensiones?.alto ?? 44}
+          sizes="180px"
+          className={styles.marcaLogoImg}
+          style={marca.logoEscala ? ({ '--logo-escala': marca.logoEscala } as CSSProperties) : undefined}
+        />
       ) : (
         <Monograma iniciales={marca.iniciales} variante="serifCalado" />
       )}

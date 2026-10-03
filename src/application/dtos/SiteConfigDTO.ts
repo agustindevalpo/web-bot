@@ -60,4 +60,10 @@ export interface SiteConfigDTO {
   // archivos en el chat ni en `/admin`): nace siempre ausente hasta que esa
   // superficie exista.
   logo?: string
+  // Ancho/alto intrínsecos del logo en píxeles, leídos de la cabecera de la
+  // imagen al subirla (`SubirImagenSitioUseCase`). Campo paralelo para que
+  // `logo` siga siendo un string. Ausente en logos anteriores o si no se pudo
+  // leer: el header cae al render de alto fijo. Un valor inválido (llegado por
+  // el editor JSON) se descarta al leerlo, nunca rompe el render.
+  logoDimensiones?: { ancho: number; alto: number }
 }

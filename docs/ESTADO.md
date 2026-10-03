@@ -118,7 +118,8 @@ un envío en silencio, y navegación móvil con header pegado y footer centrado 
 social, RUT, domicilio) en el footer de la landing (PR #42) · **subida de logo, foto
 principal y galería desde `/admin` a Cloudflare R2** (PR #44, D-42; probado en vivo en
 `test.sitios.devalpo.cl`) · logo del header de `LANDING` con alto fijo y ancho según su
-proporción (PR #45; los logos verticales quedan angostos).
+proporción (PR #45); los logos subidos desde entonces guardan sus dimensiones y el alto se
+ajusta ópticamente (0.75x a 1.5x de 44/34 px), los anteriores conservan el alto fijo.
 Las otras 4 plantillas siguen con el diseño anterior y no muestran el logo.
 
 `develop` y `main` tienen el mismo árbol: no hay nada mergeado esperando deploy.
