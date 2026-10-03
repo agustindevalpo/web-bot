@@ -87,153 +87,135 @@
   margin: 0 0 20px;
 }
 
-/* ── Inicio ── */
+/* ── Inicio (hero Bloques) ──
+ * Grid 1fr 1fr, 150px arriba. Columna izquierda con el gutter de 96px del
+ * header; la foto (720px, radio 24px solo del lado interior) sangra a la
+ * derecha. Sin foto: una columna, sin placeholder. Display en tres tramos
+ * discretos (shared/displayHero.ts, sin clamp()); sin hover que mueva nada. */
 
 .inicio {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  min-height: calc(100vh - var(--wb-spa-header-alto, 96px));
+  grid-template-columns: 1fr 1fr;
+  padding-top: 150px;
+  align-items: start;
+}
+
+.inicioSinFoto {
+  grid-template-columns: 1fr;
 }
 
 .inicioIzquierda {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 66px 30px 40px 44px;
+  padding: 0 0 150px 96px;
+}
+
+.eyebrowHero {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: 600 11.5px var(--font-montserrat), sans-serif;
+  color: var(--acento);
+  background: var(--acento-07, color-mix(in srgb, var(--acento) 7%, transparent));
+  border-radius: 999px;
+  padding: 10px 18px;
+  margin: 0 0 44px;
+}
+
+.eyebrowHero::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--acento);
+  flex: none;
 }
 
 .inicioTitulo {
-  font: 800 58px/1.06 var(--font-montserrat), sans-serif;
-  letter-spacing: -0.048em;
-  max-width: 12ch;
-  margin: 0 0 22px;
+  font-family: var(--font-montserrat), sans-serif;
+  font-weight: 800;
+  margin: 0 0 40px;
   color: var(--wb-tpl-ink);
 }
 
+.tramoGrande {
+  font-size: 104px;
+  line-height: 0.95;
+  letter-spacing: -0.048em;
+}
+
+.tramoMedio {
+  font-size: 78px;
+  line-height: 1;
+  letter-spacing: -0.042em;
+}
+
+.tramoChico {
+  font-size: 56px;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+}
+
 .inicioParrafo {
-  font: 300 16px/1.65 var(--font-montserrat), sans-serif;
+  font: 300 18px/1.85 var(--font-montserrat), sans-serif;
   color: var(--wb-tpl-ink-muted);
-  max-width: 42ch;
-  margin: 0 0 34px;
+  max-width: 38ch;
+  margin: 0 0 52px;
 }
 
 .ctas {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
-.ctaPrimaria {
+.ctaPrimaria,
+.ctaSecundaria {
   font: 600 12.5px var(--font-montserrat), sans-serif;
+  padding: 20px 34px;
+  border-radius: 999px;
+  text-align: center;
+}
+
+.ctaPrimaria {
   color: #fff;
   background: var(--acento);
-  padding: 14px 24px;
-  border-radius: 6px;
-  transition: filter 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .ctaPrimaria:hover {
-  filter: brightness(0.92);
+  background: var(--acento-hover, var(--acento));
 }
 
 .ctaSecundaria {
-  font: 600 12.5px var(--font-montserrat), sans-serif;
   color: var(--wb-tpl-ink);
   background: transparent;
-  border: 1px solid #d9dbe1;
-  padding: 14px 24px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+  border: 1.5px solid #d8d6e4;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 
+/* El texto NO cambia de color (README "Hover y foco"). */
 .ctaSecundaria:hover {
-  background: color-mix(in srgb, var(--wb-tpl-ink) 8%, transparent);
+  border-color: var(--acento);
+  background: color-mix(in srgb, var(--acento) 4%, #fff);
 }
 
-.statsRow {
-  display: flex;
-  gap: 22px;
-  border-top: 1px solid #ecedf1;
-  padding-top: 22px;
-  margin-top: 34px;
+.ctaPrimaria:focus-visible,
+.ctaSecundaria:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
 }
 
-.statItem {
-  padding-left: 22px;
-  border-left: 1px solid #ecedf1;
-}
-
-.statItem:first-child {
-  padding-left: 0;
-  border-left: none;
-}
-
-.statValor {
-  font: 800 30px/1 var(--font-montserrat), sans-serif;
-  letter-spacing: -0.03em;
-  color: var(--acento);
-}
-
-.statEtiqueta {
-  font: 400 11px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink-faint);
-  margin-top: 7px;
-}
-
-.inicioDerecha {
+.inicioFoto {
   position: relative;
-  background: var(--wb-tpl-surface-soft);
-}
-
-.fotoPlaceholder {
-  position: absolute;
-  inset: 44px 44px 120px 0;
-  border-radius: 4px;
+  height: 720px;
+  border-radius: 24px 0 0 24px;
   overflow: hidden;
   background: var(--wb-tpl-placeholder);
-  display: flex;
-  align-items: flex-end;
-  padding: 16px;
 }
 
 .fotoImg {
   object-fit: cover;
-}
-
-.fotoEtiqueta {
-  position: relative;
-  font: 500 11px var(--font-montserrat), sans-serif;
-  color: #9a968c;
-}
-
-.tarjetaDestacado {
-  position: absolute;
-  left: -56px;
-  bottom: 52px;
-  z-index: 1;
-  width: 330px;
-  background: var(--wb-tpl-ink);
-  padding: 26px 28px;
-  border-radius: 6px;
-  /* Tarjeta flotante oscura (README.md:120): `0 22px 50px rgba(16,19,26,.22)`,
-     no la clara — el fondo es --wb-tpl-ink. Confirmado contra el prototipo
-     (`Plantillas WebBot.dc.html:95`). */
-  box-shadow: 0 22px 50px rgba(16, 19, 26, 0.22);
-}
-
-.tarjetaEyebrow {
-  font: 700 10px var(--font-montserrat), sans-serif;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--wb-color-highlight);
-  margin: 0 0 7px;
-}
-
-.tarjetaFrase {
-  font: 800 19px/1.4 var(--font-montserrat), sans-serif;
-  letter-spacing: -0.03em;
-  color: #fff;
-  margin: 0;
 }
 
 /* ── Servicios ── */
@@ -628,42 +610,58 @@
     font-size: 11.5px;
   }
 
+  /* Hero móvil: la foto sube arriba del titular con `order` en el mismo
+   * contenedor (único reordenamiento de la plantilla). Display 44px en los
+   * tres tramos, cuerpo 13.5px, gutter 24px, botones apilados >= 46px. */
   .inicio {
     grid-template-columns: 1fr;
-    min-height: auto;
+    padding-top: 44px;
+  }
+
+  .inicioFoto {
+    order: -1;
+    height: 280px;
+    margin: 0 24px 32px;
+    border-radius: 16px;
   }
 
   .inicioIzquierda {
-    padding: 40px 22px 32px;
+    padding: 0 24px 44px;
+  }
+
+  .eyebrowHero {
+    margin-bottom: 28px;
+  }
+
+  .tramoGrande,
+  .tramoMedio,
+  .tramoChico {
+    font-size: 44px;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
   }
 
   .inicioTitulo {
-    font-size: 38px;
+    margin-bottom: 24px;
   }
 
-  .inicioDerecha {
-    min-height: 320px;
+  .inicioParrafo {
+    font-size: 13.5px;
+    line-height: 1.8;
+    max-width: none;
+    margin-bottom: 32px;
   }
 
-  .fotoPlaceholder {
-    position: relative;
-    inset: auto;
-    margin: 0 22px 72px;
-    aspect-ratio: 4 / 3;
-    padding: 0;
+  .ctas {
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .tarjetaDestacado {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    width: auto;
-    margin: -56px 22px 24px;
-  }
-
-  .statsRow {
-    flex-wrap: wrap;
-    row-gap: 16px;
+  .ctaPrimaria,
+  .ctaSecundaria {
+    width: 100%;
+    min-height: 46px;
+    padding: 16px 24px;
   }
 
   .servicios,
