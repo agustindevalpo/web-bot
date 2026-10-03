@@ -32,9 +32,9 @@ describe('shared/displayHero — tramoDisplay', () => {
   })
 })
 
-describe('Landing.module.css — tramos del display', () => {
+describe('HeroBloques.module.css — tramos del display', () => {
   // Los valores viven duplicados en el CSS (una clase por tramo): este test los ata.
-  const css = readFileSync(join(process.cwd(), 'src/components/templates/landing/Landing.module.css'), 'utf8')
+  const css = readFileSync(join(process.cwd(), 'src/components/templates/shared/HeroBloques.module.css'), 'utf8')
 
   it.each([
     ['grande', 'tramoGrande', '104px', '0.95', '-0.048em'],
