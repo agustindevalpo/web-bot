@@ -49,7 +49,7 @@ unit, merged as each one is ready; production only moves on an explicit release.
 
 - [x] **U1 — Foundations.** DTO fields above + defensive readers/helpers (`shared/servicios.ts`),
   `palette.ts` clamp for all templates. No visual change. SHARED.
-- [ ] **U2 — Monogram + font (T1, T4).** Monograma reduced to Sans pesado 36/34/26; Instrument Serif
+- [x] **U2 — Monogram + font (T1, T4).** Monograma reduced to Sans pesado 36/34/26; Instrument Serif
   removed from LANDING and `Monograma.module.css`; headings Montserrat 800 with Bloques tracking. SHARED.
 - [ ] **U3 — Header (C6).** 96px desktop, gutter 96, nav gap 42, "Hablemos" pill; mobile rest/stuck
   heights; CSS vars and the JS constants in `SeccionesSPA.tsx` changed together, with a test. SHARED.
@@ -78,7 +78,8 @@ unit, merged as each one is ready; production only moves on an explicit release.
   RESTAURANTE draws accent text on black): #FFD000 became #8f7400 under #221a00 text. Fixed: the clamp is
   opt-in, `buildPaletteStyle(config, { bloques: true })`, LANDING passes it, each template turns it on
   when it migrates to Bloques. Pre-U1 default-accent tests restored.
+- 2026-10-03: U2 done on `feat/bloques-u2-monograma-fuente`: `Monograma` is Sans pesado only (`tamano` prop: `cabecera` 36px / 26px under 768px, `pie` 34px), Instrument Serif and `shared/fuentes.ts` deleted, LANDING headings Montserrat 800 with tracking -.048/-.042/-.03em, sizes unchanged. tsc, eslint (0 errors), 1067 unit tests, build green.
 
 ## Next step
 
-U2 (Monogram + font) on a new branch from `develop` (stacked on U1 until it merges).
+U3 (Header, C6) on a new branch stacked on U2.
