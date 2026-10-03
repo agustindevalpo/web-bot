@@ -45,7 +45,7 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
   store `logoDimensiones`, render the logo with real `width`/`height` and a height derived from
   its aspect ratio around the 44/34px base, clamped. Fallback to today's rendering when
   dimensions are missing.
-- [ ] **T2 — R2 orphan cleanup.** Route: delegated (port, R2 and Noop adapters, use case, admin
+- [x] **T2 — R2 orphan cleanup.** Route: delegated (port, R2 and Noop adapters, use case, admin
   JSON save, tests). Add `eliminar` to `IAlmacenamientoArchivos`; delete the previous object when
   an upload replaces the logo or `imagenes[0]`, and delete owned objects that disappear from
   `configJson` when it is saved from the JSON editor.
@@ -58,6 +58,11 @@ and one PR per task to `develop` (T1 and T2 are independent). Review: RDD clone-
   scale `shared/logoOptico.ts` (clamp(sqrt(4/ratio), 0.75, 1.5)), `logoDimensiones` stored at upload.
   tsc, lint, test:unit (961), build green. Commit: see git log (one `feat(landing)` commit).
 
+- 2026-10-03: T2 done (delegated writer), branch `feat/limpieza-huerfanos-r2` stacked on T1. Port gains
+  `eliminar` + `urlPublicaBase`; pure ownership helper `domain/imagen/imagenesPropias.ts`; best-effort
+  cleanup after the DB write in upload and JSON save; stale `logoDimensiones` dropped. tsc, lint,
+  test:unit (998), build green.
+
 ## Next step
 
-T2.
+Visual check + PRs.
