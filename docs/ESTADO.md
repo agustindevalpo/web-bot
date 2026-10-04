@@ -9,8 +9,8 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-09-27 · `main` = `7306c62` · `develop` = `4270079`
-> (mismo árbol; `main` suma solo el commit de release)
+> **Última regeneración:** 2026-10-03 · `main` = `d3e48b8` (release) · `develop` = `main`
+> tras este commit
 
 ---
 
@@ -83,24 +83,29 @@ src/
 - **Templates:** `rubroTemplates.ts` mapea los 10 rubros a 5 `Template`; `resolver.ts`
   (puro) y `registry.ts` (JSX) están separados; fallback a `LANDING`, que es lo que recibe
   el rubro neutro `otro` cuando la deducción local no reconoce el negocio (D-28).
-  `components/templates/shared/` reúne lo que las plantillas comparten al migrar al
-  rediseño: `SeccionesSPA.tsx`/`scrollspy.ts`/`navScroll.ts` (shell de scroll largo con
-  nav de anclas; en móvil, fila de secciones deslizable y pegada arriba, sin hamburguesa),
-  `Monograma.tsx`/`iniciales.ts` (marca cuando no hay logo, D-37) y `servicios.ts`
-  (normaliza `servicios: string | {nombre, descripcion?}`, D-35) — hoy **`LANDING` y
-  `SERVICIOS` las consumen** (en `develop`, sin release); las otras tres plantillas siguen sin migrar.
+  `components/templates/shared/` es la base del rediseño **Bloques** (D-38; especificación
+  en `docs/design_handoff_plantillas_webbot/handoff_bloques_v2/`): `SeccionesSPA` (header
+  de 96px, nav de anclas, en móvil fila de marca + fila de nav pegada, botón flotante de
+  WhatsApp), `HeroBloques`, `BandaDatos` (cifras u horarios sobre tinta), `BloqueNosotros`
+  (a sangre en el acento, nunca desaparece), `SeccionContacto` + `FormularioContacto` +
+  `ContactoDatos`, `FooterBloques` (logo en placa blanca, línea legal), `Monograma`
+  (Sans pesado) y `logoOptico` (tamaño óptico del logo). Hoy las usan **`LANDING` y
+  `SERVICIOS`**; RESTAURANTE, PORTFOLIO y TIENDA siguen con el diseño anterior.
 - **Paleta:** `configJson.colores` guarda **solo** `acento` (D-32) — `primario`,
   `secundario` y `texto` ya no se persisten, se derivan al renderizar con
   `derivarPaletaDesdeAcento()` (`src/domain/color/paletaDerivada.ts`) y
   `palette.ts` sigue emitiendo las cuatro variables CSS que las 5 plantillas vivas
-  consumen.
+  consumen; con `{ bloques: true }` además oscurece el acento hasta 4.5:1 contra blanco
+  (solo las plantillas Bloques: las viejas pintan texto oscuro sobre el acento).
 - **Persistencia:** esquema en `src/infrastructure/db/prisma/schema.prisma`, 3
-  migraciones en `prisma/migrations/`; ni D-32 ni el ciclo de LANDING-Bloques agregaron
-  ninguna — ambos extienden tipos de TypeScript sobre el mismo `configJson: Json`.
+  migraciones en `prisma/migrations/`; ni D-32 ni el rediseño Bloques agregaron
+  ninguna — los campos nuevos (`servicios[].foto`/`precioDesde`, `sobreNosotrosPartes`,
+  `highlightAutor`, `legal`, `horarios`, `logoDimensiones`) son opcionales dentro del
+  mismo `configJson: Json`.
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `7306c62`, desplegado el 2026-09-27):**
+**En producción (`main` = `d3e48b8`, desplegado el 2026-10-03):**
 capacidad de generar un sitio real por chat demo con gate de lead (nombre + correo antes
 de revelar el sitio) · 5 templates de sitio elegidos por rubro · dominios propios vía
 Cloudflare · panel `/admin` para pausar, reactivar, asignar dominio, editar `configJson`
@@ -110,20 +115,20 @@ derivada de un único acento en OKLCH, con `primario`/`secundario`/`texto` calcu
 cada render en vez de leídos de la base (D-32) · acento derivado del estilo que el
 cliente elige en el chat (D-27) · deducción de rubro sobre descripción y servicios, con
 fallback neutro y pregunta guiada si no alcanza (D-28) · opciones del chat clicables
-(D-29) · login que precarga el correo de quien ya dejó el lead (D-30) · **S1 del
-rediseño**: `LANDING` como página de scroll largo con nav de anclas (D-33), monograma de
-marca (D-37), descripción por servicio (D-35), formulario de contacto que nunca descarta
-un envío en silencio, y navegación móvil con header pegado y footer centrado (PR #41) ·
+(D-29) · login que precarga el correo de quien ya dejó el lead (D-30) · **rediseño
+Bloques de `LANDING` y `SERVICIOS`** (PRs #48–#62): hero con título en tres tamaños,
+banda de cifras u horarios, bandas de servicio (LANDING) o lista con precios y "El lugar"
+con fotos propias (SERVICIOS), bloque Nosotros en el acento, contacto sin mapa que arma
+el mensaje de WhatsApp, footer con razón social y RUT cuando `configJson.legal` existe ·
 **páginas legales** `/terminos` y `/privacidad`, e identificación del proveedor (razón
 social, RUT, domicilio) en el footer de la landing (PR #42) · **subida de logo, foto
 principal y galería desde `/admin` a Cloudflare R2** (PR #44, D-42; probado en vivo en
 `test.sitios.devalpo.cl`) · logo del header de `LANDING` con alto fijo y ancho según su
 proporción (PR #45); los logos subidos desde entonces guardan sus dimensiones y el alto se
-ajusta ópticamente (área constante, 28-60 px en escritorio y 22-46 en móvil; un
-logotipo con proporción ≥ 1.6 reemplaza al nombre), los anteriores conservan el alto fijo.
-Las otras 3 plantillas (RESTAURANTE, PORTFOLIO, TIENDA) siguen con el diseño anterior y no muestran el logo.
-
-`develop` va por delante de `main`: el rediseño Bloques de `LANDING` y `SERVICIOS` está mergeado y espera release.
+ajusta ópticamente (área constante, 28-60 px en escritorio y 22-34 en el header móvil; un
+logotipo con proporción ≥ 1.6 reemplaza al nombre), los anteriores conservan el alto fijo ·
+las imágenes reemplazadas o quitadas se borran de R2 (solo las propias del sitio).
+RESTAURANTE, PORTFOLIO y TIENDA siguen con el diseño anterior y no muestran el logo.
 
 **No construido / inerte:**
 
@@ -137,11 +142,12 @@ Las otras 3 plantillas (RESTAURANTE, PORTFOLIO, TIENDA) siguen con el diseño an
   está desplegado (la organización tiene restricciones de OAuth App que impiden clonarlo).
 - `pausarSitioUC`, `reactivarSitioUC` y `verificarDominioUC` están compuestos en el
   container pero ninguna ruta los consume (verificado por grep).
-- Bloque legal dentro de los sitios de clientes (términos, razón social, RUT): no existe;
-  la landing ya no lo promete (D-40). Va con la tanda de Bloques.
-- Captura de contenido adicional para el rediseño: el logo y las fotos ya se cargan a
-  mano desde `/admin` (D-42), pero el cliente no puede subirlos él mismo y el chat
-  todavía no pide la descripción por servicio (D-36).
+- Términos y condiciones por cliente (si un cliente activa Webpay o Mercado Pago): no
+  existen; Bloques solo muestra razón social y RUT en el footer (T7).
+- Captura de contenido adicional (momento 2, D-36): ningún flujo llena los campos nuevos
+  de Bloques (precios, horarios, partes de Nosotros, autor de la cita, razón social y
+  RUT); hoy solo se cargan a mano en el editor JSON de `/admin`, igual que logo y fotos
+  (D-42). El chat sigue con sus 8 preguntas y el cliente no sube nada él mismo.
 
 ## 5. Bloqueado, y en qué exactamente
 
@@ -177,7 +183,7 @@ propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya pues
 **Tests:**
 
 ```bash
-npm run test:unit          # Jest — 69 suites / 925 tests en verde
+npm run test:unit          # Jest — 82 suites / 1177 tests en verde
 npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
 npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
 npm run test:all            # jest + cucumber
@@ -211,6 +217,10 @@ No existe un script `test` a secas.
 - `overflow-x: hidden` en `html` y `body` a la vez convierte al `body` en contenedor de
   scroll y **mata todo `position: sticky`** (se pega a una caja que no se mueve). Por eso
   `globals.css` usa `overflow-x: clip`. Ningún test unitario lo ve.
+- `npx tsc --noEmit` no revisa `tests/`; `npm run build` sí. En Windows, un archivo que
+  difiere solo en mayúsculas de otro (`bandaDatos.ts` junto a `BandaDatos.tsx`) rompe tsc.
+- `npm run lint` falla si existe la carpeta sin versionar `handoff_bloquesV2/` (trae un
+  `support.js`); `npx eslint src tests` es el chequeo real.
 - `docs/historico/` es archivo muerto por diseño: describe el proyecto de agosto de 2026
   (suscripciones, N8N, Python, equipo de tres). Nunca citarlo como fuente de un hecho
   actual.
