@@ -87,8 +87,8 @@ src/
   rediseño: `SeccionesSPA.tsx`/`scrollspy.ts`/`navScroll.ts` (shell de scroll largo con
   nav de anclas; en móvil, fila de secciones deslizable y pegada arriba, sin hamburguesa),
   `Monograma.tsx`/`iniciales.ts` (marca cuando no hay logo, D-37) y `servicios.ts`
-  (normaliza `servicios: string | {nombre, descripcion?}`, D-35) — hoy **solo `LANDING`
-  las consume**; las otras cuatro plantillas siguen sin migrar.
+  (normaliza `servicios: string | {nombre, descripcion?}`, D-35) — hoy **`LANDING` y
+  `SERVICIOS` las consumen** (en `develop`, sin release); las otras tres plantillas siguen sin migrar.
 - **Paleta:** `configJson.colores` guarda **solo** `acento` (D-32) — `primario`,
   `secundario` y `texto` ya no se persisten, se derivan al renderizar con
   `derivarPaletaDesdeAcento()` (`src/domain/color/paletaDerivada.ts`) y
@@ -121,9 +121,9 @@ principal y galería desde `/admin` a Cloudflare R2** (PR #44, D-42; probado en 
 proporción (PR #45); los logos subidos desde entonces guardan sus dimensiones y el alto se
 ajusta ópticamente (área constante, 28-60 px en escritorio y 22-46 en móvil; un
 logotipo con proporción ≥ 1.6 reemplaza al nombre), los anteriores conservan el alto fijo.
-Las otras 4 plantillas siguen con el diseño anterior y no muestran el logo.
+Las otras 3 plantillas (RESTAURANTE, PORTFOLIO, TIENDA) siguen con el diseño anterior y no muestran el logo.
 
-`develop` y `main` tienen el mismo árbol: no hay nada mergeado esperando deploy.
+`develop` va por delante de `main`: el rediseño Bloques de `LANDING` y `SERVICIOS` está mergeado y espera release.
 
 **No construido / inerte:**
 

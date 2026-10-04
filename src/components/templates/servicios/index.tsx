@@ -24,6 +24,7 @@ import {
   buildHorariosBanda,
   buildListaServicios,
   nombresDeServicios,
+  ubicacionLugar,
   ROTULO_HORARIOS,
 } from './sections'
 import styles from './Servicios.module.css'
@@ -43,6 +44,7 @@ export default async function Servicios({ config }: TemplateProps) {
   // Fotos propias = servidas desde el bucket público de R2; sin R2 configurado
   // (Noop → null) no hay fotos propias y "El lugar" no se renderiza.
   const lugar = buildLugar(config, getAlmacenamientoArchivos().urlPublicaBase())
+  const ubicacion = ubicacionLugar(lista !== null, lugar !== null)
   const nosotros = buildNosotros(config)
   const contacto = buildContacto(config)
   const formulario =
@@ -70,6 +72,7 @@ export default async function Servicios({ config }: TemplateProps) {
               'inicio' tras el hero. Con 0 o más de 3 horarios no renderiza
               (los horarios siguen en la tarjeta de Contacto). */}
           <BandaDatos items={horarios} rotulo={ROTULO_HORARIOS} variante="horarios" />
+          {lugar && ubicacion === 'inicio' && <Lugar {...lugar} />}
         </>
       ),
     },
@@ -77,16 +80,14 @@ export default async function Servicios({ config }: TemplateProps) {
       id: 'servicios',
       etiqueta: 'Servicios',
       // "El lugar" no es una sección del nav (una etiqueta condicional descoloca):
-      // vive en el fragmento de "Servicios", tras la lista, igual que la banda
-      // de horarios dentro de 'inicio'. Sin lista pero con fotos propias, la
-      // sección "Servicios" sigue existiendo para alojarlas.
-      contenido:
-        lista || lugar ? (
-          <>
-            {lista && <ListaServicios {...lista} />}
-            {lugar && <Lugar {...lugar} />}
-          </>
-        ) : null,
+      // vive en el fragmento de "Servicios", tras la lista (sin lista, ver
+      // `ubicacionLugar`). Cero servicios → sin sección ni etiqueta.
+      contenido: lista ? (
+        <>
+          <ListaServicios {...lista} />
+          {lugar && ubicacion === 'servicios' && <Lugar {...lugar} />}
+        </>
+      ) : null,
     },
     {
       id: 'nosotros',

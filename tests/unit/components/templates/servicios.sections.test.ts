@@ -4,6 +4,7 @@ import {
   columnasLista,
   nombresDeServicios,
   ROTULO_HORARIOS,
+  ubicacionLugar,
 } from '@/components/templates/servicios/sections'
 import { filtrarSecciones } from '@/components/templates/shared/navegacion'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
@@ -135,5 +136,16 @@ describe('servicios — navegación', () => {
 
   it('sin servicios: la etiqueta "Servicios" sale del nav', () => {
     expect(nav(config())).toEqual(['Inicio', 'Nosotros', 'Contacto'])
+  })
+})
+
+describe('servicios/sections — ubicacionLugar', () => {
+  it.each([
+    [true, true, 'servicios'],
+    [false, true, 'inicio'],
+    [true, false, null],
+    [false, false, null],
+  ])('hayLista=%s, hayLugar=%s → %s', (hayLista, hayLugar, esperado) => {
+    expect(ubicacionLugar(hayLista, hayLugar)).toBe(esperado)
   })
 })

@@ -48,7 +48,7 @@ tab-era layout, no logo, no Nosotros block, `mailto:` form, old `shared/Footer.t
   services `<select>`, footer), palette `{ bloques: true }`, plus the new price list. Remove the old
   template code and its CSS. Route: delegated.
 - [x] **S2-3 — El lugar.** Own-photo filter + 0/1/2/3+ layouts, desktop and mobile. Route: delegated.
-- [ ] **S2-4 — Polish.** Chrome pass on fixtures, motion contract, dead CSS; docs.
+- [x] **S2-4 — Polish.** Spec audit, motion contract, dead CSS/exports; docs. Chrome pass left to Agustín.
 
 ## Progress
 
@@ -56,7 +56,8 @@ tab-era layout, no logo, no Nosotros block, `mailto:` form, old `shared/Footer.t
 - 2026-10-03: S2-1 done — `shared/HeroBloques.tsx` + CSS extracted; LANDING renders it unchanged. tsc, eslint, 1142 unit tests and build green.
 - 2026-10-03: S2-2 done (resumed run after a cut-off writer) — SERVICIOS composes the shared Bloques pieces + `ListaServicios`; old template code/CSS removed; tests rewritten.
 - 2026-10-03: S2-3 done — `servicios/datosLugar.ts` (pure filter + layout) + `Lugar.tsx`; own = under `<R2 base>/sitios/<any id>/` (`esImagenPropia`, template has no site id); base from `getAlmacenamientoArchivos().urlPublicaBase()`; rendered inside the "Servicios" fragment (not a nav item).
+- 2026-10-03: S2-4 done — spec audit: with zero services "El lugar" now mounts inside 'inicio' (no "Servicios" nav label, 01-RESPUESTAS) via `ubicacionLugar`; select option keys unique; dead exports un-exported; ESTADO corrected (SERVICIOS migrated, develop ahead of main). Motion, hover, 'use client' and e2e (`h2` ~ "Servicios") verified unchanged.
 
 ## Next step
 
-S2-4.
+S2 complete on develop; release to main when Agustín asks.
