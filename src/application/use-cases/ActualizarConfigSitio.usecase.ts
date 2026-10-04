@@ -2,9 +2,15 @@ import { ISitioRepository } from '@/domain/repositories/ISitioRepository'
 import { Sitio } from '@/domain/entities/Sitio'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
 import { ConfigSitioInvalidaException } from '@/domain/exceptions/ConfigSitioInvalidaException'
+import { IAlmacenamientoArchivos } from '@/application/services/IAlmacenamientoArchivos'
+import { eliminarImagenesPropias } from '@/application/services/eliminarImagenesPropias'
+import { urlsImagenDeConfig } from '@/domain/imagen/imagenesPropias'
 
 export class ActualizarConfigSitioUseCase {
-  constructor(private sitioRepo: ISitioRepository) {}
+  constructor(
+    private sitioRepo: ISitioRepository,
+    private almacenamiento: IAlmacenamientoArchivos,
+  ) {}
 
   async execute(sitioId: string, jsonTexto: string): Promise<Sitio> {
     const sitio = await this.sitioRepo.findById(sitioId)
@@ -12,7 +18,20 @@ export class ActualizarConfigSitioUseCase {
 
     const config = parsearConfig(jsonTexto)
 
-    return this.sitioRepo.update(sitioId, { configJson: config })
+    // Si el logo cambió pero `logoDimensiones` quedó igual, esa proporción es
+    // del logo anterior: se descarta antes de guardar.
+    const configAnterior = sitio.configJson
+    const configFinal = descartarDimensionesViejas(configAnterior, config)
+
+    const actualizado = await this.sitioRepo.update(sitioId, { configJson: configFinal })
+
+    // Solo con el guardado hecho: se borran las imágenes propias que el JSON
+    // nuevo ya no referencia.
+    const vigentes = new Set(urlsImagenDeConfig(configFinal))
+    const quitadas = urlsImagenDeConfig(configAnterior).filter((url) => !vigentes.has(url))
+    await eliminarImagenesPropias(this.almacenamiento, sitioId, quitadas)
+
+    return actualizado
   }
 }
 
@@ -35,4 +54,17 @@ function parsearConfig(jsonTexto: string): Record<string, unknown> {
   }
 
   return config
+}
+
+function descartarDimensionesViejas(
+  anterior: Record<string, unknown>,
+  nuevo: Record<string, unknown>,
+): Record<string, unknown> {
+  const logoCambio = anterior.logo !== nuevo.logo
+  const dimensionesIguales = JSON.stringify(anterior.logoDimensiones) === JSON.stringify(nuevo.logoDimensiones)
+  if (!logoCambio || !dimensionesIguales || nuevo.logoDimensiones === undefined) return nuevo
+
+  const resto = { ...nuevo }
+  delete resto.logoDimensiones
+  return resto
 }

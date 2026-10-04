@@ -1,9 +1,10 @@
 import { SubirImagenSitioUseCase } from '@/application/use-cases/SubirImagenSitio.usecase'
-import { IAlmacenamientoArchivos, ArchivoASubir, ResultadoSubida } from '@/application/services/IAlmacenamientoArchivos'
+import { IAlmacenamientoArchivos } from '@/application/services/IAlmacenamientoArchivos'
 import { Sitio } from '@/domain/entities/Sitio'
 import { Template } from '@/domain/value-objects/Template'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
 import { MockSitioRepository } from '../../../mocks/MockSitioRepository'
+import { FakeAlmacenamiento } from '../../../mocks/FakeAlmacenamientoArchivos'
 
 function bytesJpeg(): Uint8Array {
   return new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0, 1, 2, 3])
@@ -24,14 +25,13 @@ function bytesSvg(): Uint8Array {
   return new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"></svg>')
 }
 
-class FakeAlmacenamiento implements IAlmacenamientoArchivos {
-  llamadas: ArchivoASubir[] = []
-  constructor(private resultado: ResultadoSubida = { tipo: 'ok', url: 'https://media.devalpo.cl/x.png' }) {}
-
-  async subir(archivo: ArchivoASubir): Promise<ResultadoSubida> {
-    this.llamadas.push(archivo)
-    return this.resultado
-  }
+// PNG mínimo: firma + IHDR con el ancho/alto dados (el resto no importa).
+function bytesPngConDimensiones(ancho: number, alto: number): Uint8Array {
+  const b = new Uint8Array(24)
+  b.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52])
+  new DataView(b.buffer).setUint32(16, ancho)
+  new DataView(b.buffer).setUint32(20, alto)
+  return b
 }
 
 describe('SubirImagenSitio UseCase', () => {
@@ -166,6 +166,10 @@ describe('SubirImagenSitio UseCase', () => {
 
   it('imagenes: no pisa una imagen que otra subida escribió mientras esta subía', async () => {
     const almacenamiento: IAlmacenamientoArchivos = {
+      async eliminar() {
+        return { tipo: 'ok' }
+      },
+      urlPublicaBase: () => 'https://media.devalpo.cl',
       async subir() {
         // Reemplaza el objeto guardado (como haría una base real) en vez de
         // mutarlo: así el snapshot leído antes de subir queda realmente viejo.
@@ -220,5 +224,141 @@ describe('SubirImagenSitio UseCase', () => {
 
     expect(resultado).toEqual({ tipo: 'error', detalle: 'boom' })
     expect(spyUpdate).not.toHaveBeenCalled()
+  })
+
+  describe('dimensiones del logo', () => {
+    const urlLogo = 'https://media.devalpo.cl/logo.png'
+    const viejo = { nombre: 'Vieja pyme', logo: 'https://media.devalpo.cl/vieja.png', logoDimensiones: { ancho: 10, alto: 10 } }
+
+    it('guarda logoDimensiones leídas de la cabecera al subir un logo', async () => {
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: urlLogo }))
+
+      await useCase.execute('sitio-1', 'logo', bytesPngConDimensiones(300, 120))
+
+      expect((await repo.findById('sitio-1'))?.configJson).toEqual({
+        nombre: 'Vieja pyme',
+        logo: urlLogo,
+        logoDimensiones: { ancho: 300, alto: 120 },
+      })
+    })
+
+    it('reemplaza las dimensiones del logo anterior', async () => {
+      sitio.configJson = { ...viejo }
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: urlLogo }))
+
+      await useCase.execute('sitio-1', 'logo', bytesPngConDimensiones(500, 100))
+
+      expect((await repo.findById('sitio-1'))?.configJson.logoDimensiones).toEqual({ ancho: 500, alto: 100 })
+    })
+
+    it('quita logoDimensiones viejas cuando el nuevo logo no se puede leer', async () => {
+      sitio.configJson = { ...viejo }
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: urlLogo }))
+
+      const resultado = await useCase.execute('sitio-1', 'logo', bytesPng()) // IHDR truncado
+
+      expect(resultado.tipo).toBe('ok')
+      expect((await repo.findById('sitio-1'))?.configJson).toEqual({ nombre: 'Vieja pyme', logo: urlLogo })
+    })
+
+    it('hero no toca logoDimensiones', async () => {
+      sitio.configJson = { ...viejo }
+      const useCase = new SubirImagenSitioUseCase(repo, new FakeAlmacenamiento({ tipo: 'ok', url: 'https://media.devalpo.cl/h.png' }))
+
+      await useCase.execute('sitio-1', 'hero', bytesPngConDimensiones(900, 600))
+
+      expect((await repo.findById('sitio-1'))?.configJson.logoDimensiones).toEqual({ ancho: 10, alto: 10 })
+    })
+  })
+
+  describe('limpieza de huérfanos', () => {
+    const URL_NUEVA = 'https://media.devalpo.cl/sitios/sitio-1/logo-nuevo.png'
+    const URL_VIEJA = 'https://media.devalpo.cl/sitios/sitio-1/logo-viejo.png'
+
+    function conConfig(config: Record<string, unknown>) {
+      repo = new MockSitioRepository([new Sitio('sitio-1', 'cliente-1', 'testpyme', Template.LANDING, config)])
+    }
+
+    it('al reemplazar el logo borra el logo anterior propio', async () => {
+      conConfig({ nombre: 'P', logo: URL_VIEJA })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
+
+      await new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'logo', bytesPng())
+
+      expect(almacenamiento.eliminadas).toEqual(['sitios/sitio-1/logo-viejo.png'])
+    })
+
+    it('al reemplazar la foto principal borra imagenes[0] propia y deja el resto', async () => {
+      conConfig({
+        nombre: 'P',
+        imagenes: ['https://media.devalpo.cl/sitios/sitio-1/hero-viejo.jpg', 'https://media.devalpo.cl/sitios/sitio-1/g-1.jpg'],
+      })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
+
+      await new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'hero', bytesPng())
+
+      expect(almacenamiento.eliminadas).toEqual(['sitios/sitio-1/hero-viejo.jpg'])
+    })
+
+    it('no borra el logo anterior si la misma URL sigue en la galería', async () => {
+      conConfig({ nombre: 'P', logo: URL_VIEJA, imagenes: [URL_VIEJA] })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
+
+      await new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'logo', bytesPng())
+
+      expect(almacenamiento.eliminadas).toEqual([])
+    })
+
+    it('no borra un logo o foto externos (Unsplash)', async () => {
+      conConfig({ nombre: 'P', logo: 'https://images.unsplash.com/x.png', imagenes: ['https://images.unsplash.com/y.jpg'] })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
+      const useCase = new SubirImagenSitioUseCase(repo, almacenamiento)
+
+      await useCase.execute('sitio-1', 'logo', bytesPng())
+      await useCase.execute('sitio-1', 'hero', bytesPng())
+
+      expect(almacenamiento.eliminadas).toEqual([])
+    })
+
+    it('agregar a la galería no borra nada', async () => {
+      conConfig({ nombre: 'P', imagenes: ['https://media.devalpo.cl/sitios/sitio-1/hero-viejo.jpg'] })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
+
+      await new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'imagenes', bytesPng())
+
+      expect(almacenamiento.eliminadas).toEqual([])
+    })
+
+    it('un fallo al borrar no falla la subida', async () => {
+      conConfig({ nombre: 'P', logo: URL_VIEJA })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA }, { tipo: 'error', detalle: 'boom' })
+      const consola = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+      const resultado = await new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'logo', bytesPng())
+
+      expect(resultado.tipo).toBe('ok')
+      expect((await repo.findById('sitio-1'))?.configJson.logo).toBe(URL_NUEVA)
+      expect(consola).toHaveBeenCalled()
+      consola.mockRestore()
+    })
+
+    it('no borra nada si la subida falla (el config no cambió)', async () => {
+      conConfig({ nombre: 'P', logo: URL_VIEJA })
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'error', detalle: 'x' })
+
+      await new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'logo', bytesPng())
+
+      expect(almacenamiento.eliminadas).toEqual([])
+    })
+
+    it('no borra si el guardado en la base falla', async () => {
+      conConfig({ nombre: 'P', logo: URL_VIEJA })
+      jest.spyOn(repo, 'update').mockRejectedValue(new Error('db caída'))
+      const almacenamiento = new FakeAlmacenamiento({ tipo: 'ok', url: URL_NUEVA })
+
+      await expect(new SubirImagenSitioUseCase(repo, almacenamiento).execute('sitio-1', 'logo', bytesPng())).rejects.toThrow('db caída')
+
+      expect(almacenamiento.eliminadas).toEqual([])
+    })
   })
 })

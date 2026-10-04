@@ -1,14 +1,13 @@
 import {
   buildMarca,
   buildInicio,
+  buildDestacados,
+  buildHighlight,
   buildServicios,
   buildNosotros,
   buildContacto,
-  buildFooter,
-  construirMensajeContacto,
-  construirWhatsAppFormulario,
-  resolverEnvioContacto,
 } from '@/components/templates/landing/sections'
+import { filtrarSecciones } from '@/components/templates/shared/navegacion'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { Estilo } from '@/domain/value-objects/Estilo'
 
@@ -51,14 +50,14 @@ describe('landing/sections — buildMarca', () => {
   it('arma las dos iniciales en mayúscula desde el nombre, saltando el artículo', () => {
     // "Panadería El Trigal": "El" es la única palabra de 2 letras — se salta
     // (shared/iniciales.ts) y las iniciales salen de Panadería + Trigal.
-    expect(buildMarca(configCompleto())).toEqual({ nombre: 'Panadería El Trigal', iniciales: 'PT', logo: null })
+    expect(buildMarca(configCompleto())).toEqual({ nombre: 'Panadería El Trigal', iniciales: 'PT', logo: null, logoDimensiones: null, logoAltos: null, mostrarNombre: true })
   })
 
   it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
     expect(() => buildMarca(configSoloNombre())).not.toThrow()
     // "Sitio E2E": ambas palabras tienen más de 2 letras y ninguna es
     // artículo/preposición — iniciales de las dos palabras tal cual.
-    expect(buildMarca(configSoloNombre())).toEqual({ nombre: 'Sitio E2E', iniciales: 'SE', logo: null })
+    expect(buildMarca(configSoloNombre())).toEqual({ nombre: 'Sitio E2E', iniciales: 'SE', logo: null, logoDimensiones: null, logoAltos: null, mostrarNombre: true })
   })
 
   it('expone `logo` cuando config.logo viene con contenido', () => {
@@ -66,7 +65,41 @@ describe('landing/sections — buildMarca', () => {
       nombre: 'Panadería El Trigal',
       iniciales: 'PT',
       logo: 'https://cdn.example.com/logo.png',
+      logoDimensiones: null,
+      logoAltos: null, mostrarNombre: true,
     })
+  })
+
+  it('expone dimensiones y altos ópticos cuando config.logoDimensiones es válido', () => {
+    const marca = buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: { ancho: 300, alto: 100 } }))
+    expect(marca.logoDimensiones).toEqual({ ancho: 300, alto: 100 })
+    expect(marca.logoAltos).toEqual({ escritorio: 44, movil: 34 })
+  })
+
+  it.each([
+    ['isotipo r<1.6', { ancho: 100, alto: 100 }, true],
+    ['borde r=1.6', { ancho: 160, alto: 100 }, false],
+    ['logotipo r>=1.6', { ancho: 400, alto: 100 }, false],
+  ])('mostrarNombre con %s', (_n, dims, mostrar) => {
+    expect(buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: dims })).mostrarNombre).toBe(mostrar)
+  })
+
+  it('mantiene el nombre visible sin dimensiones o sin logo', () => {
+    expect(buildMarca(configCompleto({ logo: 'https://cdn.example.com/logo.png' })).mostrarNombre).toBe(true)
+    expect(buildMarca(configCompleto({ logoDimensiones: { ancho: 400, alto: 100 } })).mostrarNombre).toBe(true)
+  })
+
+  it.each([
+    ['string', '400x100'],
+    ['cero', { ancho: 0, alto: 100 }],
+    ['negativo', { ancho: -4, alto: 100 }],
+    ['decimal', { ancho: 10.5, alto: 100 }],
+    ['strings numéricos', { ancho: '400', alto: '100' }],
+    ['incompleto', { ancho: 400 }],
+  ])('descarta logoDimensiones inválido (%s) sin lanzar', (_nombre, invalido) => {
+    const config = configCompleto({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: invalido as never })
+    expect(() => buildMarca(config)).not.toThrow()
+    expect(buildMarca(config)).toMatchObject({ logo: 'https://cdn.example.com/logo.png', logoDimensiones: null, logoAltos: null, mostrarNombre: true })
   })
 
   it('`logo` es null cuando config.logo es solo espacios', () => {
@@ -80,18 +113,15 @@ describe('landing/sections — buildInicio', () => {
 
     expect(inicio.nombre).toBe('Panadería El Trigal')
     expect(inicio.descripcion).toBe('Pan artesanal con más de 20 años de tradición.')
-    expect(inicio.rubro).toBe('PANADERIA')
+    expect(inicio.rubro).toBe('Panadería')
     expect(inicio.ciudad).toBe('Viña del Mar')
     expect(inicio.imagenHero).toBe('https://images.unsplash.com/hero.jpg')
     expect(inicio.whatsappUrl).toBe('https://wa.me/56912345678')
     expect(inicio.telUrl).toBe('tel:+56 9 1234 5678')
     expect(inicio.telefonoDisplay).toBe('+56 9 1234 5678')
-    expect(inicio.highlight).toBe('Horneamos tres veces al día.')
-    expect(inicio.destacados).toEqual([
-      { valor: '20+', etiqueta: 'años' },
-      { valor: '500+', etiqueta: 'clientes' },
-      { valor: '15', etiqueta: 'productos' },
-    ])
+    // Bloques: ni cifras ni frase destacada en el hero (U5 / U7).
+    expect(inicio).not.toHaveProperty('destacados')
+    expect(inicio).not.toHaveProperty('highlight')
   })
 
   it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
@@ -105,16 +135,31 @@ describe('landing/sections — buildInicio', () => {
     expect(inicio.imagenHero).toBeNull()
     expect(inicio.whatsappUrl).toBeNull()
     expect(inicio.telUrl).toBeNull()
-    expect(inicio.highlight).toBeNull()
-    expect(inicio.destacados).toEqual([])
   })
 
   it('no muestra el badge de rubro cuando rubro es "demo"', () => {
     expect(buildInicio(configCompleto({ rubro: 'demo' })).rubro).toBeNull()
   })
+})
+
+describe('landing/sections — buildDestacados / buildHighlight', () => {
+  it('expone las cifras y la frase destacada fuera del hero', () => {
+    const config = configCompleto()
+    expect(buildDestacados(config)).toEqual([
+      { valor: '20+', etiqueta: 'años' },
+      { valor: '500+', etiqueta: 'clientes' },
+      { valor: '15', etiqueta: 'productos' },
+    ])
+    expect(buildHighlight(config)).toBe('Horneamos tres veces al día.')
+  })
+
+  it('degrada con un config que solo trae { nombre }', () => {
+    expect(buildDestacados(configSoloNombre())).toEqual([])
+    expect(buildHighlight(configSoloNombre())).toBeNull()
+  })
 
   it('recorta a 3 destacados cuando llegan más de los que muestra el hero', () => {
-    const inicio = buildInicio(
+    const inicio = buildDestacados(
       configCompleto({
         destacados: [
           { valor: '1', etiqueta: 'uno' },
@@ -124,14 +169,14 @@ describe('landing/sections — buildInicio', () => {
         ],
       }),
     )
-    expect(inicio.destacados).toHaveLength(3)
+    expect(inicio).toHaveLength(3)
   })
 
   describe('contra forma equivocada (destacados malformado)', () => {
     it('trata un destacados que es un string (no array) como ausente, sin lanzar', () => {
       const config = configCompleto({ destacados: 'no soy un array' as unknown as SiteConfigDTO['destacados'] })
-      expect(() => buildInicio(config)).not.toThrow()
-      expect(buildInicio(config).destacados).toEqual([])
+      expect(() => buildDestacados(config)).not.toThrow()
+      expect(buildDestacados(config)).toEqual([])
     })
 
     it('descarta entradas de destacados sin etiqueta o sin valor, sin lanzar', () => {
@@ -144,8 +189,8 @@ describe('landing/sections — buildInicio', () => {
           null as unknown as { valor: string; etiqueta: string },
         ],
       })
-      expect(() => buildInicio(config)).not.toThrow()
-      expect(buildInicio(config).destacados).toEqual([{ valor: '20+', etiqueta: 'años' }])
+      expect(() => buildDestacados(config)).not.toThrow()
+      expect(buildDestacados(config)).toEqual([{ valor: '20+', etiqueta: 'años' }])
     })
   })
 })
@@ -155,15 +200,12 @@ describe('landing/sections — buildServicios', () => {
     expect(buildServicios(configCompleto())?.etiqueta).toBe('Qué ofrecemos')
   })
 
-  // Forma legada — la única que existe hoy en producción (D-19 nunca se
-  // implementó): un array de strings, sin descripción. `descripcion: null`
-  // en cada item, no el campo ausente, porque `ServicioItem.descripcion` es
-  // `string | null`, no opcional (T-servicios-descripcion).
-  it('numera los servicios del config desde 1 (forma legada: strings, sin descripción)', () => {
-    expect(buildServicios(configCompleto())?.items).toEqual([
-      { numero: 1, titulo: 'Pan artesanal', descripcion: null },
-      { numero: 2, titulo: 'Tortas', descripcion: null },
-      { numero: 3, titulo: 'Hallullas', descripcion: null },
+  // Forma legada (strings): sin descripción ni foto → forma A (número gigante).
+  it('una banda por servicio, numerada desde 1 (forma legada: strings)', () => {
+    expect(buildServicios(configCompleto())?.bandas).toEqual([
+      { numero: 1, nombre: 'Pan artesanal', descripcion: null, foto: null, whatsappUrl: 'https://wa.me/56912345678?text=Hola%2C%20quiero%20consultar%20por%20Pan%20artesanal' },
+      { numero: 2, nombre: 'Tortas', descripcion: null, foto: null, whatsappUrl: 'https://wa.me/56912345678?text=Hola%2C%20quiero%20consultar%20por%20Tortas' },
+      { numero: 3, nombre: 'Hallullas', descripcion: null, foto: null, whatsappUrl: 'https://wa.me/56912345678?text=Hola%2C%20quiero%20consultar%20por%20Hallullas' },
     ])
   })
 
@@ -171,59 +213,85 @@ describe('landing/sections — buildServicios', () => {
     const servicios = buildServicios(
       configCompleto({ servicios: [{ nombre: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' }] }),
     )
-    expect(servicios?.items).toEqual([{ numero: 1, titulo: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' }])
+    expect(servicios?.bandas[0]).toMatchObject({ numero: 1, nombre: 'Pan artesanal', descripcion: 'Horneado a leña, todos los días.' })
   })
 
-  it('objeto sin descripción propia también queda con descripcion: null — la celda no lee como error', () => {
+  it('objeto sin descripción propia queda con descripcion: null', () => {
     const servicios = buildServicios(configCompleto({ servicios: [{ nombre: 'Tortas' }] }))
-    expect(servicios?.items).toEqual([{ numero: 1, titulo: 'Tortas', descripcion: null }])
+    expect(servicios?.bandas[0]).toMatchObject({ nombre: 'Tortas', descripcion: null, foto: null })
   })
 
-  it('mezcla de strings y objetos en el mismo array, cada uno con su propia descripción o sin ella', () => {
+  it('cada banda decide su forma por su propia foto: forma B con foto, forma A sin ella', () => {
     const servicios = buildServicios(
       configCompleto({
-        servicios: ['Pan artesanal', { nombre: 'Tortas', descripcion: 'A pedido, con 48h de anticipación.' }, 'Hallullas'],
+        servicios: [{ nombre: 'Pan artesanal', foto: 'https://cdn.example/pan.jpg' }, 'Tortas', { nombre: 'Hallullas', foto: '  ' }],
       }),
     )
-    expect(servicios?.items).toEqual([
-      { numero: 1, titulo: 'Pan artesanal', descripcion: null },
-      { numero: 2, titulo: 'Tortas', descripcion: 'A pedido, con 48h de anticipación.' },
-      { numero: 3, titulo: 'Hallullas', descripcion: null },
-    ])
+    expect(servicios?.bandas.map((banda) => banda.foto)).toEqual(['https://cdn.example/pan.jpg', null, null])
   })
 
-  it('arma el link de WhatsApp de la celda CTA cuando hay teléfono', () => {
-    expect(buildServicios(configCompleto())?.whatsappUrl).toBe('https://wa.me/56912345678')
+  it('nunca toma la foto de imagenes[] (banco) para una banda', () => {
+    const servicios = buildServicios(configCompleto({ imagenes: ['https://images.unsplash.com/a', 'https://images.unsplash.com/b'] }))
+    expect(servicios?.bandas.every((banda) => banda.foto === null)).toBe(true)
+  })
+
+  it('el enlace de WhatsApp lleva el nombre del servicio; sin teléfono es null', () => {
+    const conTelefono = buildServicios(configCompleto({ servicios: ['Tortas'] }))
+    expect(conTelefono?.bandas[0].whatsappUrl).toContain('wa.me/56912345678?text=')
+    expect(decodeURIComponent(conTelefono?.bandas[0].whatsappUrl ?? '')).toContain('Tortas')
+
+    const sinTelefono = buildServicios(configCompleto({ servicios: ['Tortas'], contacto: { telefono: '', email: '' } }))
+    expect(sinTelefono?.bandas[0].whatsappUrl).toBeNull()
   })
 
   it('retorna null cuando no hay servicios (config { nombre } only)', () => {
     expect(buildServicios(configSoloNombre())).toBeNull()
   })
 
-  it('recorta a 5 celdas de servicio cuando llegan más de las que muestra la grilla', () => {
+  describe('un solo servicio (respuestas del diseñador 2026-10-03)', () => {
+    it('la sección se queda: eyebrow en singular, sin H2 de sección, banda sin número', () => {
+      const servicios = buildServicios(configCompleto({ servicios: ['Tortas'] }))
+      expect(servicios).toMatchObject({ unico: true, eyebrow: 'Servicio', etiqueta: null, enlaceTexto: 'Consultar por este servicio' })
+      expect(servicios?.bandas).toHaveLength(1)
+    })
+
+    it('con la foto de servicios[0] conserva la foto (forma B)', () => {
+      const servicios = buildServicios(configCompleto({ servicios: [{ nombre: 'Tortas', foto: 'https://cdn.example/t.jpg' }] }))
+      expect(servicios?.unico).toBe(true)
+      expect(servicios?.bandas[0].foto).toBe('https://cdn.example/t.jpg')
+    })
+
+    it('con varios servicios nada cambia: "Servicios", H2 "Qué ofrecemos", enlace de siempre', () => {
+      expect(buildServicios(configCompleto())).toMatchObject({
+        unico: false,
+        eyebrow: 'Servicios',
+        etiqueta: 'Qué ofrecemos',
+        enlaceTexto: 'Consultar por WhatsApp',
+      })
+    })
+  })
+
+  describe('cero servicios', () => {
+    it.each([
+      ['ausente', configSoloNombre()],
+      ['arreglo vacío', configCompleto({ servicios: [] })],
+    ])('la sección no se renderiza y "Servicios" sale del nav (%s)', (_caso, config) => {
+      expect(buildServicios(config)).toBeNull()
+      const nav = filtrarSecciones([
+        { id: 'inicio', etiqueta: 'Inicio', contenido: 'x' },
+        { id: 'servicios', etiqueta: 'Servicios', contenido: buildServicios(config) && 'x' },
+        { id: 'nosotros', etiqueta: 'Nosotros', contenido: 'x' },
+        { id: 'contacto', etiqueta: 'Contacto', contenido: 'x' },
+      ]).map(({ etiqueta }) => etiqueta)
+      expect(nav).toEqual(['Inicio', 'Nosotros', 'Contacto'])
+    })
+  })
+
+  it('no recorta: muestra una banda por cada servicio', () => {
     const servicios = buildServicios(
       configCompleto({ servicios: ['uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete'] }),
     )
-    expect(servicios?.items).toHaveLength(5)
-  })
-
-  // La celda de CTA es siempre la última de la grilla de 3 columnas y debe
-  // extenderse (`grid-column: span N`) para llenar lo que le queda libre en
-  // su fila, así la grilla nunca deja una celda vacía gris (defecto visto en
-  // `demo-consultora` con 4 servicios: 5 celdas en una grilla de 3×2 dejaban
-  // la sexta sin pintar). `ctaSpan` fija ese cálculo para cada cantidad de
-  // servicios que la grilla puede recibir (1 a MAX_SERVICIOS_GRID = 5).
-  describe('ctaSpan — la celda de CTA nunca deja una celda vacía en la grilla de 3 columnas', () => {
-    it.each([
-      [1, 2], // fila: [item1] [CTA×2]
-      [2, 1], // fila: [item1] [item2] [CTA×1]
-      [3, 3], // fila 1 completa con items, CTA arranca fila propia y la llena entera
-      [4, 2], // fila 2: [item4] [CTA×2]  ← el caso observado en demo-consultora
-      [5, 1], // fila 2: [item4] [item5] [CTA×1]
-    ])('con %i servicios, ctaSpan es %i', (cantidad, ctaSpanEsperado) => {
-      const servicios = ['uno', 'dos', 'tres', 'cuatro', 'cinco'].slice(0, cantidad)
-      expect(buildServicios(configCompleto({ servicios }))?.ctaSpan).toBe(ctaSpanEsperado)
-    })
+    expect(servicios?.bandas).toHaveLength(7)
   })
 
   describe('contra forma equivocada (servicios malformado)', () => {
@@ -248,78 +316,68 @@ describe('landing/sections — buildServicios', () => {
         ],
       })
       expect(() => buildServicios(config)).not.toThrow()
-      expect(buildServicios(config)?.items).toEqual([{ numero: 1, titulo: 'Pan artesanal', descripcion: null }])
+      expect(buildServicios(config)?.bandas.map((banda) => banda.nombre)).toEqual(['Pan artesanal'])
     })
   })
 })
 
 describe('landing/sections — buildNosotros', () => {
-  it('usa sobreNosotros cuando está presente', () => {
-    expect(buildNosotros(configCompleto())?.texto).toBe('Nacimos en 2003 con un horno a leña y mucho cariño.')
+  it('usa sobreNosotros como párrafo cuando está presente', () => {
+    expect(buildNosotros(configCompleto()).texto).toBe('Nacimos en 2003 con un horno a leña y mucho cariño.')
   })
 
-  it('el H2 es chrome de sección ("Quiénes somos"), no el nombre del negocio', () => {
-    // Antes del fix, el H2 repetía `marca.nombre` — el mismo string que el
-    // H1 del hero ya muestra. En la SPA (un clic de nav de distancia, no
-    // miles de píxeles como en el long-scroll viejo) esa repetición lee como
-    // bug, no como refuerzo de marca.
-    expect(buildNosotros(configCompleto())?.titulo).toBe('Quiénes somos')
+  it('cae a descripcion cuando sobreNosotros está ausente', () => {
+    expect(buildNosotros(configCompleto({ sobreNosotros: undefined })).texto).toBe('Pan artesanal con más de 20 años de tradición.')
   })
 
-  // Reemplaza el test que fijaba `sobreNosotros → descripcion → null`: ese
-  // fallback era correcto en el long-scroll viejo, donde Inicio y Nosotros
-  // quedaban lejísimos en la página. En la SPA de 4 secciones son un solo
-  // clic de nav aparte, y el fallback hacía que el párrafo de Nosotros
-  // repitiera literalmente `descripcion`, el mismo texto que el hero ya
-  // muestra arriba. Decisión (handoff de esta tarea): sin fallback — el
-  // párrafo de Nosotros solo existe cuando `sobreNosotros` tiene contenido
-  // propio.
-  it('NO cae a descripcion cuando sobreNosotros está ausente — el párrafo queda null', () => {
-    const nosotros = buildNosotros(configCompleto({ sobreNosotros: undefined }))
-    expect(nosotros?.texto).toBeNull()
+  it('el H2 es "{nombre} en {ciudad}", o solo el nombre sin ciudad', () => {
+    expect(buildNosotros(configCompleto()).titulo).toBe('Panadería El Trigal en Viña del Mar')
+    expect(buildNosotros(configCompleto({ ciudad: undefined })).titulo).toBe('Panadería El Trigal')
   })
 
-  it('sin sobreNosotros pero con fotos de galería, la sección igual se muestra (solo fotos, sin párrafo)', () => {
-    const nosotros = buildNosotros(configCompleto({ sobreNosotros: undefined }))
-    expect(nosotros).not.toBeNull()
-    expect(nosotros?.texto).toBeNull()
-    expect(nosotros?.imagenes.some((imagen) => imagen !== null)).toBe(true)
+  it('nunca es null: con un config que solo trae { nombre } sigue habiendo bloque', () => {
+    const nosotros = buildNosotros(configSoloNombre())
+    expect(nosotros).toEqual({ titulo: 'Sitio E2E', texto: null, tarjetas: [], frase: null, autor: null })
   })
 
-  it('retorna null (oculta la sección, desaparece del nav) cuando NI sobreNosotros NI fotos de galería existen', () => {
-    expect(buildNosotros(configSoloNombre())).toBeNull()
-    // Config explícito: sin sobreNosotros, sin descripcion-como-fallback (ya
-    // no aplica), y sin imágenes de galería (la única imagen que trae es la
-    // del hero, que `buildNosotros` excluye).
-    const config = configCompleto({ sobreNosotros: undefined, imagenes: ['https://images.unsplash.com/hero.jpg'] })
-    expect(buildNosotros(config)).toBeNull()
-  })
-
-  // Tres cupos, no cuatro: la grilla de la maqueta (README.md:203) es de dos
-  // columnas por dos filas y su primera celda abarca dos filas, así que solo
-  // quedan dos casillas libres además de la grande. Con un cuarto cupo la
-  // grilla se desbordaba a una tercera fila inexistente en el diseño y la
-  // sección terminaba más alta que el hero (medido: 955px contra 652px).
-  it('excluye la primera imagen (usada en el hero) y completa hasta 3 cupos con null', () => {
-    const nosotros = buildNosotros(configCompleto())
-    expect(nosotros?.imagenes).toEqual([
-      'https://images.unsplash.com/galeria1.jpg',
-      'https://images.unsplash.com/galeria2.jpg',
-      null,
+  it('las tarjetas salen de sobreNosotrosPartes en orden fijo, sin las vacías', () => {
+    const nosotros = buildNosotros(
+      configCompleto({ sobreNosotrosPartes: { distinto: 'Horno a leña', desde: '2003', quien: '   ' } }),
+    )
+    expect(nosotros.tarjetas).toEqual([
+      { clave: 'desde', texto: '2003' },
+      { clave: 'distinto', texto: 'Horno a leña' },
     ])
   })
 
-  it('deja los 3 cupos de imagen en null cuando no hay imágenes de galería', () => {
-    const nosotros = buildNosotros(configCompleto({ sobreNosotros: 'Somos una panadería familiar.', imagenes: undefined }))
-    expect(nosotros?.imagenes).toEqual([null, null, null])
+  it('la frase destacada y su autor viajan al bloque (C3)', () => {
+    const nosotros = buildNosotros(configCompleto({ highlightAutor: { nombre: 'Ana Rojas', cargo: 'Maestra panadera' } }))
+    expect(nosotros.frase).toBe('Horneamos tres veces al día.')
+    expect(nosotros.autor).toEqual({ nombre: 'Ana Rojas', cargo: 'Maestra panadera' })
   })
 
-  describe('contra forma equivocada (imagenes malformado)', () => {
-    it('trata un imagenes que es un string (no array) como sin fotos, sin lanzar', () => {
-      const config = configCompleto({ imagenes: 'no soy un array' as unknown as string[] })
-      expect(() => buildNosotros(config)).not.toThrow()
-      expect(buildNosotros(config)?.imagenes).toEqual([null, null, null])
+  it('sin frase no hay cita, aunque haya autor', () => {
+    const nosotros = buildNosotros(configCompleto({ highlight: undefined, highlightAutor: { nombre: 'Ana Rojas' } }))
+    expect(nosotros.frase).toBeNull()
+    expect(nosotros.autor).toBeNull()
+  })
+
+  it('con frase pero sin autor, la cita queda sin firma', () => {
+    expect(buildNosotros(configCompleto()).autor).toBeNull()
+  })
+
+  it('ya no expone fotos: imagenes[1..] no entran a Nosotros', () => {
+    expect(buildNosotros(configCompleto())).not.toHaveProperty('imagenes')
+  })
+
+  it('tolera formas equivocadas de sobreNosotrosPartes y highlightAutor sin lanzar', () => {
+    const config = configCompleto({
+      sobreNosotrosPartes: 'no soy un objeto' as unknown as SiteConfigDTO['sobreNosotrosPartes'],
+      highlightAutor: 42 as unknown as SiteConfigDTO['highlightAutor'],
     })
+    expect(() => buildNosotros(config)).not.toThrow()
+    expect(buildNosotros(config).tarjetas).toEqual([])
+    expect(buildNosotros(config).autor).toBeNull()
   })
 })
 
@@ -330,6 +388,7 @@ describe('landing/sections — buildContacto', () => {
     expect(contacto.formularioHabilitado).toBe(true)
     expect(contacto.telefono).toBe('+56 9 1234 5678')
     expect(contacto.email).toBe('contacto@eltrigal.cl')
+    expect(contacto.horarios).toEqual([])
   })
 
   it('respeta formulario.habilitado === false', () => {
@@ -353,76 +412,5 @@ describe('landing/sections — buildContacto', () => {
     const config = configCompleto({ contacto: { telefono: '+56 9 1234 5678', email: 'x@x.cl', formulario: 'si' as unknown as { habilitado: boolean } } })
     expect(() => buildContacto(config)).not.toThrow()
     expect(buildContacto(config).formularioHabilitado).toBe(true)
-  })
-})
-
-describe('landing/sections — construirMensajeContacto', () => {
-  it('arma las 3 líneas cuando los 3 campos vienen completos', () => {
-    expect(construirMensajeContacto('Ana', 'ana@mail.cl', 'Quiero cotizar una torta')).toBe(
-      'Nombre: Ana\nEmail: ana@mail.cl\nQuiero cotizar una torta',
-    )
-  })
-
-  it('omite las líneas de campos vacíos en vez de dejarlas colgando', () => {
-    expect(construirMensajeContacto('', '', 'Solo el mensaje')).toBe('Solo el mensaje')
-  })
-
-  it('degrada a string vacío con los 3 campos vacíos, sin lanzar', () => {
-    expect(() => construirMensajeContacto('', '', '')).not.toThrow()
-    expect(construirMensajeContacto('', '', '')).toBe('')
-  })
-})
-
-describe('landing/sections — construirWhatsAppFormulario', () => {
-  it('arma la URL de wa.me con el mensaje precargado', () => {
-    const url = construirWhatsAppFormulario('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Quiero cotizar una torta')
-    expect(url).toBe(
-      `https://wa.me/56912345678?text=${encodeURIComponent('Nombre: Ana\nEmail: ana@mail.cl\nQuiero cotizar una torta')}`,
-    )
-  })
-
-  it('retorna null cuando el teléfono no tiene dígitos utilizables', () => {
-    expect(construirWhatsAppFormulario('sin numero', 'Ana', 'ana@mail.cl', 'Hola')).toBeNull()
-  })
-})
-
-describe('landing/sections — resolverEnvioContacto (R3-002)', () => {
-  it('cuando la ventana se abre, no hay mensaje de error y pide resetear el formulario', () => {
-    const resultado = resolverEnvioContacto('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Hola', () => ({}))
-    expect(resultado).toEqual({ mensaje: null, debeResetear: true })
-  })
-
-  it('sin teléfono utilizable, avisa y no pide resetear (nunca abre ventana ni pierde lo tipeado)', () => {
-    const abrirVentana = jest.fn()
-    const resultado = resolverEnvioContacto('sin numero', 'Ana', 'ana@mail.cl', 'Hola', abrirVentana)
-    expect(abrirVentana).not.toHaveBeenCalled()
-    expect(resultado.debeResetear).toBe(false)
-    expect(resultado.mensaje).toMatch(/teléfono o al email/)
-  })
-
-  it('con el popup bloqueado (abrirVentana devuelve un valor falsy), avisa y no pide resetear', () => {
-    const resultado = resolverEnvioContacto('+56 9 1234 5678', 'Ana', 'ana@mail.cl', 'Hola', () => null)
-    expect(resultado.debeResetear).toBe(false)
-    expect(resultado.mensaje).toMatch(/bloqueó/)
-  })
-})
-
-describe('landing/sections — buildFooter', () => {
-  it('arma el footer desde un config lleno', () => {
-    const footer = buildFooter(configCompleto())
-
-    expect(footer.nombre).toBe('Panadería El Trigal')
-    expect(footer.ciudad).toBe('Viña del Mar')
-    expect(footer.telefono).toBe('+56 9 1234 5678')
-    expect(footer.email).toBe('contacto@eltrigal.cl')
-  })
-
-  it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
-    expect(() => buildFooter(configSoloNombre())).not.toThrow()
-    const footer = buildFooter(configSoloNombre())
-    expect(footer.nombre).toBe('Sitio E2E')
-    expect(footer.ciudad).toBeNull()
-    expect(footer.telefono).toBeNull()
-    expect(footer.email).toBeNull()
   })
 })

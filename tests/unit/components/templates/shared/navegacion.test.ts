@@ -1,4 +1,10 @@
-import { filtrarSecciones, estiloCascada, SeccionSPA } from '@/components/templates/shared/navegacion'
+import {
+  filtrarSecciones,
+  estiloCascada,
+  PASO_CASCADA_MS,
+  UMBRAL_OBSERVER_CASCADA,
+  SeccionSPA,
+} from '@/components/templates/shared/navegacion'
 
 describe('filtrarSecciones', () => {
   it.each([
@@ -47,11 +53,18 @@ describe('filtrarSecciones', () => {
 describe('estiloCascada', () => {
   it.each([
     [0, '0ms'],
-    [1, '70ms'],
-    [5, '350ms'],
+    [1, '80ms'],
+    [5, '400ms'],
     [-3, '0ms'],
-    [2.9, '140ms'],
+    [2.9, '160ms'],
   ])('índice %s → --dv-delay: %s', (indice, delayEsperado) => {
     expect(estiloCascada(indice)).toEqual({ '--dv-delay': delayEsperado })
+  })
+})
+
+describe('contrato de revelado Bloques', () => {
+  it('paso de 80ms y threshold 0.12', () => {
+    expect(PASO_CASCADA_MS).toBe(80)
+    expect(UMBRAL_OBSERVER_CASCADA).toBe(0.12)
   })
 })

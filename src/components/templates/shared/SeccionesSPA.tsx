@@ -2,9 +2,10 @@
 
 import { Fragment, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { filtrarSecciones, type SeccionSPA } from './navegacion'
+import { filtrarSecciones, UMBRAL_OBSERVER_CASCADA, type SeccionSPA } from './navegacion'
 import { resolverSeccionActiva } from './scrollspy'
 import { calcularScrollNavHorizontal } from './navScroll'
+import { ALTO_FILA1_MOBIL_PX, ALTO_HEADER_DESKTOP_PX, ALTO_HEADER_MOBIL_PX } from './headerGeometria'
 import styles from './SeccionesSPA.module.css'
 
 export type SeccionesSPAProps = {
@@ -18,9 +19,12 @@ export type SeccionesSPAProps = {
   // Override puntual del shell de header (p. ej. TIENDA suma la franja de
   // promo y baja a 74px) — el resto de las plantillas usa el shell por defecto.
   claseHeader?: string
+  // URL de WhatsApp del botón flotante (círculo verde, abajo a la derecha).
+  // Sin URL no se renderiza. Se oculta mientras la sección `contacto` está en
+  // pantalla (efecto de abajo).
+  whatsappFlotanteUrl?: string | null
 }
 
-const UMBRAL_OBSERVER_CASCADA = 0.06
 // Altura del header sticky (`.header`, SeccionesSPA.module.css, mismo valor
 // que `--wb-spa-header-alto`) usada como `rootMargin` superior del scrollspy:
 // una sección no se marca activa hasta que su borde cruza por debajo del
@@ -35,14 +39,11 @@ const UMBRAL_OBSERVER_CASCADA = 0.06
 // montar (`matchMedia`, en el efecto de abajo) — no hace falta reaccionar a
 // un resize en vivo para esto, igual que el resto de las constantes de este
 // componente.
-const ALTO_HEADER_DESKTOP_PX = 78
-const ALTO_HEADER_MOBIL_PX = 44
-// Alto de la fila 1 del header móvil (marca + accion,
-// `--wb-spa-header-fila1-alto` en el CSS) — el centinela `centinelaPegado`
-// de abajo usa esto como `rootMargin` superior de SU PROPIO observer (el
-// del header pegado, no el del scrollspy) para no marcar "pegado" hasta
-// que esa fila termine de esconderse detrás del header sticky.
-const ALTO_FILA1_MOBIL_PX = 52
+// Las constantes (`ALTO_HEADER_DESKTOP_PX`, `ALTO_HEADER_MOBIL_PX`,
+// `ALTO_FILA1_MOBIL_PX`) viven en `./headerGeometria.ts`, con un test que las
+// compara contra el CSS. `ALTO_FILA1_MOBIL_PX` (fila 1 móvil, marca + accion)
+// es el `rootMargin` superior del observer del centinela `centinelaPegado`:
+// no marca "pegado" hasta que esa fila termine de esconderse detrás del header.
 // Debe calzar con `scroll-padding-inline` del `.nav` móvil (CSS,
 // README.md:302) — el ítem activo nunca queda pegado al canto de la fila
 // cuando el efecto de scroll-al-activo de abajo lo centra.
@@ -74,7 +75,7 @@ const CONSULTA_MEDIA_MOBIL = '(max-width: 767px)'
 //   Compartir el observer de cascada le impondría su `threshold` de
 //   revelado-de-elemento-suelto y su `unobserve` de una sola vez a un
 //   trabajo que necesita lo contrario en ambos ejes.
-export default function SeccionesSPA({ secciones, marca, accionHeader, pie, className, claseHeader }: SeccionesSPAProps) {
+export default function SeccionesSPA({ secciones, marca, accionHeader, pie, className, claseHeader, whatsappFlotanteUrl }: SeccionesSPAProps) {
   // Re-filtra en el cliente aunque el server ya filtró antes de llamar acá
   // (Q2 en design.md): defensa en profundidad para el Requirement
   // "Data-Driven Navigation" — si un template olvidara filtrar, el wrapper
@@ -125,6 +126,9 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
   // horizontalmente con `nav.scrollTo`, nunca con `scrollIntoView` sobre el
   // documento (README.md:305).
   const navRef = useRef<HTMLElement>(null)
+  // Botón flotante de WhatsApp: el observer de la sección Contacto le pone/saca
+  // `data-oculto` a mano (visual, sin re-render), igual que `data-pegado`.
+  const flotanteRef = useRef<HTMLAnchorElement>(null)
 
   useEffect(() => {
     const raiz = raizRef.current
@@ -219,7 +223,7 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
       )
     }
 
-    // Móvil pinea solo la fila del nav (44px), no el header completo (78px)
+    // Móvil pinea solo la fila del nav (44px), no el header completo (96px)
     // — ver el comentario de `ALTO_HEADER_DESKTOP_PX`/`ALTO_HEADER_MOBIL_PX`
     // más arriba. Una sola lectura al montar: si la ventana cruza el
     // breakpoint después (rotación, resize manual) el rootMargin queda con
@@ -282,7 +286,22 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
     )
     if (finPaginaRef.current) observerFinPagina.observe(finPaginaRef.current)
 
+    // Oculta el botón flotante mientras Contacto está (aunque sea en parte) en
+    // pantalla. Sin sección `contacto`, el botón queda siempre visible.
+    const nodoContacto = seccionNodos.current.get('contacto')
+    const observerContacto = new IntersectionObserver(
+      (entradas) => {
+        const entrada = entradas[entradas.length - 1]
+        if (!entrada || !flotanteRef.current) return
+        if (entrada.isIntersecting) flotanteRef.current.setAttribute('data-oculto', '')
+        else flotanteRef.current.removeAttribute('data-oculto')
+      },
+      { threshold: 0 },
+    )
+    if (nodoContacto) observerContacto.observe(nodoContacto)
+
     return () => {
+      observerContacto.disconnect()
       observerCascada.disconnect()
       observerScrollspy.disconnect()
       observerPegado.disconnect()
@@ -398,6 +417,21 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
           un marcador de layout — la lupa de accesibilidad no tiene nada
           que leer acá. */}
       <div ref={finPaginaRef} className={styles.finPagina} aria-hidden="true" />
+
+      {whatsappFlotanteUrl && (
+        <a
+          ref={flotanteRef}
+          href={whatsappFlotanteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Escríbenos por WhatsApp"
+          className={styles.flotante}
+        >
+          <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1a13 13 0 0 1-5.6-4.9c-.4-.6-.9-1.5-.9-2.4 0-.9.5-1.4.7-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 1.9c.1.2 0 .4-.1.5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2 1.3 2.3 1.4.2.1.4.1.6-.1l.7-.8c.2-.2.3-.2.5-.1l2 .9c.2.1.3.2.3.3v.5Z" />
+          </svg>
+        </a>
+      )}
     </div>
   )
 }

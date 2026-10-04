@@ -71,7 +71,10 @@ por extensión):
 - **Galería** agrega la URL al final de `configJson.imagenes`. Para quitar o reordenar
   fotos se edita el JSON.
 
-Los archivos reemplazados no se borran del bucket.
+Al reemplazar el logo o la foto principal, y al quitar una imagen desde el editor JSON, el archivo
+anterior se borra del bucket (solo si es de ese sitio, `sitios/<id>/...`; las URLs externas no se
+tocan). El borrado es de mejor esfuerzo: si falla se registra en el log y el guardado igual vale.
+Los huérfanos anteriores a este cambio siguen en el bucket.
 
 La sesión del panel reutiliza `AUTH_SECRET` (ya existente) para firmar su
 propio JWT; no hace falta otra clave.

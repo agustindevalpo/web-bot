@@ -2,6 +2,9 @@ import { ISitioRepository } from '@/domain/repositories/ISitioRepository'
 import { IAlmacenamientoArchivos } from '@/application/services/IAlmacenamientoArchivos'
 import { Sitio } from '@/domain/entities/Sitio'
 import { SitioNoEncontradoException } from '@/domain/exceptions/SitioNoEncontradoException'
+import { eliminarImagenesPropias } from '@/application/services/eliminarImagenesPropias'
+import { urlsImagenDeConfig } from '@/domain/imagen/imagenesPropias'
+import { leerDimensionesImagen, DimensionesImagen } from '@/domain/imagen/dimensionesImagen'
 
 // Máximo 5 MB por archivo (Decisión 2026-09-27 del feature de subida de
 // imágenes, ver odd/tasks/subida-imagenes-admin.md).
@@ -65,20 +68,43 @@ export class SubirImagenSitioUseCase {
     // la copia vieja lo que otra subida o un guardado del JSON escribió
     // mientras tanto. Achica la ventana de carrera; no la elimina.
     const sitioVigente = (await this.sitioRepo.findById(sitioId)) ?? sitio
-    const configActualizado = aplicarImagen(sitioVigente.configJson, campo, resultadoSubida.url)
+    const dimensiones = campo === 'logo' ? leerDimensionesImagen(bytes) : null
+    const reemplazada = urlReemplazada(sitioVigente.configJson, campo)
+    const configActualizado = aplicarImagen(sitioVigente.configJson, campo, resultadoSubida.url, dimensiones)
     const sitioActualizado = await this.sitioRepo.update(sitioId, { configJson: configActualizado })
+
+    // Recién con el guardado hecho se borra lo que quedó reemplazado, salvo que
+    // la misma URL siga referenciada en otro campo (p. ej. también en la galería).
+    if (reemplazada && !urlsImagenDeConfig(configActualizado).includes(reemplazada)) {
+      await eliminarImagenesPropias(this.almacenamiento, sitioId, [reemplazada])
+    }
 
     return { tipo: 'ok', url: resultadoSubida.url, sitio: sitioActualizado }
   }
+}
+
+// URL que la subida deja sin referencia: el logo anterior, o `imagenes[0]` al
+// subir la foto principal. La galería solo agrega, no reemplaza nada.
+function urlReemplazada(config: Record<string, unknown>, campo: CampoImagenSitio): string | null {
+  if (campo === 'logo') return typeof config.logo === 'string' ? config.logo : null
+  if (campo === 'hero' && Array.isArray(config.imagenes) && typeof config.imagenes[0] === 'string') {
+    return config.imagenes[0]
+  }
+  return null
 }
 
 function aplicarImagen(
   config: Record<string, unknown>,
   campo: CampoImagenSitio,
   url: string,
+  dimensiones: DimensionesImagen | null,
 ): Record<string, unknown> {
   if (campo === 'logo') {
-    return { ...config, logo: url }
+    // Las dimensiones describen al logo anterior: se reemplazan, o se quitan
+    // si no se pudieron leer, para no dejar una proporción que ya no es.
+    const resto = { ...config }
+    delete resto.logoDimensiones
+    return dimensiones ? { ...resto, logo: url, logoDimensiones: dimensiones } : { ...resto, logo: url }
   }
 
   const actuales = Array.isArray(config.imagenes)

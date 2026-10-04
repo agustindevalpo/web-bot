@@ -39,7 +39,7 @@
  * `data-dv-anim="fade"` en ningún elemento. Se mantiene como primitiva
  * disponible del contrato `data-dv-anim` (comentario de cabecera de este
  * archivo), igual que otras piezas de S0 sin consumidor a propósito
- * (`fuentes.ts`, `contraste.ts`) — no es dead code a eliminar, es una pieza
+ * (`contraste.ts`) — no es dead code a eliminar, es una pieza
  * del sistema que otro consumidor puede volver a cablear. */
 [data-dv-anim='fade'] {
   animation: dvFade 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -57,7 +57,7 @@
 }
 
 [data-dv-anim='up'][data-dv-in] {
-  animation: dvUp 0.62s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: dvUp 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   animation-delay: var(--dv-delay, 0ms);
 }
 

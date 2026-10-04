@@ -1,0 +1,197 @@
+/*
+ * Bloque Nosotros (handoff Bloques, README "Bloque Nosotros" y T2/T5.3/C3).
+ * A sangre sobre `--acento`, padding 150px 96px. Todo el texto es #FFF pleno:
+ * el blanco solo se admite sobre el acento ya clampeado y nunca con alfa. El
+ * alfa vive solo en el fondo de las tarjetas y en el filete de la cita, que no
+ * son texto. Un solo breakpoint: 768px.
+ *
+ * Layout por cantidad de tarjetas (`layoutNosotros`): `columna` (0, centrada),
+ * `fila` (1-2, una columna con las tarjetas repartiéndose el ancho), `dos`
+ * (3, grilla 1.2fr 1fr).
+ */
+
+.bloque {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 64px;
+  padding: 150px 96px;
+  background: var(--acento);
+  color: #fff;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.dos {
+  grid-template-columns: 1.2fr 1fr;
+  gap: 96px;
+  align-items: center;
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.columna .texto {
+  align-items: center;
+  text-align: center;
+}
+
+.eyebrow {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0 0 20px;
+}
+
+.titulo {
+  font: 800 62px/1.06 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
+  max-width: 18ch;
+  margin: 0 0 32px;
+  color: #fff;
+}
+
+.parrafo {
+  font: 300 17.5px/1.9 var(--font-montserrat), sans-serif;
+  max-width: 44ch;
+  margin: 0;
+  color: #fff;
+}
+
+.cita {
+  max-width: 44ch;
+  margin: 44px 0 0;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.columna .cita {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.frase {
+  font: 700 24px/1.4 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: #fff;
+}
+
+.autor {
+  font: 500 13px var(--font-montserrat), sans-serif;
+  margin-top: 20px;
+  color: #fff;
+}
+
+.tarjetas {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.fila .tarjetas {
+  flex-direction: row;
+}
+
+.fila .tarjeta {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Una sola columna (`fila`, y todo móvil): el orden de lectura es párrafo →
+ * tarjetas → cita, como en las maquetas del diseñador (S2 móvil). La cita vive
+ * dentro de `.texto` para la columna izquierda de `dos`; con `display:
+ * contents` sus hijos pasan a ser ítems del bloque y `order` baja la cita
+ * debajo de las tarjetas sin duplicar el marcado. */
+.fila {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.fila .texto {
+  display: contents;
+}
+
+.fila .tarjetas {
+  order: 1;
+  margin-top: 44px;
+}
+
+.fila .cita {
+  order: 2;
+}
+
+.tarjeta {
+  padding: 32px 34px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.tarjetaTitulo {
+  font: 700 17px/1.5 var(--font-montserrat), sans-serif;
+  margin: 0;
+  color: #fff;
+}
+
+@media (max-width: 767px) {
+  .bloque,
+  .dos {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 24px 44px;
+  }
+
+  .titulo {
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .parrafo {
+    font-size: 13.5px;
+    line-height: 1.8;
+    max-width: none;
+  }
+
+  .cita {
+    max-width: none;
+    margin-top: 28px;
+    padding-top: 28px;
+  }
+
+  .frase {
+    font-size: 17px;
+  }
+
+  .tarjetas,
+  .fila .tarjetas {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tarjeta {
+    padding: 24px 24px;
+  }
+
+  .dos {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .dos .texto {
+    display: contents;
+  }
+
+  .dos .tarjetas,
+  .fila .tarjetas {
+    order: 1;
+    margin-top: 28px;
+  }
+
+  .dos .cita,
+  .fila .cita {
+    order: 2;
+  }
+}

@@ -15,6 +15,17 @@ export type ResultadoSubida =
   | { tipo: 'no_configurado' }
   | { tipo: 'error'; detalle: string }
 
+export type ResultadoEliminacion =
+  | { tipo: 'ok' }
+  | { tipo: 'no_configurado' }
+  | { tipo: 'error'; detalle: string }
+
 export interface IAlmacenamientoArchivos {
   subir(archivo: ArchivoASubir): Promise<ResultadoSubida>
+  // Nunca lanza: un fallo vuelve como `{ tipo: 'error' }`. Borrar una clave
+  // que no existe es ok (S3/R2 son idempotentes).
+  eliminar(clave: string): Promise<ResultadoEliminacion>
+  // Base pública de las URLs que genera `subir` (sin `/` final), o null si el
+  // storage no está configurado. Sirve para saber qué URLs son propias.
+  urlPublicaBase(): string | null
 }

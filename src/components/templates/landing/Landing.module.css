@@ -15,11 +15,8 @@
  * `#ECEDF1`, `#D9DBE1`, `#9A968C`, `#C7C3BA`, `#E6E4DE` son valores exactos
  * de ESTA maqueta (no genéricos del sistema de diseño) — se hardcodean acá a
  * propósito, igual que ya hacía `Footer.module.css` con sus propios grises.
- * Excepción documentada: el borde inferior del header (`1px #ECEDF1` en la
- * maqueta) ya lo pinta el shell compartido `SeccionesSPA.module.css` con
- * `var(--wb-tpl-line)` (`#E3E5EA`) — ese archivo es de S0 y está fuera de
- * alcance de S1, así que el header queda con el tono ligeramente distinto
- * del resto de los separadores de esta plantilla.
+ * El borde inferior del header lo pinta el shell compartido
+ * `SeccionesSPA.module.css` (`#EFEEF4`, --line-soft de Bloques).
  */
 
 .page {
@@ -31,19 +28,23 @@
 /* ── Marca (slot `marca` del header, shell en SeccionesSPA.module.css) ──
  * El cuadrado con la inicial y relleno plano (`.marcaInicial`) se reemplazó
  * por el monograma compartido (`shared/Monograma.tsx`, variante
- * "serifCalado" — handoff bloque 3c, regla 03: ese cuadrado es justo "el
+ * "Sans pesado" — T4, handoff Bloques v2, y antes regla 03: ese cuadrado es justo "el
  * gesto que grita 'no puso su logo'"). `.marcaLogoImg` es
  * el otro lado de la regla 04: cuando el cliente sube logo, ocupa el mismo
  * espacio que el monograma ocupaba, nada se mueve alrededor.
  *
- * El alto es fijo y el ancho sigue la proporción del logo (hasta un tope).
+ * El alto es el óptico (T3), o 44px/34px sin dimensiones; el ancho sigue la
+ * proporción del logo (hasta un tope).
  * Una caja fija de 160×30 dejaba un logo casi cuadrado en ~44×30 px con un
  * hueco vacío a la derecha antes del nombre (visto en test.sitios.devalpo.cl,
  * 2026-09-27). 44px entra holgado en el header de escritorio. */
 
 .marcaLogoImg {
   display: block;
-  height: 44px;
+  /* --logo-alto la fija index.tsx desde las dimensiones guardadas del logo
+   * (regla T3, shared/logoOptico.ts) con el tope de ancho ya aplicado: la caja
+   * coincide con la imagen. Sin ella, el alto de siempre. */
+  height: var(--logo-alto, 44px);
   width: auto;
   max-width: 180px;
   object-fit: contain;
@@ -52,23 +53,24 @@
 }
 
 .marcaNombre {
-  font: 600 14.5px var(--font-montserrat), sans-serif;
-  letter-spacing: -0.01em;
+  font: 700 16px var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  margin-left: 3px; /* gap de .marca (11px) + 3px = 14px del handoff T3 */
   color: var(--wb-tpl-ink);
 }
 
 .botonHablemos {
   font: 600 12px var(--font-montserrat), sans-serif;
   color: #fff;
-  background: var(--wb-tpl-ink);
-  padding: 11px 20px;
-  border-radius: 6px;
+  background: var(--acento);
+  padding: 15px 28px;
+  border-radius: 999px;
   white-space: nowrap;
-  transition: filter 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .botonHablemos:hover {
-  filter: brightness(0.92);
+  background: var(--acento-hover, var(--acento));
 }
 
 .botonHablemos:focus-visible {
@@ -76,645 +78,250 @@
   outline-offset: 2px;
 }
 
-/* Eyebrow compartido por las 4 secciones — color acento, mayúsculas. */
-.eyebrow {
-  font: 600 10.5px var(--font-montserrat), sans-serif;
-  letter-spacing: 0.2em;
+.fotoImg {
+  object-fit: cover;
+}
+
+/* ── Servicios (bandas Bloques) ──
+ * Encabezado 140px 96px 84px y una banda a sangre por servicio, 400px mínimo,
+ * fondo alternando blanco / #F2F1ED. Grid .85fr 1.15fr con la celda visual
+ * SIEMPRE a la izquierda: la alternancia vive en el color de fondo, no en el
+ * lado (README "Bandas de servicio"). La celda visual toma el fondo contrario
+ * al de su banda. Sin hover de bloque: solo el enlace. */
+
+.serviciosEncabezado {
+  padding: 140px 96px 84px;
+}
+
+.eyebrowServicios {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--acento);
   margin: 0 0 20px;
 }
 
-/* ── Inicio ── */
-
-.inicio {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  min-height: calc(100vh - 78px);
+.serviciosTitulo {
+  font: 800 68px/1.04 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
+  max-width: 22ch;
+  margin: 0;
+  color: var(--wb-tpl-ink);
 }
 
-.inicioIzquierda {
+.banda {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  min-height: 400px;
+  background: #fff;
+}
+
+.bandaHueso {
+  background: #f2f1ed;
+}
+
+.bandaVisual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f2f1ed;
+}
+
+.bandaHueso .bandaVisual {
+  background: #fff;
+}
+
+.bandaNumeroGigante {
+  font: 800 220px/1 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.06em;
+  color: var(--acento-18);
+  user-select: none;
+}
+
+/* Un solo servicio (respuestas del diseñador 2026-10-03): sin número, banda de
+ * una columna sobre #F2F1ED a sangre, sin celda visual. Con foto vuelve a dos
+ * columnas (forma B), también sin número. El nombre es el encabezado (h2). */
+.serviciosEncabezadoUnico {
+  padding: 140px 96px 0;
+}
+
+.bandaUnica,
+.bandaUnica.bandaHueso {
+  grid-template-columns: 1fr;
+  min-height: 0;
+  background: #f2f1ed;
+}
+
+.bandaUnica.bandaUnicaFoto {
+  grid-template-columns: 0.85fr 1.15fr;
+  min-height: 400px;
+}
+
+.bandaTituloUnico {
+  font: 800 52px/1.08 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
+  color: var(--wb-tpl-ink);
+  max-width: 22ch;
+  margin: 0 0 24px;
+}
+
+/* Sin descripción, el enlace sigue al nombre con los mismos 36px. */
+.bandaTituloUnicoSolo {
+  margin-bottom: 36px;
+}
+
+.bandaDescripcionUnica {
+  font: 300 18px/1.85 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  max-width: 48ch;
+  margin: 0 0 36px;
+}
+
+.bandaEnlaceUnico {
+  margin-top: 0;
+}
+
+.bandaTexto {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   justify-content: center;
-  padding: 66px 30px 40px 44px;
+  padding: 100px 96px;
 }
 
-.inicioTitulo {
-  font: 400 58px/1.06 var(--font-instrument-serif), serif;
-  letter-spacing: -0.015em;
-  max-width: 12ch;
-  margin: 0 0 22px;
-  color: var(--wb-tpl-ink);
-}
-
-.inicioParrafo {
-  font: 300 16px/1.65 var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink-muted);
-  max-width: 42ch;
-  margin: 0 0 34px;
-}
-
-.ctas {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.ctaPrimaria {
-  font: 600 12.5px var(--font-montserrat), sans-serif;
-  color: #fff;
-  background: var(--acento);
-  padding: 14px 24px;
-  border-radius: 6px;
-  transition: filter 0.2s ease;
-}
-
-.ctaPrimaria:hover {
-  filter: brightness(0.92);
-}
-
-.ctaSecundaria {
-  font: 600 12.5px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-  background: transparent;
-  border: 1px solid #d9dbe1;
-  padding: 14px 24px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.ctaSecundaria:hover {
-  background: color-mix(in srgb, var(--wb-tpl-ink) 8%, transparent);
-}
-
-.statsRow {
-  display: flex;
-  gap: 22px;
-  border-top: 1px solid #ecedf1;
-  padding-top: 22px;
-  margin-top: 34px;
-}
-
-.statItem {
-  padding-left: 22px;
-  border-left: 1px solid #ecedf1;
-}
-
-.statItem:first-child {
-  padding-left: 0;
-  border-left: none;
-}
-
-.statValor {
-  font: 400 30px/1 var(--font-instrument-serif), serif;
+.bandaNumero {
+  font: 800 15px var(--font-montserrat), sans-serif;
   color: var(--acento);
+  margin: 0 0 40px;
 }
 
-.statEtiqueta {
-  font: 400 11px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink-faint);
-  margin-top: 7px;
-}
-
-.inicioDerecha {
-  position: relative;
-  background: var(--wb-tpl-surface-soft);
-}
-
-.fotoPlaceholder {
-  position: absolute;
-  inset: 44px 44px 120px 0;
-  border-radius: 4px;
-  overflow: hidden;
-  background: var(--wb-tpl-placeholder);
-  display: flex;
-  align-items: flex-end;
-  padding: 16px;
-}
-
-.fotoImg {
-  object-fit: cover;
-}
-
-.fotoEtiqueta {
-  position: relative;
-  font: 500 11px var(--font-montserrat), sans-serif;
-  color: #9a968c;
-}
-
-.tarjetaDestacado {
-  position: absolute;
-  left: -56px;
-  bottom: 52px;
-  z-index: 1;
-  width: 330px;
-  background: var(--wb-tpl-ink);
-  padding: 26px 28px;
-  border-radius: 6px;
-  /* Tarjeta flotante oscura (README.md:120): `0 22px 50px rgba(16,19,26,.22)`,
-     no la clara — el fondo es --wb-tpl-ink. Confirmado contra el prototipo
-     (`Plantillas WebBot.dc.html:95`). */
-  box-shadow: 0 22px 50px rgba(16, 19, 26, 0.22);
-}
-
-.tarjetaEyebrow {
-  font: 700 10px var(--font-montserrat), sans-serif;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--wb-color-highlight);
-  margin: 0 0 7px;
-}
-
-.tarjetaFrase {
-  font: 400 19px/1.4 var(--font-instrument-serif), serif;
-  color: #fff;
+.bandaTitulo {
+  font: 700 38px/1.15 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--wb-tpl-ink);
   margin: 0;
 }
 
-/* ── Servicios ── */
-
-.servicios {
-  padding: 56px 44px;
-}
-
-.serviciosTitulo {
-  font: 400 40px/1.1 var(--font-instrument-serif), serif;
-  max-width: 18ch;
-  margin: 0 0 40px;
-  color: var(--wb-tpl-ink);
-}
-
-.serviciosGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  background: #ecedf1;
-  border: 1px solid #ecedf1;
-}
-
-.servicioCelda {
-  background: var(--wb-tpl-surface);
-  padding: 30px 26px 34px;
-}
-
-.servicioNumero {
-  font: 400 13px var(--font-montserrat), sans-serif;
-  color: #c7c3ba;
-  margin: 0 0 44px;
-}
-
-.servicioTitulo {
-  font: 600 16px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-}
-
-/* `300 13px/1.65 Montserrat` (README.md:201) — nace ausente hoy (ningún
-   productor del chat completa `servicios[].descripcion` todavía, ver
-   `SiteConfigDTO.ts`), así que en la práctica esta clase no se pinta en
-   ningún sitio real por ahora. `index.tsx` solo la renderiza cuando el
-   servicio trae descripción propia; sin ella la celda queda igual que hoy
-   (número + título), que es el estado que ya se ve en producción y se
-   verificó en navegador — no un placeholder ni un hueco. */
-.servicioDescripcion {
-  font: 300 13px/1.65 var(--font-montserrat), sans-serif;
+.bandaDescripcion {
+  font: 300 16px/1.85 var(--font-montserrat), sans-serif;
   color: var(--wb-tpl-ink-muted);
-  margin: 8px 0 0;
+  max-width: 40ch;
+  margin: 20px 0 0;
 }
 
-.servicioCtaCelda {
-  background: var(--acento);
-  padding: 30px 26px 34px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.servicioCtaFrase {
-  font: 400 19px/1.35 var(--font-instrument-serif), serif;
-  color: #fff;
-  margin: 0 0 16px;
-}
-
-.servicioCtaEnlace {
+.bandaEnlace {
   font: 600 12.5px var(--font-montserrat), sans-serif;
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--acento);
+  border-bottom: 1.5px solid var(--acento-28);
   width: fit-content;
-  transition: filter 0.2s ease;
+  margin-top: 32px;
+  transition: border-color 0.2s ease;
 }
 
-.servicioCtaEnlace:hover {
-  filter: brightness(0.85);
+.bandaEnlace:hover {
+  border-color: var(--acento);
 }
 
-.servicioCtaEnlace:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-
-/* ── Nosotros ── */
-
-.nosotros {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr;
-  gap: 52px;
-  padding: 56px 44px;
-}
-
-/* `index.tsx` ya referenciaba esta clase (columna izquierda de Nosotros) sin
-   que existiera acá — resolvía a `undefined`. Se agrega en vez de borrar la
-   referencia: el prototipo especifica ese wrapper como
-   `display:flex;flex-direction:column;justify-content:center`
-   (`Plantillas WebBot.dc.html:113`), y es gratis reproducirlo con fidelidad
-   aunque hoy no cambie nada visible (`.nosotros` ya no tiene alto resuelto
-   en el scroll largo, así que el `justify-content:center` no tiene espacio
-   extra que repartir todavía). */
-.nosotrosIzquierda {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.nosotrosTitulo {
-  font: 400 38px/1.12 var(--font-instrument-serif), serif;
-  margin: 0 0 18px;
-  color: var(--wb-tpl-ink);
-}
-
-.nosotrosTexto {
-  font: 300 14.5px/1.75 var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink-muted);
-}
-
-.nosotrosGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 14px;
-}
-
-/*
- * `1fr` rows need a resolved container height to distribute — they had one
- * in the old tabbed layout (`height:100%` on the tab pane), but the SPA
- * conversion put `#nosotros` in natural document flow, and both children of
- * a cell (`next/image` con `fill`, y el placeholder) son `position:absolute`
- * y no aportan altura intrínseca. Resultado medido en `demo-consultora`:
- * filas de 32.675px/0px, grilla de fotos prácticamente plana.
- *
- * Fix: darle a la celda un `aspect-ratio` propio. Con la altura del
- * contenedor indefinida, el algoritmo de grid trata `1fr` como si fuera
- * `auto` (se basa en la contribución de max-content de cada celda) — el
- * `aspect-ratio` es justo lo que le da a esa celda, vacía salvo por hijos
- * absolutos, una altura preferida real. Es el mismo mecanismo que ya usa
- * `.fotoPlaceholder` en móvil (línea de abajo), aplicado acá porque el
- * problema es el mismo: una caja sin contenido intrínseco dentro de un
- * contenedor sin alto resuelto.
- *
- * Las 4 celdas del grid son de longitud fija (`MAX_IMAGENES_NOSOTROS = 4` en
- * `sections.ts`), rellenas con `null` → placeholder cuando falta una foto:
- * el grid siempre tiene 4 celdas, con 1, 2, 3 o 4 fotos reales entre ellas.
- * Este `aspect-ratio` no distingue foto real de placeholder (ambos hijos son
- * `position:absolute;inset:0`), así que el fix vale para cualquier
- * combinación.
- */
-.nosotrosImgCelda {
-  position: relative;
-  border-radius: 4px;
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-}
-
-/*
- * La celda principal ocupa `grid-row: span 2` — necesita el doble de alto
- * que una celda simple (más el gap entre filas), no el mismo `aspect-ratio`.
- * Usarlo igual la dejaría pidiendo la altura de UNA fila mientras ocupa dos,
- * y el grid la achicaría a la mitad de lo que se ve en la maqueta. `2 / 3`
- * es `4 / 3` con el alto duplicado (0.75× el ancho → 1.5× el ancho), así que
- * la celda principal lee proporcionalmente el doble de alta que sus 3
- * vecinas, sin distorsión (el `object-fit: cover` de `.fotoImg` hace el
- * recorte final).
- */
-.nosotrosImgPrincipal {
-  grid-row: span 2;
-  aspect-ratio: 2 / 3;
-}
-
-.nosotrosImgPlaceholder {
-  position: absolute;
-  inset: 0;
-  background: var(--wb-tpl-placeholder);
-}
-
-/* ── Contacto ── */
-
-.contacto {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 52px;
-  padding: 56px 44px;
-}
-
-/* Mismo caso que `.nosotrosIzquierda` de arriba: `index.tsx` ya la
-   referenciaba (columna izquierda de Contacto) y no existía. El prototipo
-   especifica el mismo wrapper (`Plantillas WebBot.dc.html:137`). */
-.contactoIzquierda {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.contactoTitulo {
-  /* README.md no repite el tamaño explícitamente para esta sección; el
-     prototipo sí ("Plantillas WebBot.dc.html:139"): `400 38px/1.12
-     'Instrument Serif' margin:0 0 30px`, igual que el H2 de Nosotros
-     (README.md:203). El `32px/1.15` y `margin: 0 0 24px` anteriores eran un
-     desvío de transcripción, no una decisión — las otras tres secciones
-     (Servicios, Inicio, Nosotros) ya coinciden con su spec al pixel. */
-  font: 400 38px/1.12 var(--font-instrument-serif), serif;
-  margin: 0 0 30px;
-  color: var(--wb-tpl-ink);
-}
-
-.contactoForm {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.contactoInput,
-.contactoTextarea {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid var(--wb-tpl-line);
-  border-radius: 6px;
-  font: 400 13.5px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-  background: var(--wb-tpl-surface);
-}
-
-.contactoTextarea {
-  resize: vertical;
-}
-
-.contactoSubmit {
-  font: 600 12.5px var(--font-montserrat), sans-serif;
-  color: #fff;
-  background: var(--acento);
-  padding: 14px 24px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: filter 0.2s ease;
-}
-
-.contactoSubmit:hover {
-  filter: brightness(0.92);
-}
-
-.contactoEstado {
-  font: 400 12.5px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-}
-
-.contactoDerecha {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.mapaPlaceholder {
-  position: relative;
-  flex: 1;
-  min-height: 220px;
-  border-radius: 6px;
-  background-color: var(--wb-tpl-surface-soft);
-  background-image:
-    linear-gradient(#e6e4de 1px, transparent 1px),
-    linear-gradient(90deg, #e6e4de 1px, transparent 1px);
-  background-size: 38px 38px;
-}
-
-.mapaPin {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--acento);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 7px color-mix(in srgb, var(--acento) 18%, transparent);
-}
-
-.datosGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.datoCard {
-  padding: 16px;
-  border: 1px solid var(--wb-tpl-line);
-  border-radius: 6px;
-}
-
-.datoEtiqueta {
-  font: 500 10px var(--font-montserrat), sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--wb-tpl-ink-faint);
-  margin: 0 0 6px;
-}
-
-.datoValor {
-  font: 600 13.5px var(--font-montserrat), sans-serif;
-  color: var(--wb-tpl-ink);
-}
-
-/* ── Footer propio de LANDING (T6) — el compartido queda intacto ── */
-
-.footer {
-  height: 76px;
-  padding: 0 44px;
-  display: flex;
-  align-items: center;
-  gap: 26px;
-  background: var(--wb-tpl-ink);
-}
-
-.footerNombre {
-  font: 600 13px var(--font-montserrat), sans-serif;
-  color: #fff;
-  flex: none;
-}
-
-.footerDatos {
-  display: flex;
-  gap: 26px;
-  flex: 1;
-  flex-wrap: wrap;
-  font: 300 11.5px var(--font-montserrat), sans-serif;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.footerCredito {
-  font: 300 10.5px var(--font-montserrat), sans-serif;
-  color: rgba(255, 255, 255, 0.35);
-  flex: none;
-}
-
-/* ── Botón flotante de WhatsApp (README.md:167-171) ── */
-
-.whatsappFlotante {
-  position: fixed;
-  right: 32px;
-  bottom: 28px;
-  z-index: 20;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--wb-tpl-whatsapp);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.42);
-  transition: filter 0.2s ease;
-}
-
-.whatsappFlotante:hover {
-  filter: brightness(0.92);
-}
-
-.whatsappFlotante:focus-visible {
+.bandaEnlace:focus-visible {
   outline: 2px solid var(--acento);
-  outline-offset: 2px;
+  outline-offset: 4px;
 }
 
 /* ── Responsivo — único breakpoint real (README.md:159-166) ── */
 
 @media (max-width: 767px) {
   .marcaLogoImg {
-    height: 34px;
-    max-width: 130px;
+    height: var(--logo-alto-movil, 34px);
+    max-width: 140px;
   }
 
-  /*
-   * Fila 1 del header móvil (S1-fix, odd/tasks/nav-movil-seccionesspa.md):
-   * `Hablemos` compite por ancho con la marca en una sola fila de 375-428px
-   * (el nav ya no está ahí, se movió a su propia fila — SeccionesSPA.module.css).
-   * Reduce el padding para dejar más margen incluso con nombres de marca
-   * largos, sin achicar tanto el texto que pierda el mínimo de toque (regla
-   * de `.header`/`.marca`/`.accion` en SeccionesSPA.module.css: la fila
-   * completa mide 52px, este botón queda bien dentro con este padding).
-   */
+  /* 12.5px como en la maqueta móvil del handoff (5a): con 16px, un isotipo de
+   * 46px + nombre + "Hablemos" no entraban en 390px y el botón bajaba de fila. */
+  .marcaNombre {
+    font: 700 12.5px/1.2 var(--font-montserrat), sans-serif;
+    letter-spacing: -0.02em;
+    margin-left: 0;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* "Hablemos" no va en móvil (header de 86px, respuestas del diseñador): el
+   * contenedor `.accion` también se oculta en SeccionesSPA.module.css. */
   .botonHablemos {
-    padding: 9px 16px;
-    font-size: 11.5px;
+    display: none;
   }
 
-  .inicio {
-    grid-template-columns: 1fr;
-    min-height: auto;
+  /* Bandas: siempre visual arriba / texto abajo (la forma A apila el número
+   * en una celda de 170px). La foto de la forma B conserva la misma altura. */
+  .serviciosEncabezado {
+    padding: 44px 24px;
   }
 
-  .inicioIzquierda {
-    padding: 40px 22px 32px;
-  }
-
-  .inicioTitulo {
-    font-size: 38px;
-  }
-
-  .inicioDerecha {
-    min-height: 320px;
-  }
-
-  .fotoPlaceholder {
-    position: relative;
-    inset: auto;
-    margin: 0 22px 72px;
-    aspect-ratio: 4 / 3;
-    padding: 0;
-  }
-
-  .tarjetaDestacado {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    width: auto;
-    margin: -56px 22px 24px;
-  }
-
-  .statsRow {
-    flex-wrap: wrap;
-    row-gap: 16px;
-  }
-
-  .servicios,
-  .nosotros,
-  .contacto {
-    padding: 40px 22px;
-  }
-
+  /* H2 de sección en móvil: 34px / 1.06 / -.04em (README.md:273). */
   .serviciosTitulo {
-    font-size: 28px;
+    font-size: 34px;
+    line-height: 1.06;
+    letter-spacing: -0.04em;
   }
 
-  .serviciosGrid {
+  .banda {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
-  .nosotros {
+  .bandaVisual {
+    height: 170px;
+  }
+
+  .bandaNumeroGigante {
+    font-size: 120px;
+  }
+
+  .serviciosEncabezadoUnico {
+    padding: 44px 24px 0;
+  }
+
+  .bandaTituloUnico {
+    font-size: 32px;
+    line-height: 1.1;
+  }
+
+  /* Cuerpo móvil de Bloques: 13.5px/1.8 (README.md:276), igual que las
+   * descripciones de las bandas con varios servicios. */
+  .bandaDescripcionUnica {
+    font-size: 13.5px;
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+
+  .bandaUnica.bandaUnicaFoto {
     grid-template-columns: 1fr;
+    min-height: 0;
   }
 
-  .nosotrosTitulo {
-    font-size: 27px;
+  .bandaTexto {
+    padding: 44px 24px;
   }
 
-  .nosotrosGrid {
-    grid-template-columns: 1fr 1fr;
+  .bandaNumero {
+    margin-bottom: 20px;
   }
 
-  .contacto {
-    grid-template-columns: 1fr;
+  .bandaTitulo {
+    font-size: 25px;
+    line-height: 1.18;
   }
 
-  .contactoTitulo {
-    font-size: 24px;
-  }
-
-  /* Centrado en móvil (decisión de Agustín, 2026-09-26 — el handoff de
-   * Bloques no fija la alineación móvil del footer). El padding inferior
-   * deja libre la zona del botón flotante de WhatsApp (48px + 26px de
-   * `bottom`) para que no tape la última línea del crédito. */
-  .footer {
-    height: auto;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 10px;
-    padding: 24px 22px 84px;
-  }
-
-  .footerDatos {
-    justify-content: center;
-    column-gap: 18px;
-    row-gap: 6px;
-  }
-
-  .whatsappFlotante {
-    right: 18px;
-    bottom: 26px;
-    width: 48px;
-    height: 48px;
-    box-shadow: 0 10px 24px rgba(37, 211, 102, 0.4);
-  }
-
-  .whatsappFlotante svg {
-    width: 24px;
-    height: 24px;
+  .bandaDescripcion {
+    font-size: 13.5px;
+    line-height: 1.8;
+    margin-top: 14px;
   }
 }

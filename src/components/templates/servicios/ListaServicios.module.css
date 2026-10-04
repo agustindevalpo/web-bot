@@ -1,0 +1,177 @@
+/*
+ * Lista de servicios con precio (S2, handoff_bloques_v2/02-SERVICIOS.md).
+ * Fondo #F2F1ED, 140px 96px. Cada fila es un grid cuyas columnas llegan en
+ * `--lista-columnas` (las calcula `columnasLista` en sections.ts: con/sin celda
+ * de número, con/sin descripción). Único breakpoint: 768px.
+ */
+
+.seccion {
+  background: #f2f1ed;
+  padding: 140px 96px;
+}
+
+.eyebrow {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--acento);
+  margin: 0 0 20px;
+}
+
+.titulo {
+  font: 800 68px/1.04 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
+  max-width: 22ch;
+  margin: 0 0 84px;
+  color: var(--wb-tpl-ink);
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid #d9d6cc;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: var(--lista-columnas);
+  gap: 48px;
+  align-items: baseline;
+  padding: 40px 0;
+  border-top: 1px solid #d9d6cc;
+}
+
+.numero {
+  font: 800 15px var(--font-montserrat), sans-serif;
+  color: var(--acento);
+}
+
+.nombre {
+  font: 700 30px/1.2 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--wb-tpl-ink);
+  margin: 0;
+}
+
+/* Sin ninguna descripción en la lista, el nombre es el protagonista: 40px. */
+.sinDescripciones .nombre {
+  font-size: 40px;
+}
+
+.descripcion {
+  font: 300 16px/1.8 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  max-width: 44ch;
+  margin: 0;
+}
+
+.precio {
+  text-align: right;
+  justify-self: end;
+}
+
+.desde {
+  display: block;
+  font: 500 10.5px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--wb-tpl-ink-muted);
+  margin-bottom: 6px;
+}
+
+.monto {
+  display: block;
+  font: 800 30px/1 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--wb-tpl-ink);
+}
+
+.agendar {
+  font: 600 13px var(--font-montserrat), sans-serif;
+  color: var(--acento);
+  border-bottom: 1.5px solid var(--acento-28);
+  transition: border-color 0.2s ease;
+}
+
+.agendar:hover {
+  border-color: var(--acento);
+}
+
+.agendar:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 4px;
+}
+
+@media (max-width: 767px) {
+  .seccion {
+    padding: 44px 24px;
+  }
+
+  .titulo {
+    font-size: 34px;
+    line-height: 1.06;
+    letter-spacing: -0.04em;
+    margin-bottom: 32px;
+  }
+
+  /* Número y nombre en la misma línea; descripción y precio debajo, con 26px de
+   * sangría (la columna del número) para alinear con el nombre. Con un solo
+   * servicio no hay número y la fila es una columna. */
+  .fila {
+    grid-template-columns: 26px 1fr;
+    gap: 8px 0;
+    padding: 22px 0;
+  }
+
+  .filaSinNumero {
+    grid-template-columns: 1fr;
+  }
+
+  .nombre {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
+  .sinDescripciones .nombre {
+    font-size: 24px;
+  }
+
+  .descripcion,
+  .precio {
+    grid-column: -2 / -1;
+  }
+
+  .descripcion {
+    font-size: 13.5px;
+    line-height: 1.8;
+    max-width: none;
+  }
+
+  .descripcion:empty {
+    display: none;
+  }
+
+  /* Precio en línea: "desde $35.000". */
+  .precio {
+    text-align: left;
+    justify-self: start;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .precio:empty {
+    display: none;
+  }
+
+  .desde {
+    display: inline;
+    margin: 0;
+  }
+
+  .monto {
+    display: inline;
+    font-size: 18px;
+  }
+}

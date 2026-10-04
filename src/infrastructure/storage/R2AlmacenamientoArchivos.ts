@@ -1,8 +1,9 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import {
   IAlmacenamientoArchivos,
   ArchivoASubir,
   ResultadoSubida,
+  ResultadoEliminacion,
 } from '@/application/services/IAlmacenamientoArchivos'
 
 // Cloudflare R2 vía su endpoint S3-compatible.
@@ -58,5 +59,18 @@ export class R2AlmacenamientoArchivos implements IAlmacenamientoArchivos {
     } catch {
       return { tipo: 'error', detalle: 'No se pudo subir el archivo a R2.' }
     }
+  }
+
+  async eliminar(clave: string): Promise<ResultadoEliminacion> {
+    try {
+      await this.cliente.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: clave }))
+      return { tipo: 'ok' }
+    } catch {
+      return { tipo: 'error', detalle: 'No se pudo borrar el archivo de R2.' }
+    }
+  }
+
+  urlPublicaBase(): string {
+    return this.urlPublica
   }
 }
