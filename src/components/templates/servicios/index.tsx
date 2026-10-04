@@ -13,6 +13,9 @@ import FormularioContacto from '@/components/templates/shared/FormularioContacto
 import SeccionContacto from '@/components/templates/shared/SeccionContacto'
 import ContactoDatos from '@/components/templates/shared/ContactoDatos'
 import ListaServicios from './ListaServicios'
+import Lugar from './Lugar'
+import { buildLugar } from './datosLugar'
+import { getAlmacenamientoArchivos } from '@/infrastructure/container'
 import {
   buildMarca,
   buildInicio,
@@ -37,6 +40,9 @@ export default async function Servicios({ config }: TemplateProps) {
   const inicio = buildInicio(config)
   const horarios = buildHorariosBanda(config)
   const lista = buildListaServicios(config)
+  // Fotos propias = servidas desde el bucket público de R2; sin R2 configurado
+  // (Noop → null) no hay fotos propias y "El lugar" no se renderiza.
+  const lugar = buildLugar(config, getAlmacenamientoArchivos().urlPublicaBase())
   const nosotros = buildNosotros(config)
   const contacto = buildContacto(config)
   const formulario =
@@ -70,13 +76,17 @@ export default async function Servicios({ config }: TemplateProps) {
     {
       id: 'servicios',
       etiqueta: 'Servicios',
-      contenido: lista && (
-        <>
-          <ListaServicios {...lista} />
-          {/* S2-3: "El lugar" (fotos propias, no va en el nav) entra acá, tras
-              la lista. Todavía no renderiza nada. */}
-        </>
-      ),
+      // "El lugar" no es una sección del nav (una etiqueta condicional descoloca):
+      // vive en el fragmento de "Servicios", tras la lista, igual que la banda
+      // de horarios dentro de 'inicio'. Sin lista pero con fotos propias, la
+      // sección "Servicios" sigue existiendo para alojarlas.
+      contenido:
+        lista || lugar ? (
+          <>
+            {lista && <ListaServicios {...lista} />}
+            {lugar && <Lugar {...lugar} />}
+          </>
+        ) : null,
     },
     {
       id: 'nosotros',

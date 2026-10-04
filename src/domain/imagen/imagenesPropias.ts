@@ -25,6 +25,21 @@ export function claveSiPropia(url: unknown, urlPublica: string | null, sitioId: 
   return clave
 }
 
+// Variante para quien renderiza un sitio sin conocer su id (los templates solo
+// reciben el config): propia = archivo plano bajo `<urlPublica>/sitios/<cualquier
+// id>/`. Reutiliza `claveSiPropia` con el id que trae la propia URL, así que las
+// reglas de saneo son las mismas. Unsplash, hosts ajenos y `urlPublica` ausente
+// nunca son propios.
+export function esImagenPropia(url: unknown, urlPublica: string | null): boolean {
+  if (typeof url !== 'string' || !urlPublica) return false
+
+  const prefijo = `${urlPublica.replace(/\/+$/, '')}/sitios/`
+  if (!url.startsWith(prefijo)) return false
+
+  const sitioId = url.slice(prefijo.length).split('/')[0]
+  return claveSiPropia(url, urlPublica, sitioId) !== null
+}
+
 // Todas las URLs de imagen que un configJson referencia: `logo` e
 // `imagenes[]` (SiteConfigDTO no tiene ningún otro campo de imagen).
 export function urlsImagenDeConfig(config: Record<string, unknown>): string[] {
