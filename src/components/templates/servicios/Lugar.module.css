@@ -1,0 +1,96 @@
+/*
+ * "El lugar" (S2-3, handoff_bloques_v2/02-SERVICIOS.md). Fondo blanco, 140px 96px.
+ * Tres disposiciones según cuántas fotos propias hay (una / dos / tres o más);
+ * gap 20px y sin radio. Único breakpoint: 768px (fotos apiladas de 220px).
+ */
+
+.seccion {
+  background: #fff;
+  padding: 140px 96px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 56px;
+}
+
+.titulo {
+  font: 800 52px/1.06 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
+  color: var(--wb-tpl-ink);
+  margin: 0;
+}
+
+.ciudad {
+  font: 300 14px var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+}
+
+.galeria {
+  display: grid;
+  gap: 20px;
+}
+
+.foto {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.img {
+  object-fit: cover;
+}
+
+.una {
+  grid-template-columns: 1fr;
+  grid-auto-rows: 480px;
+}
+
+.dos {
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 480px;
+}
+
+/* La primera foto ocupa las dos filas de la izquierda; las otras dos se apilan. */
+.tres {
+  grid-template-columns: 1.4fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: 560px;
+}
+
+.tres .foto:first-child {
+  grid-row: 1 / span 2;
+}
+
+@media (max-width: 767px) {
+  .seccion {
+    padding: 44px 24px;
+  }
+
+  .encabezado {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 32px;
+  }
+
+  .titulo {
+    font-size: 34px;
+    letter-spacing: -0.04em;
+  }
+
+  .una,
+  .dos,
+  .tres {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: 220px;
+    height: auto;
+  }
+
+  .tres .foto:first-child {
+    grid-row: auto;
+  }
+}

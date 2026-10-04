@@ -47,7 +47,7 @@ tab-era layout, no logo, no Nosotros block, `mailto:` form, old `shared/Footer.t
   (header with "Agenda tu hora", hero with "Agenda por WhatsApp", horarios band, Nosotros, contact with the
   services `<select>`, footer), palette `{ bloques: true }`, plus the new price list. Remove the old
   template code and its CSS. Route: delegated.
-- [ ] **S2-3 — El lugar.** Own-photo filter + 0/1/2/3+ layouts, desktop and mobile. Route: delegated.
+- [x] **S2-3 — El lugar.** Own-photo filter + 0/1/2/3+ layouts, desktop and mobile. Route: delegated.
 - [ ] **S2-4 — Polish.** Chrome pass on fixtures, motion contract, dead CSS; docs.
 
 ## Progress
@@ -55,7 +55,8 @@ tab-era layout, no logo, no Nosotros block, `mailto:` form, old `shared/Footer.t
 - 2026-10-03: document created after LANDING Bloques U1-U11 merged (develop `5a429fa`).
 - 2026-10-03: S2-1 done — `shared/HeroBloques.tsx` + CSS extracted; LANDING renders it unchanged. tsc, eslint, 1142 unit tests and build green.
 - 2026-10-03: S2-2 done (resumed run after a cut-off writer) — SERVICIOS composes the shared Bloques pieces + `ListaServicios`; old template code/CSS removed; tests rewritten.
+- 2026-10-03: S2-3 done — `servicios/datosLugar.ts` (pure filter + layout) + `Lugar.tsx`; own = under `<R2 base>/sitios/<any id>/` (`esImagenPropia`, template has no site id); base from `getAlmacenamientoArchivos().urlPublicaBase()`; rendered inside the "Servicios" fragment (not a nav item).
 
 ## Next step
 
-S2-3.
+S2-4.
