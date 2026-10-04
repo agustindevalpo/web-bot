@@ -5,13 +5,13 @@ import { esImagenPropia } from '@/domain/imagen/imagenesPropias'
 // pública de R2 llega por parámetro (la lee index.tsx del container) para que
 // esto se pruebe sin env.
 
-export const TITULO_LUGAR = 'El lugar'
+const TITULO_LUGAR = 'El lugar'
 // Solo se usan las tres primeras fotos propias.
-export const MAX_FOTOS_LUGAR = 3
+const MAX_FOTOS_LUGAR = 3
 
 export type DisposicionLugar = 'una' | 'dos' | 'tres'
 
-export type FotoLugar = { src: string; alt: string }
+type FotoLugar = { src: string; alt: string }
 
 export type LugarProps = {
   titulo: string

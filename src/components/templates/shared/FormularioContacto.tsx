@@ -38,8 +38,8 @@ export default function FormularioContacto({ telefono, servicios }: { telefono: 
         <>
           <select name="servicio" defaultValue="" className={`${styles.campo} ${styles.select}`} aria-label="Servicio">
             <option value="">¿Qué servicio necesitas?</option>
-            {servicios.map((servicio) => (
-              <option key={servicio} value={servicio}>
+            {servicios.map((servicio, indice) => (
+              <option key={`${servicio}-${indice}`} value={servicio}>
                 {servicio}
               </option>
             ))}

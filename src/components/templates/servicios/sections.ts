@@ -31,7 +31,7 @@ export function buildHorariosBanda(config: SiteConfigDTO): ItemBanda[] {
   return horarios.map(({ dia, rango }) => ({ valor: rango, etiqueta: dia }))
 }
 
-export type FilaServicio = {
+type FilaServicio = {
   // `null` con un solo servicio: un "01" sin "02" anuncia una serie que no existe.
   numero: string | null
   nombre: string
@@ -95,4 +95,13 @@ export function buildListaServicios(config: SiteConfigDTO): ListaServiciosProps 
 // Nombres para el `<select>` del formulario de agenda.
 export function nombresDeServicios(lista: ListaServiciosProps | null): string[] {
   return lista ? lista.filas.map((fila) => fila.nombre) : []
+}
+
+// Dónde monta index.tsx "El lugar". Sigue a la lista (orden del handoff); sin
+// lista (cero servicios) la sección "Servicios" y su etiqueta del nav no
+// existen (01-RESPUESTAS), así que las fotos van tras la banda dentro de
+// 'inicio' en vez de reabrir "Servicios" solo para alojarlas.
+export function ubicacionLugar(hayLista: boolean, hayLugar: boolean): 'servicios' | 'inicio' | null {
+  if (!hayLugar) return null
+  return hayLista ? 'servicios' : 'inicio'
 }
