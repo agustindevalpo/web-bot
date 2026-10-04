@@ -1,102 +1,145 @@
+import type { CSSProperties } from 'react'
 import Image from 'next/image'
 import { TemplateProps } from '@/components/templates/shared/types'
 import { buildPaletteStyle } from '@/components/templates/shared/palette'
-import Footer from '@/components/templates/shared/Footer'
-import { buildHero, buildAbout, buildServicios, buildContacto, buildFooter } from './sections'
+import SeccionesSPA from '@/components/templates/shared/SeccionesSPA'
+import { filtrarSecciones, type SeccionSPA } from '@/components/templates/shared/navegacion'
+import HeroBloques from '@/components/templates/shared/HeroBloques'
+import Monograma from '@/components/templates/shared/Monograma'
+import BandaDatos from '@/components/templates/shared/BandaDatos'
+import BloqueNosotros from '@/components/templates/shared/BloqueNosotros'
+import FooterBloques from '@/components/templates/shared/FooterBloques'
+import FormularioContacto from '@/components/templates/shared/FormularioContacto'
+import SeccionContacto from '@/components/templates/shared/SeccionContacto'
+import ContactoDatos from '@/components/templates/shared/ContactoDatos'
+import ListaServicios from './ListaServicios'
+import {
+  buildMarca,
+  buildInicio,
+  buildNosotros,
+  buildContacto,
+  buildHorariosBanda,
+  buildListaServicios,
+  nombresDeServicios,
+  ROTULO_HORARIOS,
+} from './sections'
 import styles from './Servicios.module.css'
 
-// Identidad visual SERVICIOS (Decisión D6): hero partido (copia a la
-// izquierda / imagen a la derecha), lista de servicios vertical numerada con
-// líneas divisorias, CTA de reserva por WhatsApp, sin galería. Server
-// Component async — sin 'use client', sin next/dynamic (Constraints C2/C3
-// en design.md). Aplica la paleta (D6) sobre su propio elemento raíz.
+// SERVICIOS sobre el shell de Bloques (S2): mismas piezas que LANDING (header,
+// hero, Nosotros, contacto, pie) más la banda de horarios y la lista de
+// servicios con precio. Server Component async; los únicos clientes son
+// `SeccionesSPA` y el formulario de contacto.
 export default async function Servicios({ config }: TemplateProps) {
-  const hero = buildHero(config)
-  const about = buildAbout(config)
-  const servicios = buildServicios(config)
+  // `bloques: true` clampea `--acento` a >= 4.5:1 contra blanco (T2).
+  const estiloRaiz: CSSProperties = buildPaletteStyle(config, { bloques: true })
+
+  const marca = buildMarca(config)
+  const inicio = buildInicio(config)
+  const horarios = buildHorariosBanda(config)
+  const lista = buildListaServicios(config)
+  const nosotros = buildNosotros(config)
   const contacto = buildContacto(config)
-  const footer = buildFooter(config)
+  const formulario =
+    contacto.formularioHabilitado && contacto.telefono ? (
+      <FormularioContacto telefono={contacto.telefono} servicios={nombresDeServicios(lista)} />
+    ) : null
+
+  const eyebrowInicio = [inicio.rubro, inicio.ciudad].filter((valor): valor is string => valor !== null).join(' · ')
+
+  const secciones: SeccionSPA[] = filtrarSecciones([
+    {
+      id: 'inicio',
+      etiqueta: 'Inicio',
+      contenido: (
+        <>
+          <HeroBloques
+            eyebrow={eyebrowInicio || null}
+            nombre={inicio.nombre}
+            descripcion={inicio.descripcion}
+            foto={inicio.imagenHero}
+            ctaPrimario={inicio.whatsappUrl ? { texto: 'Agenda por WhatsApp', href: inicio.whatsappUrl } : null}
+            ctaSecundario={inicio.telUrl ? { texto: `Llamar · ${inicio.telefonoDisplay}`, href: inicio.telUrl } : null}
+          />
+          {/* Banda de horarios: no es una sección del nav, vive dentro de
+              'inicio' tras el hero. Con 0 o más de 3 horarios no renderiza
+              (los horarios siguen en la tarjeta de Contacto). */}
+          <BandaDatos items={horarios} rotulo={ROTULO_HORARIOS} variante="horarios" />
+        </>
+      ),
+    },
+    {
+      id: 'servicios',
+      etiqueta: 'Servicios',
+      contenido: lista && (
+        <>
+          <ListaServicios {...lista} />
+          {/* S2-3: "El lugar" (fotos propias, no va en el nav) entra acá, tras
+              la lista. Todavía no renderiza nada. */}
+        </>
+      ),
+    },
+    {
+      id: 'nosotros',
+      etiqueta: 'Nosotros',
+      contenido: <BloqueNosotros {...nosotros} />,
+    },
+    {
+      id: 'contacto',
+      etiqueta: 'Contacto',
+      contenido: (
+        <SeccionContacto
+          titulo="Agenda tu hora"
+          parrafo={formulario ? 'Elige el servicio y cuéntanos qué día te acomoda: te respondemos por WhatsApp.' : null}
+          formulario={formulario}
+          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} />}
+        />
+      ),
+    },
+  ])
+
+  // Logo del cliente en el mismo espacio que ocupa el monograma (regla 04); un
+  // logotipo (proporción >= 1.6) reemplaza también al nombre visible.
+  const marcaSlot = (
+    <>
+      {marca.logo ? (
+        <Image
+          src={marca.logo}
+          alt={marca.nombre}
+          width={marca.logoDimensiones?.ancho ?? 180}
+          height={marca.logoDimensiones?.alto ?? 44}
+          sizes="180px"
+          className={styles.marcaLogoImg}
+          style={
+            marca.logoAltos
+              ? ({ '--logo-alto': `${marca.logoAltos.escritorio}px`, '--logo-alto-movil': `${marca.logoAltos.movil}px` } as CSSProperties)
+              : undefined
+          }
+        />
+      ) : (
+        <Monograma iniciales={marca.iniciales} />
+      )}
+      {marca.mostrarNombre && <span className={styles.marcaNombre}>{marca.nombre}</span>}
+    </>
+  )
+
+  const accionHeader = inicio.whatsappUrl ? (
+    <a href={inicio.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.botonAgenda}>
+      Agenda tu hora
+    </a>
+  ) : undefined
+
+  const pie = <FooterBloques config={config} secciones={secciones.map(({ id, etiqueta }) => ({ id, etiqueta }))} anio={new Date().getFullYear()} />
 
   return (
-    <div className={styles.page} style={buildPaletteStyle(config)} data-template="SERVICIOS">
-      <section className={styles.hero}>
-        <div className={styles.heroCopia}>
-          {hero.rubro && <div className={styles.badge}>{hero.rubro}</div>}
-          <h1 className={styles.nombre}>{hero.nombre}</h1>
-          {hero.descripcion && <p className={styles.descripcion}>{hero.descripcion}</p>}
-
-          <div className={styles.ctas}>
-            {hero.whatsappUrl && (
-              <a href={hero.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimaria}>
-                Reservar por WhatsApp
-              </a>
-            )}
-            {hero.telUrl && (
-              <a href={hero.telUrl} className={styles.ctaSecundaria}>
-                Llamar · {hero.telefonoDisplay}
-              </a>
-            )}
-          </div>
-        </div>
-
-        {hero.imagenHero && (
-          <div className={styles.heroImagen}>
-            <Image src={hero.imagenHero} alt={hero.nombre} fill sizes="(max-width: 720px) 100vw, 50vw" className={styles.heroImagenImg} priority />
-          </div>
-        )}
-      </section>
-
-      {hero.highlight && (
-        <div className={styles.highlight}>
-          <span>★</span> {hero.highlight}
-        </div>
-      )}
-
-      {about && (
-        <section className={styles.seccion}>
-          <h2 className={styles.seccionTitulo}>Sobre nosotros</h2>
-          <p className={styles.descripcion}>{about.texto}</p>
-        </section>
-      )}
-
-      {servicios && (
-        <section className={styles.seccion}>
-          <h2 className={styles.seccionTitulo}>{servicios.etiqueta}</h2>
-          <ol className={styles.serviciosLista}>
-            {servicios.items.map((item) => (
-              <li key={item.numero} className={styles.servicioItem}>
-                <span className={styles.servicioNumero}>{String(item.numero).padStart(2, '0')}</span>
-                <span className={styles.servicioTexto}>{item.texto}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      <section className={styles.seccion}>
-        <h2 className={styles.seccionTitulo}>Contacto</h2>
-        <div className={styles.contactoInfo}>
-          {contacto.telefono && <span>{contacto.telefono}</span>}
-          {contacto.email && <span>{contacto.email}</span>}
-        </div>
-        {contacto.whatsappUrl && (
-          <a href={contacto.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.ctaReserva}>
-            Reservar una hora
-          </a>
-        )}
-        {contacto.formularioHabilitado && contacto.mailtoUrl && (
-          <form action={contacto.mailtoUrl} method="post" encType="text/plain" className={styles.contactoForm}>
-            <input type="text" name="nombre" placeholder="Tu nombre" required className={styles.contactoInput} />
-            <input type="email" name="email" placeholder="Tu email" required className={styles.contactoInput} />
-            <textarea name="mensaje" placeholder="Tu mensaje" required className={styles.contactoTextarea} />
-            <button type="submit" className={styles.ctaPrimaria}>
-              Enviar mensaje
-            </button>
-          </form>
-        )}
-      </section>
-
-      <Footer footer={footer} />
+    <div data-template="SERVICIOS" style={estiloRaiz}>
+      <SeccionesSPA
+        secciones={secciones}
+        marca={marcaSlot}
+        accionHeader={accionHeader}
+        pie={pie}
+        className={styles.page}
+        whatsappFlotanteUrl={inicio.whatsappUrl}
+      />
     </div>
   )
 }

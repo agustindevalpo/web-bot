@@ -1,173 +1,139 @@
 import {
-  buildHero,
-  buildAbout,
-  buildServicios,
-  buildContacto,
-  buildFooter,
+  buildHorariosBanda,
+  buildListaServicios,
+  columnasLista,
+  nombresDeServicios,
+  ROTULO_HORARIOS,
 } from '@/components/templates/servicios/sections'
+import { filtrarSecciones } from '@/components/templates/shared/navegacion'
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
-import { Estilo } from '@/domain/value-objects/Estilo'
 
-function configCompleto(overrides: Partial<SiteConfigDTO> = {}): SiteConfigDTO {
+function config(overrides: Partial<SiteConfigDTO> = {}): SiteConfigDTO {
   return {
     nombre: 'Clínica Dental Sonrisas',
-    rubro: 'dentista',
-    descripcion: 'Atención dental integral para toda la familia.',
-    sobreNosotros: 'Más de 15 años cuidando la sonrisa de Valparaíso.',
-    servicios: ['Ortodoncia', 'Blanqueamiento', 'Implantes'],
-    ciudad: 'Valparaíso',
-    contacto: { telefono: '+56 9 8765 4321', email: 'contacto@sonrisas.cl' },
-    redes: { instagram: '@sonrisas', facebook: 'Clínica Dental Sonrisas' },
-    estilo: Estilo.CALIDO,
-    highlight: 'Primera consulta sin costo.',
-    imagenes: ['https://images.unsplash.com/hero-dental.jpg', 'https://images.unsplash.com/extra.jpg'],
-    colores: { acento: '#4FD1C5' },
+    contacto: { telefono: '+56 9 8765 4321' },
     ...overrides,
-  }
+  } as SiteConfigDTO
 }
 
-// Mismo hard constraint que en landing (D4, tests/e2e/steps/sitio-por-subdominio.steps.ts):
-// el fixture del e2e crea sitios con configJson = { nombre: 'Sitio E2E' }.
-function configSoloNombre(): SiteConfigDTO {
-  return { nombre: 'Sitio E2E' } as SiteConfigDTO
-}
-
-describe('servicios/sections — buildHero', () => {
-  it('arma el hero completo desde un config lleno', () => {
-    const hero = buildHero(configCompleto())
-
-    expect(hero.nombre).toBe('Clínica Dental Sonrisas')
-    expect(hero.descripcion).toBe('Atención dental integral para toda la familia.')
-    expect(hero.rubro).toBe('DENTISTA')
-    expect(hero.imagenHero).toBe('https://images.unsplash.com/hero-dental.jpg')
-    expect(hero.whatsappUrl).toBe('https://wa.me/56987654321')
-    expect(hero.telUrl).toBe('tel:+56 9 8765 4321')
-    expect(hero.telefonoDisplay).toBe('+56 9 8765 4321')
-    expect(hero.highlight).toBe('Primera consulta sin costo.')
-  })
-
-  it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
-    expect(() => buildHero(configSoloNombre())).not.toThrow()
-    const hero = buildHero(configSoloNombre())
-
-    expect(hero.nombre).toBe('Sitio E2E')
-    expect(hero.descripcion).toBeNull()
-    expect(hero.rubro).toBeNull()
-    expect(hero.imagenHero).toBeNull()
-    expect(hero.whatsappUrl).toBeNull()
-    expect(hero.telUrl).toBeNull()
-    expect(hero.highlight).toBeNull()
-  })
-
-  it('no muestra el badge de rubro cuando rubro es "demo"', () => {
-    expect(buildHero(configCompleto({ rubro: 'demo' })).rubro).toBeNull()
+describe('servicios/sections — columnasLista', () => {
+  it.each([
+    [true, true, '72px 1fr 1.15fr 200px'],
+    [true, false, '72px 1fr 200px'],
+    [false, true, '1fr 1.15fr 200px'],
+    [false, false, '1fr 200px'],
+  ])('conNumero=%s, hayDescripciones=%s → %s', (conNumero, hayDescripciones, esperado) => {
+    expect(columnasLista(conNumero, hayDescripciones)).toBe(esperado)
   })
 })
 
-describe('servicios/sections — buildAbout', () => {
-  it('usa sobreNosotros cuando está presente', () => {
-    expect(buildAbout(configCompleto())).toEqual({
-      texto: 'Más de 15 años cuidando la sonrisa de Valparaíso.',
-    })
+describe('servicios/sections — buildListaServicios', () => {
+  it('retorna null sin servicios utilizables', () => {
+    expect(buildListaServicios(config())).toBeNull()
+    expect(buildListaServicios(config({ servicios: [] }))).toBeNull()
+    expect(buildListaServicios(config({ servicios: ['   ', { nombre: '' }] as never }))).toBeNull()
   })
 
-  it('cae a descripcion cuando sobreNosotros está ausente', () => {
-    expect(buildAbout(configCompleto({ sobreNosotros: undefined }))).toEqual({
-      texto: 'Atención dental integral para toda la familia.',
-    })
+  it('H2 "Servicios y precios" si algún servicio trae precioDesde', () => {
+    const lista = buildListaServicios(config({ servicios: ['Corte', { nombre: 'Tinte', precioDesde: '$35.000' }] as never }))
+    expect(lista?.titulo).toBe('Servicios y precios')
+    expect(lista?.eyebrow).toBe('Servicios')
   })
 
-  it('retorna null (oculta la sección) cuando ni sobreNosotros ni descripcion existen', () => {
-    expect(buildAbout(configSoloNombre())).toBeNull()
-  })
-})
-
-describe('servicios/sections — buildServicios', () => {
-  it('usa la etiqueta "Servicios" (identidad del template)', () => {
-    expect(buildServicios(configCompleto())?.etiqueta).toBe('Servicios')
+  it('H2 "Nuestros servicios" si ninguno trae precio', () => {
+    const lista = buildListaServicios(config({ servicios: ['Corte', 'Tinte'] as never }))
+    expect(lista?.titulo).toBe('Nuestros servicios')
   })
 
-  it('numera los servicios del config en orden', () => {
-    expect(buildServicios(configCompleto())?.items).toEqual([
-      { numero: 1, texto: 'Ortodoncia' },
-      { numero: 2, texto: 'Blanqueamiento' },
-      { numero: 3, texto: 'Implantes' },
-    ])
-  })
-
-  it('retorna null cuando no hay servicios (config { nombre } only)', () => {
-    expect(buildServicios(configSoloNombre())).toBeNull()
-  })
-})
-
-describe('servicios/sections — buildContacto (defaults del formulario + CTA de reserva)', () => {
-  it('con formulario ausente, el form queda habilitado por defecto apuntando a contacto.email', () => {
-    const contacto = buildContacto(configCompleto())
-
-    expect(contacto.formularioHabilitado).toBe(true)
-    expect(contacto.mailtoUrl).toBe(`mailto:${encodeURIComponent('contacto@sonrisas.cl')}`)
-    expect(contacto.telefono).toBe('+56 9 8765 4321')
-    expect(contacto.email).toBe('contacto@sonrisas.cl')
-  })
-
-  it('respeta un destinatarioEmail explícito del formulario', () => {
-    const contacto = buildContacto(
-      configCompleto({
-        contacto: {
-          telefono: '+56 9 8765 4321',
-          email: 'contacto@sonrisas.cl',
-          formulario: { habilitado: true, destinatarioEmail: 'reservas@sonrisas.cl' },
-        },
-      }),
+  it('numera 01, 02… y arma columnas con descripción cuando alguna existe', () => {
+    const lista = buildListaServicios(
+      config({ servicios: [{ nombre: 'Corte', descripcion: 'Con lavado.' }, 'Tinte'] as never }),
     )
-
-    expect(contacto.mailtoUrl).toBe(`mailto:${encodeURIComponent('reservas@sonrisas.cl')}`)
+    expect(lista?.filas.map((fila) => fila.numero)).toEqual(['01', '02'])
+    expect(lista?.hayDescripciones).toBe(true)
+    expect(lista?.columnas).toBe('72px 1fr 1.15fr 200px')
   })
 
-  it('respeta formulario.habilitado === false', () => {
-    const contacto = buildContacto(
-      configCompleto({
-        contacto: { telefono: '+56 9 8765 4321', email: 'contacto@sonrisas.cl', formulario: { habilitado: false } },
-      }),
+  it('sin descripciones usa tres columnas', () => {
+    const lista = buildListaServicios(config({ servicios: ['Corte', 'Tinte'] as never }))
+    expect(lista?.hayDescripciones).toBe(false)
+    expect(lista?.columnas).toBe('72px 1fr 200px')
+  })
+
+  it('un solo servicio: fila sin número y sin celda de número en las columnas', () => {
+    const conDescripcion = buildListaServicios(config({ servicios: [{ nombre: 'Consulta', descripcion: 'Evaluación.' }] as never }))
+    expect(conDescripcion?.filas).toHaveLength(1)
+    expect(conDescripcion?.filas[0].numero).toBeNull()
+    expect(conDescripcion?.columnas).toBe('1fr 1.15fr 200px')
+
+    const sinDescripcion = buildListaServicios(config({ servicios: ['Consulta'] as never }))
+    expect(sinDescripcion?.columnas).toBe('1fr 200px')
+    expect(sinDescripcion?.titulo).toBe('Nuestros servicios')
+  })
+
+  it('imprime el precio tal cual; sin precio queda null (el componente pinta "Agendar →")', () => {
+    const lista = buildListaServicios(config({ servicios: [{ nombre: 'Tinte', precioDesde: '$35.000' }, 'Corte'] as never }))
+    expect(lista?.filas[0].precio).toBe('$35.000')
+    expect(lista?.filas[1].precio).toBeNull()
+  })
+
+  it('el WhatsApp de cada fila precarga el servicio', () => {
+    const lista = buildListaServicios(config({ servicios: ['Corte de pelo'] as never }))
+    expect(lista?.filas[0].whatsappUrl).toBe(
+      `https://wa.me/56987654321?text=${encodeURIComponent('Hola, quiero agendar Corte de pelo')}`,
     )
-
-    expect(contacto.formularioHabilitado).toBe(false)
   })
 
-  it('arma la URL de WhatsApp para el CTA de reserva desde el teléfono', () => {
-    expect(buildContacto(configCompleto()).whatsappUrl).toBe('https://wa.me/56987654321')
+  it('sin teléfono no hay enlace de WhatsApp', () => {
+    const lista = buildListaServicios({ nombre: 'X', servicios: ['Corte'] } as never)
+    expect(lista?.filas[0].whatsappUrl).toBeNull()
   })
 
-  it('degrada con un config que solo trae { nombre } — sin lanzar, formulario igual habilitado', () => {
-    expect(() => buildContacto(configSoloNombre())).not.toThrow()
-    const contacto = buildContacto(configSoloNombre())
-    expect(contacto.formularioHabilitado).toBe(true)
-    expect(contacto.telefono).toBeNull()
-    expect(contacto.email).toBeNull()
-    expect(contacto.mailtoUrl).toBeNull()
-    expect(contacto.whatsappUrl).toBeNull()
+  it('nombresDeServicios alimenta el select del formulario', () => {
+    const lista = buildListaServicios(config({ servicios: ['Corte', { nombre: 'Tinte' }] as never }))
+    expect(nombresDeServicios(lista)).toEqual(['Corte', 'Tinte'])
+    expect(nombresDeServicios(null)).toEqual([])
   })
 })
 
-describe('servicios/sections — buildFooter', () => {
-  it('arma el footer desde un config lleno', () => {
-    const footer = buildFooter(configCompleto())
+describe('servicios/sections — buildHorariosBanda', () => {
+  const horario = (dia: string) => ({ dia, rango: '09:00 – 18:00' })
 
-    expect(footer.ciudad).toBe('Valparaíso')
-    expect(footer.telefono).toBe('+56 9 8765 4321')
-    expect(footer.email).toBe('contacto@sonrisas.cl')
-    expect(footer.instagramUrl).toBe('https://instagram.com/sonrisas')
-    expect(footer.instagramHandle).toBe('@sonrisas')
-    expect(footer.facebook).toBe('Clínica Dental Sonrisas')
+  it('rótulo fijo "Horarios"', () => {
+    expect(ROTULO_HORARIOS).toBe('Horarios')
   })
 
-  it('degrada con un config que solo trae { nombre } — sin lanzar', () => {
-    expect(() => buildFooter(configSoloNombre())).not.toThrow()
-    const footer = buildFooter(configSoloNombre())
-    expect(footer.ciudad).toBeNull()
-    expect(footer.telefono).toBeNull()
-    expect(footer.email).toBeNull()
-    expect(footer.instagramUrl).toBeNull()
-    expect(footer.facebook).toBeNull()
+  it.each([1, 2, 3])('con %i entradas arma la banda (valor = rango, etiqueta = día)', (cantidad) => {
+    const horarios = ['Lun – Vie', 'Sábado', 'Domingo'].slice(0, cantidad).map(horario)
+    const banda = buildHorariosBanda(config({ horarios } as never))
+    expect(banda).toHaveLength(cantidad)
+    expect(banda[0]).toEqual({ valor: '09:00 – 18:00', etiqueta: 'Lun – Vie' })
+  })
+
+  it('con más de 3 entradas no hay banda', () => {
+    const horarios = ['Lun', 'Mar', 'Mié', 'Jue'].map(horario)
+    expect(buildHorariosBanda(config({ horarios } as never))).toEqual([])
+  })
+
+  it('sin horarios no hay banda', () => {
+    expect(buildHorariosBanda(config())).toEqual([])
+  })
+})
+
+describe('servicios — navegación', () => {
+  const nav = (cfg: SiteConfigDTO) =>
+    filtrarSecciones([
+      { id: 'inicio', etiqueta: 'Inicio', contenido: 'x' },
+      { id: 'servicios', etiqueta: 'Servicios', contenido: buildListaServicios(cfg) && 'x' },
+      { id: 'nosotros', etiqueta: 'Nosotros', contenido: 'x' },
+      { id: 'contacto', etiqueta: 'Contacto', contenido: 'x' },
+    ]).map((seccion) => seccion.etiqueta)
+
+  it('con servicios: Inicio · Servicios · Nosotros · Contacto', () => {
+    expect(nav(config({ servicios: ['Corte'] as never }))).toEqual(['Inicio', 'Servicios', 'Nosotros', 'Contacto'])
+  })
+
+  it('sin servicios: la etiqueta "Servicios" sale del nav', () => {
+    expect(nav(config())).toEqual(['Inicio', 'Nosotros', 'Contacto'])
   })
 })

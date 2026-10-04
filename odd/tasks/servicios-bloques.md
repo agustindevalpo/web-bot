@@ -43,7 +43,7 @@ tab-era layout, no logo, no Nosotros block, `mailto:` form, old `shared/Footer.t
 
 - [x] **S2-1 — Shared hero.** Move the LANDING hero into `shared/` (props: eyebrow, nombre, descripcion,
   foto, primary/secondary CTA labels and hrefs). LANDING renders identically. Route: delegated.
-- [ ] **S2-2 — SERVICIOS on the Bloques shell.** Rewrite `templates/servicios/` composing the shared pieces
+- [x] **S2-2 — SERVICIOS on the Bloques shell.** Rewrite `templates/servicios/` composing the shared pieces
   (header with "Agenda tu hora", hero with "Agenda por WhatsApp", horarios band, Nosotros, contact with the
   services `<select>`, footer), palette `{ bloques: true }`, plus the new price list. Remove the old
   template code and its CSS. Route: delegated.
@@ -54,7 +54,8 @@ tab-era layout, no logo, no Nosotros block, `mailto:` form, old `shared/Footer.t
 
 - 2026-10-03: document created after LANDING Bloques U1-U11 merged (develop `5a429fa`).
 - 2026-10-03: S2-1 done — `shared/HeroBloques.tsx` + CSS extracted; LANDING renders it unchanged. tsc, eslint, 1142 unit tests and build green.
+- 2026-10-03: S2-2 done (resumed run after a cut-off writer) — SERVICIOS composes the shared Bloques pieces + `ListaServicios`; old template code/CSS removed; tests rewritten.
 
 ## Next step
 
-S2-2.
+S2-3.
