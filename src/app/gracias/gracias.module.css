@@ -1,0 +1,175 @@
+/*
+ * /gracias (G1). Mismo sistema que el chat y el momento 2: Montserrat, tinta
+ * casi negra y el violeta de WebBot como acento. Móvil primero a 390px; en
+ * escritorio la columna se centra a 640px. Medidas de 03-CHAT-Y-MOMENTO-2.md.
+ */
+.pagina {
+  --wb-purple: var(--wb-color-secondary);
+  --wb-purple-hover: #4632de;
+  --wb-ink: #101218;
+  --wb-ink-soft: #565e6b;
+  --wb-ink-help: #3f4652;
+  --wb-line: #efeef4;
+  --wb-anillo: 0 0 0 3px rgba(91, 70, 248, 0.18);
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: #ffffff;
+  color: var(--wb-ink);
+  font-family: var(--wb-font-body);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--wb-line);
+}
+
+.marca {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--wb-ink);
+  text-decoration: none;
+}
+
+.contenido {
+  flex: 1;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 24px;
+}
+
+.rotulo {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wb-purple);
+}
+
+.titulo {
+  margin: 0 0 14px;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.texto {
+  margin: 0 0 28px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--wb-ink-help);
+}
+
+.encabezadoLista {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--wb-line);
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.numero {
+  flex: none;
+  width: 20px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--wb-purple);
+}
+
+.itemTitulo {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.itemDetalle {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--wb-ink-soft);
+}
+
+.barra {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--wb-line);
+  background: #ffffff;
+}
+
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: var(--wb-purple);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.boton:hover {
+  background: var(--wb-purple-hover);
+}
+
+.boton:focus-visible {
+  outline: none;
+  box-shadow: var(--wb-anillo);
+}
+
+.pie {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--wb-ink-soft);
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .header {
+    height: 72px;
+    padding: 0 48px;
+  }
+
+  .contenido {
+    padding-top: 56px;
+  }
+}
