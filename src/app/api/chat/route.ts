@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sesionRepo, clienteRepo, getChatServiceReal } from '@/infrastructure/container'
-import { DemoChatService } from '@/infrastructure/demo/DemoChatService'
+import { DemoChatService, sugerenciasParaPregunta } from '@/infrastructure/demo/DemoChatService'
 import { verificarLimiteDemoIP } from '@/infrastructure/demo/demoRateLimit'
 import { verificarLimiteClaude } from '@/infrastructure/claude/claudeRateLimit'
 import { ClaudeServiceError } from '@/infrastructure/claude/claudeErrors'
@@ -163,7 +163,11 @@ export async function POST(req: NextRequest) {
 
       await sesionRepo.update(sessionIdEfectivo, { historial: sesion.historial })
 
-      return NextResponse.json({ respuesta, completada: false, esDemo, sessionIdNuevo: sessionIdRotado })
+      // Chips de la pregunta de servicios: solo en demo (el guion es fijo y
+      // el rubro ya está resuelto); en modo real la pregunta la genera Claude.
+      const sugerencias = esDemo ? sugerenciasParaPregunta(sesion.historial, respuesta) : []
+
+      return NextResponse.json({ respuesta, completada: false, esDemo, sessionIdNuevo: sessionIdRotado, sugerencias })
     } catch (error) {
       if (error instanceof ClaudeServiceError) {
         if (error.codigo === 'claude_extraction_failed') {

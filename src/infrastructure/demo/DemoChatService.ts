@@ -114,6 +114,15 @@ export function sugerenciasServicios(historial: MensajeDTO[]): readonly string[]
   return SUGERENCIAS_SERVICIOS[fase.rubro] ?? []
 }
 
+/**
+ * Sugerencias que acompañan a la respuesta que devuelve la API: solo cuando la
+ * pregunta que se acaba de hacer es la de servicios; en cualquier otra, vacío.
+ */
+export function sugerenciasParaPregunta(historial: MensajeDTO[], pregunta: string | null): string[] {
+  if (pregunta !== PREGUNTA_SERVICIOS) return []
+  return [...sugerenciasServicios(historial)]
+}
+
 function parseServicios(texto: string): string[] {
   return texto
     .split(/,|\/|;|\by\b/i)

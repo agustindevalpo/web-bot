@@ -29,6 +29,11 @@ import { POST } from '@/app/api/chat/route'
 import { sesionRepo, clienteRepo, sitioRepo, getChatServiceReal } from '@/infrastructure/container'
 import { verificarLimiteClaude } from '@/infrastructure/claude/claudeRateLimit'
 import { verificarSesionJWT } from '@/infrastructure/auth/JwtSessionService'
+import {
+  PREGUNTA_DESCRIPCION,
+  PREGUNTA_SERVICIOS,
+  SUGERENCIAS_SERVICIOS,
+} from '@/infrastructure/demo/guionChat'
 
 const mockSesionRepo = sesionRepo as jest.Mocked<typeof sesionRepo>
 const mockClienteRepo = clienteRepo as jest.Mocked<typeof clienteRepo>
@@ -302,6 +307,45 @@ describe('POST /api/chat — rotación de demo ya completada', () => {
     expect(body.requiereLead).toBeUndefined()
     expect(mockSitioRepo.save).not.toHaveBeenCalled()
     expect(mockSitioRepo.findBySubdominio).not.toHaveBeenCalled()
+  })
+})
+
+describe('POST /api/chat — sugerencias de servicios (chips)', () => {
+  function sesionEnCurso(sessionId: string, turnos: Array<['user' | 'assistant', string]>): Sesion {
+    const sesion = new Sesion(`sesion-${sessionId}`, sessionId)
+    for (const [rol, contenido] of turnos) sesion.agregarMensaje(rol, contenido)
+    return sesion
+  }
+
+  it('devuelve las sugerencias del rubro cuando la próxima pregunta es la de servicios', async () => {
+    mockSesionRepo.findBySessionId.mockResolvedValue(
+      sesionEnCurso('sess-chips', [
+        ['user', 'Panadería El Trigal'],
+        ['assistant', 'Por el nombre, parece que es una panadería o pastelería. ¿Es correcto?'],
+        ['user', 'Sí, es correcto'],
+        ['assistant', PREGUNTA_DESCRIPCION],
+      ]),
+    )
+
+    const body = await (await POST(buildRequest({ mensaje: 'Hacemos pan amasado', sessionId: 'sess-chips' }))).json()
+
+    expect(body.respuesta).toBe(PREGUNTA_SERVICIOS)
+    expect(body.sugerencias).toEqual(SUGERENCIAS_SERVICIOS.panaderia)
+  })
+
+  it('devuelve sugerencias vacías en cualquier otra pregunta', async () => {
+    const body = await (await POST(buildRequest({ mensaje: 'Panadería El Trigal', sessionId: 'sess-sin-chips' }))).json()
+
+    expect(body.respuesta).toContain('Por el nombre, parece que es')
+    expect(body.sugerencias).toEqual([])
+  })
+
+  it('no manda sugerencias en modo real: la pregunta la genera Claude', async () => {
+    activatedClienteSetup(fakeChatService({ procesarMensaje: jest.fn().mockResolvedValue(PREGUNTA_SERVICIOS) }))
+
+    const body = await (await POST(buildRequest({ mensaje: 'hola', sessionId: 'sess-chips-real' }, 'token-fake'))).json()
+
+    expect(body.sugerencias).toEqual([])
   })
 })
 
