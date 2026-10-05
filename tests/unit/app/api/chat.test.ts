@@ -239,7 +239,7 @@ describe('POST /api/chat — rotación de demo ya completada', () => {
     expect(res.status).toBe(200)
     expect(body.completada).toBe(false)
     // El guion demo responde con su segunda pregunta: el mensaje se procesó.
-    expect(body.respuesta).toContain('¿A qué se dedica tu negocio?')
+    expect(body.respuesta).toContain('Por el nombre, parece que es una panadería')
     expect(mockSesionRepo.save).toHaveBeenCalledTimes(1)
   })
 

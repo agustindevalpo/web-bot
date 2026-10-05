@@ -13,7 +13,7 @@ interface Mensaje {
 }
 
 const MENSAJE_INICIAL =
-  '¡Hola! Soy el asistente de WebBot. Te voy a hacer algunas preguntas para armar tu sitio. ¿Cómo se llama tu negocio?'
+  'Hola, soy el asistente de WebBot. En seis preguntas armamos tu sitio. ¿Cómo se llama tu negocio?'
 
 function leerCookie(nombre: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${nombre}=([^;]*)`))
