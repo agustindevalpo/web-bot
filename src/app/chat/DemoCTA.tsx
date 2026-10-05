@@ -2,11 +2,9 @@ import styles from './DemoCTA.module.css'
 import { estadoPromo, formatCLP, PRECIO_PROMO, PRECIO_SITIO } from '@/app/_landing/precios'
 import { TarjetaAvance } from './TarjetaAvance'
 import { VistaPreviaSitio } from './VistaPreviaSitio'
+import { urlSitioDemo } from './urlSitioDemo'
 import { bannerPago, clasificarEnlacePago, contrastarModoPago, normalizarModoPagoDeclarado, resolverEnlacePago } from './hrefPago'
 
-const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'sitios.devalpo.cl'
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || ''
-const ES_LOCAL = APP_URL.includes('localhost')
 // Link de pago único de Mercado Pago (WB-43). Debe ser NEXT_PUBLIC_* porque este
 // componente se renderiza en el cliente (lo importa ChatWidget, 'use client').
 // Sin la variable, el CTA cae a /login.
@@ -35,10 +33,7 @@ export interface DemoCTAProps {
 // Reveal (R2, R3, E1): primero el sitio, después el avance con la invitación a
 // completarlo y al final la caja de pago. El pago nunca depende del momento 2.
 export function DemoCTA({ subdominioDemo, nombre, template, avance }: DemoCTAProps) {
-  // En local, sitios.devalpo.cl sirve lo que esté deployado en producción,
-  // no esta rama — apuntar ahí en dev muestra código viejo, no el que se
-  // está probando. Solo se usa el subdominio real fuera de localhost.
-  const urlDemo = ES_LOCAL ? `${APP_URL}/sites/${subdominioDemo}` : `https://${subdominioDemo}.${BASE_DOMAIN}`
+  const urlDemo = urlSitioDemo(subdominioDemo)
   const titulo = nombre.trim() ? `Así se ve ${nombre.trim()}` : 'Así se ve tu sitio'
 
   return (

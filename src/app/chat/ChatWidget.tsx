@@ -27,7 +27,7 @@ interface Mensaje {
 type LimiteAlcanzado = 'demo' | 'claude' | null
 
 // Lo que el reveal necesita de la respuesta de /api/chat/lead.
-interface DatosReveal {
+export interface DatosReveal {
   subdominioDemo: string
   nombre: string
   template: string | null
@@ -229,7 +229,7 @@ function sugerenciasDeRespuesta(valor: unknown): string[] {
   return Array.isArray(valor) ? valor.filter((s): s is string => typeof s === 'string') : []
 }
 
-export default function ChatWidget() {
+export default function ChatWidget({ revealInicial }: { revealInicial?: DatosReveal }) {
   const sessionIdRef = useRef<string | null>(null)
   const [mensajes, setMensajes] = useState<Mensaje[]>([
     { rol: 'assistant', contenido: MENSAJE_INICIAL },
@@ -244,7 +244,7 @@ export default function ChatWidget() {
   const [sugerencias, setSugerencias] = useState<string[]>([])
   const [solicitudFoco, setSolicitudFoco] = useState(0)
   const [completada, setCompletada] = useState(false)
-  const [reveal, setReveal] = useState<DatosReveal | null>(null)
+  const [reveal, setReveal] = useState<DatosReveal | null>(revealInicial ?? null)
   const [requiereLead, setRequiereLead] = useState(false)
   const [leadNombre, setLeadNombre] = useState('')
   const [leadEmail, setLeadEmail] = useState('')
