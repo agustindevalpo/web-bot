@@ -11,6 +11,7 @@ import {
   guardarDominioAction,
   quitarDominioAction,
   guardarContenidoAction,
+  guardarDatosLegalesAction,
   confirmarPagoAction,
   subirImagenSitioAction,
 } from './actions'
@@ -24,6 +25,7 @@ const MENSAJES_OK: Record<string, string> = {
   dominio: 'Dominio guardado.',
   dominio_quitado: 'Dominio propio quitado.',
   contenido: 'Contenido guardado.',
+  legal: 'Datos legales guardados.',
   pago_confirmado: 'Pago confirmado. El cliente quedó activo.',
   logo: 'Logo actualizado.',
   imagen_hero: 'Foto principal actualizada.',
@@ -76,6 +78,13 @@ export default async function AdminSitioPage({
     typeof sitio.configJson.nombre === 'string' && sitio.configJson.nombre.trim() !== ''
       ? sitio.configJson.nombre
       : sitio.subdominio
+
+  const legalActual =
+    typeof sitio.configJson.legal === 'object' && sitio.configJson.legal !== null
+      ? (sitio.configJson.legal as Record<string, unknown>)
+      : {}
+  const razonSocialActual = typeof legalActual.razonSocial === 'string' ? legalActual.razonSocial : ''
+  const rutActual = typeof legalActual.rut === 'string' ? legalActual.rut : ''
 
   const configBonito = JSON.stringify(sitio.configJson, null, 2)
 
@@ -415,6 +424,47 @@ export default async function AdminSitioPage({
               </button>
             </form>
           </div>
+        </section>
+
+        <section className={styles.seccion}>
+          <h2 className={styles.seccionTitulo}>Datos legales</h2>
+          <p className={styles.ayuda}>
+            Razón social y RUT del cliente. El pie del sitio los muestra solo si están los dos; si dejas ambos
+            vacíos, se quitan. El RUT se valida y se guarda con puntos y guion.
+          </p>
+          <form className={styles.form} action={guardarDatosLegalesAction.bind(null, sitio.id)}>
+            <div className={styles.fila}>
+              <label htmlFor="razonSocial">Razón social</label>
+              <input
+                id="razonSocial"
+                className={styles.input}
+                type="text"
+                name="razonSocial"
+                defaultValue={razonSocialActual}
+                maxLength={120}
+                placeholder="Mi Negocio SpA"
+                autoComplete="off"
+              />
+            </div>
+            <div className={styles.fila}>
+              <label htmlFor="rut">RUT</label>
+              <input
+                id="rut"
+                className={styles.input}
+                type="text"
+                name="rut"
+                defaultValue={rutActual}
+                placeholder="77.119.936-4"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </div>
+            <div className={styles.fila}>
+              <button type="submit" className={styles.boton}>
+                Guardar datos legales
+              </button>
+            </div>
+          </form>
         </section>
 
         <section className={styles.seccion}>

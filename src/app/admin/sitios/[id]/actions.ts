@@ -7,6 +7,7 @@ import {
   cambiarEstadoSitioUC,
   asignarDominioPropioUC,
   actualizarConfigSitioUC,
+  actualizarDatosLegalesSitioUC,
   confirmarPagoSitioUC,
   subirImagenSitioUC,
 } from '@/infrastructure/container'
@@ -185,6 +186,27 @@ export async function guardarContenidoAction(sitioId: string, formData: FormData
     const sitio = await actualizarConfigSitioUC.execute(sitioId, typeof jsonTexto === 'string' ? jsonTexto : '')
     revalidar(sitioId, sitio.subdominio)
     params = { ok: 'contenido' }
+  } catch (error) {
+    params = { error: mensajeDeError(error) }
+  }
+
+  irA(sitioId, params)
+}
+
+// Razón social y RUT del pie del sitio. Se validan en el use case (nunca se
+// confía en el cliente) y solo cambian la clave `legal` del config.
+export async function guardarDatosLegalesAction(sitioId: string, formData: FormData): Promise<void> {
+  await exigirAdmin()
+
+  let params: Record<string, string>
+  try {
+    const sitio = await actualizarDatosLegalesSitioUC.execute(
+      sitioId,
+      campoTexto(formData.get('razonSocial')) ?? '',
+      campoTexto(formData.get('rut')) ?? '',
+    )
+    revalidar(sitioId, sitio.subdominio)
+    params = { ok: 'legal' }
   } catch (error) {
     params = { error: mensajeDeError(error) }
   }
