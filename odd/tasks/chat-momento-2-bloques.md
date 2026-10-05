@@ -46,7 +46,7 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
 - [x] **T1 — 6-question script.** `DemoChatService`: new questions and closing (no emoji), rubro confirmation
   2a/2b with `RUBRO_FRASE`, `SUGERENCIAS_SERVICIOS` (UI only), remove `contacto`, `redes`, `highlight` from
   the chat. Keep the D-29 parser contract (style labels) and add the 2a labels to it. Route: delegated.
-- [ ] **T2 — Chat in Bloques.** Restyle `/chat` (C1–C3): active question 24/32px, history at 14px, 6-segment
+- [x] **T2 — Chat in Bloques.** Restyle `/chat` (C1–C3): active question 24/32px, history at 14px, 6-segment
   progress, option buttons and suggestions, reply bar, 429 card, network-error retry, a11y of (j). Remove
   Inter. Route: delegated.
 - [ ] **T3 — Data step with phone (R1).** `LeadForm` with fixed "+56 9" prefix, 8 digits, per-field
@@ -73,6 +73,18 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   help line after `\n\n`. Not aligned: real-mode `ClaudeChatService` prompt still has the old 8 questions
   (inert without `ANTHROPIC_API_KEY`).
 
+- 2026-10-05 · T1 merged: PR #65 → `1da99cf`.
+- 2026-10-05 · T2 done (delegated writer, sonnet; trigger: 2+ non-trivial files). Commits `3ceb135` (restyle,
+  `preguntaActiva.ts`, `/api/chat` returns `sugerencias`, 429 card, retry, a11y) + parent fixes: chips without
+  " y " (parseServicios splits on "y") with a test, trailing comma dropped on send, mobile scroll aligns the
+  active question's start (2b list hid its prompt). Checks: tsc clean · eslint 0 errors · 1213/1213 · build OK ·
+  Chrome 1280px and 390px full flow to the reveal. 429 card covered by render test only (local limit not hit).
+  Diff ~+1150/-210, over the 400 heuristic: full CSS rewrite + widget rewrite + tests; one cohesive screen.
+  Temporary: LeadForm and DemoCTA wrapped in a navy `.legado` panel until T3/T4. Devalpo WhatsApp in
+  `src/app/chat/contactoDevalpo.ts` = the public number in the landing footer (+56 9 7642 4587).
+  Follow-up (pre-existing, not in T1–T7): reloading `/chat` mid-flow shows Q1 while the server session keeps
+  its step, so the next answer is read against the wrong question. The widget never restores history.
+
 ## Next step
 
-T2.
+T3.

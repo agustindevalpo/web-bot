@@ -1,156 +1,512 @@
+/*
+ * Chat en Bloques (S3, C1-C3). Mismo sistema que las plantillas: Montserrat,
+ * tinta casi negra, radios de pastilla. El acento de la herramienta es el
+ * violeta de WebBot (`--wb-purple`); el acento del cliente solo aparece en la
+ * vista previa de su sitio. Las medidas salen de 03-CHAT-Y-MOMENTO-2.md.
+ */
 .page {
+  --wb-purple: var(--wb-color-secondary);
+  --wb-purple-hover: #4632de;
+  --wb-ink: #101218;
+  --wb-ink-soft: #565e6b;
+  --wb-ink-help: #3f4652;
+  --wb-line: #efeef4;
+  --wb-card: #f2f1ed;
+  --wb-anillo: 0 0 0 3px rgba(91, 70, 248, 0.18);
+
   display: flex;
   flex-direction: column;
   height: 100dvh;
-  background: #080056;
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--wb-ink);
+  font-family: var(--wb-font-body);
 }
 
+/* ── Encabezado: marca, contador y barra de 6 segmentos ── */
+
 .header {
-  padding: 1rem;
-  font-weight: 700;
-  font-size: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex: none;
+  border-bottom: 1px solid var(--wb-line);
+}
+
+.headerInterior {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 24px 12px;
+}
+
+.headerFila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+}
+
+.marca {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.logotipo {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.porDevalpo {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--wb-ink-soft);
+}
+
+.contador {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--wb-ink-soft);
+}
+
+.segmentos {
+  display: flex;
+  gap: 4px;
+}
+
+.segmento {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: #e2e0ec;
+}
+
+.segmentoCompleto {
+  background: var(--wb-purple);
+}
+
+/* ── Cuerpo: historial + barra de respuesta ── */
+
+.cuerpo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .chat {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 0 24px 24px;
+}
+
+.mensajes {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 12px;
+  padding-top: 12px;
 }
 
-.burbuja {
-  max-width: 80%;
-  padding: 0.75rem 1rem;
-  border-radius: 1rem;
-  line-height: 1.4;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.bot {
+/* Lo ya respondido baja a 14px y pierde la burbuja. */
+.historialBot {
   align-self: flex-start;
-  background: #0d0080;
-  color: #ffffff;
-  border-bottom-left-radius: 0.25rem;
+  max-width: 88%;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--wb-ink-soft);
+  overflow-wrap: anywhere;
 }
 
 .usuario {
   align-self: flex-end;
-  background: #5b46f8;
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 18px 18px 4px 18px;
+  background: var(--wb-ink);
   color: #ffffff;
-  border-bottom-right-radius: 0.25rem;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .escribiendo {
-  opacity: 0.6;
-  font-style: italic;
+  align-self: flex-start;
+  font-size: 14px;
+  color: var(--wb-ink-soft);
 }
+
+/* ── Pregunta activa: la que manda ── */
+
+.activa {
+  margin-top: 12px;
+  /* Deja libre el header fijo de 52px cuando se alinea al comienzo. */
+  scroll-margin-top: 68px;
+}
+
+.rotulo {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wb-purple);
+}
+
+.pregunta {
+  margin: 0 0 22px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--wb-ink);
+  overflow-wrap: anywhere;
+}
+
+.preguntaConAyuda {
+  margin-bottom: 10px;
+}
+
+.ayuda {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--wb-ink-soft);
+}
+
+.ayudaOpciones {
+  margin: 12px 0 0;
+  font-size: 12.5px;
+  color: var(--wb-ink-soft);
+}
+
+/* ── Opciones (C1) ── */
 
 .opciones {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.opcionesEnFila {
+  flex-direction: row;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  align-self: flex-start;
-  max-width: 80%;
+}
+
+.opcion,
+.sugerencia {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid #d8d6e4;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--wb-ink);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .opcion {
-  padding: 0.6rem 1rem;
-  border-radius: 999px;
-  border: 1px solid #15defa;
-  background: transparent;
-  color: #15defa;
-  font-size: 0.9rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  min-height: 52px;
+  padding: 0 22px;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.opcion:hover:not(:disabled) {
-  background: #15defa;
-  color: #080056;
+.opcionCompacta {
+  min-height: 44px;
+  padding: 6px 18px;
+  font-size: 14px;
 }
 
-.opcion:focus-visible {
-  outline: 2px solid #15defa;
-  outline-offset: 2px;
+.opcion:hover:not(:disabled),
+.sugerencia:hover:not(:disabled) {
+  border-color: var(--wb-purple);
+  background: #f6f4fe;
 }
 
-.opcion:disabled {
+.opcion:focus-visible,
+.sugerencia:focus-visible {
+  outline: none;
+  border-color: var(--wb-purple);
+  background: #f6f4fe;
+  box-shadow: var(--wb-anillo);
+}
+
+.opcion:disabled,
+.sugerencia:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .opcion {
-    transition: none;
-  }
-}
+/* ── Sugerencias de servicios (C2) ── */
 
-.error {
-  align-self: center;
-  color: #ff8080;
-  font-size: 0.85rem;
-  text-align: center;
-  padding: 0.5rem 1rem;
-}
-
-.inputBar {
+.sugerencias {
   display: flex;
-  gap: 0.5rem;
-  padding: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sugerencia {
+  min-height: 44px;
+  padding: 0 16px;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mas {
+  font-weight: 700;
+  color: var(--wb-purple);
+}
+
+/* ── Errores del envío ── */
+
+.falloRed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--wb-ink);
+}
+
+.reintentar {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1.5px solid #d8d6e4;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--wb-ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reintentar:hover:not(:disabled) {
+  border-color: var(--wb-purple);
+  background: #f6f4fe;
+}
+
+.reintentar:focus-visible {
+  outline: none;
+  border-color: var(--wb-purple);
+  box-shadow: var(--wb-anillo);
+}
+
+.reintentar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.aviso {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--wb-ink-help);
+}
+
+/*
+ * Lead y reveal siguen con su estilo navy hasta T3 y T4 (formulario con
+ * teléfono, reveal con avance): se enmarcan en un panel oscuro para que no
+ * queden blanco sobre blanco mientras tanto.
+ */
+.legado {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 20px;
+  background: #080056;
+  color: #ffffff;
+}
+
+/* ── Barra de respuesta ── */
+
+.barra {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--wb-line);
+  background: #ffffff;
 }
 
 .input {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid #15defa;
-  background: #050040;
-  color: #ffffff;
-  font-size: 1rem;
+  min-width: 0;
+  height: 48px;
+  padding: 0 16px;
+  border: 1.5px solid #e2e0ec;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--wb-ink);
+  font-family: inherit;
+  font-size: 15px;
   outline: none;
 }
 
 .input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: #6b7280;
 }
 
-.input:focus {
-  box-shadow: 0 0 0 2px rgba(21, 222, 250, 0.4);
+.input:focus-visible {
+  border-color: var(--wb-purple);
+  box-shadow: 0 0 0 3px rgba(91, 70, 248, 0.12);
+}
+
+.input:disabled {
+  background: #f7f6f2;
 }
 
 .enviar {
-  padding: 0.75rem 1.25rem;
-  border-radius: 0.75rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
   border: none;
-  background: #15defa;
-  color: #080056;
-  font-weight: 700;
+  border-radius: 50%;
+  background: var(--wb-purple);
+  color: #ffffff;
   cursor: pointer;
 }
 
+.enviar:hover:not(:disabled) {
+  background: var(--wb-purple-hover);
+}
+
+.enviar:focus-visible {
+  outline: none;
+  box-shadow: var(--wb-anillo);
+}
+
 .enviar:disabled {
-  opacity: 0.5;
+  background: #e2e0ec;
   cursor: not-allowed;
 }
 
-@media (max-width: 480px) {
-  .burbuja {
-    max-width: 90%;
+/* ── Límite diario (C3): reemplaza a la barra ── */
+
+.limite {
+  flex: none;
+  margin: 0 16px 30px;
+  padding: 28px 24px 24px;
+  border-radius: 20px;
+  background: var(--wb-card);
+}
+
+.limiteRotulo {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wb-ink-soft);
+}
+
+.limiteTitulo {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.limiteTexto {
+  margin: 0 0 22px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--wb-ink-help);
+}
+
+.botonPrimario,
+.botonSecundario {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+.botonPrimario {
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: var(--wb-purple);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.botonPrimario:hover {
+  background: var(--wb-purple-hover);
+}
+
+.botonSecundario {
+  min-height: 44px;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wb-ink);
+}
+
+.botonPrimario:focus-visible,
+.botonSecundario:focus-visible {
+  outline: none;
+  box-shadow: var(--wb-anillo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opcion,
+  .sugerencia {
+    transition: none;
+  }
+}
+
+/* ── Escritorio: columna de 640px, pregunta a 32px, barra en el flujo ── */
+
+@media (min-width: 768px) {
+  .page {
+    height: auto;
+    min-height: 100dvh;
   }
 
+  .headerFila {
+    height: 72px;
+  }
+
+  .cuerpo {
+    flex: none;
+  }
+
+  .chat {
+    flex: none;
+    overflow: visible;
+    padding-bottom: 8px;
+  }
+
+  .pregunta {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+
+  /* En escritorio las opciones van siempre en fila con salto de línea. */
   .opciones {
-    max-width: 90%;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
-  .header {
-    font-size: 1.1rem;
+  .barra {
+    padding: 12px 24px 40px;
+    border-top: none;
+  }
+
+  .limite {
+    margin: 0 24px 40px;
   }
 }
