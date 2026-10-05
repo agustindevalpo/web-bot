@@ -7,7 +7,7 @@
 
 ## Estado general
 
-**Última sesión:** 2026-09-20 — **S1 del rediseño de plantillas: `LANDING` reescrita sobre la dirección "Bloques"** (scroll largo con nav de anclas, D-33; sistema de monograma de marca, D-37; descripción por servicio, D-35; momento 2 mixto para capturar contenido adicional, D-36), cadena de 3 PRs (#37, #38, #39) **mergeada a `develop`** (`5f0aef8`) el mismo día — **`main` no avanzó**, sigue en `23ed10b` con solo el deploy de D-32. 876 tests, 63 suites, 0 skipped. Ver [S1 del rediseño de plantillas: LANDING sobre la dirección Bloques](#s1-del-rediseño-de-plantillas-landing-sobre-la-dirección-bloques-2026-09-20). Mismo día, sesión anterior: 2026-09-19/20 — **D-31 resuelta por el camino (3): `primario`, `secundario` y `texto` se derivan del acento en vez de persistirse (D-32)**, ruta ODD, y **desplegado a producción el mismo 20/09**: PR #35 y #36 mergeados a `develop` (`c0c1c17`, `f669651`) y `develop` → `main` (`ed2788e`), Railway redeployó en ~90 s. `main` = `ed2788e` y `develop` = `f669651` (el release solo agrega ese commit sobre lo mergeado), y los sitios publicados ya sirven la paleta derivada, verificado en vivo. Ver [Paleta derivada del acento — D-31 resuelta por D-32](#paleta-derivada-del-acento--d-31-resuelta-por-d-32-ruta-odd-2026-09-20) y [Deploy a producción de la paleta derivada del acento](#deploy-a-producción-de-la-paleta-derivada-del-acento-d-31d-32-2026-09-20). Sesión anterior: 2026-09-13 — **Acento derivado del estilo (D-27), detección local de rubro con fallback neutro (D-28), opciones clicables en el chat (D-29) y precarga del correo en login (D-30)**, todo desplegado: `main` = `develop` = `ac079d7`, sin nada esperando. S0a y S0b del rediseño de plantillas también llegaron a producción; **S1 (LANDING) quedó desbloqueado pero pendiente de D-31**. Ver [Acento por estilo, detección de rubro y despliegue al día](#acento-por-estilo-detección-de-rubro-y-despliegue-al-día-2026-09-13). Sesión anterior: 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
+**Última sesión:** 2026-10-03 — **Rediseño Bloques de `LANDING` y `SERVICIOS` en producción** (`main` = `develop` = `3ccfd0b`), junto con el logo óptico y la limpieza de imágenes en R2 — PRs #46–#62, ver [Bloques: LANDING completa, SERVICIOS, logo óptico y limpieza de R2](#bloques-landing-completa-servicios-logo-óptico-y-limpieza-de-r2-2026-10-03). Sesión anterior: 2026-09-27 — subida de logo y fotos a R2 desde `/admin` y logo del header por alto, ver [Subida de imágenes a R2 y logo del header por alto](#subida-de-imágenes-a-r2-y-logo-del-header-por-alto-2026-09-27). Sesión anterior: 2026-09-26 — navegación móvil de S1 y páginas legales. Sesión anterior: 2026-09-20 — **S1 del rediseño de plantillas: `LANDING` reescrita sobre la dirección "Bloques"** (scroll largo con nav de anclas, D-33; sistema de monograma de marca, D-37; descripción por servicio, D-35; momento 2 mixto para capturar contenido adicional, D-36), cadena de 3 PRs (#37, #38, #39) **mergeada a `develop`** (`5f0aef8`) el mismo día — **`main` no avanzó**, sigue en `23ed10b` con solo el deploy de D-32. 876 tests, 63 suites, 0 skipped. Ver [S1 del rediseño de plantillas: LANDING sobre la dirección Bloques](#s1-del-rediseño-de-plantillas-landing-sobre-la-dirección-bloques-2026-09-20). Mismo día, sesión anterior: 2026-09-19/20 — **D-31 resuelta por el camino (3): `primario`, `secundario` y `texto` se derivan del acento en vez de persistirse (D-32)**, ruta ODD, y **desplegado a producción el mismo 20/09**: PR #35 y #36 mergeados a `develop` (`c0c1c17`, `f669651`) y `develop` → `main` (`ed2788e`), Railway redeployó en ~90 s. `main` = `ed2788e` y `develop` = `f669651` (el release solo agrega ese commit sobre lo mergeado), y los sitios publicados ya sirven la paleta derivada, verificado en vivo. Ver [Paleta derivada del acento — D-31 resuelta por D-32](#paleta-derivada-del-acento--d-31-resuelta-por-d-32-ruta-odd-2026-09-20) y [Deploy a producción de la paleta derivada del acento](#deploy-a-producción-de-la-paleta-derivada-del-acento-d-31d-32-2026-09-20). Sesión anterior: 2026-09-13 — **Acento derivado del estilo (D-27), detección local de rubro con fallback neutro (D-28), opciones clicables en el chat (D-29) y precarga del correo en login (D-30)**, todo desplegado: `main` = `develop` = `ac079d7`, sin nada esperando. S0a y S0b del rediseño de plantillas también llegaron a producción; **S1 (LANDING) quedó desbloqueado pero pendiente de D-31**. Ver [Acento por estilo, detección de rubro y despliegue al día](#acento-por-estilo-detección-de-rubro-y-despliegue-al-día-2026-09-13). Sesión anterior: 2026-09-06 — **Link de pago Mercado Pago + activación manual + reasignación de sitios demo (WB-43)**, en rama `feature/wb-43-link-pago-3`, sin push todavía (ver secciones [Link de pago Mercado Pago + activación manual (FASE 5, WB-43)](#link-de-pago-mercado-pago--activación-manual-fase-5-wb-43--rama-featurewb-43-link-pago-2026-09-06) y [Captura del comprador y reasignación del sitio demo (WB-43, slice 2)](#captura-del-comprador-y-reasignación-del-sitio-demo-wb-43-slice-2--rama-featurewb-43-link-pago-3-2026-09-06) más abajo): el CTA del demo lleva al link de pago único (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`, pendiente de cargar en `.env.example` y Railway) y el panel `/admin` confirma el pago, identifica (o crea) al comprador real por email y le reasigna el sitio demo. Misma fecha, sesión anterior: **Landing nueva de la fábrica de sitios (WB-42)** mergeada (#14–#17) (ver sección [Landing nueva (FASE 5, WB-42)](#landing-nueva-fase-5-wb-42--ciclo-sdd-landing-fabrica-2026-09-06) más abajo): precio único con promo de lanzamiento, 3 ejemplos reales, demo interactiva del hero, FAQ, gancho legal honesto (sin prometer "aprobación" de Webpay/Mercado Pago) y e2e de solo lectura — cadena de 4 PRs (#14–#17) ya mergeada a `develop`. Sesión anterior (2026-09-05): **Reposicionamiento del producto** (ver sección [Reposicionamiento: fábrica de sitios](#reposicionamiento-fábrica-de-sitios-2026-09-05) más abajo): WebBot deja de ser un SaaS de autoservicio por suscripción y pasa a ser la fábrica interna de Devalpo para vender "tu sitio web en 1 día con dominio propio, pago único". Alcance de código cerrado en 5 puntos; motor de pagos, N8N y WhatsApp quedan fuera. Seguimiento en Jira bajo el flujo de trabajo FASE 5. Sesión anterior (2026-08-25): — **Frente 1 (Resend) y Frente 2 (ClaudeChatService) mergeados a `main`**, vía un plan SDD (`phase2-rollout`) que secuenció los dos rollouts para no bundlearlos. `main` y `develop` quedaron sincronizados en `40f7bf6`. Ninguno de los dos está *funcionalmente* activo todavía — ambos dependen de una API key que sigue sin cargarse en Railway (`RESEND_API_KEY` y `ANTHROPIC_API_KEY` respectivamente, ambos pasos manuales de Agustín). Deploy verificado con `railway status` + logs de arranque limpios. Ver sección [Deploy a producción (2026-08-25)](#deploy-a-producción-2026-08-25--frente-1-resend-y-frente-2-claudechatservice-a-main) más abajo. Sesión anterior (2026-08-24): **Backend real de `ClaudeChatService`** (Tareas 2.2–2.4, vía SDD + TDD estricto) — reemplazado el stub por el adaptador real (`@anthropic-ai/sdk`), extracción de datos con fallback de parseo para los 10 rubros, rate limiter propio (20 msg/24h por cliente), `container.ts` con construcción perezosa (`getChatServiceReal()`) y `route.ts` con el wiring completo (503/429/502 según corresponda). 104 tests unitarios, 17 suites, todo verde — ver sección [ClaudeChatService: backend real de Claude](#claudechatservice-backend-real-de-claude-fase-2-tareas-22–24). Sesión previa (2026-08-14): **Deploy a producción de todo lo de Fase 2** (`develop` → `main`): Chat UI, auth por magic link, Demo Mode y landing pública en vivo en `web-bot-production-d190.up.railway.app`. **Hallazgo importante de esa sesión:** el SMTP de Gmail (465 y 587) está bloqueado en el egress de Railway — se migró el envío del magic link a **Resend** (API HTTP). Ver también [Auth: magic link](#auth-chat-limitado--cuenta-magic-link--pago-en-progreso-rama-feature-auth-login), [Demo Mode + landing + template de sitio](#demo-mode--landing-pública--template-de-sitio-rama-webot_demo) y [Deploy a producción + bloqueo de SMTP](#deploy-a-producción-2026-08-14--bloqueo-de-smtp-en-railway).
 **Fase actual:** FASE 2 — Bot & IA (arrancada, parcial — ver checklist)
 **Desarrollador:** Agustín (único dev del proyecto — el roadmap menciona 3 personas pero todo lo hace él)
 **Seguimiento también en Jira:** proyecto **WB (Web-Bot)** en `devalpo-team.atlassian.net` — espejo del roadmap. Estaba desactualizado respecto a esta bitácora al empezar la sesión del 14/08 (varios tickets de Fase 2 seguían en "Tareas por hacer" ya terminados); si no se sincronizó todavía en esta sesión, hacerlo antes de dar por buena la vista de Jira.
@@ -1358,6 +1358,144 @@ con `/terminos` y `/privacidad` estáticas.
 
 ---
 
+## Subida de imágenes a R2 y logo del header por alto (2026-09-27)
+
+Jornada corta, ruta ODD (`odd/tasks/subida-imagenes-admin.md`). Objetivo de Agustín:
+que el logo y las fotos de un cliente que pagó lleguen a su sitio sin pasar por URLs de
+Unsplash escritas a mano en el editor JSON.
+
+### 1. Subida desde `/admin` a Cloudflare R2 (PR #44, D-42)
+
+Agustín eligió **Cloudflare R2** sobre Railway Buckets: R2 sirve el bucket público desde
+`media.devalpo.cl` (la zona `devalpo.cl` ya vive en Cloudflare) y Railway habría obligado
+a una ruta proxy en la app. Quedó un puerto `IAlmacenamientoArchivos` con adaptador R2 y
+uno Noop (sin variables `R2_*`, el panel dice "almacenamiento no configurado" en vez de
+fallar), y `SubirImagenSitioUseCase`, que valida JPEG/PNG/WebP por sus primeros bytes,
+hasta 5 MB, y escribe la URL en `configJson`.
+
+**La exploración del día anterior estaba mal:** no existe un campo `imagenHero`. Todas
+las plantillas sacan la foto principal de `imagenes[0]`, así que subir "foto principal"
+reemplaza ese índice.
+
+Liberado a `main` (`607aaa4`). En Railway: bucket `webbot-media`,
+`R2_PUBLIC_URL=https://media.devalpo.cl`. Agustín probó la subida en vivo.
+
+### 2. Logo del header de LANDING (PR #45)
+
+El logo vivía en una caja fija de 160×30: un logo casi cuadrado quedaba de ~44×30 con un
+hueco antes del nombre (visto en `test.sitios.devalpo.cl`). Quedó con alto fijo (44px,
+34px en móvil) y ancho según su proporción, con tope. Liberado (`7306c62`).
+
+### Lo que costó tiempo real
+
+- **`R2_ACCOUNT_ID` tenía 53 caracteres**; son 32 hexadecimales. Con el valor malo,
+  toda subida falla.
+- **Railway guarda los cambios de variables como pendientes** hasta presionar Deploy.
+- El sitio `test` se veía vacío porque casi no tenía contenido, no por el diseño S1.
+
+### Pendiente que quedó
+
+Logos verticales angostos y el salto de layout al cargar (tamaño óptico), logo en las
+otras plantillas, borrar imágenes huérfanas en R2, subida por el propio cliente.
+
+---
+
+## Bloques: LANDING completa, SERVICIOS, logo óptico y limpieza de R2 (2026-10-03)
+
+Jornada larga, de la mañana a la noche, con release al cierre. Ruta ODD con gentle-ai,
+escritura delegada a subagentes y **cada unidad revisada en Chrome antes de mergear**.
+Documentos de seguimiento: `odd/tasks/logo-optico-y-huerfanos-r2.md`,
+`odd/tasks/landing-geometria-bloques.md` y `odd/tasks/servicios-bloques.md`.
+
+### 1. Logo óptico y limpieza de R2 (PRs #46 y #47)
+
+- **Logo:** al subirlo se leen sus dimensiones de la cabecera del archivo
+  (`domain/imagen/dimensionesImagen.ts`) y se guardan en `logoDimensiones`. El alto se
+  calcula para que todos los logos ocupen la misma área visual. La primera fórmula se
+  reemplazó por la **regla T3 del diseñador** (referencia 3:1 a 44px, tope de ancho
+  180px; un logotipo con proporción ≥ 1.6 oculta el nombre del negocio).
+- **R2:** al reemplazar o quitar una imagen se borra el archivo anterior, solo si es del
+  bucket y del sitio, y nunca si la misma URL sigue usada en otro campo (lo encontró la
+  revisión del orquestador).
+
+### 2. El diseñador como agente
+
+El rediseño de las otras plantillas se le pidió a **Claude Design** con un brief escrito
+para un agente sin memoria (`docs/brief-bloques-plantillas.md`). Respondió con las
+decisiones transversales T1–T10 y el capítulo de SERVICIOS
+(`docs/design_handoff_plantillas_webbot/handoff_bloques_v2/`). La carpeta que Agustín
+descargó a mano (`handoff_bloquesV2/`, sin versionar) traía casi todo con nombres
+cambiados: los archivos reales se leyeron con `DesignSync` tras `/design-login`.
+
+**Hallazgo incómodo:** S1, que figuraba como "LANDING en Bloques", solo tenía el shell de
+scroll largo. La geometría (aire, escala, tracking) no existía en ninguna plantilla.
+
+### 3. LANDING en Bloques (U1–U11, PRs #48–#58)
+
+Una unidad por PR, directo a `develop` (estrategia elegida por Agustín), con su OK
+permanente para mergear cada una tras chequeos y Chrome. Quedaron compartidos en
+`components/templates/shared/`: header de 96px, hero con título en tres tamaños según el
+largo del nombre, banda de cifras sobre tinta, bandas de servicio (número gigante o
+foto), bloque Nosotros en el acento que nunca desaparece, contacto sin mapa, footer con
+el logo en placa blanca y la línea legal con RUT, monograma "Sans pesado". Instrument
+Serif salió del proyecto.
+
+Dos preguntas al diseñador (`docs/preguntas-disenador-bloques.md`): qué hacer con un
+solo servicio, y el header móvil de 82px donde no cabía "Hablemos". Respondió el mismo
+día (`01-RESPUESTAS-UN-SERVICIO-Y-HEADER-MOVIL.md`): con un servicio la sección se queda
+pero sin el número "01", y el header móvil mide 86px sin "Hablemos". Aplicado en U11.
+
+### 4. SERVICIOS en Bloques (S2-1 a S2-4, PRs #59–#62)
+
+Hero compartido, banda de horarios, **lista con precios** ("Servicios y precios" o
+"Nuestros servicios", "Agendar →" cuando no hay precio) y **"El lugar"**, que muestra
+solo fotos propias del cliente subidas a R2, nunca de banco, así que no aparece en los
+sitios demo.
+
+### Lo que costó tiempo real
+
+- **El ajuste de contraste del acento rompía las plantillas viejas.** Aplicado a todas,
+  oscurecía el botón de RESTAURANTE y PORTFOLIO, que ponen texto oscuro encima. Quedó
+  opcional, solo para plantillas Bloques.
+- **La pestaña de Chrome que controla el agente está oculta:** ni el scroll suave, ni las
+  animaciones, ni `IntersectionObserver` corren. Un clic en el menú "no hacía nada" y no
+  era un bug. Se mide con scroll instantáneo y forzando la revelación.
+- **El optimizador de imágenes de Next bloquea `localhost`**, así que "El lugar" solo se
+  pudo verificar en su geometría, simulando el bucket con archivos locales.
+- **Un subagente se cortó por el límite de uso de la sesión** a mitad de SERVICIOS; otro
+  retomó desde el trabajo sin commitear.
+- Las revisiones en Chrome encontraron lo que los tests no veían: el título de servicios
+  en móvil a 28px en vez de 34, la cita de Nosotros antes que las tarjetas, el correo
+  partido en dos líneas, un header móvil de 149px con nombres largos (bug que ya estaba
+  en producción) y el rubro en mayúsculas en la píldora del hero.
+
+### Release
+
+Agustín revisó `develop` en su navegador y pidió el release. `develop` → `main`
+(`d3e48b8`) sin migraciones ni variables nuevas; `ESTADO.md` regenerado (`3ccfd0b`);
+Railway en `SUCCESS`. En producción, `demo-consultora` (LANDING) y `demo-veterinaria`
+(SERVICIOS) ya sirven el diseño nuevo.
+
+### Verificación
+
+`main` = `develop` = `3ccfd0b`. `npm run test:unit` → **1177 tests, 82 suites**. `npx tsc
+--noEmit` limpio. `npx eslint src tests` → 0 errores (23 warnings preexistentes).
+`npm run build` en verde.
+
+### Pendiente
+
+- Probar en producción el borrado en R2 al reemplazar una imagen y "El lugar" con una
+  foto propia real.
+- RESTAURANTE, PORTFOLIO y TIENDA esperan los capítulos del diseñador; PROFESIONAL espera
+  la decisión de Agustín (el diseñador propone no crear un valor nuevo de `Template`).
+- Ningún flujo llena todavía los campos nuevos (precios, horarios, partes de Nosotros,
+  autor de la cita, razón social y RUT): solo el editor JSON de `/admin`. El rediseño del
+  chat (momento 2, D-36) sigue sin construir.
+- `.env.example` (variables R2) y `docs/brief-rediseno-chat-onboarding.md` (última línea
+  cortada) siguen modificados sin commitear en el equipo de Agustín.
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |
@@ -1440,10 +1578,10 @@ Su propia doc dice explícito: *"This repository only builds and validates the s
 
 ## Cómo retomar
 
-**Estado al cierre del 2026-09-26.** `main` = `develop`, nada mergeado esperando deploy.
-Producción tiene S1 de `LANDING` con navegación móvil y las páginas legales — ver
-[la entrada del 2026-09-26](#navegación-móvil-de-s1-s1-en-producción-y-páginas-legales-2026-09-26).
-Lo siguiente es Bloques. La lista de abajo es histórica (2026-09-08): para el estado
+**Estado al cierre del 2026-10-03.** `main` = `develop` = `3ccfd0b`, nada esperando deploy.
+Producción tiene `LANDING` y `SERVICIOS` en Bloques — ver
+[la entrada del 2026-10-03](#bloques-landing-completa-servicios-logo-óptico-y-limpieza-de-r2-2026-10-03).
+Lo siguiente: RESTAURANTE, PORTFOLIO y TIENDA cuando el diseñador entregue sus capítulos. La lista de abajo es histórica (2026-09-08): para el estado
 actual, `ESTADO.md` manda.
 
 1. Leer `ESTADO.md` (qué es WebBot hoy) y `DECISIONES.md` (por qué). Esta bitácora es el registro cronológico, no el mapa.
