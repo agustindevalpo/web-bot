@@ -9,7 +9,7 @@
 > archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
 > gana Engram.
 >
-> **Última regeneración:** 2026-10-03 · `main` = `d3e48b8` (release) · `develop` = `main`
+> **Última regeneración:** 2026-10-05 · `main` = `2c55b53` (release) · `develop` = `main`
 > tras este commit
 
 ---
@@ -30,8 +30,10 @@ promesa **"tu sitio web en un día, en producción, con tu propio dominio"**.
   un dominio `.cl`/`.com` estándar hasta `TOPE_DOMINIO_ANUAL` ($15.000/año), siempre a
   nombre del cliente; uno premium paga la diferencia (D-41). Sin derecho a retracto,
   con garantía de publicación en 10 días (D-39).
-- **Embudo:** aviso → landing → chat demo → el visitante deja nombre y correo → se le
-  revela su sitio demo → paga → Devalpo le asigna el dominio.
+- **Embudo:** aviso → landing → chat demo de 6 preguntas → el visitante deja nombre,
+  correo y WhatsApp → se le revela su sitio demo con su avance (35 %) → opcionalmente lo
+  completa en `/chat/completar` (hasta 80 %) → paga por Mercado Pago, que lo devuelve a
+  `/gracias` → Devalpo confirma el pago, carga logo y fotos y le asigna el dominio.
 - **Equipo:** Agustín Romero, solo.
 
 ## 2. Stack real
@@ -105,9 +107,15 @@ src/
 
 ## 4. Qué está en producción, qué no
 
-**En producción (`main` = `d3e48b8`, desplegado el 2026-10-03):**
-capacidad de generar un sitio real por chat demo con gate de lead (nombre + correo antes
-de revelar el sitio) · 5 templates de sitio elegidos por rubro · dominios propios vía
+**En producción (`main` = `2c55b53`, desplegado el 2026-10-05):**
+**chat demo en Bloques** con 6 preguntas, confirmación del rubro por el nombre y
+sugerencias de servicios (PRs #65–#66) · **paso de datos** con nombre, correo y WhatsApp
+(+56 9 y 8 dígitos), que llena `configJson.contacto` (PR #67) · **reveal** con vista
+previa, avance de `calcularAvance` (base 35 %, techo 80 % antes del pago) y caja de pago
+(PR #68) · **momento 2** en `/chat/completar`: una tarea por pantalla (servicios con
+precio, horarios, Nosotros, frase de cliente), omitir, resumen; se cierra cuando Devalpo
+confirma el pago (PRs #69–#70) · **`/gracias`**, URL de retorno del link de Mercado Pago
+(PR #71) · campos "Razón social" y "RUT" en `/admin` (PR #72) · 5 templates de sitio elegidos por rubro · dominios propios vía
 Cloudflare · panel `/admin` para pausar, reactivar, asignar dominio, editar `configJson`
 y confirmar pago · cobro por link de Mercado Pago con activación manual · metadata y
 Open Graph propios por sitio (no la copia de la landing comercial) · paleta de cada sitio
@@ -144,14 +152,10 @@ RESTAURANTE, PORTFOLIO y TIENDA siguen con el diseño anterior y no muestran el 
   container pero ninguna ruta los consume (verificado por grep).
 - Términos y condiciones por cliente (si un cliente activa Webpay o Mercado Pago): no
   existen; Bloques solo muestra razón social y RUT en el footer (T7).
-- Captura de contenido adicional (momento 2, D-36): en producción ningún flujo llena los
-  campos nuevos de Bloques (precios, horarios, partes de Nosotros, autor de la cita, razón
-  social y RUT); solo se cargan a mano en el editor JSON de `/admin`, igual que logo y
-  fotos (D-42), y el chat sigue con sus 8 preguntas. **En `develop`, sin release
-  (PRs #65–#72):** chat de 6 preguntas en Bloques, paso de datos con WhatsApp, reveal
-  con avance (35 % → techo 80 %), momento 2 en `/chat/completar`, `/gracias` (URL de
-  retorno ya configurada en Mercado Pago, da 404 hasta el release) y campos "Razón
-  social" y "RUT" en `/admin`. El cliente sigue sin subir archivos él mismo.
+- El cliente no sube archivos él mismo: logo y fotos llegan por WhatsApp y Devalpo los
+  sube desde `/admin` (D-42). `destacados` (cifras de LANDING) solo se carga en `/admin`.
+- El modo real del chat (`ClaudeChatService`, inerte sin `ANTHROPIC_API_KEY`) conserva
+  el guion viejo de 8 preguntas; no está alineado con el de 6.
 
 ## 5. Bloqueado, y en qué exactamente
 
@@ -212,6 +216,12 @@ No existe un script `test` a secas.
   `*.sitios.devalpo.cl` son sitios de clientes. La app reconoce un solo host propio
   (`NEXT_PUBLIC_APP_DOMAIN`, `src/proxy.ts`): cualquier otro se enruta como sitio de cliente,
   así que `panel.sitios.devalpo.cl` ya no es el panel.
+- Recargar `/chat` a mitad del guion muestra la pregunta 1, pero la sesión del servidor
+  sigue en su paso: la respuesta siguiente se lee contra la pregunta equivocada. Solo
+  `/chat?vista=sitio` restaura algo (el reveal de un sitio abierto).
+- En Chrome automatizado con la ventana maximizada, `resize_window` no achica nada y
+  escribir + Enter llegó a recargar `/chat`: para 390 px se usa un iframe de 390 px y se
+  llena el formulario por JS.
 - El SMTP de Gmail está bloqueado en el egress de Railway (puertos 465 y 587); por eso
   producción usa Resend por HTTP.
 - El túnel SSH de Railway (`railway connect Postgres --tunnel-only`) no funciona en
