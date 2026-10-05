@@ -17,6 +17,7 @@ import {
   sugerenciaYaIncluida,
 } from './preguntaActiva'
 import { COOKIE_NAME } from './sessionCookie'
+import { AVANCE_BASE } from '@/application/shared/avanceSitio'
 
 interface Mensaje {
   rol: 'user' | 'assistant'
@@ -24,6 +25,26 @@ interface Mensaje {
 }
 
 type LimiteAlcanzado = 'demo' | 'claude' | null
+
+// Lo que el reveal necesita de la respuesta de /api/chat/lead.
+interface DatosReveal {
+  subdominioDemo: string
+  nombre: string
+  template: string | null
+  avance: number
+}
+
+// Lectura defensiva de la respuesta del lead: un campo ausente degrada al
+// estado mínimo (35 %, sin plantilla) en vez de romper el reveal.
+function datosDeReveal(data: Record<string, unknown>): DatosReveal | null {
+  if (typeof data.subdominioDemo !== 'string' || !data.subdominioDemo) return null
+  return {
+    subdominioDemo: data.subdominioDemo,
+    nombre: typeof data.nombre === 'string' ? data.nombre : '',
+    template: typeof data.template === 'string' ? data.template : null,
+    avance: typeof data.avance === 'number' && Number.isFinite(data.avance) ? data.avance : AVANCE_BASE,
+  }
+}
 
 const MENSAJE_INICIAL =
   'Hola, soy el asistente de WebBot. En seis preguntas armamos tu sitio. ¿Cómo se llama tu negocio?'
@@ -223,7 +244,7 @@ export default function ChatWidget() {
   const [sugerencias, setSugerencias] = useState<string[]>([])
   const [solicitudFoco, setSolicitudFoco] = useState(0)
   const [completada, setCompletada] = useState(false)
-  const [subdominioDemo, setSubdominioDemo] = useState<string | null>(null)
+  const [reveal, setReveal] = useState<DatosReveal | null>(null)
   const [requiereLead, setRequiereLead] = useState(false)
   const [leadNombre, setLeadNombre] = useState('')
   const [leadEmail, setLeadEmail] = useState('')
@@ -262,6 +283,11 @@ export default function ChatWidget() {
     campo.focus()
     campo.setSelectionRange(campo.value.length, campo.value.length)
   }, [solicitudFoco])
+
+  // El reveal arranca arriba: el chat dejó el scroll al final del historial.
+  useEffect(() => {
+    if (reveal) window.scrollTo({ top: 0 })
+  }, [reveal])
 
   const pedirFoco = () => setSolicitudFoco((n) => n + 1)
 
@@ -356,7 +382,12 @@ export default function ChatWidget() {
 
       // Recién acá se revela el sitio — el subdominio real solo llega en la
       // respuesta de este endpoint, nunca antes.
-      setSubdominioDemo(data.subdominioDemo)
+      const datos = datosDeReveal(data)
+      if (!datos) {
+        setLeadError(mensajeErrorLead(undefined))
+        return
+      }
+      setReveal(datos)
       setRequiereLead(false)
     } catch {
       setLeadError('No pudimos guardar tus datos. Revisa tu conexión e inténtalo de nuevo.')
@@ -381,6 +412,24 @@ export default function ChatWidget() {
     ? TOTAL_PREGUNTAS
     : numeroDePregunta(ultimoAsistente?.contenido ?? '', respuestasDelVisitante)
   const campoBloqueado = limite !== null || falloEnvio !== null
+
+  // El reveal reemplaza al chat: es la misma pantalla de /chat, pero con el
+  // sitio, el avance y el pago (R2, R3, E1), que no caben en la columna del chat.
+  if (reveal) {
+    return (
+      <div className={`${styles.page} ${styles.pageReveal}`}>
+        <header className={styles.headerReveal}>
+          <div className={styles.marca}>
+            <span className={styles.logotipo}>WebBot</span>
+            <span className={styles.porDevalpo}>por Devalpo</span>
+          </div>
+        </header>
+        <main className={styles.cuerpoReveal}>
+          <DemoCTA {...reveal} />
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.page}>
@@ -487,12 +536,6 @@ export default function ChatWidget() {
               onTelefonoChange={setLeadTelefono}
               onSubmit={enviarLead}
             />
-          )}
-
-          {completada && subdominioDemo && (
-            <div className={styles.legado}>
-              <DemoCTA subdominioDemo={subdominioDemo} />
-            </div>
           )}
 
           <div ref={finRef} />

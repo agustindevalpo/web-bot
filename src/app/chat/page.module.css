@@ -312,16 +312,23 @@
   color: var(--wb-ink-help);
 }
 
-/*
- * El reveal sigue con su estilo navy hasta T4 (reveal con avance): se enmarca en un panel oscuro para que no
- * queden blanco sobre blanco mientras tanto.
- */
-.legado {
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: 20px;
-  background: #080056;
-  color: #ffffff;
+/* ── Reveal (R2, R3, E1): reemplaza al chat, con scroll de página ── */
+
+.pageReveal {
+  height: auto;
+  min-height: 100dvh;
+}
+
+.headerReveal {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--wb-line);
+}
+
+.cuerpoReveal {
+  flex: 1;
 }
 
 /* ── Barra de respuesta ── */
@@ -507,5 +514,17 @@
 
   .limite {
     margin: 0 24px 40px;
+  }
+}
+
+/* El reveal pasa a dos columnas a partir de 1024px, sobre fondo hueso. */
+@media (min-width: 1024px) {
+  .headerReveal {
+    height: 72px;
+    padding: 0 48px;
+  }
+
+  .cuerpoReveal {
+    background: #f7f6f2;
   }
 }

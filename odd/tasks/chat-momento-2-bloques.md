@@ -51,7 +51,7 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   Inter. Route: delegated.
 - [x] **T3 — Data step with phone (R1).** `LeadForm` with fixed "+56 9" prefix, 8 digits, per-field
   validation and messages; `/api/chat/lead` + use case accept `telefono` and write `contacto` defensively.
-- [ ] **T4 — Progress model + reveal (R2, R3, E1).** `calcularAvance` and `TAREAS_POR_PLANTILLA` (pure,
+- [x] **T4 — Progress model + reveal (R2, R3, E1).** `calcularAvance` and `TAREAS_POR_PLANTILLA` (pure,
   application layer, tested with the designer's weights); reveal with preview, progress card and payment
   box (D-39 notice verbatim before the button); desktop scaled iframe.
 - [ ] **T5 — Momento 2 (`/chat/completar`, M1–M5, E2).** One task per screen, save action with length
@@ -95,6 +95,19 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   640px column as T2). Known limits: a returning Cliente keeps its old phone (site config gets the new one);
   a phone error stays visible until blur after it is fixed.
 
+- 2026-10-05 · T3 merged: PR #67 → `5fa0d30`.
+- 2026-10-05 · T4 done (delegated writer, sonnet; trigger: 2+ non-trivial files). Commit `def93f6` + parent fix:
+  at 80 % the card title becomes "Completaste todo lo que se puede antes del pago." (section (i), line 161)
+  instead of keeping "Tu sitio está al 80 %". `src/application/shared/avanceSitio.ts`: `calcularAvance`,
+  `estadoDeTareas`, `TAREAS_POR_PLANTILLA` (weights match section (i); other templates use LANDING; a task
+  counts with one answer; horarios needs `dia` + `rango`). `/api/chat/lead` returns `{subdominioDemo, nombre,
+  template, avance}`. D-39 notice and the text under the button kept verbatim. Checks: tsc clean · eslint 0
+  errors · 1298/1298 · build OK · Chrome 1280px (two columns, scaled iframe, 35 % card, payment box) and
+  390px (inside a 390px iframe: the window kept re-maximizing). The generated site shows the T3 phone
+  ("Llamar · +56987654321", WhatsApp button). `/chat/completar` is a 404 until T5.
+  Testing note: the Chrome extension's type + Enter reloaded `/chat` on a maximized window; driving the
+  form with JS worked, and the app's submit handler is fine.
+
 ## Next step
 
-T4.
+T5.

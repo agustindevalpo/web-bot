@@ -1,80 +1,154 @@
-.contenedor {
-  align-self: center;
-  width: 100%;
-  max-width: 460px;
+/*
+ * Reveal en Bloques (R2, R3, E1). Usa las variables --wb-* que define .page en
+ * page.module.css; las medidas salen de 03-CHAT-Y-MOMENTO-2.md. Móvil primero
+ * (390px, gutter 24px); a partir de 1024px el reveal pasa a dos columnas.
+ */
+.reveal {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1rem 0;
+  padding: 24px 24px 40px;
+  color: var(--wb-ink);
 }
 
-.preview {
+.columnaSitio {
+  min-width: 0;
+}
+
+.columnaAccion {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  align-items: center;
-  text-align: center;
+  gap: 28px;
+  margin-top: 24px;
 }
 
-.previewLabel {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.8);
+.rotulo {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wb-purple);
 }
 
-.previewLink {
-  display: block;
-  width: 100%;
-  border-radius: 0.75rem;
+.titulo {
+  margin: 0 0 20px;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+/* ── Vista previa ── */
+
+.marcoVista {
+  height: min(70vh, 560px);
+  border: 1px solid #e2e0ec;
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(21, 222, 250, 0.4);
+  background: #ffffff;
 }
 
 .iframe {
+  display: block;
   width: 100%;
-  height: 220px;
+  height: 100%;
   border: none;
   pointer-events: none;
   background: #ffffff;
 }
 
 .verCompleto {
-  color: #15defa;
-  font-size: 0.85rem;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
   font-weight: 600;
+  color: var(--wb-purple-hover);
 }
+
+.verCompleto:focus-visible,
+.botonTinta:focus-visible,
+.enlaceEditar:focus-visible,
+.boton:focus-visible,
+.retracto a:focus-visible {
+  outline: none;
+  box-shadow: var(--wb-anillo);
+}
+
+/* ── Tarjeta de avance ── */
+
+.tarjetaAvance {
+  padding: 22px 20px 20px;
+  border-radius: 20px;
+  background: var(--wb-card);
+}
+
+.avanceTitulo {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.avanceTexto {
+  margin: 14px 0 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--wb-ink-help);
+}
+
+.botonTinta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 999px;
+  background: var(--wb-ink);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.botonTinta:hover {
+  background: #2a2f3a;
+}
+
+.enlaceEditar {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wb-purple-hover);
+}
+
+/* ── Caja de pago ── */
 
 .caja {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  border-radius: 1rem;
-  background: rgba(21, 222, 250, 0.08);
-  border: 1px solid #15defa;
-  text-align: center;
+  padding-top: 28px;
+  border-top: 1px solid var(--wb-ink);
 }
 
-.titulo {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.texto {
-  margin: 0;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.4;
+.tituloPago {
+  margin: 0 0 18px;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 }
 
 .alertaSandbox {
-  margin: 0;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.75rem;
-  background: rgba(255, 176, 32, 0.15);
-  border: 1px solid #ffb020;
-  color: #ffb020;
-  font-size: 0.8rem;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff4e0;
+  border: 1.5px solid #ffb020;
+  color: #7a4a00;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -83,80 +157,167 @@
    estado más peligroso del contraste, por eso un rojo más fuerte que el
    amarillo de "sandbox tranquilo" — nunca se muestran los dos a la vez. */
 .alertaDiscrepancia {
-  margin: 0;
-  padding: 0.75rem 0.85rem;
-  border-radius: 0.75rem;
-  background: rgba(255, 59, 48, 0.18);
-  border: 2px solid #ff3b30;
-  color: #ff3b30;
-  font-size: 0.85rem;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fde8e6;
+  border: 2px solid #b42318;
+  color: #b42318;
+  font-size: 13.5px;
   font-weight: 700;
   line-height: 1.45;
 }
 
 .precio {
+  margin-bottom: 18px;
+}
+
+.precioFila {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  padding: 0.75rem 0.5rem;
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: baseline;
+  gap: 10px;
 }
 
 .precioActual {
-  font-weight: 700;
-  font-size: 1.4rem;
-  color: #15defa;
-}
-
-.precioTachado {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
-  text-decoration: line-through;
-}
-
-.precioNota {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .precioDetalle {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--wb-ink-soft);
 }
 
-.boton {
+.precioNota {
   display: block;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  background: #15defa;
-  color: #080056;
-  font-weight: 700;
-  text-decoration: none;
-  text-align: center;
+  margin-top: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--wb-ink-help);
 }
 
-.retracto {
-  margin: 0;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.75rem;
+.precioTachado {
+  font-weight: 400;
+  color: var(--wb-ink-soft);
+  text-decoration: line-through;
+}
+
+.vinetas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
   line-height: 1.45;
 }
 
+.vinetas li {
+  display: flex;
+  gap: 10px;
+}
+
+.vinetas li::before {
+  content: '✓';
+  flex: none;
+  font-weight: 700;
+  color: var(--wb-purple);
+}
+
+.retracto {
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--wb-ink-help);
+}
+
 .retracto a {
-  color: #15defa;
-  font-weight: 600;
+  color: inherit;
+  text-decoration: underline;
+}
+
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--wb-purple);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.boton:hover {
+  background: var(--wb-purple-hover);
 }
 
 .disclaimer {
-  margin: 0;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6);
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--wb-ink-soft);
+}
+
+/* ── Escritorio (E1): sitio escalado a la izquierda, avance y pago fijos a la derecha ── */
+
+@media (min-width: 1024px) {
+  .reveal {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 48px;
+    align-items: start;
+    padding: 40px 48px 48px;
+  }
+
+  .titulo {
+    font-size: 34px;
+  }
+
+  /* El sitio se renderiza a 1280px y se escala: --k es el ancho del marco
+     dividido por 1280 (lo fija VistaPreviaSitio). */
+  .marcoVista {
+    height: calc(800px * var(--k, 0.6));
+  }
+
+  .iframe {
+    width: 1280px;
+    height: 800px;
+    transform: scale(var(--k, 0.6));
+    transform-origin: top left;
+  }
+
+  .columnaAccion {
+    position: sticky;
+    top: 24px;
+    gap: 16px;
+    margin-top: 0;
+  }
+
+  .tarjetaAvance,
+  .caja {
+    padding: 20px 22px 22px;
+    border: 1px solid #e2e0ec;
+    border-radius: 20px;
+    background: #ffffff;
+  }
+
+  .tituloPago {
+    margin-bottom: 14px;
+    font-size: 28px;
+  }
+
+  .precio {
+    margin-bottom: 14px;
+  }
+
+  .vinetas {
+    margin-bottom: 14px;
+  }
 }
