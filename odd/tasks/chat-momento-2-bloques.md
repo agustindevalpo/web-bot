@@ -57,7 +57,7 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
 - [x] **T5 — Momento 2 (`/chat/completar`, M1–M5, E2).** One task per screen, save action with length
   limits and defensive merge, `revalidatePath` + iframe reload, "Así quedó", summary with antesala, skip
   (`momento2Omitidas`), closed and expired states. May split in two PRs.
-- [ ] **T6 — `/gracias` (G1).** Static page. Blocked on P1.
+- [x] **T6 — `/gracias` (G1).** Static page.
 - [ ] **T7 — Admin fields for razón social and RUT (C5).** Optional; only if Agustín prioritizes it.
 
 ## Progress
@@ -123,6 +123,12 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   save error reuses the lead one); E2 WhatsApp opens without a prefilled message; SERVICIOS antesala shows 4
   zones (spec says 3 but lists 4). Saves are read-modify-write without locking (two tabs can overwrite).
 
+- 2026-10-05 · T5 part 2 merged: PR #70 → `fa6102d`.
+- 2026-10-05 · T6 done (delegated writer, sonnet; trigger: 2+ files). Commit `70079e4`: static `/gracias`
+  (○ in the build), spec copy verbatim, `noindex`, WhatsApp via `enlaceWhatsAppDevalpo`, no searchParams read.
+  Checks: tsc clean · eslint 0 errors · 1364/1364 · build OK · Chrome 1280px and 390px with Mercado Pago
+  query params appended (not echoed). Production needs the release to `main` before the MP return URL works.
+
 ## Next step
 
-T6.
+T7.
