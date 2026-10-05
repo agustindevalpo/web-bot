@@ -203,8 +203,11 @@ No existe un script `test` a secas.
 - `npm run db:seed-demo` es precondición de arranque: sin el `Cliente` demo compartido,
   `POST /api/chat/lead` cae con `P2003` en `Sitio_clienteId_fkey` y devuelve un 500 opaco.
 - `https://devalpo.cl` **no es WebBot**, es el WordPress de Bluehost: responde 200 en `/`
-  y 404 en `/chat`, y se lee como app rota. El origen real es
-  `web-bot-production-d190.up.railway.app` o cualquier `*.sitios.devalpo.cl`.
+  y 404 en `/chat`, y se lee como app rota. La app (chat y `/admin`) vive en
+  `https://webbot.devalpo.cl` (también responde en `web-bot-production-d190.up.railway.app`);
+  `*.sitios.devalpo.cl` son sitios de clientes. La app reconoce un solo host propio
+  (`NEXT_PUBLIC_APP_DOMAIN`, `src/proxy.ts`): cualquier otro se enruta como sitio de cliente,
+  así que `panel.sitios.devalpo.cl` ya no es el panel.
 - El SMTP de Gmail está bloqueado en el egress de Railway (puertos 465 y 587); por eso
   producción usa Resend por HTTP.
 - El túnel SSH de Railway (`railway connect Postgres --tunnel-only`) no funciona en

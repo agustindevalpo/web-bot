@@ -24,7 +24,12 @@ the Claude Design project `6b6d0664-fe8b-4d6c-9c13-996324a27b53`, `S3 Chat y mom
 - P4 · default: momento 2 closes when Devalpo confirms the payment. The chat session cookie lasts one year
   (`ChatWidget.tsx`), so "sesión vencida" only appears without the cookie.
 - P3 · default: `destacados` only from `/admin`.
-- P1 · Mercado Pago return URL: pending, asked to Agustín. Blocks only T6.
+- P1 · resolved 2026-10-05: WebBot pays with a fixed `mpago.la` link (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`,
+  `src/app/chat/DemoCTA.tsx`), not the Orders API, so `success_url` does not apply. The link accepts a return
+  URL in the Mercado Pago panel: Agustín set `https://webbot.devalpo.cl/gracias`. That host was created the
+  same day (Railway custom domain on port 8080 + Cloudflare CNAME) and Railway's `NEXT_PUBLIC_APP_DOMAIN` /
+  `NEXT_PUBLIC_APP_URL` moved from `panel.sitios.devalpo.cl` / the `up.railway.app` URL to it. `/gracias`
+  returns 404 until T6 is released to `main`.
 - C5 · `/admin` fields for razón social and RUT: optional, T7, not prioritized yet.
 
 **Risk:** this is the sales funnel. Every change reaches production only on an explicit release.
@@ -38,7 +43,7 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
 
 ## Tasks
 
-- [ ] **T1 — 6-question script.** `DemoChatService`: new questions and closing (no emoji), rubro confirmation
+- [x] **T1 — 6-question script.** `DemoChatService`: new questions and closing (no emoji), rubro confirmation
   2a/2b with `RUBRO_FRASE`, `SUGERENCIAS_SERVICIOS` (UI only), remove `contacto`, `redes`, `highlight` from
   the chat. Keep the D-29 parser contract (style labels) and add the 2a labels to it. Route: delegated.
 - [ ] **T2 — Chat in Bloques.** Restyle `/chat` (C1–C3): active question 24/32px, history at 14px, 6-segment
@@ -58,7 +63,16 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
 ## Progress
 
 - 2026-10-04: designer chapter saved; owner questions answered from code where possible; plan created.
+- 2026-10-05: Agustín authorized T1–T7. T6 unblocked (P1 above); T7 is now in scope.
+- 2026-10-05 · T1 done (delegated writer, sonnet; trigger: 4+ files). Commit `a84848a`. Copy in
+  `src/infrastructure/demo/guionChat.ts`; `sugerenciasServicios(historial)` in `DemoChatService.ts`.
+  Checks: tsc clean · eslint 0 errors (22 pre-existing warnings) · 1189/1189 unit tests · build OK ·
+  Chrome 390px: full flow with 2a → "No, es otra cosa" → 2b → 6 answers → lead → SERVICIOS preview renders
+  without contacto/redes/highlight. Desktop width left to T2 (no layout change in T1). RDD off (clone-local).
+  Gaps carried to T2: `/api/chat` must return `sugerencias` for chips; the servicios question carries its
+  help line after `\n\n`. Not aligned: real-mode `ClaudeChatService` prompt still has the old 8 questions
+  (inert without `ANTHROPIC_API_KEY`).
 
 ## Next step
 
-T1, once Agustín confirms the plan.
+T2.
