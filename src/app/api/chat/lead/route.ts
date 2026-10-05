@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : ''
     const nombre = typeof body?.nombre === 'string' ? body.nombre : ''
     const email = typeof body?.email === 'string' ? body.email : ''
+    const telefono = typeof body?.telefono === 'string' ? body.telefono : ''
 
     // Re-deriva el modo (demo vs. cliente real y pagado) de forma
     // independiente a lo que el chat haya devuelto — nunca se confía en un
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     const token = req.cookies.get(SESSION_COOKIE_NAME)?.value
     const esDemo = await resolverModoChat(token, clienteRepo)
 
-    const resultado = await capturarLeadDemoUC.execute({ sessionId, nombre, email, esDemo })
+    const resultado = await capturarLeadDemoUC.execute({ sessionId, nombre, email, telefono, esDemo })
 
     return NextResponse.json({ subdominioDemo: resultado.subdominioDemo })
   } catch (error) {

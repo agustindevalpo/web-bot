@@ -313,8 +313,7 @@
 }
 
 /*
- * Lead y reveal siguen con su estilo navy hasta T3 y T4 (formulario con
- * teléfono, reveal con avance): se enmarcan en un panel oscuro para que no
+ * El reveal sigue con su estilo navy hasta T4 (reveal con avance): se enmarca en un panel oscuro para que no
  * queden blanco sobre blanco mientras tanto.
  */
 .legado {

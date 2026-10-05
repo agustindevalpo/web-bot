@@ -56,7 +56,7 @@ function obtenerSessionId(): string {
 function mensajeErrorLead(codigo: unknown): string {
   switch (codigo) {
     case 'datos_invalidos':
-      return 'Revisa tu nombre y tu correo electrónico.'
+      return 'Revisa tu nombre, tu correo y tu WhatsApp.'
     case 'sesion_incompleta':
       return 'Termina de responder todas las preguntas antes de continuar.'
     case 'sesion_no_encontrada':
@@ -227,6 +227,7 @@ export default function ChatWidget() {
   const [requiereLead, setRequiereLead] = useState(false)
   const [leadNombre, setLeadNombre] = useState('')
   const [leadEmail, setLeadEmail] = useState('')
+  const [leadTelefono, setLeadTelefono] = useState('')
   const [enviandoLead, setEnviandoLead] = useState(false)
   const [leadError, setLeadError] = useState<string | null>(null)
   const finRef = useRef<HTMLDivElement>(null)
@@ -334,7 +335,7 @@ export default function ChatWidget() {
   async function enviarLead() {
     const nombre = leadNombre.trim()
     const email = leadEmail.trim()
-    if (!nombre || !email || enviandoLead) return
+    if (!nombre || !email || !leadTelefono || enviandoLead) return
 
     setEnviandoLead(true)
     setLeadError(null)
@@ -343,7 +344,7 @@ export default function ChatWidget() {
       const res = await fetch('/api/chat/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sessionIdRef.current, nombre, email }),
+        body: JSON.stringify({ sessionId: sessionIdRef.current, nombre, email, telefono: leadTelefono }),
       })
 
       const data = await res.json()
@@ -358,7 +359,7 @@ export default function ChatWidget() {
       setSubdominioDemo(data.subdominioDemo)
       setRequiereLead(false)
     } catch {
-      setLeadError('No se pudo conectar con el servidor. Inténtalo de nuevo en un momento.')
+      setLeadError('No pudimos guardar tus datos. Revisa tu conexión e inténtalo de nuevo.')
     } finally {
       setEnviandoLead(false)
     }
@@ -475,17 +476,17 @@ export default function ChatWidget() {
           )}
 
           {completada && requiereLead && (
-            <div className={styles.legado}>
-              <LeadForm
-                nombre={leadNombre}
-                email={leadEmail}
-                enviando={enviandoLead}
-                error={leadError}
-                onNombreChange={setLeadNombre}
-                onEmailChange={setLeadEmail}
-                onSubmit={enviarLead}
-              />
-            </div>
+            <LeadForm
+              nombre={leadNombre}
+              email={leadEmail}
+              telefono={leadTelefono}
+              enviando={enviandoLead}
+              error={leadError}
+              onNombreChange={setLeadNombre}
+              onEmailChange={setLeadEmail}
+              onTelefonoChange={setLeadTelefono}
+              onSubmit={enviarLead}
+            />
           )}
 
           {completada && subdominioDemo && (
