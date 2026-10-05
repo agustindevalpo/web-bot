@@ -49,7 +49,7 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
 - [x] **T2 — Chat in Bloques.** Restyle `/chat` (C1–C3): active question 24/32px, history at 14px, 6-segment
   progress, option buttons and suggestions, reply bar, 429 card, network-error retry, a11y of (j). Remove
   Inter. Route: delegated.
-- [ ] **T3 — Data step with phone (R1).** `LeadForm` with fixed "+56 9" prefix, 8 digits, per-field
+- [x] **T3 — Data step with phone (R1).** `LeadForm` with fixed "+56 9" prefix, 8 digits, per-field
   validation and messages; `/api/chat/lead` + use case accept `telefono` and write `contacto` defensively.
 - [ ] **T4 — Progress model + reveal (R2, R3, E1).** `calcularAvance` and `TAREAS_POR_PLANTILLA` (pure,
   application layer, tested with the designer's weights); reveal with preview, progress card and payment
@@ -85,6 +85,16 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   Follow-up (pre-existing, not in T1–T7): reloading `/chat` mid-flow shows Q1 while the server session keeps
   its step, so the next answer is read against the wrong question. The widget never restores history.
 
+- 2026-10-05 · T2 merged: PR #66 → `524152e`.
+- 2026-10-05 · T3 done (delegated writer, sonnet; trigger: 2+ non-trivial files). Commit `7ccac52`. Pure
+  validator `src/application/shared/datosLead.ts`; `telefono` required, normalized `+569XXXXXXXX`, merged
+  defensively into `configJson.contacto` together with the lead email (spec lines 262–263) and stored on a
+  newly created `Cliente.telefono`. Checks: tsc clean · eslint 0 errors · 1246/1246 · build OK · Chrome 390px:
+  empty name / `ana@correo` / short phone show the three spec errors; valid submit reveals the site; local DB
+  shows `contacto = {email: prueba4@example.com, telefono: +56912345678}`. Desktop not re-checked (same
+  640px column as T2). Known limits: a returning Cliente keeps its old phone (site config gets the new one);
+  a phone error stays visible until blur after it is fixed.
+
 ## Next step
 
-T3.
+T4.

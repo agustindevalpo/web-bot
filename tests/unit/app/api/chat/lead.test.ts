@@ -49,6 +49,16 @@ describe('POST /api/chat/lead', () => {
     expect(body).toEqual({ subdominioDemo: 'demo-abc12345' })
   })
 
+  it('reenvía telefono al caso de uso y no lo inventa si falta', async () => {
+    mockExecute.mockResolvedValue({ subdominioDemo: 'demo-abc12345' })
+
+    await POST(buildRequest({ sessionId: 's', nombre: 'Ana', email: 'ana@correo.cl', telefono: '1234 5678' }))
+    expect(mockExecute).toHaveBeenLastCalledWith(expect.objectContaining({ telefono: '1234 5678' }))
+
+    await POST(buildRequest({ sessionId: 's', nombre: 'Ana', email: 'ana@correo.cl' }))
+    expect(mockExecute).toHaveBeenLastCalledWith(expect.objectContaining({ telefono: '' }))
+  })
+
   it('400 datos_invalidos cuando el use-case rechaza nombre/email', async () => {
     mockExecute.mockRejectedValue(new LeadInvalidoException('El nombre es obligatorio.'))
 
