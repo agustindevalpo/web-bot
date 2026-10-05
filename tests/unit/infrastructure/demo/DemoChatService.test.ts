@@ -173,6 +173,14 @@ describe('DemoChatService', () => {
       expect(SUGERENCIAS_SERVICIOS.otro).toBeUndefined()
     })
 
+    it('ninguna sugerencia lleva "y": parseServicios la partiría en dos servicios', () => {
+      for (const rubro of RUBROS_CONOCIDOS) {
+        for (const sugerencia of SUGERENCIAS_SERVICIOS[rubro]) {
+          expect(sugerencia).not.toMatch(/\by\b/i)
+        }
+      }
+    })
+
     it('cada etiqueta de estilo se parsea al estilo correspondiente', async () => {
       const esperado = ['moderno', 'calido', 'colorido']
       for (const [i, etiqueta] of OPCIONES_ESTILO.entries()) {

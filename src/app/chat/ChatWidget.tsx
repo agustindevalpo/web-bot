@@ -262,7 +262,8 @@ export default function ChatWidget() {
   // haya en la caja de texto. `reintento` reenvía un texto que ya está en el
   // historial sin duplicar la burbuja.
   async function enviarMensaje(textoDirecto?: string, reintento = false) {
-    const texto = (textoDirecto ?? input).trim()
+    // Las sugerencias dejan ", " al final para seguir escribiendo; no se envía.
+    const texto = (textoDirecto ?? input).trim().replace(/,+$/, '').trim()
     if (!texto || enviando || completada || limite) return
 
     if (!sessionIdRef.current) sessionIdRef.current = obtenerSessionId()

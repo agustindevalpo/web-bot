@@ -36,11 +36,13 @@ export const RUBRO_FRASE: Record<string, string> = {
 
 // Solo texto de interfaz (chips de la pregunta de servicios). El parser de
 // DemoChatService NO lo lee: lo que cuenta es lo que escribe el cliente.
+// Cada sugerencia es un solo servicio y no lleva " y ": parseServicios corta
+// por "y", así que "Tortas y pasteles" llegaría al sitio como dos servicios.
 export const SUGERENCIAS_SERVICIOS: Record<string, readonly string[]> = {
-  panaderia: ['Pan amasado', 'Tortas y pasteles', 'Empanadas', 'Pan de masa madre', 'Pedidos para eventos'],
-  peluqueria: ['Corte de pelo', 'Tintura y mechas', 'Peinados', 'Manicure y pedicure', 'Tratamientos capilares'],
+  panaderia: ['Pan amasado', 'Tortas', 'Empanadas', 'Pan de masa madre', 'Pedidos para eventos'],
+  peluqueria: ['Corte de pelo', 'Tintura', 'Peinados', 'Manicure', 'Tratamientos capilares'],
   dentista: ['Limpieza dental', 'Blanqueamiento', 'Ortodoncia', 'Endodoncia', 'Implantes'],
-  restaurante: ['Almuerzos del día', 'Platos a la carta', 'Desayunos y café', 'Delivery', 'Banquetería'],
+  restaurante: ['Almuerzos del día', 'Platos a la carta', 'Desayunos', 'Delivery', 'Banquetería'],
   consultora: ['Asesoría tributaria', 'Contabilidad', 'Declaración de renta', 'Constitución de empresas', 'Asesoría legal'],
   taller: ['Mantención general', 'Cambio de aceite', 'Frenos', 'Diagnóstico computarizado', 'Revisión técnica'],
   yoga: ['Clases de yoga', 'Pilates', 'Meditación', 'Clases particulares', 'Talleres de bienestar'],
