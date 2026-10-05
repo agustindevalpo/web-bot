@@ -1,0 +1,39 @@
+/*
+ * Barra de avance (R2/R3, 03-CHAT-Y-MOMENTO-2.md (i)). Las variables --wb-*
+ * las define .page en page.module.css; los valores de respaldo permiten
+ * reutilizarla en otras rutas (momento 2).
+ */
+.contenedor {
+  margin: 14px 0 0;
+}
+
+.barra {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #dcd7fd;
+}
+
+.logrado {
+  flex: none;
+  background: var(--wb-purple, #5b46f8);
+}
+
+.faltante {
+  flex: none;
+  background: #dcd7fd;
+}
+
+.despuesDelPago {
+  flex: none;
+  background: repeating-linear-gradient(135deg, #cfcbc0 0 3px, #edebe5 3px 7px);
+}
+
+.leyenda {
+  margin: 8px 0 0;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--wb-ink-soft, #565e6b);
+}

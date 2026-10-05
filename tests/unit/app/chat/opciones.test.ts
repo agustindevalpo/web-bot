@@ -1,10 +1,10 @@
 import { extraerOpciones } from '@/app/chat/opciones'
 
-// Texto copiado literal de PREGUNTAS[5] en DemoChatService.ts — si ese
+// Texto copiado literal de PREGUNTAS_RESTANTES[3] en DemoChatService.ts — si ese
 // mensaje cambia de formato, este test debe fallar para que alguien revise
 // el parser, no seguir en verde sobre un texto que ya no existe.
 const PREGUNTA_ESTILO_VERBATIM =
-  '¿Qué estilo visual prefieres para tu sitio?\n\n• Moderno y minimalista\n• Cálido y cercano\n• Colorido y llamativo'
+  '¿Qué estilo prefieres para tu sitio?\n\n• Moderno y minimalista\n• Cálido y cercano\n• Colorido y llamativo'
 
 describe('extraerOpciones', () => {
   it('separa la prosa de las opciones en un mensaje con viñetas', () => {
@@ -38,10 +38,19 @@ describe('extraerOpciones', () => {
     expect(resultado.opciones).toEqual(['Consultora o asesoría (contable, tributaria, legal)', 'Ninguno de estos'])
   })
 
-  it('parsea la pregunta de estilo visual real, verbatim, de PREGUNTAS', () => {
+  it('parsea la pregunta de estilo visual real, verbatim, de PREGUNTAS_RESTANTES', () => {
     const resultado = extraerOpciones(PREGUNTA_ESTILO_VERBATIM)
 
-    expect(resultado.texto).toBe('¿Qué estilo visual prefieres para tu sitio?')
+    expect(resultado.texto).toBe('¿Qué estilo prefieres para tu sitio?')
     expect(resultado.opciones).toEqual(['Moderno y minimalista', 'Cálido y cercano', 'Colorido y llamativo'])
+  })
+
+  it('parsea la pregunta 2a de confirmación de rubro, verbatim', () => {
+    const resultado = extraerOpciones(
+      'Por el nombre, parece que es una panadería o pastelería. ¿Es correcto?\n\n• Sí, es correcto\n• No, es otra cosa',
+    )
+
+    expect(resultado.texto).toBe('Por el nombre, parece que es una panadería o pastelería. ¿Es correcto?')
+    expect(resultado.opciones).toEqual(['Sí, es correcto', 'No, es otra cosa'])
   })
 })

@@ -26,6 +26,7 @@ import { ListarSitiosUseCase } from '@/application/use-cases/ListarSitios.usecas
 import { CambiarEstadoSitioUseCase } from '@/application/use-cases/CambiarEstadoSitio.usecase'
 import { AsignarDominioPropioUseCase } from '@/application/use-cases/AsignarDominioPropio.usecase'
 import { ActualizarConfigSitioUseCase } from '@/application/use-cases/ActualizarConfigSitio.usecase'
+import { ActualizarDatosLegalesSitioUseCase } from '@/application/use-cases/ActualizarDatosLegalesSitio.usecase'
 import { ActivarClienteUseCase } from '@/application/use-cases/ActivarCliente.usecase'
 import { PausarSitioUseCase } from '@/application/use-cases/PausarSitio.usecase'
 import { ReactivarSitioUseCase } from '@/application/use-cases/ReactivarSitio.usecase'
@@ -35,6 +36,8 @@ import { VerificarAccesoUseCase } from '@/application/use-cases/VerificarAcceso.
 import { ConfirmarPagoSitioUseCase } from '@/application/use-cases/ConfirmarPagoSitio.usecase'
 import { CapturarLeadDemoUseCase } from '@/application/use-cases/CapturarLeadDemo.usecase'
 import { SubirImagenSitioUseCase } from '@/application/use-cases/SubirImagenSitio.usecase'
+import { ObtenerMomento2UseCase } from '@/application/use-cases/ObtenerMomento2.usecase'
+import { GuardarTareaMomento2UseCase } from '@/application/use-cases/GuardarTareaMomento2.usecase'
 import { CLIENTE_DEMO_ID } from './demo/rubroDefaults'
 
 // Repositorios
@@ -161,6 +164,9 @@ export const listarSitiosUC = new ListarSitiosUseCase(sitioRepo)
 export const cambiarEstadoSitioUC = new CambiarEstadoSitioUseCase(sitioRepo)
 export const asignarDominioPropioUC = new AsignarDominioPropioUseCase(sitioRepo, customHostnameServiceDiferido)
 export const actualizarConfigSitioUC = new ActualizarConfigSitioUseCase(sitioRepo, almacenamientoArchivosDiferido)
+export const actualizarDatosLegalesSitioUC = new ActualizarDatosLegalesSitioUseCase(sitioRepo)
 export const confirmarPagoSitioUC = new ConfirmarPagoSitioUseCase(sitioRepo, clienteRepo, activarClienteUC, CLIENTE_DEMO_ID)
 export const capturarLeadDemoUC = new CapturarLeadDemoUseCase(sesionRepo, sitioRepo, clienteRepo, CLIENTE_DEMO_ID)
+export const obtenerMomento2UC = new ObtenerMomento2UseCase(sesionRepo, sitioRepo, CLIENTE_DEMO_ID)
+export const guardarTareaMomento2UC = new GuardarTareaMomento2UseCase(sesionRepo, sitioRepo, CLIENTE_DEMO_ID)
 export const subirImagenSitioUC = new SubirImagenSitioUseCase(sitioRepo, almacenamientoArchivosDiferido)

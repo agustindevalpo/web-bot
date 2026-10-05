@@ -144,10 +144,14 @@ RESTAURANTE, PORTFOLIO y TIENDA siguen con el diseño anterior y no muestran el 
   container pero ninguna ruta los consume (verificado por grep).
 - Términos y condiciones por cliente (si un cliente activa Webpay o Mercado Pago): no
   existen; Bloques solo muestra razón social y RUT en el footer (T7).
-- Captura de contenido adicional (momento 2, D-36): ningún flujo llena los campos nuevos
-  de Bloques (precios, horarios, partes de Nosotros, autor de la cita, razón social y
-  RUT); hoy solo se cargan a mano en el editor JSON de `/admin`, igual que logo y fotos
-  (D-42). El chat sigue con sus 8 preguntas y el cliente no sube nada él mismo.
+- Captura de contenido adicional (momento 2, D-36): en producción ningún flujo llena los
+  campos nuevos de Bloques (precios, horarios, partes de Nosotros, autor de la cita, razón
+  social y RUT); solo se cargan a mano en el editor JSON de `/admin`, igual que logo y
+  fotos (D-42), y el chat sigue con sus 8 preguntas. **En `develop`, sin release
+  (PRs #65–#72):** chat de 6 preguntas en Bloques, paso de datos con WhatsApp, reveal
+  con avance (35 % → techo 80 %), momento 2 en `/chat/completar`, `/gracias` (URL de
+  retorno ya configurada en Mercado Pago, da 404 hasta el release) y campos "Razón
+  social" y "RUT" en `/admin`. El cliente sigue sin subir archivos él mismo.
 
 ## 5. Bloqueado, y en qué exactamente
 
@@ -203,8 +207,11 @@ No existe un script `test` a secas.
 - `npm run db:seed-demo` es precondición de arranque: sin el `Cliente` demo compartido,
   `POST /api/chat/lead` cae con `P2003` en `Sitio_clienteId_fkey` y devuelve un 500 opaco.
 - `https://devalpo.cl` **no es WebBot**, es el WordPress de Bluehost: responde 200 en `/`
-  y 404 en `/chat`, y se lee como app rota. El origen real es
-  `web-bot-production-d190.up.railway.app` o cualquier `*.sitios.devalpo.cl`.
+  y 404 en `/chat`, y se lee como app rota. La app (chat y `/admin`) vive en
+  `https://webbot.devalpo.cl` (también responde en `web-bot-production-d190.up.railway.app`);
+  `*.sitios.devalpo.cl` son sitios de clientes. La app reconoce un solo host propio
+  (`NEXT_PUBLIC_APP_DOMAIN`, `src/proxy.ts`): cualquier otro se enruta como sitio de cliente,
+  así que `panel.sitios.devalpo.cl` ya no es el panel.
 - El SMTP de Gmail está bloqueado en el egress de Railway (puertos 465 y 587); por eso
   producción usa Resend por HTTP.
 - El túnel SSH de Railway (`railway connect Postgres --tunnel-only`) no funciona en
