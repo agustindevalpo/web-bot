@@ -58,7 +58,7 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   limits and defensive merge, `revalidatePath` + iframe reload, "Así quedó", summary with antesala, skip
   (`momento2Omitidas`), closed and expired states. May split in two PRs.
 - [x] **T6 — `/gracias` (G1).** Static page.
-- [ ] **T7 — Admin fields for razón social and RUT (C5).** Optional; only if Agustín prioritizes it.
+- [x] **T7 — Admin fields for razón social and RUT (C5).** Prioritized by Agustín on 2026-10-05.
 
 ## Progress
 
@@ -129,6 +129,18 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   Checks: tsc clean · eslint 0 errors · 1364/1364 · build OK · Chrome 1280px and 390px with Mercado Pago
   query params appended (not echoed). Production needs the release to `main` before the MP return URL works.
 
+- 2026-10-05 · T6 merged: PR #71 → `569715f`.
+- 2026-10-05 · T7 done (delegated writer, sonnet; trigger: 2+ non-trivial files). Commit `e24f89e`: "Datos
+  legales" section in `/admin/sitios/[id]` writing `configJson.legal = {razonSocial, rut}` (the key the
+  Bloques footer already reads); RUT módulo 11, stored as `77.119.936-4`; both or neither; server-side
+  validation in `ActualizarDatosLegalesSitio`. Obsolete `logo` comment in `SiteConfigDTO.ts` fixed (C5).
+  Checks: tsc clean · eslint 0 errors · 1387/1387 · build OK · Chrome: with `legal` set in the local DB the
+  site footer reads "© 2026 Peluquería Luz SpA · RUT 77.119.936-4". The `/admin` form itself was not
+  exercised in the browser: logging in needs the real `ADMIN_SECRET`. ESTADO updated for the develop state.
+
 ## Next step
 
-T7.
+All tasks done on `develop`. Release to `main` only when Agustín asks; then regenerate ESTADO and add the
+BITACORA entry. Follow-ups outside this plan: `/chat` reload mid-flow desyncs UI and server step; real-mode
+`ClaudeChatService` prompt still has 8 questions; a returning Cliente keeps its old phone; momento 2 saves
+have no locking.

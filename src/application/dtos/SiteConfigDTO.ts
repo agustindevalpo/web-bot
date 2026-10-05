@@ -69,10 +69,9 @@ export interface SiteConfigDTO {
   // el logo, ocupa el mismo espacio"). Mismo patrón aditivo-opcional que
   // `destacados`: cuando el campo no viene, el header sigue mostrando el
   // monograma derivado de `nombre` (`shared/iniciales.ts` +
-  // `shared/Monograma.tsx`) — nunca un hueco ni un ícono roto. A propósito,
-  // NINGÚN productor lo completa todavía (no hay flujo de subida de
-  // archivos en el chat ni en `/admin`): nace siempre ausente hasta que esa
-  // superficie exista.
+  // `shared/Monograma.tsx`) — nunca un hueco ni un ícono roto. Lo completa
+  // la subida de imágenes de `/admin` (`SubirImagenSitioUseCase`); el chat
+  // no lo produce.
   logo?: string
   // Ancho/alto intrínsecos del logo en píxeles, leídos de la cabecera de la
   // imagen al subirla (`SubirImagenSitioUseCase`). Campo paralelo para que
@@ -89,8 +88,10 @@ export interface SiteConfigDTO {
   // Autor de la cita `highlight` (C3, 00-DECISIONES-TRANSVERSALES.md). Sin
   // `nombre` no se muestra atribución.
   highlightAutor?: { nombre: string; cargo?: string }
-  // Datos legales para el footer (T7): solo se muestran con razón social Y
-  // RUT; nunca medio RUT.
+  // Datos legales para el footer: solo se muestran con razón social Y RUT;
+  // nunca medio RUT. Se editan en `/admin` (sección "Datos legales",
+  // `ActualizarDatosLegalesSitioUseCase`), que valida el RUT y guarda ambos o
+  // ninguno; el chat no los produce.
   legal?: { razonSocial: string; rut: string }
   // Horarios para la banda de datos y el contacto (C1/T9). El tope de la
   // banda (3) es decisión de la plantilla, no del DTO.

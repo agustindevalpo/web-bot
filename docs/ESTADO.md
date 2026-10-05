@@ -144,10 +144,14 @@ RESTAURANTE, PORTFOLIO y TIENDA siguen con el diseño anterior y no muestran el 
   container pero ninguna ruta los consume (verificado por grep).
 - Términos y condiciones por cliente (si un cliente activa Webpay o Mercado Pago): no
   existen; Bloques solo muestra razón social y RUT en el footer (T7).
-- Captura de contenido adicional (momento 2, D-36): ningún flujo llena los campos nuevos
-  de Bloques (precios, horarios, partes de Nosotros, autor de la cita, razón social y
-  RUT); hoy solo se cargan a mano en el editor JSON de `/admin`, igual que logo y fotos
-  (D-42). El chat sigue con sus 8 preguntas y el cliente no sube nada él mismo.
+- Captura de contenido adicional (momento 2, D-36): en producción ningún flujo llena los
+  campos nuevos de Bloques (precios, horarios, partes de Nosotros, autor de la cita, razón
+  social y RUT); solo se cargan a mano en el editor JSON de `/admin`, igual que logo y
+  fotos (D-42), y el chat sigue con sus 8 preguntas. **En `develop`, sin release
+  (PRs #65–#72):** chat de 6 preguntas en Bloques, paso de datos con WhatsApp, reveal
+  con avance (35 % → techo 80 %), momento 2 en `/chat/completar`, `/gracias` (URL de
+  retorno ya configurada en Mercado Pago, da 404 hasta el release) y campos "Razón
+  social" y "RUT" en `/admin`. El cliente sigue sin subir archivos él mismo.
 
 ## 5. Bloqueado, y en qué exactamente
 
