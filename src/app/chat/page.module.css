@@ -141,6 +141,8 @@
 
 .activa {
   margin-top: 12px;
+  /* Deja libre el header fijo de 52px cuando se alinea al comienzo. */
+  scroll-margin-top: 68px;
 }
 
 .rotulo {

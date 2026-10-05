@@ -110,7 +110,7 @@ export function BurbujaAsistente({
   const compactas = opcionesCompactas(opciones)
 
   return (
-    <section className={styles.activa}>
+    <section className={styles.activa} data-pregunta-activa>
       {numero !== null && (
         <p className={styles.rotulo}>
           Pregunta {numero} de {TOTAL_PREGUNTAS}
@@ -239,8 +239,16 @@ export default function ChatWidget() {
     // se desplaza, dentro de su contenedor.
     const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const esEscritorio = window.matchMedia('(min-width: 768px)').matches
+    const behavior = sinMovimiento ? 'auto' : 'smooth'
+    // En móvil, una pregunta con muchas opciones (2b) es más alta que la
+    // pantalla: se alinea su comienzo para que el enunciado no quede oculto.
+    const activa = esEscritorio ? null : document.querySelector('[data-pregunta-activa]')
+    if (activa) {
+      activa.scrollIntoView({ behavior, block: 'start' })
+      return
+    }
     const destino = esEscritorio && barraRef.current ? barraRef.current : finRef.current
-    destino?.scrollIntoView({ behavior: sinMovimiento ? 'auto' : 'smooth', block: 'end' })
+    destino?.scrollIntoView({ behavior, block: 'end' })
   }, [mensajes, enviando, falloEnvio, limite])
 
   // Después de responder (o de tocar una sugerencia) el foco vuelve al campo,
