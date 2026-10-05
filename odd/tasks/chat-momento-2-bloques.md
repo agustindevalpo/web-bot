@@ -54,7 +54,7 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
 - [x] **T4 — Progress model + reveal (R2, R3, E1).** `calcularAvance` and `TAREAS_POR_PLANTILLA` (pure,
   application layer, tested with the designer's weights); reveal with preview, progress card and payment
   box (D-39 notice verbatim before the button); desktop scaled iframe.
-- [ ] **T5 — Momento 2 (`/chat/completar`, M1–M5, E2).** One task per screen, save action with length
+- [x] **T5 — Momento 2 (`/chat/completar`, M1–M5, E2).** One task per screen, save action with length
   limits and defensive merge, `revalidatePath` + iframe reload, "Así quedó", summary with antesala, skip
   (`momento2Omitidas`), closed and expired states. May split in two PRs.
 - [ ] **T6 — `/gracias` (G1).** Static page. Blocked on P1.
@@ -108,6 +108,21 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   Testing note: the Chrome extension's type + Enter reloaded `/chat` on a maximized window; driving the
   form with JS worked, and the app's submit handler is fine.
 
+- 2026-10-05 · T4 merged: PR #68 → `0000f51`.
+- 2026-10-05 · T5 done (delegated writer, sonnet; trigger: 2+ non-trivial files), two PRs:
+  part 1 `dbdd61b` (validation, defensive merge, skip, session → site, closed/expired, server actions) →
+  PR #69 → `14b0414`; part 2 `4290c71` (route and screens M1–M5, E2, `/chat?vista=sitio` returns to the
+  reveal, which makes `/chat` dynamic). Closed = site no longer owned by `CLIENTE_DEMO_ID` (payment confirmed).
+  Checks: tsc clean · eslint 0 errors · 1361/1361 · build OK · Chrome end to end on a real local session:
+  390px (iframe) chat → lead → reveal → "Completar mi sitio" → services saved (DB:
+  `[{nombre: "Corte de pelo", descripcion: …, precioDesde: "$12.000"}, "Tintura"]`, 35 → 50 %) → three skips →
+  summary with "Lo omitiste · suma 10 %" → "Volver a mi sitio" shows the reveal at 50 %; 1280px summary and a
+  frase save (→ 60 %). Closed state covered by unit tests only.
+  Writer's choices to review: horarios anchor is `#contacto` (templates have no `#horarios`); three strings
+  not in the spec (half-filled horario row, "Guardado · tu sitio está al {p} %" when it does not rise, generic
+  save error reuses the lead one); E2 WhatsApp opens without a prefilled message; SERVICIOS antesala shows 4
+  zones (spec says 3 but lists 4). Saves are read-modify-write without locking (two tabs can overwrite).
+
 ## Next step
 
-T5.
+T6.
