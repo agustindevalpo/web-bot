@@ -158,10 +158,10 @@ describe('DemoCTA — render (R10/S10.1)', () => {
       }
     })
 
-    it('al 80 % compacta la tarjeta: frase de logro y "Editar respuestas", sin botón de completar', () => {
+    it('al 80 % el titular pasa a la frase de logro, con "Editar respuestas" y sin botón de completar', () => {
       const markup = render({ avance: 80 })
-      expect(markup).toContain('Tu sitio está al 80 %')
-      expect(markup).toContain('Completaste todo lo que se puede antes del pago.')
+      expect(markup).toMatch(/<h2 [^>]*>Completaste todo lo que se puede antes del pago\.<\/h2>/)
+      expect(markup).not.toContain('Tu sitio está al 80 %')
       expect(markup).toMatch(/<a [^>]*href="\/chat\/completar"[^>]*>Editar respuestas<\/a>/)
       expect(markup).not.toContain('Completar mi sitio')
       expect(markup).not.toContain('Con dos minutos más')
