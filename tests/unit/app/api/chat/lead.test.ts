@@ -38,15 +38,15 @@ beforeEach(() => {
 })
 
 describe('POST /api/chat/lead', () => {
-  it('200: devuelve subdominioDemo en el happy path', async () => {
-    mockExecute.mockResolvedValue({ subdominioDemo: 'demo-abc12345' })
+  it('200: devuelve subdominioDemo, nombre, plantilla y avance en el happy path', async () => {
+    mockExecute.mockResolvedValue({ subdominioDemo: 'demo-abc12345', nombre: 'Peluquería Ana', template: 'SERVICIOS', avance: 35 })
 
     const req = buildRequest({ sessionId: 'sess-1', nombre: 'Ana', email: 'ana@correo.cl' })
     const res = await POST(req)
     const body = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body).toEqual({ subdominioDemo: 'demo-abc12345' })
+    expect(body).toEqual({ subdominioDemo: 'demo-abc12345', nombre: 'Peluquería Ana', template: 'SERVICIOS', avance: 35 })
   })
 
   it('reenvía telefono al caso de uso y no lo inventa si falta', async () => {

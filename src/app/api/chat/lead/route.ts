@@ -23,7 +23,12 @@ export async function POST(req: NextRequest) {
 
     const resultado = await capturarLeadDemoUC.execute({ sessionId, nombre, email, telefono, esDemo })
 
-    return NextResponse.json({ subdominioDemo: resultado.subdominioDemo })
+    return NextResponse.json({
+      subdominioDemo: resultado.subdominioDemo,
+      nombre: resultado.nombre,
+      template: resultado.template,
+      avance: resultado.avance,
+    })
   } catch (error) {
     if (error instanceof LeadInvalidoException) {
       return NextResponse.json({ error: 'datos_invalidos' }, { status: 400 })

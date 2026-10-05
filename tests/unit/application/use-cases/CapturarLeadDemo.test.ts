@@ -2,6 +2,8 @@ import { CapturarLeadDemoUseCase } from '@/application/use-cases/CapturarLeadDem
 import { MockSesionRepository } from '../../../mocks/MockSesionRepository'
 import { MockSitioRepository } from '../../../mocks/MockSitioRepository'
 import { MockClienteRepository } from '../../../mocks/MockClienteRepository'
+import { Sitio } from '@/domain/entities/Sitio'
+import { Template } from '@/domain/value-objects/Template'
 import { Sesion } from '@/domain/entities/Sesion'
 import { Cliente } from '@/domain/entities/Cliente'
 import { Plan } from '@/domain/value-objects/Plan'
@@ -63,6 +65,52 @@ describe('CapturarLeadDemoUseCase', () => {
     const sitio = await sitioRepo.findBySubdominio('demo-sess-dem')
     expect(sitio).not.toBeNull()
     expect(sitio!.clienteId).toBe(CLIENTE_DEMO_ID)
+  })
+
+  it('devuelve lo que el reveal necesita: nombre del negocio, plantilla y avance en la base de 35 %', async () => {
+    // El guion nuevo deja `highlight` vacío: la frase del cliente llega en el momento 2.
+    const sesion = sesionCompletada('sess-demo-1')
+    ;(sesion.datosJson as Record<string, unknown>).highlight = ''
+    sesionRepo = new MockSesionRepository([sesion])
+    useCase = new CapturarLeadDemoUseCase(sesionRepo, sitioRepo, clienteRepo, CLIENTE_DEMO_ID)
+
+    const resultado = await useCase.execute({
+      sessionId: 'sess-demo-1',
+      nombre: 'Ana Pérez',
+      email: 'ana@correo.cl',
+      telefono: '12345678',
+      esDemo: true,
+    })
+
+    expect(resultado).toEqual({
+      subdominioDemo: 'demo-sess-dem',
+      nombre: 'Panadería El Trigal',
+      template: 'RESTAURANTE',
+      avance: 35,
+    })
+  })
+
+  it('resubmit: el avance sale del sitio guardado, que puede traer respuestas del momento 2', async () => {
+    sesionRepo = new MockSesionRepository([sesionCompletada('sess-demo-1', 'cliente-ya-capturado')])
+    sitioRepo = new MockSitioRepository([
+      new Sitio('sitio-1', CLIENTE_DEMO_ID, 'demo-sess-dem', Template.SERVICIOS, {
+        nombre: 'Panadería El Trigal',
+        template: 'SERVICIOS',
+        highlight: 'Muy buen servicio',
+      }),
+    ])
+    useCase = new CapturarLeadDemoUseCase(sesionRepo, sitioRepo, clienteRepo, CLIENTE_DEMO_ID)
+
+    const resultado = await useCase.execute({
+      sessionId: 'sess-demo-1',
+      nombre: 'Ana',
+      email: 'ana@correo.cl',
+      telefono: '12345678',
+      esDemo: true,
+    })
+
+    expect(resultado.avance).toBe(45)
+    expect(resultado.template).toBe('SERVICIOS')
   })
 
   it('crea un Cliente nuevo con activo:false para el lead', async () => {

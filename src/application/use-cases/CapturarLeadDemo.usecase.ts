@@ -7,6 +7,7 @@ import { Plan } from '@/domain/value-objects/Plan'
 import type { Template } from '@/domain/value-objects/Template'
 import { normalizarEmail } from '@/application/shared/email'
 import { telefonoLeadANormalizado } from '@/application/shared/datosLead'
+import { calcularAvance } from '@/application/shared/avanceSitio'
 import { subdominioDemoDe } from '@/application/shared/subdominioDemo'
 import { LeadInvalidoException } from '@/domain/exceptions/LeadInvalidoException'
 import { SesionNoEncontradaException } from '@/domain/exceptions/SesionNoEncontradaException'
@@ -27,6 +28,11 @@ export interface CapturarLeadDemoInput {
 
 export interface ResultadoCapturarLeadDemo {
   subdominioDemo: string
+  // Lo que el reveal necesita del sitio sin recibir el configJson completo:
+  // el nombre del negocio, la plantilla y el avance ya calculado (T4).
+  nombre: string
+  template: string | null
+  avance: number
 }
 
 export class CapturarLeadDemoUseCase {
@@ -75,7 +81,10 @@ export class CapturarLeadDemoUseCase {
     // reescribir con datos distintos — un reenvío con otro email no puede
     // re-atribuir la sesión en silencio.
     if (sesion.clienteId) {
-      return { subdominioDemo }
+      // El sitio puede haber ganado respuestas del momento 2 desde el primer
+      // envío: el avance sale de lo que está guardado, no de la sesión.
+      const guardado = await this.sitioRepo.findBySubdominio(subdominioDemo)
+      return resultadoDelSitio(subdominioDemo, guardado?.configJson ?? (sesion.datosJson as Record<string, unknown>))
     }
 
     const cliente = await this.clienteRepo.findOrCreateByEmail(
@@ -108,7 +117,17 @@ export class CapturarLeadDemoUseCase {
 
     await this.sesionRepo.update(sesion.sessionId, { clienteId: cliente.id })
 
-    return { subdominioDemo }
+    return resultadoDelSitio(subdominioDemo, datosJson)
+  }
+}
+
+function resultadoDelSitio(subdominioDemo: string, config: Record<string, unknown>): ResultadoCapturarLeadDemo {
+  const template = typeof config.template === 'string' ? config.template : null
+  return {
+    subdominioDemo,
+    nombre: typeof config.nombre === 'string' ? config.nombre : '',
+    template,
+    avance: calcularAvance(config, template),
   }
 }
 
