@@ -1280,3 +1280,60 @@ que volver a desplegar. Los archivos reemplazados quedan huérfanos en el bucket
 `src/infrastructure/storage/R2AlmacenamientoArchivos.ts`; `next.config.ts`
 (`remotePatternsImagenes`); commits `8ecc8ad`, `6586ba2`, `5caa784`, `a02166c`; Engram
 `odd/subida-imagenes-admin/decision-storage`.
+
+---
+
+## D-43 — La dirección del local se pide en el paso de datos del chat, opcional y para todas las plantillas
+
+**Fecha:** 2026-10-17 · **Estado:** vigente
+**Contexto:** el DTO no tenía dirección, así que ningún sitio podía mostrar dónde está el
+negocio; RESTAURANTE la necesita en el hero y en Reservas (04-RESTAURANTE, P1).
+**Decisión (Agustín):** `contacto.direccion?` (una línea, máximo 60 caracteres, recortada;
+vacía equivale a ausente) se captura en el formulario de datos del chat (nombre, correo,
+teléfono), antes del pago, como campo opcional. No se pide en el momento 2 ni es solo del
+admin. Cualquier plantilla con tarjetas de contacto la muestra.
+**Por qué:** es el único punto donde el visitante aún está en el chat y ya entrega datos de
+contacto; ponerla obligatoria frenaría el lead, y dejarla en el admin la volvería un dato
+que nadie completa.
+**Consecuencia:** va dentro de `configJson.contacto` (columna JSON, sin migración) y nunca
+pisa un valor ya existente. Un sitio sin ella cae a `ciudad`.
+**Evidencia:** `src/application/dtos/SiteConfigDTO.ts:41`;
+`src/application/shared/datosLead.ts:39-46`; commit `e372cfa`; Engram
+`odd/restaurante-bloques/decisiones`.
+
+---
+
+## D-44 — RESTAURANTE nunca usa una foto de banco en el hero
+
+**Fecha:** 2026-10-17 · **Estado:** vigente
+**Contexto:** T9 permite una foto de banco en `imagenes[0]` como atmósfera, pero en un
+restaurante una foto genérica muestra platos o un comedor que el visitante leerá como los de
+este local (04-RESTAURANTE, P2).
+**Decisión (Agustín):** el hero de RESTAURANTE usa foto solo si `imagenes[0]` es propia
+(servida por nuestro bucket R2, D-42). Si no, el hero es el tipográfico a ancho completo con
+la fila de datos reales (Dónde, Reservas, La carta).
+**Por qué:** el encargo prohíbe simular lo que el local no mostró; todo sitio recién
+entregado no tiene fotos, así que el caso sin foto es el normal y debe verse intencional.
+**Consecuencia:** "El local" tampoco usa fotos de banco y exige 2 o más fotos propias.
+**Evidencia:** `src/components/templates/restaurante/sections.ts:70-77`
+(`fotoHeroPropia`); `src/components/templates/restaurante/HeroRestaurante.tsx:33-47`; commit
+`0abfb51`; Engram `odd/restaurante-bloques/decisiones`.
+
+---
+
+## D-45 — Panadería usa la plantilla RESTAURANTE con un formulario de encargo
+
+**Fecha:** 2026-10-17 · **Estado:** vigente
+**Contexto:** `panaderia` comparte plantilla con `restaurante`, pero "Reservar mesa" y el
+selector de personas no tienen sentido allí (04-RESTAURANTE, P3).
+**Decisión (Agustín):** opción (a). Para `panaderia` el formulario es de encargo ("Tu
+nombre", "¿Qué quieres encargar?", "¿Para cuándo?"), los textos pasan a "Encargar por
+WhatsApp" / "Haz tu encargo" y el mensaje a "Hola, soy {nombre}. Quiero encargar {pedido} para
+{cuándo}." Header y hero siguen el mismo verbo. Se descartó (b), mover `panaderia` a TIENDA,
+porque esa plantilla no existe en Bloques.
+**Por qué:** es un cambio de textos y de un campo, no de plantilla.
+**Consecuencia:** todo el texto que varía por rubro vive en un solo archivo; agregar otro
+rubro con vocabulario propio es agregar un objeto allí.
+**Evidencia:** `src/components/templates/restaurante/copy.ts:48-73` (`ENCARGO`,
+`esPanaderia`, `copyReserva`); commits `0abfb51`, `248d0a5`; Engram
+`odd/restaurante-bloques/decisiones`.

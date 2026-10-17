@@ -27,6 +27,9 @@ const CLASE_TRAMO: Record<TramoDisplay, string> = {
   chico: heroStyles.tramoChico,
 }
 
+// 04-RESTAURANTE: foto de 680px en escritorio y 220px en móvil.
+const ALTO_FOTO = { escritorio: 680, movil: 220 }
+
 export default function HeroRestaurante({ eyebrow, nombre, descripcion, foto, datos, primaria, secundaria }: HeroRestauranteProps) {
   if (foto) {
     return (
@@ -37,6 +40,7 @@ export default function HeroRestaurante({ eyebrow, nombre, descripcion, foto, da
         foto={foto}
         ctaPrimario={primaria}
         ctaSecundario={secundaria}
+        altoFoto={ALTO_FOTO}
       />
     )
   }

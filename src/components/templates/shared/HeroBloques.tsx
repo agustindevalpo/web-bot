@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import Image from 'next/image'
 import { estiloCascada } from './navegacion'
 import { tramoDisplay, type TramoDisplay } from './displayHero'
@@ -16,6 +17,9 @@ export type HeroBloquesProps = {
   foto: string | null
   ctaPrimario: Cta | null
   ctaSecundario: Cta | null
+  // Alto de la foto en px. Por defecto 720 / 280 (LANDING, SERVICIOS); RESTAURANTE
+  // usa 680 / 220 (04-RESTAURANTE).
+  altoFoto?: { escritorio: number; movil: number }
 }
 
 const CLASE_TRAMO: Record<TramoDisplay, string> = {
@@ -24,7 +28,7 @@ const CLASE_TRAMO: Record<TramoDisplay, string> = {
   chico: styles.tramoChico,
 }
 
-export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPrimario, ctaSecundario }: HeroBloquesProps) {
+export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPrimario, ctaSecundario, altoFoto }: HeroBloquesProps) {
   const { tramo } = tramoDisplay(nombre)
 
   return (
@@ -62,7 +66,10 @@ export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPri
       </div>
 
       {foto && (
-        <div className={styles.inicioFoto}>
+        <div
+          className={styles.inicioFoto}
+          style={altoFoto ? ({ '--alto-foto': `${altoFoto.escritorio}px`, '--alto-foto-movil': `${altoFoto.movil}px` } as CSSProperties) : undefined}
+        >
           <Image src={foto} alt={nombre} fill sizes="(max-width: 767px) 100vw, 50vw" className={styles.fotoImg} priority />
         </div>
       )}

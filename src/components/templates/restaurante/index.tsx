@@ -118,7 +118,7 @@ export default async function Restaurante({ config }: TemplateProps) {
           tituloId={ID_TITULO_RESERVAS}
           parrafo={parrafo}
           formulario={formulario}
-          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} direccion={contacto.direccion} />}
+          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} direccion={contacto.direccion} variante="reserva" />}
         />
       ),
     },
@@ -156,7 +156,7 @@ export default async function Restaurante({ config }: TemplateProps) {
     </a>
   )
 
-  const pie = <FooterBloques config={config} secciones={secciones.map(({ id, etiqueta }) => ({ id, etiqueta }))} anio={new Date().getFullYear()} />
+  const pie = <FooterBloques config={config} secciones={secciones.map(({ id, etiqueta }) => ({ id, etiqueta }))} anio={new Date().getFullYear()} glosaConPreposicion />
 
   return (
     <div data-template="RESTAURANTE" style={estiloRaiz}>
