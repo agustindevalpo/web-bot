@@ -93,6 +93,8 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
   - FormReserva at 929px: errors only after the first submit, focus on the first invalid field, errors clear per field, message "Hola, soy Ana. Quiero reservar una mesa para 3 personas, sábado a las 21:00." (trimmed), status box shown, blocked window shows "Abrir WhatsApp" at 44px, editing hides the box.
   - Not covered: the photo hero, "El local" and the PDF link (they need R2 configured locally), and a real upload to R2.
 
+- 2026-10-17: stacked PRs opened, merge in order: #73 handoff (`feat/restaurante-01-handoff` → develop), #74 address, #75 carta model, #76 template, #77 FormReserva, #78 polish, #79 carta PDF (each targets the previous branch). Over 400 lines with `size:exception` recommended: #73 (imported spec + prototype), #76 (template rewrite, 2293), #77 (637), #79 (520).
+
 ## Next step
 
-PRs to develop (one per task, same strategy as S2). Test the photo hero, "El local" and the PDF upload against R2. Record the carta-PDF decision in `docs/DECISIONES.md`. Regenerate `docs/ESTADO.md` once RESTAURANTE is in develop.
+Merge #73–#79 in order, retargeting each to develop after its parent merges. Test the photo hero, "El local" and the PDF upload against R2. Record the carta-PDF decision in `docs/DECISIONES.md`. Regenerate `docs/ESTADO.md` once RESTAURANTE is in develop.
