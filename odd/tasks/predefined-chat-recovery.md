@@ -37,8 +37,8 @@ Preserve completed-demo rotation on ordinary `/chat` visits and the existing `?v
   - Implementation: server-side cookie lookup restores only unfinished predefined/demo sessions; serializable history, identity, service chips, and extraction retry initialize the widget. Real-mode recovery remains out of scope.
   - Automated evidence: focused recovery/page/API tests 3 suites / 26 tests passed; full unit suite 95 suites / 1396 tests passed; TypeScript passed; ESLint 0 errors / 22 existing warnings; production build passed after an approved retry to download Google Fonts (initial sandbox run failed to fetch Fredoka/Montserrat).
   - Browser acceptance passed on disposable localhost: at 390px, reload at question 3 restored history/current question and the next answer advanced; at 1280px, reload at question 4 restored service chips and subsequent answers completed the six-question flow and lead/reveal. The explicit `?vista=sitio` return preserved the reveal. An ordinary `/chat` visit after completion started a distinct new demo, whose question 2 also survived reload. Parent structural and independent verification accepted.
-  - Commit: R1 work-unit commit being recorded; exact identity added in the final closure metadata update. Authored source/test lines: 193 (35 tracked additions/deletions + 158 new lines), documentation additional.
-- [ ] **R2 — Validate existing legal form and closed momento 2 locally.** Route: delegated; trigger: local runtime and browser verification.
+  - Commit: `c8b8531` (`fix(chat): recover unfinished predefined conversations`). Authored source/test lines: 193 (35 tracked additions/deletions + 158 new lines), documentation additional.
+- [x] **R2 — Validate existing legal form and closed momento 2 locally.** Route: delegated; trigger: local runtime and browser verification.
   - Use disposable local Postgres data and synthetic local `ADMIN_SECRET`/`AUTH_SECRET` values; never inspect or reuse real secrets or authenticated remote sessions.
   - Legal form: reject incomplete pairs and invalid RUT; save a valid pair, verify persistence and footer, and verify clearing both fields removes the legal data.
   - With the same disposable chat session, confirm payment only through the local app/data flow, then verify `/chat/completar` is closed and rejects further saves.
@@ -46,7 +46,7 @@ Preserve completed-demo rotation on ordinary `/chat` visits and the existing `?v
   - Check browser presentation at 390px and 1280px. Report unavailable environment or browser access as blocked/pending, not completed.
   - Browser evidence: synthetic admin login succeeded; incomplete legal pair and invalid RUT rejected; valid pair saved as `77.119.936-4`, survived reload, and appeared in the site footer; clearing both removed `legal` and restored the business-name footer. Legal layout inspected at actual 390px with no horizontal overflow and at 1280px.
   - Closed-state evidence: a disposable local ownership fixture change (no payment or notification call) made a stale momento 2 save return the closed screen. Reload confirmed the closed screen at actual 390px and 1280px; local DB readback proved services remained unchanged. This verifies the ownership-based closing contract, not the payment-provider flow.
-  - Commit: pending parent verification. Authored source lines: 0; documentation only. Runtime acceptance observed; checkbox awaits work-unit commit evidence.
+  - Commit: R2 documentation work-unit commit being recorded; exact identity added in the final closure metadata update. Authored source lines: 0; documentation only. Runtime acceptance and parent verification accepted.
 
 ## Verification
 
@@ -75,7 +75,7 @@ R1 rollback boundary: remove only the new chat recovery behavior and its regress
 
 ## Progress and next step
 
-- 2026-10-17: R1 automated/browser acceptance and parent independent verification accepted; R1 work-unit closure in progress. R2 runtime evidence accepted, documentation work-unit closure next. Existing untracked `.claude/` preserved.
+- 2026-10-17: R1 closed in `c8b8531` after automated/browser acceptance and parent independent verification. R2 runtime evidence and parent verification accepted; documentation work-unit closure in progress. Existing untracked `.claude/` preserved.
 - Runtime isolation: new Docker container `webbot-recovery-check-20261017`, database `webbot_recovery` bound only to `127.0.0.1:5437`; three migrations applied and demo seed run. Next served `localhost:3000` with synthetic `ADMIN_SECRET` and `AUTH_SECRET`, local database/app URLs, and explicitly empty external integration keys in the Node child environment. No `.env` contents read, no Claude/provider/payment calls, no production access. Dev font fetches failed and used fallback fonts; production build had passed with downloaded fonts, so local browser checks validate behavior/layout but not final font fidelity.
 - Local DB readback: two separate sessions (completed original with six answers; new unfinished session with one answer), closed site ownership, no legal key after clear, unchanged services after rejected stale save.
 - Cleanup: local Next process stopped, test browser tabs closed and temporary viewport reset. Disposable Docker container stopped, retained with its test data for reproducibility. Optional final cleanup: `docker rm -v webbot-recovery-check-20261017` removes only that disposable container/data. Do not touch pre-existing containers.
