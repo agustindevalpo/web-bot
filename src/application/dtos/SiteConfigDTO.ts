@@ -98,4 +98,9 @@ export interface SiteConfigDTO {
   // Horarios para la banda de datos y el contacto (C1/T9). El tope de la
   // banda (3) es decisión de la plantilla, no del DTO.
   horarios?: { dia: string; rango: string }[]
+  // Carta de RESTAURANTE (handoff S4, 04-RESTAURANTE.md "Reglas de `menu`"):
+  // hasta 8 platos y 3 categorías, `precio` texto libre que se imprime tal
+  // cual. Con al menos un plato reemplaza a `servicios[]` en la carta. Se
+  // normaliza con `normalizarCarta` (`application/shared/carta.ts`).
+  menu?: { categoria?: string; items: { nombre: string; precio?: string }[] }[]
 }
