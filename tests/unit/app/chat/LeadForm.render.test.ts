@@ -12,11 +12,13 @@ function propsBase() {
     nombre: '',
     email: '',
     telefono: '',
+    direccion: '',
     enviando: false,
     error: null as string | null,
     onNombreChange: () => {},
     onEmailChange: () => {},
     onTelefonoChange: () => {},
+    onDireccionChange: () => {},
     onSubmit: () => {},
   }
 }
@@ -42,6 +44,24 @@ describe('LeadForm — render', () => {
     expect(markup).toContain('+56 9')
     expect(markup).toContain('inputMode="numeric"')
     expect(markup).toContain('autoComplete="tel-national"')
+  })
+
+  it('la dirección es opcional: rótulo, placeholder, autocompletado y tope de 60', () => {
+    const markup = renderToStaticMarkup(React.createElement(LeadForm, propsBase()))
+
+    expect(markup).toContain('Dirección de tu local (opcional)')
+    expect(markup).toContain('placeholder="Por ejemplo: Av. Libertad 1200, Viña del Mar"')
+    expect(markup).toContain('autoComplete="street-address"')
+    expect(markup).toContain('maxLength="60"')
+    expect(markup).not.toMatch(/<input[^>]*street-address[^>]*required/)
+  })
+
+  it('refleja la dirección recibida por props', () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(LeadForm, { ...propsBase(), direccion: 'Av. Libertad 1200' }),
+    )
+
+    expect(markup).toContain('value="Av. Libertad 1200"')
   })
 
   it('sin intentos de envío no muestra errores ni marca campos inválidos', () => {

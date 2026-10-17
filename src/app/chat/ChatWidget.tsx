@@ -249,6 +249,7 @@ export default function ChatWidget({ revealInicial }: { revealInicial?: DatosRev
   const [leadNombre, setLeadNombre] = useState('')
   const [leadEmail, setLeadEmail] = useState('')
   const [leadTelefono, setLeadTelefono] = useState('')
+  const [leadDireccion, setLeadDireccion] = useState('')
   const [enviandoLead, setEnviandoLead] = useState(false)
   const [leadError, setLeadError] = useState<string | null>(null)
   const finRef = useRef<HTMLDivElement>(null)
@@ -370,7 +371,7 @@ export default function ChatWidget({ revealInicial }: { revealInicial?: DatosRev
       const res = await fetch('/api/chat/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sessionIdRef.current, nombre, email, telefono: leadTelefono }),
+        body: JSON.stringify({ sessionId: sessionIdRef.current, nombre, email, telefono: leadTelefono, direccion: leadDireccion.trim() }),
       })
 
       const data = await res.json()
@@ -529,11 +530,13 @@ export default function ChatWidget({ revealInicial }: { revealInicial?: DatosRev
               nombre={leadNombre}
               email={leadEmail}
               telefono={leadTelefono}
+              direccion={leadDireccion}
               enviando={enviandoLead}
               error={leadError}
               onNombreChange={setLeadNombre}
               onEmailChange={setLeadEmail}
               onTelefonoChange={setLeadTelefono}
+              onDireccionChange={setLeadDireccion}
               onSubmit={enviarLead}
             />
           )}

@@ -7,13 +7,14 @@ export type ContactoDatosProps = {
   horarios?: Horario[]
   telefono: string | null
   email: string | null
+  direccion?: string | null
 }
 
 // Columna derecha de Contacto (C1, sin mapa). Server Component. Sin horarios
 // ni datos devuelve null: la columna entera desaparece y la sección no queda
 // con un hueco.
-export default function ContactoDatos({ horarios, telefono, email }: ContactoDatosProps) {
-  const vista = datosContactoVista({ horarios, telefono, email })
+export default function ContactoDatos({ horarios, telefono, email, direccion }: ContactoDatosProps) {
+  const vista = datosContactoVista({ horarios, telefono, email, direccion })
   if (vista.horarios.length === 0 && vista.tarjetas.length === 0) return null
 
   return (
@@ -41,12 +42,13 @@ export default function ContactoDatos({ horarios, telefono, email }: ContactoDat
               </>
             )
             const estilo = estiloCascada(2 + indice)
+            const clase = tarjeta.clave === 'direccion' ? `${styles.tarjeta} ${styles.tarjetaAncha}` : styles.tarjeta
             return tarjeta.href ? (
-              <a key={tarjeta.clave} href={tarjeta.href} className={styles.tarjeta} data-dv-anim="up" style={estilo}>
+              <a key={tarjeta.clave} href={tarjeta.href} className={clase} data-dv-anim="up" style={estilo}>
                 {contenido}
               </a>
             ) : (
-              <div key={tarjeta.clave} className={styles.tarjeta} data-dv-anim="up" style={estilo}>
+              <div key={tarjeta.clave} className={clase} data-dv-anim="up" style={estilo}>
                 {contenido}
               </div>
             )

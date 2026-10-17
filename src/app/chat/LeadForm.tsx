@@ -3,7 +3,9 @@
 import { useId, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import {
+  DIRECCION_MAX,
   mensajeErrorCorreo,
+  mensajeErrorDireccion,
   MENSAJES_LEAD,
   normalizarDigitosTelefono,
   telefonoLeadANormalizado,
@@ -17,12 +19,15 @@ interface LeadFormProps {
   email: string
   // Solo los 8 dígitos; el prefijo "+56 9" es fijo y no se edita.
   telefono: string
+  // Opcional: una línea, hasta 60 caracteres.
+  direccion: string
   enviando: boolean
   // Error del envío (red o servidor); los datos escritos se conservan.
   error: string | null
   onNombreChange: (valor: string) => void
   onEmailChange: (valor: string) => void
   onTelefonoChange: (valor: string) => void
+  onDireccionChange: (valor: string) => void
   onSubmit: () => void
 }
 
@@ -36,6 +41,8 @@ function errorDeCampo(campo: Campo, valor: string): string | undefined {
       return mensajeErrorCorreo(valor) ?? undefined
     case 'telefono':
       return telefonoLeadANormalizado(valor) ? undefined : MENSAJES_LEAD.telefono
+    case 'direccion':
+      return mensajeErrorDireccion(valor) ?? undefined
   }
 }
 
@@ -46,11 +53,13 @@ export function LeadForm({
   nombre,
   email,
   telefono,
+  direccion,
   enviando,
   error,
   onNombreChange,
   onEmailChange,
   onTelefonoChange,
+  onDireccionChange,
   onSubmit,
 }: LeadFormProps) {
   const id = useId()
@@ -63,10 +72,13 @@ export function LeadForm({
     errorEmail: `${id}-error-email`,
     errorTelefono: `${id}-error-telefono`,
     ayudaTelefono: `${id}-ayuda-telefono`,
+    direccion: `${id}-direccion`,
+    errorDireccion: `${id}-error-direccion`,
   }
   const nombreRef = useRef<HTMLInputElement>(null)
   const emailRef = useRef<HTMLInputElement>(null)
   const telefonoRef = useRef<HTMLInputElement>(null)
+  const direccionRef = useRef<HTMLInputElement>(null)
   const [intentado, setIntentado] = useState(false)
   const [errores, setErrores] = useState<ErroresLead>({})
 
@@ -79,12 +91,17 @@ export function LeadForm({
     e.preventDefault()
     if (enviando) return
     setIntentado(true)
-    const encontrados = validarDatosLead({ nombre, email, telefono })
+    const encontrados = validarDatosLead({ nombre, email, telefono, direccion })
     setErrores(encontrados)
 
-    const primero = (['nombre', 'email', 'telefono'] as const).find((campo) => encontrados[campo])
+    const primero = (['nombre', 'email', 'telefono', 'direccion'] as const).find((campo) => encontrados[campo])
     if (primero) {
-      const destino = { nombre: nombreRef, email: emailRef, telefono: telefonoRef }[primero]
+      const destino = {
+        nombre: nombreRef,
+        email: emailRef,
+        telefono: telefonoRef,
+        direccion: direccionRef,
+      }[primero]
       destino.current?.focus()
       return
     }
@@ -183,6 +200,32 @@ export function LeadForm({
         <p className={styles.ayuda} id={ids.ayudaTelefono}>
           Es el número que recibe los mensajes de tu sitio. Puedes cambiarlo después.
         </p>
+      </div>
+
+      <div className={styles.campo}>
+        <label className={styles.etiqueta} htmlFor={ids.direccion}>
+          Dirección de tu local (opcional)
+        </label>
+        <input
+          ref={direccionRef}
+          id={ids.direccion}
+          className={`${styles.input} ${errores.direccion ? styles.invalido : ''}`}
+          type="text"
+          autoComplete="street-address"
+          maxLength={DIRECCION_MAX}
+          placeholder="Por ejemplo: Av. Libertad 1200, Viña del Mar"
+          value={direccion}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => onDireccionChange(e.target.value)}
+          onBlur={() => alSalir('direccion', direccion)}
+          disabled={enviando}
+          aria-invalid={errores.direccion ? true : undefined}
+          aria-describedby={descritoPor('direccion', ids.errorDireccion)}
+        />
+        {errores.direccion && (
+          <p className={styles.mensajeError} id={ids.errorDireccion}>
+            {errores.direccion}
+          </p>
+        )}
       </div>
 
       {error && (
