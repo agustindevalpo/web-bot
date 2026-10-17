@@ -43,7 +43,7 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
 
 ## Tasks
 
-- [ ] **R1 — Address in the data step.** `contacto.direccion?` in `SiteConfigDTO` and its validation
+- [x] **R1 — Address in the data step.** `contacto.direccion?` in `SiteConfigDTO` and its validation
   (trimmed, max 60, empty → absent); optional "Dirección de tu local" field in `LeadForm`; the lead route
   persists it into the site config; `ContactoDatos` shows an address card when present (all templates).
   Route: delegated (2+ non-trivial files).
@@ -67,6 +67,8 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
 - 2026-10-17: designer handoff imported (`04-RESTAURANTE.md` + prototype into `handoff_bloques_v2/`);
   P1-P3 resolved with Agustín; branch `feat/restaurante-bloques` from develop `4c4ef02`.
 
+- 2026-10-17: R1 done (`e372cfa`, delegated writer). `contacto.direccion?` in the DTO; `datosLead.ts` trims, empty → absent, max 60; optional LeadForm field after telefono; lead route and use case merge it into `contacto` of the site `configJson` (JSON column, no migration; never overwrites an existing value, no key when blank); `ContactoDatos` shows a full-width "Dirección" card without link. Checks: tsc, eslint (0 errors), test:unit 1406 passed, build OK.
+
 ## Next step
 
-R1.
+R2.

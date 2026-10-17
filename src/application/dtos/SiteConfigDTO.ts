@@ -37,6 +37,8 @@ export interface SiteConfigDTO {
   contacto: {
     telefono: string
     email: string
+    // Una línea, hasta 60 caracteres (se captura opcional en el paso de datos del chat).
+    direccion?: string
     formulario?: { habilitado: boolean; destinatarioEmail?: string }
   }
   redes: {

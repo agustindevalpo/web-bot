@@ -102,7 +102,7 @@ export default async function Servicios({ config }: TemplateProps) {
           titulo="Agenda tu hora"
           parrafo={formulario ? 'Elige el servicio y cuéntanos qué día te acomoda: te respondemos por WhatsApp.' : null}
           formulario={formulario}
-          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} />}
+          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} direccion={contacto.direccion} />}
         />
       ),
     },
