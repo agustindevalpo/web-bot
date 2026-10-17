@@ -59,7 +59,7 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
 - [x] **R4 — FormReserva.** Client form that builds the WhatsApp message, with every state in the spec
   (rest, focus, errors after first submit, sent box, blocked window, no phone → email fallback) and the
   panadería order variant (P3). Route: delegated.
-- [ ] **R5 — Polish and docs.** Spec audit against the prototype, motion contract, dead CSS/exports;
+- [x] **R5 — Polish and docs.** Spec audit against the prototype, motion contract, dead CSS/exports;
   `docs/ESTADO.md` and `docs/DECISIONES.md` (P1-P3). Route: inline or delegated depending on findings.
 
 ## Progress
@@ -75,6 +75,8 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
 
 - 2026-10-17: R4 done (`248d0a5`, delegated writer). Client `restaurante/FormReserva.tsx` (+ CSS module) with pure logic in `reservaLogica.ts` (validation, message, `wa.me` via shared `buildWhatsAppUrlConMensaje`, blocked-window result); validation only after first submit (derived errors, focus to first invalid, `role="alert"`, `aria-invalid/describedby`), sent box `role="status"` with "Abrir WhatsApp" link when `window.open` returns null, editing hides the box, panadería order variant (P3, copy in `copy.ts`). `SeccionContacto` gained optional `tituloId` (H2 id, other templates unchanged); `index.tsx` mounts the form only when the phone has digits, otherwise `copy.sinTelefono`. Tests in `tests/unit/components/templates/restaurante.reserva.test.ts` (Jest env is `node`, so behaviour is pinned through the pure helpers + static markup; no click-through). Checks: tsc, eslint (0 errors), test:unit 1517 passed, build OK. Chrome pass not done by the writer.
 
+- 2026-10-17: R5 done (code `e174596`, docs in the next commit; inline). Fixed: hero photo 680px desktop / 220px mobile via optional `HeroBloques.altoFoto` (defaults 720 / 280 keep LANDING and SERVICIOS identical); Reservas cards via `ContactoDatos variante="reserva"` (address full width, "WhatsApp" + "Correo" in `1fr 1fr`, WhatsApp card links to wa.me); footer gloss "de" + lowercase from the second entry via `glosaPie` option `conPreposicion` (RESTAURANTE only, only when the range starts with a digit). Verified, no change: no-phone section ("Escríbenos para reservar." + email card, hero buttons "Escríbenos" -> mailto, header CTA stays `#reservas`). Not fixed: horarios band keeps S2 measures (44px range, 72px gap/padding, day below the range) while the S4 prototype uses 40px / 64px / 56px with the day above; the shared `BandaDatos` would need a layout variant, S2 spec itself says 44. `docs/ESTADO.md` not regenerated: it describes `main`/`develop` and this branch is not merged; regenerate when RESTAURANTE reaches develop. `docs/DECISIONES.md`: D-43 (address), D-44 (no stock hero), D-45 (panadería order form). Checks: tsc, eslint (0 errors), test:unit 1519 passed, build OK. Chrome pass not done.
+
 ## Next step
 
-R5 (Polish and docs): spec audit against the prototype at 1280px and 390px (full, minimal, minimal + logo, panadería fixtures; includes the Chrome pass for the form states, which no task has done yet), motion contract, dead CSS/exports; then `docs/ESTADO.md` and `docs/DECISIONES.md` (P1-P3).
+Chrome pass at 1280px and 390px on the local fixtures (`npm run db:seed-fixtures-restaurante`: completo, minimo, minimo-logo, panaderia; includes the FormReserva states), then PRs to develop (one per task, same strategy as S2). Regenerate `docs/ESTADO.md` once RESTAURANTE is in develop.
