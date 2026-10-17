@@ -85,6 +85,14 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
 
 - 2026-10-17: R6 done (code `f78c423`, delegated writer). `cartaPdf?` in the DTO; `SubirCartaPdfSitioUseCase` (execute/quitar: `%PDF-` signature, max 10 MB, key `sitios/<id>/carta-<uuid>.pdf` flat so `claveSiPropia` sees it as own, replaces and deletes the old object); `esPdfPropio` + `urlsImagenDeConfig` includes `cartaPdf` so JSON-edit cleanup never deletes a referenced PDF; /admin 'Carta en PDF' section (upload/replace/remove); `Carta` footer shows 'Ver la carta completa (PDF)' (`target=_blank rel=noopener`) next to the WhatsApp link only when the carta renders and the URL is an own PDF. Checks: tsc, eslint (0 errors), test:unit 1558 passed, build OK. Chrome pass not done.
 
+- 2026-10-17: Chrome pass on the local fixtures (Docker Postgres 5433, `next dev`). The window could not be resized to 1280px (it stayed at 929px), so 1280 and 390 were rendered in a same-origin iframe of that width. Observed:
+  - completo at 1280: nav Inicio · Carta · Nosotros · Reservas, CTA "Reservar mesa", hero buttons, data row with the address, carta with guides in three categories ("Plato del día" name only), price note, Reservas with horarios / address / WhatsApp + Correo cards, footer gloss with "de … a …".
+  - completo at 390: carta in one column with guides, Reservas fields stacked, no horizontal overflow, floating WhatsApp visible over Carta and hidden over Reservas.
+  - minimo and minimo-logo at 390: typographic hero with the data list; large carta form, H2 "Lo que preparamos"; "La carta" count matches the rendered dishes (4 and 3); "menú del día" note shown on minimo.
+  - panadería: nav "Encargos", CTA "Hacer un encargo", hero "Encargar por WhatsApp", H2 "Haz tu encargo", fields Tu nombre · ¿Qué quieres encargar? · ¿Para cuándo?.
+  - FormReserva at 929px: errors only after the first submit, focus on the first invalid field, errors clear per field, message "Hola, soy Ana. Quiero reservar una mesa para 3 personas, sábado a las 21:00." (trimmed), status box shown, blocked window shows "Abrir WhatsApp" at 44px, editing hides the box.
+  - Not covered: the photo hero, "El local" and the PDF link (they need R2 configured locally), and a real upload to R2.
+
 ## Next step
 
-Chrome pass at 1280px and 390px on the local fixtures (`npm run db:seed-fixtures-restaurante`: completo, minimo, minimo-logo, panaderia; includes the FormReserva states), then PRs to develop (one per task, same strategy as S2). Regenerate `docs/ESTADO.md` once RESTAURANTE is in develop.
+PRs to develop (one per task, same strategy as S2). Test the photo hero, "El local" and the PDF upload against R2. Record the carta-PDF decision in `docs/DECISIONES.md`. Regenerate `docs/ESTADO.md` once RESTAURANTE is in develop.
