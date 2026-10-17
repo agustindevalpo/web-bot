@@ -61,6 +61,12 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
   panadería order variant (P3). Route: delegated.
 - [x] **R5 — Polish and docs.** Spec audit against the prototype, motion contract, dead CSS/exports;
   `docs/ESTADO.md` and `docs/DECISIONES.md` (P1-P3). Route: inline or delegated depending on findings.
+- [ ] **R6 — Optional carta PDF.** Decision (Agustín, 2026-10-17): the built carta (max 8 dishes) stays the main
+  piece; an OPTIONAL full-menu PDF complements it, never replaces it. `cartaPdf?` (public URL) in
+  `SiteConfigDTO`; Agustín uploads/replaces/removes it from `/admin` on the existing R2 infrastructure
+  (`application/pdf` only, max 10 MB, key `sitios/<id>/carta/...`, old object deleted like images); `Carta`
+  shows "Ver la carta completa (PDF)" next to the WhatsApp link in its footer, only for an own-file URL and
+  only when the carta section itself renders. Route: delegated.
 
 ## Progress
 
