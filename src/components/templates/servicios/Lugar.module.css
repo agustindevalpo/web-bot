@@ -51,7 +51,7 @@
 
 .dos {
   grid-template-columns: 1fr 1fr;
-  grid-auto-rows: 480px;
+  grid-auto-rows: var(--lugar-alto-dos, 480px);
 }
 
 /* La primera foto ocupa las dos filas de la izquierda; las otras dos se apilan. */

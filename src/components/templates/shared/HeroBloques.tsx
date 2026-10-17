@@ -6,7 +6,8 @@ import styles from './HeroBloques.module.css'
 // Hero de Bloques compartido por LANDING y SERVICIOS. Server Component puro:
 // cada plantilla decide los textos y enlaces de los botones; acá solo vive el
 // markup, la cascada de entrada (`data-dv-anim`) y los tramos del display.
-type Cta = { texto: string; href: string }
+// `interno`: ancla de la misma página o `mailto:`; se abre en la misma pestaña.
+type Cta = { texto: string; href: string; interno?: boolean }
 
 export type HeroBloquesProps = {
   eyebrow: string | null
@@ -44,7 +45,11 @@ export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPri
         )}
         <div className={styles.ctas} data-dv-anim="up" style={estiloCascada(3)}>
           {ctaPrimario && (
-            <a href={ctaPrimario.href} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimaria}>
+            <a
+              href={ctaPrimario.href}
+              {...(ctaPrimario.interno ? null : { target: '_blank', rel: 'noopener noreferrer' })}
+              className={styles.ctaPrimaria}
+            >
               {ctaPrimario.texto}
             </a>
           )}

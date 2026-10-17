@@ -41,6 +41,23 @@ describe('pieBloques — glosaPie', () => {
   })
 })
 
+describe('pieBloques — glosaPie, horarios cerrados y largos', () => {
+  const abierto = (dia: string) => ({ dia, rango: '12:00 a 22:00' })
+
+  it('un día "Cerrado" no se escribe como horario', () => {
+    expect(glosaPie('restaurante', 'Quilpué', [{ dia: 'Lunes', rango: 'Cerrado' }, abierto('Martes')])).toBe(
+      'Restaurante en Quilpué. Martes 12:00 a 22:00.',
+    )
+    expect(glosaPie('restaurante', 'Quilpué', [{ dia: 'Lunes', rango: ' cerrado ' }])).toBe('Restaurante en Quilpué.')
+  })
+
+  it('con 4 o más entradas queda solo la primera frase', () => {
+    const cuatro = ['Lunes', 'Martes', 'Miércoles', 'Jueves'].map(abierto)
+    expect(glosaPie('restaurante', 'Quilpué', cuatro)).toBe('Restaurante en Quilpué.')
+    expect(glosaPie('restaurante', 'Quilpué', cuatro.slice(0, 3))).toContain('Miércoles 12:00 a 22:00')
+  })
+})
+
 describe('pieBloques — lineaLegal', () => {
   it('con razón social y RUT', () => {
     expect(lineaLegal({ razonSocial: 'Trigal SpA', rut: '76.123.456-7' }, 'El Trigal', 2026)).toBe('© 2026 Trigal SpA · RUT 76.123.456-7')
