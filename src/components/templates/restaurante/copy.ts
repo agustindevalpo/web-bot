@@ -19,6 +19,13 @@ export type CopyReserva = {
   sinTelefono: string
   // Texto del botón de envío del formulario (R4).
   botonEnviar: string
+  // Rótulo y ayuda del campo central del formulario (personas / pedido).
+  rotuloDetalle: string
+  placeholderDetalle: string | null
+  // Texto de apoyo bajo el botón: evita creer que ya quedó reservado.
+  apoyo: string
+  // Caja de "enviado": el texto se completa con el teléfono (`{telefono}`).
+  estadoTexto: string
 }
 
 const RESERVA: CopyReserva = {
@@ -32,6 +39,10 @@ const RESERVA: CopyReserva = {
   parrafo: 'Cuéntanos para cuántas personas y cuándo. Te respondemos por WhatsApp para confirmar.',
   sinTelefono: 'Escríbenos para reservar.',
   botonEnviar: 'Pedir reserva por WhatsApp',
+  rotuloDetalle: 'Personas',
+  placeholderDetalle: null,
+  apoyo: 'Se abre WhatsApp con tu mensaje listo. La reserva queda confirmada cuando te respondamos.',
+  estadoTexto: 'Envíalo para pedir tu reserva. Si no se abrió, escríbenos al {telefono}.',
 }
 
 const ENCARGO: CopyReserva = {
@@ -45,6 +56,10 @@ const ENCARGO: CopyReserva = {
   parrafo: 'Cuéntanos qué quieres encargar y para cuándo. Te respondemos por WhatsApp para confirmar.',
   sinTelefono: 'Escríbenos para encargar.',
   botonEnviar: 'Pedir encargo por WhatsApp',
+  rotuloDetalle: '¿Qué quieres encargar?',
+  placeholderDetalle: 'Por ejemplo: una torta de mil hojas para 10 personas',
+  apoyo: 'Se abre WhatsApp con tu mensaje listo. El encargo queda confirmado cuando te respondamos.',
+  estadoTexto: 'Envíalo para pedir tu encargo. Si no se abrió, escríbenos al {telefono}.',
 }
 
 export const TEXTO_ESCRIBENOS = 'Escríbenos'

@@ -12,7 +12,9 @@ import SeccionContacto from '@/components/templates/shared/SeccionContacto'
 import ContactoDatos from '@/components/templates/shared/ContactoDatos'
 import Lugar from '@/components/templates/servicios/Lugar'
 import { getAlmacenamientoArchivos } from '@/infrastructure/container'
+import { soloDigitos } from '@/components/templates/shared/enlaces'
 import Carta from './Carta'
+import FormReserva from './FormReserva'
 import HeroRestaurante from './HeroRestaurante'
 import { copyReserva } from './copy'
 import {
@@ -31,10 +33,12 @@ import {
 } from './sections'
 import styles from './Restaurante.module.css'
 
+const ID_TITULO_RESERVAS = 'reservas-titulo'
+
 // RESTAURANTE sobre el shell de Bloques (S4): las mismas piezas que LANDING y
 // SERVICIOS (header, Nosotros, contacto, pie, banda de horarios) más la carta
-// tipográfica y el hero con dos formas. Server Component async; el único
-// cliente es `SeccionesSPA` (y, desde R4, el formulario de reserva).
+// tipográfica y el hero con dos formas. Server Component async; los únicos
+// clientes son `SeccionesSPA` y el formulario de reserva (`FormReserva`).
 export default async function Restaurante({ config }: TemplateProps) {
   // `bloques: true` clampea `--acento` a >= 4.5:1 contra blanco (T2).
   const estiloRaiz: CSSProperties = buildPaletteStyle(config, { bloques: true })
@@ -53,11 +57,12 @@ export default async function Restaurante({ config }: TemplateProps) {
   const contacto = buildContacto(config)
   const acciones = buildAccionesHero(config, carta, copy)
 
-  // Aquí monta R4 el formulario de reserva/encargo (`FormReserva`, cliente,
-  // recibe `contacto.telefono` y `copy`). Mientras no exista, la columna
-  // izquierda lleva solo el título (y, sin teléfono, la invitación a escribir).
-  const formulario: ReactNode = null
-  const parrafo = !contacto.telefono ? copy.sinTelefono : formulario ? copy.parrafo : null
+  // Sin teléfono utilizable no hay formulario (no hay a dónde abrir WhatsApp):
+  // la columna izquierda lleva el título y la invitación a escribir por correo.
+  const formulario: ReactNode = soloDigitos(contacto.telefono ?? '') ? (
+    <FormReserva telefono={contacto.telefono ?? ''} copy={copy} tituloId={ID_TITULO_RESERVAS} />
+  ) : null
+  const parrafo = formulario ? copy.parrafo : copy.sinTelefono
 
   const eyebrowInicio = [inicio.rubro, inicio.ciudad].filter((valor): valor is string => valor !== null).join(' · ')
 
@@ -110,6 +115,7 @@ export default async function Restaurante({ config }: TemplateProps) {
         <SeccionContacto
           eyebrow={copy.eyebrow}
           titulo={copy.titulo}
+          tituloId={ID_TITULO_RESERVAS}
           parrafo={parrafo}
           formulario={formulario}
           datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} direccion={contacto.direccion} />}

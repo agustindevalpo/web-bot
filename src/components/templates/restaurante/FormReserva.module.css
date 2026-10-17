@@ -1,0 +1,181 @@
+/*
+ * FormReserva (04-RESTAURANTE.md, "Formulario de reserva"). Campos: borde
+ * 1.5px #E2E0EC, radio 12px, 400 15px, padding 18px 22px (select 58px). Foco
+ * con :focus-visible: borde al acento + halo 3px al 12%. Error #B42318.
+ * Móvil (<768px): campos apilados de 52px.
+ */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+/* Encargo (panadería): el pedido y el "cuándo" van apilados, sin la columna fija. */
+.grupoEncargo {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rotulo {
+  font: 600 13px var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink);
+  margin-bottom: 8px;
+}
+
+.campo {
+  width: 100%;
+  padding: 18px 22px;
+  border: 1.5px solid #e2e0ec;
+  border-radius: 12px;
+  font: 400 15px var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink);
+  background: var(--wb-tpl-surface);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.campo:focus {
+  outline: none;
+}
+
+.campo:focus-visible {
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--acento) 12%, transparent);
+}
+
+.invalido,
+.invalido:focus-visible {
+  border-color: #b42318;
+}
+
+.invalido:focus-visible {
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.12);
+}
+
+.select {
+  appearance: none;
+  height: 58px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 52px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%235a6270' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 22px center;
+  cursor: pointer;
+}
+
+.error {
+  font: 500 12.5px var(--font-montserrat), sans-serif;
+  color: #b42318;
+  margin: 8px 0 0;
+}
+
+.enviar {
+  width: 100%;
+  font: 600 14px var(--font-montserrat), sans-serif;
+  color: #fff;
+  background: var(--acento);
+  padding: 20px 34px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.enviar:hover {
+  background: var(--acento-hover);
+}
+
+.enviar:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+}
+
+.apoyo {
+  font: 300 13px/1.6 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  margin: -6px 0 0;
+}
+
+.estado {
+  background: #f2f1ed;
+  border-radius: 16px;
+  padding: 20px 22px;
+}
+
+.estadoTitulo {
+  font: 600 15px/1.5 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink);
+  margin: 0 0 4px;
+}
+
+.estadoTexto {
+  font: 400 14px/1.6 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  margin: 0;
+}
+
+.abrir {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  font: 600 14px var(--font-montserrat), sans-serif;
+  color: var(--acento);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.abrir:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .fila {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .rotulo {
+    margin-bottom: 6px;
+  }
+
+  .campo {
+    min-height: 52px;
+    padding: 16px 20px;
+  }
+
+  .select {
+    height: 52px;
+    padding-right: 48px;
+    background-position: right 20px center;
+  }
+
+  .enviar {
+    min-height: 52px;
+    padding: 16px 24px;
+  }
+
+  .apoyo {
+    font-size: 12px;
+  }
+}
