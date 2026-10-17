@@ -47,7 +47,7 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
   (trimmed, max 60, empty → absent); optional "Dirección de tu local" field in `LeadForm`; the lead route
   persists it into the site config; `ContactoDatos` shows an address card when present (all templates).
   Route: delegated (2+ non-trivial files).
-- [ ] **R2 — Carta model.** `menu?` type in the DTO + pure `normalizarCarta(menu, servicios)` in the
+- [x] **R2 — Carta model.** `menu?` type in the DTO + pure `normalizarCarta(menu, servicios)` in the
   application layer, with one test per row of the spec's "Casos intermedios" table (max 8 dishes in reading
   order, max 3 categories, uncategorised group first, menu replaces servicios, price printed as-is,
   "menú del día" note rule). Route: delegated.
@@ -69,6 +69,8 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
 
 - 2026-10-17: R1 done (`e372cfa`, delegated writer). `contacto.direccion?` in the DTO; `datosLead.ts` trims, empty → absent, max 60; optional LeadForm field after telefono; lead route and use case merge it into `contacto` of the site `configJson` (JSON column, no migration; never overwrites an existing value, no key when blank); `ContactoDatos` shows a full-width "Dirección" card without link. Checks: tsc, eslint (0 errors), test:unit 1406 passed, build OK.
 
+- 2026-10-17: R2 done (`638c076`, delegated writer). `menu?` in the DTO; pure `normalizarCarta(menu, servicios)` in `src/application/shared/carta.ts` returns `{conPrecios, grupos, totalPlatos, hayCategorias, columnasSinCategorias, notaMenuDelDia} | null` (caps 8 dishes / 3 categories, uncategorised group first, menu replaces servicios, column split 5 / 6-8 as data). 27 tests in `tests/unit/application/shared/carta.test.ts`. Checks: tsc, eslint (0 errors), test:unit 1433 passed, build OK.
+
 ## Next step
 
-R2.
+R3.
