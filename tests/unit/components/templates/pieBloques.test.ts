@@ -105,3 +105,22 @@ describe('pieBloques — construirPie', () => {
     expect(pie.contacto).toEqual([])
   })
 })
+
+describe('pieBloques — glosaPie con preposición (RESTAURANTE)', () => {
+  const opciones = { conPreposicion: true }
+
+  it('escribe "de" antes del rango y baja a minúscula desde la segunda entrada', () => {
+    const horarios = [
+      { dia: 'Martes a sábado', rango: '12:30 a 23:00' },
+      { dia: 'Domingo', rango: '12:30 a 17:00' },
+    ]
+    expect(glosaPie('restaurante', 'Ñuñoa', horarios, opciones)).toBe(
+      'Restaurante en Ñuñoa. Martes a sábado de 12:30 a 23:00, domingo de 12:30 a 17:00.',
+    )
+  })
+
+  it('un rango que no empieza con dígito no lleva "de"; sin la opción nada cambia', () => {
+    expect(glosaPie('restaurante', null, [{ dia: 'Lunes', rango: 'de 9:00 a 18:00' }], opciones)).toBe('Restaurante. Lunes de 9:00 a 18:00.')
+    expect(glosaPie('restaurante', null, [{ dia: 'Lunes', rango: '9:00 a 18:00' }])).toBe('Restaurante. Lunes 9:00 a 18:00.')
+  })
+})

@@ -124,7 +124,7 @@
 
 .inicioFoto {
   position: relative;
-  height: 720px;
+  height: var(--alto-foto, 720px);
   border-radius: 24px 0 0 24px;
   overflow: hidden;
   background: var(--wb-tpl-placeholder);
@@ -145,7 +145,7 @@
 
   .inicioFoto {
     order: -1;
-    height: 280px;
+    height: var(--alto-foto-movil, 280px);
     margin: 0 24px 32px;
     border-radius: 16px;
   }

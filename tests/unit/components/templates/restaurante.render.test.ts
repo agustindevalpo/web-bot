@@ -171,7 +171,7 @@ describe('RESTAURANTE — footer', () => {
         ],
       }),
     )
-    expect(pie(markup)).toContain('Restaurante en Quilpué. Martes a sábado 12:30 a 23:00, Domingo 12:30 a 17:00.')
+    expect(pie(markup)).toContain('Restaurante en Quilpué. Martes a sábado de 12:30 a 23:00, domingo de 12:30 a 17:00.')
     expect(pie(markup)).not.toContain('Cerrado')
   })
 

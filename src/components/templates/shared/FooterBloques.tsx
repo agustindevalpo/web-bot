@@ -12,10 +12,12 @@ export type FooterBloquesProps = {
   config: SiteConfigDTO
   secciones: { id: string; etiqueta: string }[]
   anio: number
+  // RESTAURANTE: horarios con "de" en la glosa (04-RESTAURANTE).
+  glosaConPreposicion?: boolean
 }
 
-export default function FooterBloques({ config, secciones, anio }: FooterBloquesProps) {
-  const pie = construirPie(config, anio)
+export default function FooterBloques({ config, secciones, anio, glosaConPreposicion }: FooterBloquesProps) {
+  const pie = construirPie(config, anio, { conPreposicion: glosaConPreposicion })
   const estiloLogo = {
     '--logo-alto': `${pie.altosLogo.escritorio}px`,
     '--logo-alto-movil': `${pie.altosLogo.movil}px`,
