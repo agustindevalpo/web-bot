@@ -24,7 +24,7 @@ Preserve completed-demo rotation on ordinary `/chat` visits and the existing `?v
 - Forecast: **180–320 authored changed lines**, excluding generated files and the out-of-scope Claude work. This is an advisory estimate, not a reason to omit tests or compress code.
 - Delivery strategy: `ask-on-risk`; no chain strategy selected. If the forecast or running authored total exceeds about 400 lines, ask before the next commit.
 - Each completed task closes with a Conventional Commit on the feature branch, with checks and documentation alongside its behavior. Never add AI attribution. Record exact commit IDs below; remote delivery remains unauthorized.
-- Running authored total: source/tests 193 plus this document; final committed count recorded at closure. RDD outcome: disabled/unmanaged. Native assessment unavailable because untracked candidate inventory was refused; high fallback independent verification completed with no candidate-caused blockers. Parent structural readback and diff check passed; independent verifier reran the three focused suites (26 tests) and diff check successfully. No RDD transaction started.
+- Final authored count: 276 lines against branch point (193 source/tests + 83 documentation); cumulative work-unit/closure churn 292 lines, including documentation updates. RDD outcome: disabled/unmanaged. Native assessment unavailable because untracked candidate inventory was refused; high fallback independent verification completed with no candidate-caused blockers. Parent structural readback and diff check passed; independent verifier reran the three focused suites (26 tests) and diff check successfully. No RDD transaction started.
 
 ## Tasks and acceptance
 
@@ -46,7 +46,7 @@ Preserve completed-demo rotation on ordinary `/chat` visits and the existing `?v
   - Check browser presentation at 390px and 1280px. Report unavailable environment or browser access as blocked/pending, not completed.
   - Browser evidence: synthetic admin login succeeded; incomplete legal pair and invalid RUT rejected; valid pair saved as `77.119.936-4`, survived reload, and appeared in the site footer; clearing both removed `legal` and restored the business-name footer. Legal layout inspected at actual 390px with no horizontal overflow and at 1280px.
   - Closed-state evidence: a disposable local ownership fixture change (no payment or notification call) made a stale momento 2 save return the closed screen. Reload confirmed the closed screen at actual 390px and 1280px; local DB readback proved services remained unchanged. This verifies the ownership-based closing contract, not the payment-provider flow.
-  - Commit: R2 documentation work-unit commit being recorded; exact identity added in the final closure metadata update. Authored source lines: 0; documentation only. Runtime acceptance and parent verification accepted.
+  - Commit: `674d023` (`test(chat): record local legal and closed-state acceptance`). Authored source lines: 0; documentation only. Runtime acceptance and parent verification accepted.
 
 ## Verification
 
@@ -75,9 +75,9 @@ R1 rollback boundary: remove only the new chat recovery behavior and its regress
 
 ## Progress and next step
 
-- 2026-10-17: R1 closed in `c8b8531` after automated/browser acceptance and parent independent verification. R2 runtime evidence and parent verification accepted; documentation work-unit closure in progress. Existing untracked `.claude/` preserved.
+- 2026-10-17: R1 closed in `c8b8531` after automated/browser acceptance and parent independent verification. R2 closed in `674d023` after local runtime and parent verification. This final metadata-only update records both work-unit identities; its own identity is intentionally not recursively recorded. Existing untracked `.claude/` preserved.
 - Runtime isolation: new Docker container `webbot-recovery-check-20261017`, database `webbot_recovery` bound only to `127.0.0.1:5437`; three migrations applied and demo seed run. Next served `localhost:3000` with synthetic `ADMIN_SECRET` and `AUTH_SECRET`, local database/app URLs, and explicitly empty external integration keys in the Node child environment. No `.env` contents read, no Claude/provider/payment calls, no production access. Dev font fetches failed and used fallback fonts; production build had passed with downloaded fonts, so local browser checks validate behavior/layout but not final font fidelity.
 - Local DB readback: two separate sessions (completed original with six answers; new unfinished session with one answer), closed site ownership, no legal key after clear, unchanged services after rejected stale save.
 - Cleanup: local Next process stopped, test browser tabs closed and temporary viewport reset. Disposable Docker container stopped, retained with its test data for reproducibility. Optional final cleanup: `docker rm -v webbot-recovery-check-20261017` removes only that disposable container/data. Do not touch pre-existing containers.
-- Next: record R1/R2 work-unit identities and final authored count, then hand off the local verified feature. No remote delivery authorization.
+- Next: human chooses any remote delivery separately; no push, PR, merge, or release performed or authorized. Optional removal of the stopped disposable container remains local cleanup only.
 - Recovery mirror: `odd/predefined-chat-recovery/tasks`; repository locator: `odd/tasks/predefined-chat-recovery.md`. Both copies must be read back and refreshed after each task.
