@@ -51,7 +51,7 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
   application layer, with one test per row of the spec's "Casos intermedios" table (max 8 dishes in reading
   order, max 3 categories, uncategorised group first, menu replaces servicios, price printed as-is,
   "menú del día" note rule). Route: delegated.
-- [ ] **R3 — RESTAURANTE on the Bloques shell.** Rewrite `templates/restaurante/`: header "Reservar mesa",
+- [x] **R3 — RESTAURANTE on the Bloques shell.** Rewrite `templates/restaurante/`: header "Reservar mesa",
   `HeroRestaurante` (photo form via `HeroBloques` only with an own photo; typographic form with the
   Dónde / Reservas / La carta row), horarios band, `Carta` (guides form and large form, footer note + WhatsApp
   link), "El local" (2+ own photos), Nosotros, contact section, `FooterBloques` with the horarios gloss.
@@ -71,6 +71,8 @@ standing OK covers the Bloques unit PRs; production only moves on an explicit re
 
 - 2026-10-17: R2 done (`638c076`, delegated writer). `menu?` in the DTO; pure `normalizarCarta(menu, servicios)` in `src/application/shared/carta.ts` returns `{conPrecios, grupos, totalPlatos, hayCategorias, columnasSinCategorias, notaMenuDelDia} | null` (caps 8 dishes / 3 categories, uncategorised group first, menu replaces servicios, column split 5 / 6-8 as data). 27 tests in `tests/unit/application/shared/carta.test.ts`. Checks: tsc, eslint (0 errors), test:unit 1433 passed, build OK.
 
+- 2026-10-17: R3 done (`0abfb51`, delegated writer). `templates/restaurante/` rebuilt on the Bloques shell: `HeroRestaurante` (photo form via `HeroBloques` only with an own `imagenes[0]`, otherwise typographic with the Dónde/Reservas/La carta row), `Carta` (guides + large forms), "El local" via `buildLugar(..., { titulo, minimo: 2, altoDosPx: 520 })`, `BloqueNosotros`, Reservas section (`SeccionContacto` with `eyebrow`, `ContactoDatos`), `FooterBloques`. Shared additions (all backwards compatible): `SeccionesSPA.seccionOcultaFlotante` (RESTAURANTE passes `reservas`), `SeccionContacto.eyebrow`, `HeroBloques` Cta `interno`, `BandaDatos` "Cerrado" style, `glosaPie` skips "Cerrado" and drops hours with 4+ entries (now also true for SERVICIOS), `Lugar` `altoDosPx`. Fixtures: `prisma/fixturesRestaurante.ts` + `npm run db:seed-fixtures-restaurante` (sites `dev-restaurante-completo|minimo|minimo-logo`, `dev-panaderia`, URL `/sites/<subdominio>`; no own photos, so photo hero and "El local" need R2). Checks: tsc, eslint (0 errors), test:unit 1501 passed, build OK. Chrome pass not done by the writer.
+
 ## Next step
 
-R3.
+R4 (FormReserva). Plug-in point: `src/components/templates/restaurante/index.tsx`, the `const formulario: ReactNode = null` slot; it feeds `SeccionContacto` (`formulario`), and `parrafo` already switches to `copy.parrafo` once the slot is non-null (no phone → `copy.sinTelefono`, no form). Per-rubro copy (restaurante vs panadería order, including `botonEnviar`, `titulo`, `esEncargo`) lives in `src/components/templates/restaurante/copy.ts` (`copyReserva(rubro)`); pass it to `FormReserva` with `contacto.telefono`. The floating WhatsApp already hides on `#reservas`.
