@@ -6,7 +6,7 @@
 > La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`); si se
 > contradicen, gana Engram.
 >
-> **Última regeneración:** 2026-10-17 · `main` = `1d21eb0` (release `2477f4f`) · `develop` = `602d0d5`
+> **Última regeneración:** 2026-10-17 · `main` = `develop` = release `9d2a742`
 
 ## 1. Qué es el producto
 
@@ -62,12 +62,12 @@ auth, claude, demo, email, cloudflare, storage, routing…) · `app/` (rutas, ca
 ## 4. Producción y develop
 
 **En producción** (`main`, release 2026-10-17): chat demo de 6 preguntas, paso de
-datos, reveal con avance, momento 2 en `/chat/completar`, `/gracias`, 5 templates por rubro,
+datos, recuperación del chat sin terminar al recargar `/chat`, reveal con avance, momento 2 en `/chat/completar`, `/gracias`, 5 templates por rubro,
 **Bloques en `LANDING`, `SERVICIOS` y `RESTAURANTE`**, dirección opcional (`contacto.direccion`, máx. 60) en el paso de datos, carta PDF opcional desde `/admin`, dominios propios, panel `/admin` (pausar, dominio,
 editar `configJson`, confirmar pago, razón social/RUT, subir logo y fotos a R2), metadata y
 Open Graph por sitio, páginas legales `/terminos` y `/privacidad`.
 
-**Solo en `develop`:** recargar `/chat` a mitad de la conversación demo recupera la conversación sin terminar (pregunta e historial del servidor) en vez de volver al saludo inicial (#81).
+**Solo en `develop`:** nada; `develop` y `main` tienen el mismo código.
 
 **Inerte o sin construir:**
 - Chat real con Claude: sin `ANTHROPIC_API_KEY` en Railway `/api/chat` responde 503; todo
