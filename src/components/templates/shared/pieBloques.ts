@@ -2,6 +2,7 @@ import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { rubroVisible } from '@/components/templates/shared/rubroVisible'
 import { buildTelUrl, buildMailtoUrl, buildInstagramUrl } from '@/components/templates/shared/enlaces'
 import { comoHorarios, comoLegal, type DatosLegales, type Horario } from '@/components/templates/shared/contenido'
+import { MAX_ITEMS_BANDA } from '@/components/templates/shared/layoutBanda'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
 import { altosLogo, altoLogoMovilPie, comoDimensionesLogo, esLogotipo, type DimensionesLogo } from '@/components/templates/shared/logoOptico'
 
@@ -33,8 +34,17 @@ function comoTexto(valor: unknown): string | null {
   return typeof valor === 'string' && valor.trim() !== '' ? valor.trim() : null
 }
 
+// Con más entradas que la banda de datos, la glosa no las repite (recortar
+// mostraría una selección arbitraria): queda solo la primera frase (04-RESTAURANTE).
+const MAX_HORARIOS_GLOSA = MAX_ITEMS_BANDA
+
+function esDiaCerrado({ rango }: Horario): boolean {
+  return rango.trim().toLowerCase() === 'cerrado'
+}
+
 // "{Rubro} en {ciudad}." omitiendo la parte que falta, más los horarios como
-// texto simple ("Lunes 9:00 a 18:00, Sábado 10:00 a 14:00."). `null` si no
+// texto simple ("Lunes 9:00 a 18:00, Sábado 10:00 a 14:00."). Un día "Cerrado"
+// no se escribe como horario, y con 4 o más entradas no se agregan. `null` si no
 // queda nada que decir.
 export function glosaPie(rubro: string | null, ciudad: string | null, horarios: Horario[]): string | null {
   const rubroTexto = rubro ? rubroVisible(rubro) : null
@@ -42,7 +52,8 @@ export function glosaPie(rubro: string | null, ciudad: string | null, horarios: 
   if (rubroTexto && ciudad) oraciones.push(`${rubroTexto} en ${ciudad}.`)
   else if (rubroTexto) oraciones.push(`${rubroTexto}.`)
   else if (ciudad) oraciones.push(`${ciudad}.`)
-  if (horarios.length > 0) oraciones.push(`${horarios.map(({ dia, rango }) => `${dia} ${rango}`).join(', ')}.`)
+  const abiertos = horarios.length > MAX_HORARIOS_GLOSA ? [] : horarios.filter((horario) => !esDiaCerrado(horario))
+  if (abiertos.length > 0) oraciones.push(`${abiertos.map(({ dia, rango }) => `${dia} ${rango}`).join(', ')}.`)
   return oraciones.length > 0 ? oraciones.join(' ') : null
 }
 

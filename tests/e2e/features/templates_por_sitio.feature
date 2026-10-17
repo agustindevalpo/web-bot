@@ -17,11 +17,11 @@ Feature: Templates por sitio
     And la página muestra la sección "Servicios"
     And la página tiene el atributo data-template "SERVICIOS"
 
-  Scenario: Template RESTAURANTE renderiza "Menú"
+  Scenario: Template RESTAURANTE renderiza la carta
     Given un sitio con template "RESTAURANTE" y subdominio "e2e-template-restaurante"
     When visito la página de ese sitio
     Then la respuesta HTTP es 200
-    And la página muestra la sección "Menú"
+    And la página muestra la sección "Lo que preparamos"
     And la página tiene el atributo data-template "RESTAURANTE"
 
   Scenario: Template PORTFOLIO renderiza "Trabajos"

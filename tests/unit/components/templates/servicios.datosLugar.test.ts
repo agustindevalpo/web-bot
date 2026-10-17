@@ -98,4 +98,22 @@ describe('buildLugar', () => {
   it('sin base URL → null', () => {
     expect(buildLugar(config([propia(0), propia(1)]), null)).toBeNull()
   })
+
+  describe('opciones (RESTAURANTE: "El local")', () => {
+    const opciones = { titulo: 'El local', minimo: 2, altoDosPx: 520 }
+
+    it('por debajo del mínimo no se renderiza', () => {
+      expect(buildLugar(config([propia(0), propia(1)]), BASE, opciones)).toBeNull()
+    })
+
+    it('cambia título, alt y alto de la disposición de dos; sin opciones nada de eso aparece', () => {
+      const local = buildLugar(config([propia(0), propia(1), propia(2)]), BASE, opciones)
+      expect(local).toMatchObject({ titulo: 'El local', disposicion: 'dos', altoDosPx: 520 })
+      expect(local?.fotos[0].alt).toBe('Peluquería Luna — el local 1')
+
+      const lugar = buildLugar(config([propia(0), propia(1), propia(2)]), BASE)
+      expect(lugar?.titulo).toBe('El lugar')
+      expect(lugar).not.toHaveProperty('altoDosPx')
+    })
+  })
 })

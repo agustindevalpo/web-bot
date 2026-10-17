@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import Image from 'next/image'
 import { estiloCascada } from '@/components/templates/shared/navegacion'
 import type { DisposicionLugar, LugarProps } from './datosLugar'
@@ -16,7 +17,7 @@ const SIZES: Record<DisposicionLugar, [string, string]> = {
 
 // "El lugar" (S2-3). Server Component puro. No es una sección del nav: la monta
 // `servicios/index.tsx` dentro del fragmento de "Servicios".
-export default function Lugar({ titulo, ciudad, disposicion, fotos }: LugarProps) {
+export default function Lugar({ titulo, ciudad, disposicion, fotos, altoDosPx }: LugarProps) {
   const [sizesPrincipal, sizesResto] = SIZES[disposicion]
 
   return (
@@ -25,7 +26,10 @@ export default function Lugar({ titulo, ciudad, disposicion, fotos }: LugarProps
         <h2 className={styles.titulo}>{titulo}</h2>
         {ciudad && <span className={styles.ciudad}>{ciudad}</span>}
       </div>
-      <div className={`${styles.galeria} ${styles[disposicion]}`}>
+      <div
+        className={`${styles.galeria} ${styles[disposicion]}`}
+        style={altoDosPx !== undefined ? ({ '--lugar-alto-dos': `${altoDosPx}px` } as CSSProperties) : undefined}
+      >
         {fotos.map((foto, indice) => (
           <div key={foto.src} className={styles.foto} data-dv-anim="up" style={estiloCascada(indice + 1)}>
             <Image

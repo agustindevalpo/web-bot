@@ -23,6 +23,10 @@ export type SeccionesSPAProps = {
   // Sin URL no se renderiza. Se oculta mientras la sección `contacto` está en
   // pantalla (efecto de abajo).
   whatsappFlotanteUrl?: string | null
+  // Id de la sección que, mientras está en pantalla, esconde el botón flotante
+  // (donde vive el formulario o los datos de contacto). `contacto` por defecto;
+  // RESTAURANTE pasa `reservas`.
+  seccionOcultaFlotante?: string
 }
 
 // Altura del header sticky (`.header`, SeccionesSPA.module.css, mismo valor
@@ -75,7 +79,16 @@ const CONSULTA_MEDIA_MOBIL = '(max-width: 767px)'
 //   Compartir el observer de cascada le impondría su `threshold` de
 //   revelado-de-elemento-suelto y su `unobserve` de una sola vez a un
 //   trabajo que necesita lo contrario en ambos ejes.
-export default function SeccionesSPA({ secciones, marca, accionHeader, pie, className, claseHeader, whatsappFlotanteUrl }: SeccionesSPAProps) {
+export default function SeccionesSPA({
+  secciones,
+  marca,
+  accionHeader,
+  pie,
+  className,
+  claseHeader,
+  whatsappFlotanteUrl,
+  seccionOcultaFlotante = 'contacto',
+}: SeccionesSPAProps) {
   // Re-filtra en el cliente aunque el server ya filtró antes de llamar acá
   // (Q2 en design.md): defensa en profundidad para el Requirement
   // "Data-Driven Navigation" — si un template olvidara filtrar, el wrapper
@@ -288,7 +301,7 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
 
     // Oculta el botón flotante mientras Contacto está (aunque sea en parte) en
     // pantalla. Sin sección `contacto`, el botón queda siempre visible.
-    const nodoContacto = seccionNodos.current.get('contacto')
+    const nodoContacto = seccionNodos.current.get(seccionOcultaFlotante)
     const observerContacto = new IntersectionObserver(
       (entradas) => {
         const entrada = entradas[entradas.length - 1]
@@ -307,6 +320,8 @@ export default function SeccionesSPA({ secciones, marca, accionHeader, pie, clas
       observerPegado.disconnect()
       observerFinPagina.disconnect()
     }
+    // `seccionOcultaFlotante` es una constante por plantilla: no cambia entre renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Al cambiar la sección activa, desplaza la fila del nav para que el

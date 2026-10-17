@@ -71,6 +71,11 @@
   color: rgba(255, 255, 255, 0.62);
 }
 
+.horarios .valor.cerrado {
+  font-weight: 300;
+  color: #fff;
+}
+
 .horarios .etiqueta {
   color: rgba(255, 255, 255, 0.72);
 }
