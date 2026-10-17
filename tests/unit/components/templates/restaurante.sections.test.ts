@@ -232,3 +232,27 @@ describe('restaurante/sections — ubicacionLocal', () => {
     expect(ubicacionLocal(hayCarta, hayLocal)).toBe(esperado)
   })
 })
+
+describe('buildCarta — carta en PDF (R6)', () => {
+  const pdf = `${BASE}/sitios/abc123/carta-1.pdf`
+
+  it('enlaza un PDF propio', () => {
+    expect(buildCarta(config({ cartaPdf: pdf }), BASE)?.enlacePdf).toBe(pdf)
+  })
+
+  it.each([
+    ['sin cartaPdf', undefined],
+    ['URL externa', 'https://ejemplo.cl/carta.pdf'],
+    ['propio pero no PDF', `${BASE}/sitios/abc123/foto-1.jpg`],
+  ])('no enlaza: %s', (_nombre, cartaPdf) => {
+    expect(buildCarta(config({ cartaPdf }), BASE)?.enlacePdf).toBeNull()
+  })
+
+  it('sin base pública (storage no configurado) no enlaza', () => {
+    expect(buildCarta(config({ cartaPdf: pdf }))?.enlacePdf).toBeNull()
+  })
+
+  it('sin platos no resucita la sección aunque haya PDF', () => {
+    expect(buildCarta(config({ servicios: [], cartaPdf: pdf }), BASE)).toBeNull()
+  })
+})

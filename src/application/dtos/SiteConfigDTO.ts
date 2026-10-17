@@ -103,4 +103,8 @@ export interface SiteConfigDTO {
   // cual. Con al menos un plato reemplaza a `servicios[]` en la carta. Se
   // normaliza con `normalizarCarta` (`application/shared/carta.ts`).
   menu?: { categoria?: string; items: { nombre: string; precio?: string }[] }[]
+  // Carta completa en PDF (URL pública de R2), complemento opcional de `menu`
+  // en RESTAURANTE (R6). La sube Agustín desde /admin
+  // (`SubirCartaPdfSitioUseCase`); solo se enlaza si es un archivo propio.
+  cartaPdf?: string
 }

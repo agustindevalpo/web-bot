@@ -1,4 +1,4 @@
-import { claveSiPropia, urlsImagenDeConfig } from '@/domain/imagen/imagenesPropias'
+import { claveSiPropia, esPdfPropio, urlsImagenDeConfig } from '@/domain/imagen/imagenesPropias'
 
 const BASE = 'https://media.devalpo.cl'
 
@@ -41,7 +41,31 @@ describe('urlsImagenDeConfig', () => {
     expect(urlsImagenDeConfig({ logo: 'a', imagenes: ['b', 3, 'c'] })).toEqual(['a', 'b', 'c'])
   })
 
+  it('incluye cartaPdf para que la limpieza de huérfanos la vea', () => {
+    expect(urlsImagenDeConfig({ logo: 'a', cartaPdf: 'p' })).toEqual(['p', 'a'])
+  })
+
   it('devuelve vacío si no hay imágenes', () => {
     expect(urlsImagenDeConfig({ nombre: 'x', imagenes: 'no-array' })).toEqual([])
+  })
+})
+
+describe('esPdfPropio', () => {
+  it('acepta un .pdf plano bajo sitios/<id>/', () => {
+    expect(esPdfPropio(`${BASE}/sitios/s1/carta-abc.pdf`, BASE)).toBe(true)
+  })
+
+  it.each([
+    ['una imagen propia', `${BASE}/sitios/s1/logo-abc.png`],
+    ['un PDF externo', 'https://ejemplo.cl/sitios/s1/carta.pdf'],
+    ['un PDF en subcarpeta', `${BASE}/sitios/s1/carta/menu.pdf`],
+    ['un PDF con query', `${BASE}/sitios/s1/carta.pdf?x=1`],
+    ['un valor que no es texto', 42],
+  ])('rechaza %s', (_nombre, url) => {
+    expect(esPdfPropio(url, BASE)).toBe(false)
+  })
+
+  it('sin base pública nada es propio', () => {
+    expect(esPdfPropio(`${BASE}/sitios/s1/carta-abc.pdf`, null)).toBe(false)
   })
 })

@@ -50,7 +50,7 @@ export default async function Restaurante({ config }: TemplateProps) {
   const marca = buildMarca(config)
   const inicio = buildInicio(config)
   const horarios = buildHorariosBanda(config)
-  const carta = buildCarta(config)
+  const carta = buildCarta(config, urlPublica)
   const local = buildLocal(config, urlPublica)
   const ubicacion = ubicacionLocal(carta !== null, local !== null)
   const nosotros = buildNosotros(config)
