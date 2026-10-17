@@ -6,8 +6,7 @@
 > La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`); si se
 > contradicen, gana Engram.
 >
-> **Última regeneración:** 2026-10-17 · `main` = `fb70b87` (código = release `2c55b53`) ·
-> `develop` = `5ed2bf4`
+> **Última regeneración:** 2026-10-17 · `main` = `develop` = release `2477f4f`
 
 ## 1. Qué es el producto
 
@@ -62,16 +61,13 @@ auth, claude, demo, email, cloudflare, storage, routing…) · `app/` (rutas, ca
 
 ## 4. Producción y develop
 
-**En producción** (`main`, código del release 2026-10-05): chat demo de 6 preguntas, paso de
+**En producción** (`main`, release 2026-10-17): chat demo de 6 preguntas, paso de
 datos, reveal con avance, momento 2 en `/chat/completar`, `/gracias`, 5 templates por rubro,
-**Bloques en `LANDING` y `SERVICIOS`**, dominios propios, panel `/admin` (pausar, dominio,
+**Bloques en `LANDING`, `SERVICIOS` y `RESTAURANTE`**, dirección opcional (`contacto.direccion`, máx. 60) en el paso de datos, carta PDF opcional desde `/admin`, dominios propios, panel `/admin` (pausar, dominio,
 editar `configJson`, confirmar pago, razón social/RUT, subir logo y fotos a R2), metadata y
 Open Graph por sitio, páginas legales `/terminos` y `/privacidad`.
 
-**Solo en `develop` (falta el release a `main`):** **RESTAURANTE en Bloques** (PRs #73–#79) ·
-dirección opcional (`contacto.direccion`, máx. 60 caracteres) capturada en el paso de datos
-del chat para todos los templates · carta PDF opcional desde `/admin`. Sin migración, pero
-la subida del PDF y la foto del hero necesitan R2 configurado en el entorno.
+**Solo en `develop`:** nada; `develop` y `main` tienen el mismo código.
 
 **Inerte o sin construir:**
 - Chat real con Claude: sin `ANTHROPIC_API_KEY` en Railway `/api/chat` responde 503; todo
