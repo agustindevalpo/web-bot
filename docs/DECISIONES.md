@@ -1337,3 +1337,22 @@ rubro con vocabulario propio es agregar un objeto allí.
 **Evidencia:** `src/components/templates/restaurante/copy.ts:48-73` (`ENCARGO`,
 `esPanaderia`, `copyReserva`); commits `0abfb51`, `248d0a5`; Engram
 `odd/restaurante-bloques/decisiones`.
+
+---
+
+## D-46 — La carta del restaurante se construye con datos; el PDF solo la complementa
+
+**Fecha:** 2026-10-17 · **Estado:** vigente
+**Contexto:** muchos restaurantes ya tienen una carta completa en PDF, y la carta construida
+muestra como máximo 8 platos (`normalizarCarta`). Había que decidir si el PDF podía
+reemplazarla.
+**Decisión (Agustín):** la carta armada con datos sigue siendo la pieza principal. Un PDF de
+carta completa (`cartaPdf`, subido desde `/admin`) es opcional y solo complementa: se enlaza
+como "Ver la carta completa (PDF)", nunca la sustituye.
+**Por qué:** un PDF se lee mal en el móvil, no se indexa como texto, se desactualiza sin que
+nadie lo note y rompe el diseño de la plantilla.
+**Consecuencia:** el PDF no hace que la sección Carta se muestre por sí solo: si no hay platos
+que renderizar, no hay carta aunque exista `cartaPdf`. Solo se enlazan PDFs propios (en
+nuestro bucket R2, D-42); una URL ajena no se muestra.
+**Evidencia:** `src/components/templates/restaurante/Carta.tsx:98-100` (enlace
+`TEXTO_ENLACE_PDF`); commit `f78c423`; PR #79; Engram `odd/restaurante-bloques/tasks`.
