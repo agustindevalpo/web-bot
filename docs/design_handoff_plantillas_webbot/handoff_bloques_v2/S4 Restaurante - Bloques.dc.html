@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+@keyframes dvUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){[data-r]{animation:none !important}}
+body{margin:0;background:#E9E7E1;font-family:Montserrat,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#B5482A;text-decoration:none}a:hover{color:#9A3B21}
+code{font:500 11.5px ui-monospace,Menlo,monospace}
+</style></helmet>
+
+<div style="padding:40px 48px 72px;display:flex;flex-direction:column;gap:24px">
+
+<div style="width:1740px;display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+<div>
+<div style="display:flex;align-items:center;gap:10px;margin:0 0 10px"><span style="font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#080056;color:#fff;border-radius:4px">S4</span><span style="font:600 13px Montserrat,sans-serif;color:#080056">RESTAURANTE en Bloques · restaurante, panadería</span></div>
+<div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#3F4652;max-width:96ch">Escritorio a 1280 px y móvil a 390 px con los mismos datos. Cambia el estado con los botones: todo lo que desaparece en <b>Mínimo</b> es un campo que el chat no captura. Especificación completa en <code>04-RESTAURANTE.md</code>.</div>
+</div>
+<div style="flex:none;display:flex;gap:6px;background:#fff;border:1px solid #D8D6CF;border-radius:999px;padding:5px">
+<a href="#" onClick="{{ setCompleto }}" style="font:600 12px Montserrat,sans-serif;padding:10px 18px;border-radius:999px;color:{{ tabCompletoColor }};background:{{ tabCompletoBg }}">Completo</a>
+<a href="#" onClick="{{ setMinimo }}" style="font:600 12px Montserrat,sans-serif;padding:10px 18px;border-radius:999px;color:{{ tabMinimoColor }};background:{{ tabMinimoBg }}">Mínimo</a>
+<a href="#" onClick="{{ setLogo }}" style="font:600 12px Montserrat,sans-serif;padding:10px 18px;border-radius:999px;color:{{ tabLogoColor }};background:{{ tabLogoBg }}">Mínimo + logo</a>
+</div>
+</div>
+
+<div style="width:1740px;box-sizing:border-box;background:#FFF6D9;border:1px solid #E8D79C;border-radius:10px;padding:14px 20px;display:flex;gap:14px;align-items:baseline">
+<span style="flex:none;font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6B4E00">Contenido ilustrativo</span>
+<span style="font:400 12.5px/1.6 Montserrat,sans-serif;color:#3F3418">"Cocinería Doña Rosa" es un negocio inventado para revisar el diseño. Ningún texto, precio, horario ni RUT de este prototipo es real. Los rectángulos rayados son espacios para fotos propias del cliente.</span>
+</div>
+
+<div style="width:1740px;box-sizing:border-box;background:#fff;border:1px solid #D8D6CF;border-radius:10px;padding:18px 22px;display:grid;grid-template-columns:220px 1fr 1fr;gap:28px">
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8A3620;margin:0 0 6px">Estado</div><div style="font:600 13px Montserrat,sans-serif;color:#101218">{{ estadoTitulo }}</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8A3620;margin:0 0 6px">Qué trae</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#3F4652">{{ estadoDetalle }}</div></div>
+<div><div style="font:700 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#8A3620;margin:0 0 6px">Campos propuestos en este estado</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#3F4652">{{ estadoPropuestos }}</div></div>
+</div>
+
+<div style="display:flex;gap:40px;align-items:flex-start">
+
+<!-- ================= ESCRITORIO 1280 ================= -->
+<div style="flex:none;width:1282px">
+<div style="font:700 11px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#4632DE;margin:0 0 12px">Escritorio · 1280 px</div>
+<div style="width:1282px;background:#fff;border:1px solid #D8D6CF;border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(16,19,26,.08)">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#F6F5F2;border-bottom:1px solid #E3E5EA">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;text-align:center;font:500 11px Montserrat,sans-serif;color:#565E6B;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:5px 12px">cocineriadonarosa.cl</div><div style="width:56px"></div>
+</div>
+<div style="width:1280px;background:#fff">
+
+<header style="display:flex;align-items:center;justify-content:space-between;padding:0 96px;height:96px;border-bottom:1px solid #EFEEF4">
+<sc-if value="{{ conLogo }}" hint-placeholder-val="{{ false }}"><div style="width:132px;height:44px;border:1.5px dashed #9BA3AE;display:flex;align-items:center;justify-content:center;font:600 10px Montserrat,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#565E6B">Logo 3:1 · 44 px</div></sc-if>
+<sc-if value="{{ sinLogo }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:14px"><div style="width:36px;height:36px;background:#B5482A;display:flex;align-items:center;justify-content:center;font:800 14px Montserrat,sans-serif;letter-spacing:-.04em;color:#fff">DR</div><div style="font:700 16px Montserrat,sans-serif;letter-spacing:-.02em;color:#101218">Cocinería Doña Rosa</div></div></sc-if>
+<nav aria-label="Secciones" style="display:flex;gap:42px">
+<a href="#" style="font:600 12.5px Montserrat,sans-serif;color:#101218">Inicio</a>
+<a href="#" style="font:500 12.5px Montserrat,sans-serif;color:#565E6B" style-hover="color:#101218">Carta</a>
+<a href="#" style="font:500 12.5px Montserrat,sans-serif;color:#565E6B" style-hover="color:#101218">Nosotros</a>
+<a href="#" style="font:500 12.5px Montserrat,sans-serif;color:#565E6B" style-hover="color:#101218">Reservas</a>
+</nav>
+<a href="#" style="font:600 12px Montserrat,sans-serif;color:#fff;background:#B5482A;padding:15px 28px;border-radius:999px" style-hover="background:#9A3B21">Reservar mesa</a>
+</header>
+
+<sc-if value="{{ conFoto }}" hint-placeholder-val="{{ true }}">
+<div data-revsec style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;padding:150px 0 0 96px">
+<div style="padding:0 0 150px">
+<div data-r style="display:inline-flex;align-items:center;gap:10px;background:#F8EDE9;padding:10px 18px;border-radius:999px;margin:0 0 44px"><span style="width:7px;height:7px;border-radius:50%;background:#B5482A"></span><span style="font:600 11.5px Montserrat,sans-serif;color:#B5482A">Restaurante · Ñuñoa</span></div>
+<h1 data-r style="margin:0 0 40px;font:800 78px/1 Montserrat,sans-serif;letter-spacing:-.042em;color:#101218;max-width:11ch">Cocinería Doña Rosa</h1>
+<p data-r style="margin:0 0 52px;font:300 18px/1.85 Montserrat,sans-serif;color:#565E6B;max-width:38ch">Cocina chilena casera, con menú del día de lunes a viernes y platos de olla los fines de semana.</p>
+<div data-r style="display:flex;gap:16px">
+<a href="#" style="font:600 13px Montserrat,sans-serif;color:#fff;background:#B5482A;padding:20px 34px;border-radius:999px" style-hover="background:#9A3B21">Reservar por WhatsApp</a>
+<a href="#" style="font:600 13px Montserrat,sans-serif;color:#101218;border:1.5px solid #D8D6E4;padding:20px 34px;border-radius:999px" style-hover="border-color:#B5482A;background:#FCF6F4">Ver la carta</a>
+</div>
+</div>
+<div data-r style="height:680px;background:repeating-linear-gradient(135deg,#E4E2DC 0 14px,#EDEBE5 14px 28px);border-radius:24px 0 0 24px;display:flex;align-items:flex-end;padding:36px"><span style="font:500 11.5px Montserrat,sans-serif;color:#6E6A5E">imagenes[0] · foto propia del local o de un plato</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sinFoto }}" hint-placeholder-val="{{ false }}">
+<div data-revsec style="padding:150px 96px 120px">
+<div data-r style="display:inline-flex;align-items:center;gap:10px;background:#F8EDE9;padding:10px 18px;border-radius:999px;margin:0 0 44px"><span style="width:7px;height:7px;border-radius:50%;background:#B5482A"></span><span style="font:600 11.5px Montserrat,sans-serif;color:#B5482A">Restaurante · Ñuñoa</span></div>
+<h1 data-r style="margin:0 0 40px;font:800 78px/1 Montserrat,sans-serif;letter-spacing:-.042em;color:#101218;max-width:14ch">Cocinería Doña Rosa</h1>
+<div data-r style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:96px;align-items:end">
+<p style="margin:0;font:300 18px/1.85 Montserrat,sans-serif;color:#565E6B;max-width:44ch">Cocina chilena casera, con menú del día de lunes a viernes y platos de olla los fines de semana.</p>
+<div style="display:flex;gap:16px">
+<a href="#" style="font:600 13px Montserrat,sans-serif;color:#fff;background:#B5482A;padding:20px 34px;border-radius:999px" style-hover="background:#9A3B21">Reservar por WhatsApp</a>
+<a href="#" style="font:600 13px Montserrat,sans-serif;color:#101218;border:1.5px solid #D8D6E4;padding:20px 34px;border-radius:999px" style-hover="border-color:#B5482A;background:#FCF6F4">Ver la carta</a>
+</div>
+</div>
+<div data-r style="margin:96px 0 0;border-top:1px solid #101218;display:grid;grid-template-columns:repeat(3,1fr)">
+<sc-for list="{{ datosHero }}" as="d" hint-placeholder-count="3">
+<div style="padding:28px 32px 0 0"><div style="font:600 11px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#565E6B;margin:0 0 12px">{{ d.label }}</div><div style="font:700 22px/1.3 Montserrat,sans-serif;letter-spacing:-.02em;color:#101218">{{ d.value }}</div></div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ conHorarios }}" hint-placeholder-val="{{ true }}">
+<div data-revsec style="background:#101218;padding:72px 96px;display:flex;align-items:center;gap:64px">
+<div data-r style="flex:none;font:600 11px Montserrat,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.72)">Horarios</div>
+<sc-for list="{{ horarios }}" as="h" hint-placeholder-count="3">
+<div data-r style="display:flex;flex-direction:column;gap:12px;border-left:1px solid rgba(255,255,255,.16);padding-left:56px">
+<span style="font:600 11px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.72)">{{ h.dia }}</span>
+<sc-if value="{{ h.abierto }}" hint-placeholder-val="{{ true }}"><span style="font:800 40px/1 Montserrat,sans-serif;letter-spacing:-.04em;color:#15DEFA">{{ h.rango }}</span></sc-if>
+<sc-if value="{{ h.cerrado }}" hint-placeholder-val="{{ false }}"><span style="font:300 40px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#fff">{{ h.rango }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<div data-revsec style="background:#F2F1ED;padding:140px 96px">
+<div data-r style="font:600 11px Montserrat,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:#B5482A;margin:0 0 30px">La carta</div>
+<h2 data-r style="margin:0 0 84px;font:800 68px/1.04 Montserrat,sans-serif;letter-spacing:-.042em;color:#101218">{{ h2Carta }}</h2>
+<sc-if value="{{ cartaGuias }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:96px;row-gap:72px">
+<sc-for list="{{ cartaCols }}" as="c" hint-placeholder-count="2">
+<div data-r>
+<sc-if value="{{ c.conTitulo }}" hint-placeholder-val="{{ true }}"><div style="font:600 11px Montserrat,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:#B5482A;padding:0 0 18px;border-bottom:1px solid #101218;margin:0 0 8px">{{ c.titulo }}</div></sc-if>
+<sc-for list="{{ c.items }}" as="it" hint-placeholder-count="3">
+<div style="display:flex;align-items:baseline;gap:16px;padding:18px 0">
+<span style="font:700 24px/1.25 Montserrat,sans-serif;letter-spacing:-.02em;color:#101218">{{ it.nombre }}</span>
+<sc-if value="{{ it.conPrecio }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:1;min-width:24px;border-bottom:2px dotted #B9B5AA;transform:translateY(-6px)"></span><span style="flex:none;font:800 24px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#101218;font-variant-numeric:tabular-nums">{{ it.precio }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ cartaGrande }}" hint-placeholder-val="{{ false }}">
+<div style="max-width:880px">
+<sc-for list="{{ cartaItems }}" as="it" hint-placeholder-count="4">
+<div data-r style="padding:30px 0;border-top:1px solid #D9D6CC;font:800 44px/1.12 Montserrat,sans-serif;letter-spacing:-.04em;color:#101218">{{ it.nombre }}</div>
+</sc-for>
+<div style="border-top:1px solid #D9D6CC"></div>
+</div>
+</sc-if>
+<div data-r style="margin:64px 0 0;display:flex;align-items:baseline;justify-content:space-between;gap:48px">
+<span style="font:300 14px/1.6 Montserrat,sans-serif;color:#565E6B;max-width:56ch">{{ notaCarta }}</span>
+<a href="#" style="flex:none;font:600 13px Montserrat,sans-serif;color:#B5482A;border-bottom:1.5px solid #E9C5BA;padding:0 0 5px" style-hover="border-color:#B5482A">Reserva o pide por WhatsApp →</a>
+</div>
+</div>
+
+<sc-if value="{{ conLocal }}" hint-placeholder-val="{{ true }}">
+<div data-revsec style="background:#fff;padding:140px 96px">
+<div data-r style="display:flex;align-items:baseline;justify-content:space-between;margin:0 0 56px"><h2 style="margin:0;font:800 52px/1.06 Montserrat,sans-serif;letter-spacing:-.042em;color:#101218">El local</h2><span style="font:300 14px Montserrat,sans-serif;color:#565E6B">Ñuñoa</span></div>
+<div data-r style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px;height:560px">
+<div style="background:repeating-linear-gradient(135deg,#E4E2DC 0 14px,#EDEBE5 14px 28px);display:flex;align-items:flex-end;padding:24px"><span style="font:500 11px Montserrat,sans-serif;color:#6E6A5E">imagenes[1] · foto propia</span></div>
+<div style="display:grid;grid-template-rows:1fr 1fr;gap:20px">
+<div style="background:repeating-linear-gradient(135deg,#E4E2DC 0 14px,#EDEBE5 14px 28px);display:flex;align-items:flex-end;padding:20px"><span style="font:500 11px Montserrat,sans-serif;color:#6E6A5E">imagenes[2]</span></div>
+<div style="background:repeating-linear-gradient(135deg,#E4E2DC 0 14px,#EDEBE5 14px 28px);display:flex;align-items:flex-end;padding:20px"><span style="font:500 11px Montserrat,sans-serif;color:#6E6A5E">imagenes[3]</span></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<div data-revsec style="background:#B5482A;padding:150px 96px;display:grid;grid-template-columns:{{ gridNosotros }};gap:96px;align-items:center">
+<div>
+<div data-r style="font:600 11px Montserrat,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:#fff;margin:0 0 34px">Nosotros</div>
+<h2 data-r style="margin:0 0 34px;font:800 62px/1.06 Montserrat,sans-serif;letter-spacing:-.042em;color:#fff;max-width:18ch">Cocinería Doña Rosa en Ñuñoa</h2>
+<p data-r style="margin:0;font:300 17.5px/1.9 Montserrat,sans-serif;color:#fff;max-width:44ch">{{ nosotrosParrafo }}</p>
+<sc-if value="{{ conHighlight }}" hint-placeholder-val="{{ false }}">
+<figure data-r style="margin:44px 0 0;padding:40px 0 0;border-top:1px solid rgba(255,255,255,.3);max-width:44ch"><blockquote style="margin:0 0 14px;font:700 24px/1.4 Montserrat,sans-serif;letter-spacing:-.02em;color:#fff">"Es lo más parecido a almorzar donde mi abuela."</blockquote><figcaption style="font:500 13px Montserrat,sans-serif;color:#fff">Ignacio M. · cliente desde 2019</figcaption></figure>
+</sc-if>
+</div>
+<sc-if value="{{ conPartes }}" hint-placeholder-val="{{ false }}">
+<div data-r style="display:flex;flex-direction:column;gap:22px">
+<div style="background:rgba(255,255,255,.14);padding:32px 34px"><div style="font:700 17px Montserrat,sans-serif;color:#fff;margin:0 0 10px">Desde 1998</div><div style="font:300 14px/1.7 Montserrat,sans-serif;color:#fff">En la misma esquina de Irarrázaval.</div></div>
+<div style="background:rgba(255,255,255,.14);padding:32px 34px"><div style="font:700 17px Montserrat,sans-serif;color:#fff;margin:0 0 10px">Rosa Valdés</div><div style="font:300 14px/1.7 Montserrat,sans-serif;color:#fff">Cocinera y dueña, en la cocina todos los días.</div></div>
+<div style="background:rgba(255,255,255,.14);padding:32px 34px"><div style="font:700 17px Montserrat,sans-serif;color:#fff;margin:0 0 10px">Todo hecho el mismo día</div><div style="font:300 14px/1.7 Montserrat,sans-serif;color:#fff">Nada recalentado de ayer.</div></div>
+</div>
+</sc-if>
+</div>
+
+<div data-revsec style="background:#fff;padding:140px 96px;display:grid;grid-template-columns:1fr 1fr;gap:96px">
+<div>
+<div data-r style="font:600 11px Montserrat,sans-serif;letter-spacing:.26em;text-transform:uppercase;color:#B5482A;margin:0 0 30px">Reservas</div>
+<h2 data-r style="margin:0 0 24px;font:800 56px/1.06 Montserrat,sans-serif;letter-spacing:-.042em;color:#101218">Reserva tu mesa</h2>
+<p data-r style="margin:0 0 44px;font:300 17px/1.85 Montserrat,sans-serif;color:#565E6B;max-width:40ch">Cuéntanos para cuántas personas y cuándo. Te respondemos por WhatsApp para confirmar.</p>
+<div data-r style="display:flex;flex-direction:column;gap:20px">
+<div>
+<label for="d-nombre" style="display:block;font:600 13px Montserrat,sans-serif;color:#101218;margin:0 0 8px">Tu nombre</label>
+<input id="d-nombre" value="{{ fNombre }}" onChange="{{ onNombre }}" aria-invalid="{{ errNombreAria }}" style="width:100%;box-sizing:border-box;font:400 15px Montserrat,sans-serif;color:#101218;padding:18px 22px;border:1.5px solid {{ bNombre }};border-radius:12px;outline:none;background:#fff" style-focus="border-color:#B5482A;box-shadow:0 0 0 3px rgba(181,72,42,.12)">
+<sc-if value="{{ errNombre }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 12.5px Montserrat,sans-serif;color:#B42318;margin:8px 0 0">Escribe tu nombre.</div></sc-if>
+</div>
+<div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px">
+<div>
+<label for="d-personas" style="display:block;font:600 13px Montserrat,sans-serif;color:#101218;margin:0 0 8px">Personas</label>
+<select id="d-personas" value="{{ fPersonas }}" onChange="{{ onPersonas }}" aria-invalid="{{ errPersonasAria }}" style="width:100%;box-sizing:border-box;height:58px;font:400 15px Montserrat,sans-serif;color:#101218;padding:0 18px;border:1.5px solid {{ bPersonas }};border-radius:12px;outline:none;background:#fff" style-focus="border-color:#B5482A;box-shadow:0 0 0 3px rgba(181,72,42,.12)">
+<option value="">Elige</option><option>1 persona</option><option>2 personas</option><option>3 personas</option><option>4 personas</option><option>5 personas</option><option>6 personas</option><option>7 personas</option><option>8 personas</option><option>Más de 8 personas</option>
+</select>
+<sc-if value="{{ errPersonas }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 12.5px Montserrat,sans-serif;color:#B42318;margin:8px 0 0">Elige para cuántas personas.</div></sc-if>
+</div>
+<div>
+<label for="d-cuando" style="display:block;font:600 13px Montserrat,sans-serif;color:#101218;margin:0 0 8px">¿Para cuándo?</label>
+<input id="d-cuando" value="{{ fCuando }}" onChange="{{ onCuando }}" placeholder="Por ejemplo: sábado a las 21:00" aria-invalid="{{ errCuandoAria }}" style="width:100%;box-sizing:border-box;font:400 15px Montserrat,sans-serif;color:#101218;padding:18px 22px;border:1.5px solid {{ bCuando }};border-radius:12px;outline:none;background:#fff" style-focus="border-color:#B5482A;box-shadow:0 0 0 3px rgba(181,72,42,.12)">
+<sc-if value="{{ errCuando }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 12.5px Montserrat,sans-serif;color:#B42318;margin:8px 0 0">Cuéntanos para qué día y hora.</div></sc-if>
+</div>
+</div>
+<a href="#" onClick="{{ onEnviar }}" style="font:600 13px Montserrat,sans-serif;color:#fff;background:#B5482A;padding:21px 34px;border-radius:999px;text-align:center;margin:4px 0 0" style-hover="background:#9A3B21">Pedir reserva por WhatsApp</a>
+<div style="font:300 13px/1.6 Montserrat,sans-serif;color:#565E6B">Se abre WhatsApp con tu mensaje listo. La reserva queda confirmada cuando te respondamos.</div>
+<sc-if value="{{ enviado }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="background:#F2F1ED;border-radius:16px;padding:20px 22px">
+<div style="font:700 14px Montserrat,sans-serif;color:#101218;margin:0 0 8px">Abrimos WhatsApp con tu mensaje</div>
+<div style="font:400 13px/1.6 Montserrat,sans-serif;color:#3F4652;margin:0 0 12px">Envíalo para pedir tu reserva. Si no se abrió, escríbenos al +56 9 7345 2210.</div>
+<div style="font:500 12px/1.6 ui-monospace,Menlo,monospace;color:#101218;background:#fff;border:1px solid #E2E0EC;border-radius:10px;padding:12px 14px">{{ mensaje }}</div>
+<div style="font:500 11px Montserrat,sans-serif;color:#565E6B;margin:10px 0 0">En el prototipo no se abre WhatsApp: se muestra el mensaje que se enviaría.</div>
+</div>
+</sc-if>
+</div>
+</div>
+<div data-r style="display:flex;flex-direction:column;gap:20px;justify-content:center">
+<sc-if value="{{ conHorarios }}" hint-placeholder-val="{{ true }}">
+<div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:32px">
+<div style="font:500 10.5px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 10px">Horarios</div>
+<sc-for list="{{ horarios }}" as="h" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #EFEEF4;font:400 15px Montserrat,sans-serif;color:#101218"><span>{{ h.dia }}</span><span style="font-weight:700">{{ h.rango }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ conDireccion }}" hint-placeholder-val="{{ false }}">
+<div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:30px;position:relative"><span style="position:absolute;right:16px;top:14px;font:700 9px Montserrat,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6B4E00;background:#FFF6D9;padding:4px 8px;border-radius:4px">Campo propuesto · P1</span><div style="font:500 10.5px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 12px">Dirección</div><div style="font:700 17px Montserrat,sans-serif;color:#101218">Av. Irarrázaval 3150, Ñuñoa</div></div>
+</sc-if>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:30px"><div style="font:500 10.5px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 12px">WhatsApp</div><div style="font:700 17px Montserrat,sans-serif;color:#101218">+56 9 7345 2210</div></div>
+<div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:30px"><div style="font:500 10.5px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 12px">Correo</div><div style="font:700 15px Montserrat,sans-serif;color:#101218">reservas@donarosa.cl</div></div>
+</div>
+</div>
+</div>
+
+<footer style="background:#101218;padding:100px 96px 44px">
+<div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:72px;padding:0 0 80px;border-bottom:1px solid rgba(255,255,255,.14)">
+<div>
+<sc-if value="{{ conLogo }}" hint-placeholder-val="{{ false }}"><div style="display:inline-flex;background:#fff;padding:12px 16px;margin:0 0 24px"><div style="width:106px;height:35px;border:1.5px dashed #9BA3AE;display:flex;align-items:center;justify-content:center;font:600 9px Montserrat,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#565E6B">Logo · placa</div></div></sc-if>
+<sc-if value="{{ sinLogo }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:14px;margin:0 0 24px"><div style="width:34px;height:34px;background:#B5482A;display:flex;align-items:center;justify-content:center;font:800 13px Montserrat,sans-serif;letter-spacing:-.04em;color:#fff">DR</div><div style="font:700 19px Montserrat,sans-serif;letter-spacing:-.02em;color:#fff">Cocinería Doña Rosa</div></div></sc-if>
+<div style="font:300 14px/1.8 Montserrat,sans-serif;color:rgba(255,255,255,.72);max-width:34ch">{{ footerGlosa }}</div>
+</div>
+<div><div style="font:600 10.5px Montserrat,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.66);margin:0 0 24px">Secciones</div><div style="display:flex;flex-direction:column;gap:14px"><a href="#" style="font:300 14px Montserrat,sans-serif;color:rgba(255,255,255,.8)">Inicio</a><a href="#" style="font:300 14px Montserrat,sans-serif;color:rgba(255,255,255,.8)">Carta</a><a href="#" style="font:300 14px Montserrat,sans-serif;color:rgba(255,255,255,.8)">Nosotros</a><a href="#" style="font:300 14px Montserrat,sans-serif;color:rgba(255,255,255,.8)">Reservas</a></div></div>
+<div><div style="font:600 10.5px Montserrat,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.66);margin:0 0 24px">Contacto</div><div style="display:flex;flex-direction:column;gap:14px"><span style="font:300 14px Montserrat,sans-serif;color:rgba(255,255,255,.8)">+56 9 7345 2210</span><span style="font:300 14px Montserrat,sans-serif;color:rgba(255,255,255,.8)">reservas@donarosa.cl</span><sc-if value="{{ conRedes }}" hint-placeholder-val="{{ false }}"><span style="font:300 14px Montserrat,sans-serif;color:rgba(255,255,255,.8)">@cocineriadonarosa</span></sc-if></div></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;padding:36px 0 0"><span style="font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.66)">{{ legalLinea }}</span><span style="font:300 11.5px Montserrat,sans-serif;color:rgba(255,255,255,.66)">Hecho con WebBot · Devalpo</span></div>
+</footer>
+</div>
+</div>
+</div>
+
+<!-- ================= MÓVIL 390 ================= -->
+<div style="flex:none;width:410px">
+<div style="font:700 11px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#4632DE;margin:0 0 12px">Móvil · 390 px · página completa</div>
+<div style="width:410px;box-sizing:border-box;padding:10px;background:#10131A;border-radius:46px;box-shadow:0 18px 44px rgba(16,19,26,.2)">
+<div style="width:390px;background:#fff;border-radius:36px;overflow:hidden;position:relative">
+
+<div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font:600 13px Montserrat,sans-serif;color:#101218"><span>9:41</span><span style="width:22px;height:11px;border:1.5px solid #101218;border-radius:3px;display:block"></span></div>
+<div style="height:42px;display:flex;align-items:center;gap:9px;padding:0 18px">
+<sc-if value="{{ conLogo }}" hint-placeholder-val="{{ false }}"><div style="width:102px;height:34px;border:1.5px dashed #9BA3AE;display:flex;align-items:center;justify-content:center;font:600 8.5px Montserrat,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#565E6B">Logo · 34 px</div></sc-if>
+<sc-if value="{{ sinLogo }}" hint-placeholder-val="{{ true }}"><div style="width:26px;height:26px;background:#B5482A;display:flex;align-items:center;justify-content:center;font:800 10.5px Montserrat,sans-serif;letter-spacing:-.04em;color:#fff">DR</div><div style="font:700 12.5px/1.2 Montserrat,sans-serif;letter-spacing:-.02em;color:#101218">Cocinería Doña Rosa</div></sc-if>
+</div>
+<div style="height:44px;box-sizing:border-box;display:flex;gap:22px;padding:0 18px;border-bottom:1px solid #EFEEF4;overflow:hidden;align-items:flex-end">
+<div style="flex:none;padding:0 0 11px;border-bottom:2px solid #B5482A;font:600 12.5px Montserrat,sans-serif;color:#101218">Inicio</div>
+<div style="flex:none;padding:0 0 11px;font:500 12.5px Montserrat,sans-serif;color:#565E6B">Carta</div>
+<div style="flex:none;padding:0 0 11px;font:500 12.5px Montserrat,sans-serif;color:#565E6B">Nosotros</div>
+<div style="flex:none;padding:0 0 11px;font:500 12.5px Montserrat,sans-serif;color:#565E6B">Reservas</div>
+</div>
+
+<sc-if value="{{ conFoto }}" hint-placeholder-val="{{ true }}">
+<div style="height:220px;background:repeating-linear-gradient(135deg,#E4E2DC 0 12px,#EDEBE5 12px 24px);display:flex;align-items:flex-end;padding:14px 18px"><span style="font:500 10px Montserrat,sans-serif;color:#6E6A5E">imagenes[0] · propia</span></div>
+</sc-if>
+<div style="padding:32px 24px 44px">
+<div style="display:inline-flex;align-items:center;gap:8px;background:#F8EDE9;padding:8px 14px;border-radius:999px;margin:0 0 20px"><span style="width:6px;height:6px;border-radius:50%;background:#B5482A"></span><span style="font:600 10.5px Montserrat,sans-serif;color:#B5482A">Restaurante · Ñuñoa</span></div>
+<div style="font:800 44px/.98 Montserrat,sans-serif;letter-spacing:-.045em;color:#101218;margin:0 0 18px">Cocinería Doña Rosa</div>
+<div style="font:300 13.5px/1.8 Montserrat,sans-serif;color:#565E6B;margin:0 0 24px">Cocina chilena casera, con menú del día de lunes a viernes y platos de olla los fines de semana.</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="min-height:46px;display:flex;align-items:center;justify-content:center;background:#B5482A;border-radius:999px;font:600 12.5px Montserrat,sans-serif;color:#fff">Reservar por WhatsApp</div>
+<div style="min-height:46px;display:flex;align-items:center;justify-content:center;border:1.5px solid #D8D6E4;border-radius:999px;font:600 12.5px Montserrat,sans-serif;color:#101218">Ver la carta</div>
+</div>
+<sc-if value="{{ sinFoto }}" hint-placeholder-val="{{ false }}">
+<div style="margin:36px 0 0;border-top:1px solid #101218">
+<sc-for list="{{ datosHero }}" as="d" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:16px 0;border-bottom:1px solid #EFEEF4"><span style="font:600 10px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#565E6B">{{ d.label }}</span><span style="font:700 15px Montserrat,sans-serif;letter-spacing:-.01em;color:#101218;text-align:right">{{ d.value }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{ conHorarios }}" hint-placeholder-val="{{ true }}">
+<div style="background:#101218;padding:28px 24px">
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.72);margin:0 0 6px">Horarios</div>
+<sc-for list="{{ horarios }}" as="h" hint-placeholder-count="3">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.14)"><span style="font:300 12.5px Montserrat,sans-serif;color:rgba(255,255,255,.72)">{{ h.dia }}</span>
+<sc-if value="{{ h.abierto }}" hint-placeholder-val="{{ true }}"><span style="font:800 19px/1 Montserrat,sans-serif;letter-spacing:-.03em;color:#15DEFA">{{ h.rango }}</span></sc-if>
+<sc-if value="{{ h.cerrado }}" hint-placeholder-val="{{ false }}"><span style="font:300 19px/1 Montserrat,sans-serif;color:#fff">{{ h.rango }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<div style="background:#F2F1ED;padding:44px 24px">
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#B5482A;margin:0 0 16px">La carta</div>
+<div style="font:800 34px/1.06 Montserrat,sans-serif;letter-spacing:-.04em;color:#101218;margin:0 0 30px">{{ h2Carta }}</div>
+<sc-if value="{{ cartaGuias }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:36px">
+<sc-for list="{{ cartaCols }}" as="c" hint-placeholder-count="2">
+<div>
+<sc-if value="{{ c.conTitulo }}" hint-placeholder-val="{{ true }}"><div style="font:600 10px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#B5482A;padding:0 0 12px;border-bottom:1px solid #101218;margin:0 0 4px">{{ c.titulo }}</div></sc-if>
+<sc-for list="{{ c.items }}" as="it" hint-placeholder-count="3">
+<div style="display:flex;align-items:baseline;gap:10px;padding:13px 0">
+<span style="font:700 17px/1.3 Montserrat,sans-serif;letter-spacing:-.02em;color:#101218">{{ it.nombre }}</span>
+<sc-if value="{{ it.conPrecio }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="flex:1;min-width:16px;border-bottom:1.5px dotted #B9B5AA;transform:translateY(-4px)"></span><span style="flex:none;font:800 17px/1 Montserrat,sans-serif;letter-spacing:-.02em;color:#101218;font-variant-numeric:tabular-nums">{{ it.precio }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ cartaGrande }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ cartaItems }}" as="it" hint-placeholder-count="4">
+<div style="padding:20px 0;border-top:1px solid #D9D6CC;font:800 26px/1.15 Montserrat,sans-serif;letter-spacing:-.035em;color:#101218">{{ it.nombre }}</div>
+</sc-for>
+<div style="border-top:1px solid #D9D6CC"></div>
+</sc-if>
+<div style="margin:30px 0 0;font:300 12px/1.6 Montserrat,sans-serif;color:#565E6B">{{ notaCarta }}</div>
+<div style="margin:16px 0 0;min-height:44px;display:flex;align-items:center"><span style="font:600 12.5px Montserrat,sans-serif;color:#B5482A;border-bottom:1.5px solid #E9C5BA;padding:0 0 4px">Reserva o pide por WhatsApp →</span></div>
+</div>
+
+<sc-if value="{{ conLocal }}" hint-placeholder-val="{{ true }}">
+<div style="padding:44px 24px">
+<div style="font:800 30px/1.06 Montserrat,sans-serif;letter-spacing:-.04em;color:#101218;margin:0 0 22px">El local</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="height:220px;background:repeating-linear-gradient(135deg,#E4E2DC 0 12px,#EDEBE5 12px 24px)"></div>
+<div style="height:220px;background:repeating-linear-gradient(135deg,#E4E2DC 0 12px,#EDEBE5 12px 24px)"></div>
+<div style="height:220px;background:repeating-linear-gradient(135deg,#E4E2DC 0 12px,#EDEBE5 12px 24px)"></div>
+</div>
+</div>
+</sc-if>
+
+<div style="background:#B5482A;padding:40px 24px 44px">
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#fff;margin:0 0 20px">Nosotros</div>
+<div style="font:800 32px/1.08 Montserrat,sans-serif;letter-spacing:-.04em;color:#fff;margin:0 0 20px">Cocinería Doña Rosa en Ñuñoa</div>
+<div style="font:300 13.5px/1.85 Montserrat,sans-serif;color:#fff">{{ nosotrosParrafo }}</div>
+<sc-if value="{{ conPartes }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:10px;margin:24px 0 0">
+<div style="background:rgba(255,255,255,.14);padding:18px 20px"><div style="font:700 14px Montserrat,sans-serif;color:#fff;margin:0 0 6px">Desde 1998</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#fff">En la misma esquina de Irarrázaval.</div></div>
+<div style="background:rgba(255,255,255,.14);padding:18px 20px"><div style="font:700 14px Montserrat,sans-serif;color:#fff;margin:0 0 6px">Rosa Valdés</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#fff">Cocinera y dueña.</div></div>
+<div style="background:rgba(255,255,255,.14);padding:18px 20px"><div style="font:700 14px Montserrat,sans-serif;color:#fff;margin:0 0 6px">Todo hecho el mismo día</div><div style="font:300 12.5px/1.6 Montserrat,sans-serif;color:#fff">Nada recalentado de ayer.</div></div>
+</div>
+</sc-if>
+<sc-if value="{{ conHighlight }}" hint-placeholder-val="{{ false }}">
+<div style="margin:24px 0 0;padding:24px 0 0;border-top:1px solid rgba(255,255,255,.3)"><div style="font:700 17px/1.4 Montserrat,sans-serif;letter-spacing:-.02em;color:#fff;margin:0 0 10px">"Es lo más parecido a almorzar donde mi abuela."</div><div style="font:500 11.5px Montserrat,sans-serif;color:#fff">Ignacio M. · cliente desde 2019</div></div>
+</sc-if>
+</div>
+
+<div style="padding:44px 24px">
+<div style="font:600 10px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#B5482A;margin:0 0 16px">Reservas</div>
+<div style="font:800 32px/1.06 Montserrat,sans-serif;letter-spacing:-.04em;color:#101218;margin:0 0 14px">Reserva tu mesa</div>
+<div style="font:300 13.5px/1.75 Montserrat,sans-serif;color:#565E6B;margin:0 0 26px">Cuéntanos para cuántas personas y cuándo. Te respondemos por WhatsApp para confirmar.</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div><label for="m-nombre" style="display:block;font:600 13px Montserrat,sans-serif;color:#101218;margin:0 0 6px">Tu nombre</label><input id="m-nombre" value="{{ fNombre }}" onChange="{{ onNombre }}" style="width:100%;box-sizing:border-box;height:52px;font:400 15px Montserrat,sans-serif;color:#101218;padding:0 16px;border:1.5px solid {{ bNombre }};border-radius:12px;outline:none;background:#fff" style-focus="border-color:#B5482A;box-shadow:0 0 0 3px rgba(181,72,42,.12)"><sc-if value="{{ errNombre }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 12.5px Montserrat,sans-serif;color:#B42318;margin:6px 0 0">Escribe tu nombre.</div></sc-if></div>
+<div><label for="m-personas" style="display:block;font:600 13px Montserrat,sans-serif;color:#101218;margin:0 0 6px">Personas</label><select id="m-personas" value="{{ fPersonas }}" onChange="{{ onPersonas }}" style="width:100%;box-sizing:border-box;height:52px;font:400 15px Montserrat,sans-serif;color:#101218;padding:0 14px;border:1.5px solid {{ bPersonas }};border-radius:12px;outline:none;background:#fff"><option value="">Elige</option><option>1 persona</option><option>2 personas</option><option>3 personas</option><option>4 personas</option><option>5 personas</option><option>6 personas</option><option>7 personas</option><option>8 personas</option><option>Más de 8 personas</option></select><sc-if value="{{ errPersonas }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 12.5px Montserrat,sans-serif;color:#B42318;margin:6px 0 0">Elige para cuántas personas.</div></sc-if></div>
+<div><label for="m-cuando" style="display:block;font:600 13px Montserrat,sans-serif;color:#101218;margin:0 0 6px">¿Para cuándo?</label><input id="m-cuando" value="{{ fCuando }}" onChange="{{ onCuando }}" placeholder="Por ejemplo: sábado a las 21:00" style="width:100%;box-sizing:border-box;height:52px;font:400 15px Montserrat,sans-serif;color:#101218;padding:0 16px;border:1.5px solid {{ bCuando }};border-radius:12px;outline:none;background:#fff" style-focus="border-color:#B5482A;box-shadow:0 0 0 3px rgba(181,72,42,.12)"><sc-if value="{{ errCuando }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font:500 12.5px Montserrat,sans-serif;color:#B42318;margin:6px 0 0">Cuéntanos para qué día y hora.</div></sc-if></div>
+<a href="#" onClick="{{ onEnviar }}" style="min-height:52px;display:flex;align-items:center;justify-content:center;background:#B5482A;border-radius:999px;font:600 13.5px Montserrat,sans-serif;color:#fff;margin:4px 0 0">Pedir reserva por WhatsApp</a>
+<div style="font:300 12px/1.6 Montserrat,sans-serif;color:#565E6B">Se abre WhatsApp con tu mensaje listo. La reserva queda confirmada cuando te respondamos.</div>
+<sc-if value="{{ enviado }}" hint-placeholder-val="{{ false }}"><div role="status" style="background:#F2F1ED;border-radius:14px;padding:16px 18px;font:400 12.5px/1.6 Montserrat,sans-serif;color:#3F4652"><b style="font-weight:700;color:#101218">Abrimos WhatsApp con tu mensaje.</b> Envíalo para pedir tu reserva.</div></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin:32px 0 0">
+<sc-if value="{{ conHorarios }}" hint-placeholder-val="{{ true }}">
+<div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:20px 22px">
+<div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 4px">Horarios</div>
+<sc-for list="{{ horarios }}" as="h" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #EFEEF4;font:400 13.5px Montserrat,sans-serif;color:#101218"><span>{{ h.dia }}</span><span style="font-weight:700">{{ h.rango }}</span></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ conDireccion }}" hint-placeholder-val="{{ false }}"><div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:20px 22px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 8px">Dirección · propuesto</div><div style="font:700 15px Montserrat,sans-serif;color:#101218">Av. Irarrázaval 3150, Ñuñoa</div></div></sc-if>
+<div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:20px 22px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 8px">WhatsApp</div><div style="font:700 15px Montserrat,sans-serif;color:#101218">+56 9 7345 2210</div></div>
+<div style="border:1.5px solid #E2E0EC;border-radius:16px;padding:20px 22px"><div style="font:500 10px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#565E6B;margin:0 0 8px">Correo</div><div style="font:700 15px Montserrat,sans-serif;color:#101218">reservas@donarosa.cl</div></div>
+</div>
+</div>
+
+<div style="background:#101218;padding:36px 24px 30px">
+<sc-if value="{{ conLogo }}" hint-placeholder-val="{{ false }}"><div style="display:inline-flex;background:#fff;padding:10px 13px;margin:0 0 18px"><div style="width:96px;height:32px;border:1.5px dashed #9BA3AE;display:flex;align-items:center;justify-content:center;font:600 8px Montserrat,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#565E6B">Logo</div></div></sc-if>
+<sc-if value="{{ sinLogo }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:11px;margin:0 0 18px"><div style="width:28px;height:28px;background:#B5482A;display:flex;align-items:center;justify-content:center;font:800 11px Montserrat,sans-serif;color:#fff">DR</div><div style="font:700 14px Montserrat,sans-serif;letter-spacing:-.02em;color:#fff">Cocinería Doña Rosa</div></div></sc-if>
+<div style="font:300 12.5px/1.8 Montserrat,sans-serif;color:rgba(255,255,255,.72);margin:0 0 18px">{{ footerGlosa }}</div>
+<div style="padding:16px 0 0;border-top:1px solid rgba(255,255,255,.14);display:flex;flex-direction:column;gap:6px;font:300 11px/1.6 Montserrat,sans-serif;color:rgba(255,255,255,.66)"><span>{{ legalLinea }}</span><span>Hecho con WebBot · Devalpo</span></div>
+</div>
+
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;completo&quot;,&quot;minimo&quot;,&quot;logo&quot;],&quot;default&quot;:&quot;completo&quot;,&quot;tsType&quot;:&quot;'completo'|'minimo'|'logo'&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;animaciones&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = { estado: null, nombre: '', personas: '', cuando: '', intentado: false, enviado: false };
+  componentDidMount(){ this.observe(); }
+  componentDidUpdate(p, s){ if (s.estado !== this.state.estado) this.observe(); }
+  observe(){
+    if (this.io) this.io.disconnect();
+    this.io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        this.io.unobserve(e.target);
+        if (this.props.animaciones === false) return;
+        Array.from(e.target.querySelectorAll('[data-r]')).forEach((el,i) => {
+          el.style.animation = 'none'; void el.offsetWidth;
+          el.style.animation = 'dvUp .7s cubic-bezier(.2,.7,.2,1) ' + (i*80) + 'ms both';
+        });
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-revsec]').forEach(el => this.io.observe(el));
+  }
+  renderVals(){
+    const estado = this.state.estado || this.props.estado || 'completo';
+    const full = estado === 'completo';
+    const conLogo = estado !== 'minimo';
+    const go = (k) => (e) => { e.preventDefault(); this.setState({ estado: k }); };
+    const tab = (k) => estado === k;
+
+    const menu = [
+      { categoria: 'Entradas', items: [{ nombre: 'Empanada de pino', precio: '$3.200' }, { nombre: 'Sopaipillas con pebre', precio: '$4.500' }] },
+      { categoria: 'Fondos', items: [{ nombre: 'Pastel de choclo', precio: '$11.900' }, { nombre: 'Cazuela de vacuno', precio: '$10.500' }, { nombre: 'Pescado del día', precio: '' }] },
+      { categoria: 'Postres', items: [{ nombre: 'Leche asada', precio: '$3.900' }, { nombre: 'Mote con huesillo', precio: '$3.500' }] }
+    ];
+    const servicios = ['Pastel de choclo', 'Cazuela de vacuno', 'Empanadas de pino', 'Menú del día'];
+
+    let cartaCols, cartaItems, hayPrecio, nPlatos;
+    if (full) {
+      cartaCols = menu.map(c => ({ titulo: c.categoria, conTitulo: true,
+        items: c.items.map(i => ({ nombre: i.nombre, precio: i.precio, conPrecio: !!i.precio })) }));
+      hayPrecio = true; nPlatos = 7; cartaItems = [];
+    } else {
+      cartaItems = servicios.map(n => ({ nombre: n }));
+      cartaCols = []; hayPrecio = false; nPlatos = servicios.length;
+    }
+
+    const horarios = [
+      { dia: 'Martes a sábado', rango: '12:30 – 23:00', abierto: true, cerrado: false },
+      { dia: 'Domingo', rango: '12:30 – 17:00', abierto: true, cerrado: false },
+      { dia: 'Lunes', rango: 'Cerrado', abierto: false, cerrado: true }
+    ];
+
+    const s = this.state;
+    const eN = s.intentado && !s.nombre.trim();
+    const eP = s.intentado && !s.personas;
+    const eC = s.intentado && !s.cuando.trim();
+    const mensaje = 'Hola, soy ' + (s.nombre.trim() || '{nombre}') + '. Quiero reservar una mesa para ' + (s.personas ? s.personas.replace(' personas',' personas').toLowerCase() : '{personas}') + ', ' + (s.cuando.trim() || '{cuándo}') + '.';
+
+    const det = {
+      completo: 'Foto propia en el hero, logo 3:1, horarios (con un día cerrado), carta de 7 platos en 3 categorías con un plato sin precio, 3 fotos del local, las 3 micro-preguntas, cita con autor, Instagram, razón social y RUT.',
+      minimo: 'Solo lo que deja el chat y la captura de contacto: nombre, rubro, descripción, 4 servicios como texto, ciudad, teléfono y correo. Sin foto propia: hero tipográfico. Sin logo: monograma.',
+      logo: 'Igual que Mínimo, más el logo que carga Devalpo después del pago. Es el estado típico de un sitio recién pagado, antes de que lleguen las fotos.'
+    };
+    const prop = {
+      completo: 'menu (M2) · horarios (M2) · sobreNosotrosPartes, highlight, highlightAutor (M2) · contacto.direccion (propuesto, P1) · legal (Admin) · logo e imagenes (Admin).',
+      minimo: 'Ninguno. La carta sale de servicios[] y no muestra precios.',
+      logo: 'Solo logo (Admin).'
+    };
+    const tit = { completo: 'Completo', minimo: 'Mínimo · lo que deja el chat', logo: 'Mínimo + logo' };
+
+    return {
+      setCompleto: go('completo'), setMinimo: go('minimo'), setLogo: go('logo'),
+      tabCompletoColor: tab('completo') ? '#fff' : '#101218', tabCompletoBg: tab('completo') ? '#B5482A' : 'transparent',
+      tabMinimoColor: tab('minimo') ? '#fff' : '#101218', tabMinimoBg: tab('minimo') ? '#B5482A' : 'transparent',
+      tabLogoColor: tab('logo') ? '#fff' : '#101218', tabLogoBg: tab('logo') ? '#B5482A' : 'transparent',
+      estadoTitulo: tit[estado], estadoDetalle: det[estado], estadoPropuestos: prop[estado],
+      conLogo, sinLogo: !conLogo,
+      conFoto: full, sinFoto: !full,
+      conHorarios: full, horarios,
+      conLocal: full, conPartes: full, conHighlight: full, conRedes: full, conDireccion: full,
+      cartaGuias: hayPrecio, cartaGrande: !hayPrecio, cartaCols, cartaItems,
+      h2Carta: hayPrecio ? 'Nuestra carta' : 'Lo que preparamos',
+      notaCarta: hayPrecio ? 'Precios referenciales. Algunos platos varían según el día; confírmalos al reservar.' : 'Pregunta por el menú del día al reservar.',
+      datosHero: [
+        { label: 'Dónde', value: 'Ñuñoa' },
+        { label: 'Reservas', value: '+56 9 7345 2210' },
+        { label: 'La carta', value: nPlatos + ' platos' }
+      ],
+      gridNosotros: full ? '1.2fr 1fr' : '1fr',
+      nosotrosParrafo: full ? 'Rosa Valdés abrió la cocinería en 1998. Cocinamos lo mismo que se come en una casa chilena: platos de olla, hechos en el día y servidos sin apuro.' : 'Cocina chilena casera, con menú del día de lunes a viernes y platos de olla los fines de semana.',
+      footerGlosa: full ? 'Restaurante en Ñuñoa. Martes a sábado de 12:30 a 23:00, domingo de 12:30 a 17:00.' : 'Restaurante en Ñuñoa.',
+      legalLinea: full ? '© 2026 Comercial Doña Rosa SpA · RUT 77.123.456-8' : '© 2026 Cocinería Doña Rosa',
+      fNombre: s.nombre, fPersonas: s.personas, fCuando: s.cuando,
+      onNombre: (e) => this.setState({ nombre: e.target.value, enviado: false }),
+      onPersonas: (e) => this.setState({ personas: e.target.value, enviado: false }),
+      onCuando: (e) => this.setState({ cuando: e.target.value, enviado: false }),
+      onEnviar: (e) => { e.preventDefault(); const ok = s.nombre.trim() && s.personas && s.cuando.trim(); this.setState({ intentado: true, enviado: !!ok }); },
+      errNombre: eN, errPersonas: eP, errCuando: eC,
+      errNombreAria: eN ? 'true' : 'false', errPersonasAria: eP ? 'true' : 'false', errCuandoAria: eC ? 'true' : 'false',
+      bNombre: eN ? '#B42318' : '#E2E0EC', bPersonas: eP ? '#B42318' : '#E2E0EC', bCuando: eC ? '#B42318' : '#E2E0EC',
+      enviado: s.enviado, mensaje
+    };
+  }
+}
+
+</script>
+</body>
+</html>
