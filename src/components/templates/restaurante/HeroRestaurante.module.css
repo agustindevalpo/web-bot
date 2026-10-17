@@ -1,0 +1,114 @@
+/*
+ * Hero tipográfico de RESTAURANTE (S4, 04-RESTAURANTE.md "Hero sin foto").
+ * La píldora, el display, los botones y sus estados salen de
+ * shared/HeroBloques.module.css; acá solo lo propio de esta forma: una columna
+ * a ancho completo, la fila texto / botones y la fila de datos. Único
+ * breakpoint: 768px (la fila de datos pasa a lista).
+ */
+
+.seccion {
+  padding: 150px 96px 120px;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+/* Tope de 14 caracteres por línea: el nombre se parte en pocas líneas anchas. */
+.titulo {
+  max-width: 14ch;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 96px;
+  align-items: end;
+}
+
+.parrafo {
+  font: 300 18px/1.85 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  max-width: 44ch;
+  margin: 0;
+}
+
+/* ── Fila de datos ── */
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(var(--columnas-datos, 3), 1fr);
+  margin: 96px 0 0;
+  border-top: 1px solid #101218;
+}
+
+.celda {
+  padding: 28px 32px 0 0;
+  min-width: 0;
+}
+
+.rotulo {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--wb-tpl-ink-muted);
+  margin: 0 0 12px;
+}
+
+.valor {
+  font: 700 22px/1.3 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--wb-tpl-ink);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .seccion {
+    padding: 44px 24px;
+  }
+
+  .titulo {
+    max-width: none;
+  }
+
+  .fila {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .parrafo {
+    font-size: 13.5px;
+    line-height: 1.8;
+    max-width: none;
+  }
+
+  /* Lista: rótulo a la izquierda, valor a la derecha, 1px entre filas y el
+   * primer borde en --ink. */
+  .datos {
+    display: block;
+    margin-top: 32px;
+  }
+
+  .celda {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 0;
+    border-top: 1px solid #efeef4;
+  }
+
+  .celda:first-child {
+    border-top: 0;
+  }
+
+  .rotulo {
+    font-size: 10px;
+    margin: 0;
+    flex: none;
+  }
+
+  .valor {
+    font-size: 15px;
+    text-align: right;
+  }
+}

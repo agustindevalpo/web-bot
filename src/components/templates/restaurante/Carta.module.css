@@ -1,0 +1,234 @@
+/*
+ * Carta de RESTAURANTE (S4, handoff_bloques_v2/04-RESTAURANTE.md "Carta").
+ * Fondo #F2F1ED, 140px 96px. Dos formas: con guías punteadas (hay precios) y
+ * grande (ninguno). Único breakpoint: 768px.
+ */
+
+.seccion {
+  background: #f2f1ed;
+  padding: 140px 96px;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.eyebrow {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--acento);
+  margin: 0 0 20px;
+}
+
+.titulo {
+  font: 800 68px/1.04 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
+  max-width: 22ch;
+  margin: 0 0 84px;
+  color: var(--wb-tpl-ink);
+}
+
+.categoria {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--acento);
+  margin: 0 0 8px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #101218;
+}
+
+/* ── Forma con guías ── */
+
+.categorias {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 96px;
+  row-gap: 72px;
+}
+
+.dosColumnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 96px;
+}
+
+.unaColumna {
+  max-width: 760px;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.plato {
+  display: flex;
+  align-items: baseline;
+  /* Si el nombre se parte en dos líneas, la guía y el precio se alinean con la última. */
+  align-items: last baseline;
+  gap: 16px;
+  padding: 18px 0;
+}
+
+.nombre {
+  font: 700 24px/1.25 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--wb-tpl-ink);
+}
+
+/* La guía lleva el ojo hasta el precio; sube 6px para quedar a media altura de
+ * las minúsculas. Un plato sin precio no la renderiza. */
+.guia {
+  flex: 1;
+  min-width: 24px;
+  border-bottom: 2px dotted #b9b5aa;
+  transform: translateY(-6px);
+}
+
+.precio {
+  flex: none;
+  font: 800 24px/1 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--wb-tpl-ink);
+}
+
+/* ── Forma grande ── */
+
+.grande {
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.listaGrande {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid #d9d6cc;
+}
+
+.platoGrande {
+  padding: 30px 0;
+  border-top: 1px solid #d9d6cc;
+  font: 800 44px/1.12 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.04em;
+  color: var(--wb-tpl-ink);
+}
+
+/* Con títulos de categoría, el título hace de borde superior del grupo. */
+.grupoGrande .categoria + .listaGrande .platoGrande:first-child {
+  border-top: 0;
+}
+
+/* ── Pie ── */
+
+.pie {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 32px;
+  margin-top: 64px;
+}
+
+.nota {
+  font: 300 14px/1.6 var(--font-montserrat), sans-serif;
+  color: var(--wb-tpl-ink-muted);
+  max-width: 56ch;
+  margin: 0;
+}
+
+.enlaces {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  margin-left: auto;
+}
+
+.enlace {
+  font: 600 13px var(--font-montserrat), sans-serif;
+  color: var(--acento);
+  border-bottom: 1.5px solid var(--acento-28);
+  white-space: nowrap;
+  transition: border-color 0.2s ease;
+}
+
+.enlace:hover {
+  border-color: var(--acento);
+}
+
+.enlace:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 4px;
+}
+
+@media (max-width: 767px) {
+  .seccion {
+    padding: 44px 24px;
+  }
+
+  .titulo {
+    font-size: 34px;
+    line-height: 1.06;
+    letter-spacing: -0.04em;
+    margin-bottom: 32px;
+  }
+
+  .categoria {
+    font-size: 10px;
+    padding-bottom: 14px;
+  }
+
+  .categorias {
+    grid-template-columns: 1fr;
+    row-gap: 36px;
+  }
+
+  .dosColumnas {
+    grid-template-columns: 1fr;
+  }
+
+  .plato {
+    gap: 10px;
+    padding: 13px 0;
+  }
+
+  .nombre {
+    font-size: 17px;
+    line-height: 1.3;
+  }
+
+  .guia {
+    border-bottom-width: 1.5px;
+    transform: translateY(-4px);
+  }
+
+  .precio {
+    font-size: 17px;
+  }
+
+  .grande {
+    gap: 36px;
+  }
+
+  .platoGrande {
+    font-size: 26px;
+    line-height: 1.15;
+    padding: 20px 0;
+  }
+
+  .pie {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    margin-top: 40px;
+  }
+
+  .enlaces {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-left: 0;
+  }
+}

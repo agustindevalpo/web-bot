@@ -1,255 +1,130 @@
 # WebBot — Estado actual
 
 > **Qué es este archivo.** La foto de hoy: qué es WebBot, cómo está construido y qué
-> funciona. Se **reemplaza completo** en cada regeneración, nunca se le agrega historia.
-> La historia va en [`BITACORA.md`](./BITACORA.md); el porqué de cada decisión, en
-> [`DECISIONES.md`](./DECISIONES.md).
+> funciona. Se **reemplaza completo** en cada regeneración, sin historia. La historia va en
+> [`BITACORA.md`](./BITACORA.md); el porqué de cada decisión, en [`DECISIONES.md`](./DECISIONES.md).
+> La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`); si se
+> contradicen, gana Engram.
 >
-> La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`). Este
-> archivo es un reflejo de ellos: si se pierde, se regenera. Si contradice a Engram,
-> gana Engram.
->
-> **Última regeneración:** 2026-10-05 · `main` = `2c55b53` (release) · `develop` = `main`
-> tras este commit
-
----
+> **Última regeneración:** 2026-10-17 · `main` = `fb70b87` (código = release `2c55b53`) ·
+> `develop` = `5ed2bf4`
 
 ## 1. Qué es el producto
 
-Herramienta interna de producción de Devalpo, no un SaaS que se vende por sí solo.
-Devalpo ya vendía sitios WordPress a mano; WebBot es la fábrica que hace rentable la
-promesa **"tu sitio web en un día, en producción, con tu propio dominio"**.
+Herramienta interna de producción de Devalpo: la fábrica detrás de **"tu sitio web en un día,
+en producción, con tu propio dominio"** para PyMEs chilenas. Equipo: Agustín Romero, solo.
 
-- **A quién sirve:** PyMEs chilenas captadas por marketing y referidos.
-- **Cómo se vende:** **pago único**, no suscripción. Link de Mercado Pago
-  (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`), sin webhook: Agustín confirma el pago a mano
-  desde `/admin` y eso activa al cliente.
-- **Precios vigentes** (`src/app/_landing/precios.ts`): $149.990 sitio, $119.990 promo
-  para los primeros 10 cupos (0 vendidos hasta hoy), $249.990 multipágina, $39.990
-  renovación anual con 30 días de gracia. Precios finales con IVA incluido (D-39). Incluye
-  un dominio `.cl`/`.com` estándar hasta `TOPE_DOMINIO_ANUAL` ($15.000/año), siempre a
-  nombre del cliente; uno premium paga la diferencia (D-41). Sin derecho a retracto,
-  con garantía de publicación en 10 días (D-39).
-- **Embudo:** aviso → landing → chat demo de 6 preguntas → el visitante deja nombre,
-  correo y WhatsApp → se le revela su sitio demo con su avance (35 %) → opcionalmente lo
-  completa en `/chat/completar` (hasta 80 %) → paga por Mercado Pago, que lo devuelve a
-  `/gracias` → Devalpo confirma el pago, carga logo y fotos y le asigna el dominio.
-- **Equipo:** Agustín Romero, solo.
+- **Venta:** pago único por link de Mercado Pago (`NEXT_PUBLIC_MERCADOPAGO_LINK_URL`), sin
+  webhook: Agustín confirma el pago en `/admin` y eso activa al cliente.
+- **Precios** (`src/app/_landing/precios.ts`, con IVA, D-39): $149.990 sitio, $119.990 promo
+  (10 cupos, 0 vendidos), $249.990 multipágina, $39.990 renovación anual. Incluye un dominio
+  hasta `TOPE_DOMINIO_ANUAL` ($15.000/año), a nombre del cliente (D-41).
+- **Embudo:** landing → chat demo de 6 preguntas → nombre, correo, WhatsApp (y dirección
+  opcional) → sitio demo con 35 % de avance → opcional `/chat/completar` (hasta 80 %) → pago
+  → `/gracias` → Devalpo confirma, carga logo y fotos y asigna el dominio.
 
-## 2. Stack real
+## 2. Stack
 
-| Capa | Qué hay |
-|---|---|
-| Framework | Next.js **16.3.0** (App Router), React 19.2.8, TypeScript 5 |
-| Datos | PostgreSQL + Prisma **7.9.1** con driver adapter `@prisma/adapter-pg` |
-| IA | `@anthropic-ai/sdk` 0.120 — modelo por `ANTHROPIC_MODEL` (default `claude-sonnet-4-6`) |
-| Auth | Magic link con `jose` (JWT), cookie `webbot_auth`; panel admin con cookie `webbot_admin` |
-| Correo | Resend (HTTP) en producción, Gmail SMTP en local, consola sin credenciales |
-| Dominios propios | Cloudflare for SaaS + Worker (`infra/cloudflare/worker`) delante de Railway |
-| Imágenes de clientes | Cloudflare R2 (bucket `webbot-media`, público en `media.devalpo.cl`) vía `@aws-sdk/client-s3` |
-| Tests | Jest 30 + ts-jest (unit) y Cucumber 13 + **Playwright** (e2e) |
-| Deploy | Railway, plan Hobby, un solo servicio multitenant, auto-deploy desde `main` |
-
-No hay N8N, ni Python, ni Selenium: cero referencias en `src/`.
+Next.js **16.3.0** (App Router), React 19.2.8, TypeScript 5 · PostgreSQL + Prisma **7.9.1** con
+`@prisma/adapter-pg` · `@anthropic-ai/sdk` 0.120 (`ANTHROPIC_MODEL`, default `claude-sonnet-4-6`)
+· auth por magic link (`jose`, cookie `webbot_auth`); admin con cookie `webbot_admin` y
+`ADMIN_SECRET` · Resend (producción), Gmail SMTP (local) · dominios propios: Cloudflare for SaaS
++ Worker (`infra/cloudflare/worker`) · imágenes y PDF de clientes en Cloudflare R2 (bucket
+`webbot-media`, `media.devalpo.cl`) · Jest 30 + Cucumber 13/Playwright · Railway (Hobby, un
+servicio multitenant, auto-deploy desde `main`). No hay N8N, Python ni Selenium.
 
 ## 3. Arquitectura
 
-Hexagonal por capas, con nombres de dominio en español (`Cliente`, `Sitio`, `Pago`,
-`Sesion`, `TokenAcceso`).
+Hexagonal con nombres de dominio en español. `src/`: `domain/` (entidades, puertos, `color/`
+OKLCH) · `application/` (DTOs, 18 casos de uso `*.usecase.ts`) · `infrastructure/` (Prisma,
+auth, claude, demo, email, cloudflare, storage, routing…) · `app/` (rutas, capa delgada) ·
+`components/` (5 templates + `shared/`) · `proxy.ts` (entrada multitenant).
 
-```
-src/
-├── domain/           entidades, value objects, excepciones, puertos I*Repository,
-│                     color/ (OKLCH: contraste, derivación del acento por estilo,
-│                     y derivación de primario/secundario/texto desde el acento)
-├── application/      DTOs, mappers, 14 casos de uso (*.usecase.ts), puertos I*Service
-├── infrastructure/   adaptadores: db (Prisma), auth, claude, demo, email, cloudflare,
-│                     notifications, payments, railway, routing, storage, templates
-├── app/              rutas del App Router (capa delgada: llama casos de uso)
-├── components/       los 5 templates de sitio + shared/ + registry/resolver
-└── proxy.ts          entrada multitenant (Next 16 renombró middleware.ts → proxy.ts)
-```
+- **Composition root:** `src/infrastructure/container.ts`, DI manual (los servicios que leen
+  env son perezosos). **Enrutado:** `proxy.ts` + `resolverDestino()` clasifican el host
+  (`app` / `subdominio` / `dominioPropio`) y reescriben a `/sites/[subdominio]` o `/sites/custom/[host]`.
+- **Templates:** `rubroTemplates.ts` mapea 10 rubros a 5 `Template`; fallback a `LANDING`
+  (D-28). El rediseño **Bloques** (D-38) vive en `components/templates/shared/` (`SeccionesSPA`,
+  `HeroBloques`, `BandaDatos`, `BloqueNosotros`, `SeccionContacto`, `FooterBloques`…; spec en
+  `docs/design_handoff_plantillas_webbot/handoff_bloques_v2/`). En Bloques: **`LANDING`,
+  `SERVICIOS` y `RESTAURANTE`** (restaurante y panadería). `PORTFOLIO` y `TIENDA` siguen con el
+  diseño anterior y no muestran el logo.
+- **RESTAURANTE:** carta armada con datos (`normalizarCarta`, máx. 8 platos, D-46), hero con
+  foto solo si `imagenes[0]` es propia (D-44), panadería con formulario de encargo (D-45) y
+  `FormReserva` que arma el mensaje de WhatsApp. `cartaPdf` opcional (PDF ≤ 10 MB subido desde
+  `/admin`) se enlaza como complemento, nunca reemplaza la carta.
+- **Imágenes:** `SubirImagenSitioUseCase` (JPEG/PNG/WebP ≤ 5 MB) sube a R2 y escribe en
+  `configJson`: `logo`, `imagenes[0]` (foto principal) o la galería (D-42). Las reemplazadas
+  se borran de R2 (solo las propias).
+- **Paleta y datos:** `configJson.colores` guarda solo `acento` (D-32; el resto se deriva en
+  `src/domain/color/paletaDerivada.ts`). Los campos nuevos (`contacto.direccion`, `menu`,
+  `cartaPdf`, `horarios`, `legal`…) son opcionales dentro de `configJson: Json`; 3 migraciones.
 
-- **Composition root:** `src/infrastructure/container.ts`, DI manual. Repositorios y
-  casos de uso se instancian ahí de forma *eager*; `getChatServiceReal()`,
-  `getCustomHostnameService()` y `getAlmacenamientoArchivos()` son perezosos y
-  memoizados porque leen variables de entorno que pueden faltar.
-- **Imágenes:** `SubirImagenSitioUseCase` acepta JPEG/PNG/WebP de hasta 5 MB
-  (validados por sus primeros bytes), los sube a R2 y escribe la URL en `configJson`:
-  `logo`, `imagenes[0]` (la foto principal de todas las plantillas) o al final de
-  `imagenes` (galería). No existe un campo `imagenHero` (D-42).
-- **Enrutado:** `src/proxy.ts` es un adaptador delgado sobre `resolverDestino()`
-  (`src/infrastructure/routing/resolverDestino.ts`, pura y testeada). Clasifica el host
-  en `app` / `subdominio` / `dominioPropio` y reescribe a `/sites/[subdominio]` o
-  `/sites/custom/[host]`.
-- **Templates:** `rubroTemplates.ts` mapea los 10 rubros a 5 `Template`; `resolver.ts`
-  (puro) y `registry.ts` (JSX) están separados; fallback a `LANDING`, que es lo que recibe
-  el rubro neutro `otro` cuando la deducción local no reconoce el negocio (D-28).
-  `components/templates/shared/` es la base del rediseño **Bloques** (D-38; especificación
-  en `docs/design_handoff_plantillas_webbot/handoff_bloques_v2/`): `SeccionesSPA` (header
-  de 96px, nav de anclas, en móvil fila de marca + fila de nav pegada, botón flotante de
-  WhatsApp), `HeroBloques`, `BandaDatos` (cifras u horarios sobre tinta), `BloqueNosotros`
-  (a sangre en el acento, nunca desaparece), `SeccionContacto` + `FormularioContacto` +
-  `ContactoDatos`, `FooterBloques` (logo en placa blanca, línea legal), `Monograma`
-  (Sans pesado) y `logoOptico` (tamaño óptico del logo). Hoy las usan **`LANDING` y
-  `SERVICIOS`**; RESTAURANTE, PORTFOLIO y TIENDA siguen con el diseño anterior.
-- **Paleta:** `configJson.colores` guarda **solo** `acento` (D-32) — `primario`,
-  `secundario` y `texto` ya no se persisten, se derivan al renderizar con
-  `derivarPaletaDesdeAcento()` (`src/domain/color/paletaDerivada.ts`) y
-  `palette.ts` sigue emitiendo las cuatro variables CSS que las 5 plantillas vivas
-  consumen; con `{ bloques: true }` además oscurece el acento hasta 4.5:1 contra blanco
-  (solo las plantillas Bloques: las viejas pintan texto oscuro sobre el acento).
-- **Persistencia:** esquema en `src/infrastructure/db/prisma/schema.prisma`, 3
-  migraciones en `prisma/migrations/`; ni D-32 ni el rediseño Bloques agregaron
-  ninguna — los campos nuevos (`servicios[].foto`/`precioDesde`, `sobreNosotrosPartes`,
-  `highlightAutor`, `legal`, `horarios`, `logoDimensiones`) son opcionales dentro del
-  mismo `configJson: Json`.
+## 4. Producción y develop
 
-## 4. Qué está en producción, qué no
+**En producción** (`main`, código del release 2026-10-05): chat demo de 6 preguntas, paso de
+datos, reveal con avance, momento 2 en `/chat/completar`, `/gracias`, 5 templates por rubro,
+**Bloques en `LANDING` y `SERVICIOS`**, dominios propios, panel `/admin` (pausar, dominio,
+editar `configJson`, confirmar pago, razón social/RUT, subir logo y fotos a R2), metadata y
+Open Graph por sitio, páginas legales `/terminos` y `/privacidad`.
 
-**En producción (`main` = `2c55b53`, desplegado el 2026-10-05):**
-**chat demo en Bloques** con 6 preguntas, confirmación del rubro por el nombre y
-sugerencias de servicios (PRs #65–#66) · **paso de datos** con nombre, correo y WhatsApp
-(+56 9 y 8 dígitos), que llena `configJson.contacto` (PR #67) · **reveal** con vista
-previa, avance de `calcularAvance` (base 35 %, techo 80 % antes del pago) y caja de pago
-(PR #68) · **momento 2** en `/chat/completar`: una tarea por pantalla (servicios con
-precio, horarios, Nosotros, frase de cliente), omitir, resumen; se cierra cuando Devalpo
-confirma el pago (PRs #69–#70) · **`/gracias`**, URL de retorno del link de Mercado Pago
-(PR #71) · campos "Razón social" y "RUT" en `/admin` (PR #72) · 5 templates de sitio elegidos por rubro · dominios propios vía
-Cloudflare · panel `/admin` para pausar, reactivar, asignar dominio, editar `configJson`
-y confirmar pago · cobro por link de Mercado Pago con activación manual · metadata y
-Open Graph propios por sitio (no la copia de la landing comercial) · paleta de cada sitio
-derivada de un único acento en OKLCH, con `primario`/`secundario`/`texto` calculados en
-cada render en vez de leídos de la base (D-32) · acento derivado del estilo que el
-cliente elige en el chat (D-27) · deducción de rubro sobre descripción y servicios, con
-fallback neutro y pregunta guiada si no alcanza (D-28) · opciones del chat clicables
-(D-29) · login que precarga el correo de quien ya dejó el lead (D-30) · **rediseño
-Bloques de `LANDING` y `SERVICIOS`** (PRs #48–#62): hero con título en tres tamaños,
-banda de cifras u horarios, bandas de servicio (LANDING) o lista con precios y "El lugar"
-con fotos propias (SERVICIOS), bloque Nosotros en el acento, contacto sin mapa que arma
-el mensaje de WhatsApp, footer con razón social y RUT cuando `configJson.legal` existe ·
-**páginas legales** `/terminos` y `/privacidad`, e identificación del proveedor (razón
-social, RUT, domicilio) en el footer de la landing (PR #42) · **subida de logo, foto
-principal y galería desde `/admin` a Cloudflare R2** (PR #44, D-42; probado en vivo en
-`test.sitios.devalpo.cl`) · logo del header de `LANDING` con alto fijo y ancho según su
-proporción (PR #45); los logos subidos desde entonces guardan sus dimensiones y el alto se
-ajusta ópticamente (área constante, 28-60 px en escritorio y 22-34 en el header móvil; un
-logotipo con proporción ≥ 1.6 reemplaza al nombre), los anteriores conservan el alto fijo ·
-las imágenes reemplazadas o quitadas se borran de R2 (solo las propias del sitio).
-RESTAURANTE, PORTFOLIO y TIENDA siguen con el diseño anterior y no muestran el logo.
+**Solo en `develop` (falta el release a `main`):** **RESTAURANTE en Bloques** (PRs #73–#79) ·
+dirección opcional (`contacto.direccion`, máx. 60 caracteres) capturada en el paso de datos
+del chat para todos los templates · carta PDF opcional desde `/admin`. Sin migración, pero
+la subida del PDF y la foto del hero necesitan R2 configurado en el entorno.
 
-**No construido / inerte:**
+**Inerte o sin construir:**
+- Chat real con Claude: sin `ANTHROPIC_API_KEY` en Railway `/api/chat` responde 503; todo
+  va por `DemoChatService` (guionado). Su guion sigue siendo el de 8 preguntas, no el de 6.
+- Magic link: requiere `RESEND_API_KEY` y dominio verificado; si no, cae a `DevEmailService`.
+- `PaymentEngineService`, `RailwayDeployService`, `WhatsAppNotificacionService` son stubs que
+  tiran; el motor de pagos es un microservicio aparte, no desplegado.
+- `pausarSitioUC`, `reactivarSitioUC`, `verificarDominioUC` no los consume ninguna ruta.
+- El cliente no sube archivos: Devalpo carga logo, fotos y PDF desde `/admin`.
 
-- Chat real con Claude: el código está completo desde 2026-08-25, pero sin
-  `ANTHROPIC_API_KEY` en Railway `getChatServiceReal()` devuelve `null` y `/api/chat`
-  responde 503. Todo el tráfico hoy va por `DemoChatService` (guionado).
-- Magic link: funciona en código, requiere `RESEND_API_KEY` y un dominio verificado en
-  Resend. Sin eso cae a `DevEmailService`.
-- `PaymentEngineService`, `RailwayDeployService` y `WhatsAppNotificacionService` son
-  stubs que **tiran** al llamarlos. El motor de pagos es un microservicio aparte que no
-  está desplegado (la organización tiene restricciones de OAuth App que impiden clonarlo).
-- `pausarSitioUC`, `reactivarSitioUC` y `verificarDominioUC` están compuestos en el
-  container pero ninguna ruta los consume (verificado por grep).
-- Términos y condiciones por cliente (si un cliente activa Webpay o Mercado Pago): no
-  existen; Bloques solo muestra razón social y RUT en el footer (T7).
-- El cliente no sube archivos él mismo: logo y fotos llegan por WhatsApp y Devalpo los
-  sube desde `/admin` (D-42). `destacados` (cifras de LANDING) solo se carga en `/admin`.
-- El modo real del chat (`ClaudeChatService`, inerte sin `ANTHROPIC_API_KEY`) conserva
-  el guion viejo de 8 preguntas; no está alineado con el de 6.
+## 5. Bloqueado
 
-## 5. Bloqueado, y en qué exactamente
-
-| Qué | Bloqueado en |
+| Qué | En qué |
 |---|---|
-| Vender a tráfico frío con tranquilidad | Que un abogado revise `/terminos` y `/privacidad`: son un borrador fundado en las leyes 19.496 y 19.628, sin revisión profesional. |
-| Chat real con Claude | Que Agustín cargue `ANTHROPIC_API_KEY` en Railway. |
+| Vender a tráfico frío | Revisión legal de `/terminos` y `/privacidad` (borrador, leyes 19.496 y 19.628). |
+| Chat real con Claude | `ANTHROPIC_API_KEY` en Railway. |
 | Magic link en producción | Cuenta de Resend con dominio verificado. |
-| Activación automática por pago | Deploy del motor de pagos de Devalpo. |
-| T9 de `site-metadata` | Pegar un link de sitio real en WhatsApp y pasarlo por el Sharing Debugger de Facebook — solo se puede probar en vivo. |
-| Limpiar el sitio de prueba `demo-cea59ef1` | Es un `UPDATE` contra la Postgres de producción; falta que Agustín decida corregir o borrar. |
+| Activación automática por pago | Deploy del motor de pagos. |
+| Foto de hero, "El local" y PDF de RESTAURANTE | Probarlos con R2 configurado (no verificado en local). |
 
 ## 6. Cómo correrlo
-
-**Local, sin depender de Railway** (receta verificada el 2026-09-08):
 
 ```bash
 docker run -d --name webbot-pg -e POSTGRES_PASSWORD=webbot -e POSTGRES_USER=webbot \
   -e POSTGRES_DB=webbot -p 5433:5432 postgres:16-alpine
-
 export DATABASE_URL="postgresql://webbot:webbot@localhost:5433/webbot"
-npx prisma migrate deploy   # aplica las 3 migraciones
-npm run db:seed-demo         # OBLIGATORIO, ver trampas
-npm run dev                   # http://localhost:3000
+npx prisma migrate deploy    # 3 migraciones
+npm run db:seed-demo         # OBLIGATORIO (ver trampas)
+npm run db:seed-fixtures-restaurante   # sitios /sites/dev-restaurante-*, dev-panaderia
+npm run dev                  # http://localhost:3000
 ```
 
-La variable inline gana sobre el `.env` del repo (Next.js no pisa una variable ya
-definida en el entorno).
+`npm run dev:sandbox` arma lo mismo con el link de pruebas de Mercado Pago (puerto 5435).
+Tests: `npm run test:unit` (99 suites / 1558 tests en verde), `test:coverage` (70/80/80/80),
+`test:e2e` (necesita `npm run dev`), `npx tsc --noEmit`, `npx eslint src tests`. No hay
+script `test` a secas.
 
-**Sandbox de pagos** (D-22): `npm run dev:sandbox` arma lo de arriba solo, contra su
-propio contenedor (puerto 5435) y con el link de pruebas de Mercado Pago ya puesto.
+## 7. Trampas
 
-**Tests:**
-
-```bash
-npm run test:unit          # Jest — 82 suites / 1177 tests en verde
-npm run test:coverage       # umbrales: 70 branches / 80 functions / 80 lines / 80 statements
-npm run test:e2e            # Cucumber + Playwright; necesita `npm run dev` y una BD con datos
-npm run test:all            # jest + cucumber
-npx tsc --noEmit             # no hay script de typecheck; se corre directo
-npm run lint
-```
-
-No existe un script `test` a secas.
-
-## 7. Trampas que costaron tiempo real
-
-- El deploy de Railway **no corre migraciones**: toda release con migración nueva se
-  aplica a mano con `npx prisma migrate deploy`.
-- Nunca usar `prisma migrate dev` (exige shadow database y no hay staging); usar
-  `prisma migrate diff --script` para previsualizar y `migrate deploy` para aplicar.
-- Prisma 7 exige driver adapter: un `new PrismaClient()` pelado revienta.
-- `npm run db:seed-demo` es precondición de arranque: sin el `Cliente` demo compartido,
-  `POST /api/chat/lead` cae con `P2003` en `Sitio_clienteId_fkey` y devuelve un 500 opaco.
-- `https://devalpo.cl` **no es WebBot**, es el WordPress de Bluehost: responde 200 en `/`
-  y 404 en `/chat`, y se lee como app rota. La app (chat y `/admin`) vive en
-  `https://webbot.devalpo.cl` (también responde en `web-bot-production-d190.up.railway.app`);
-  `*.sitios.devalpo.cl` son sitios de clientes. La app reconoce un solo host propio
-  (`NEXT_PUBLIC_APP_DOMAIN`, `src/proxy.ts`): cualquier otro se enruta como sitio de cliente,
-  así que `panel.sitios.devalpo.cl` ya no es el panel.
-- Recargar `/chat` a mitad del guion muestra la pregunta 1, pero la sesión del servidor
-  sigue en su paso: la respuesta siguiente se lee contra la pregunta equivocada. Solo
-  `/chat?vista=sitio` restaura algo (el reveal de un sitio abierto).
-- En Chrome automatizado con la ventana maximizada, `resize_window` no achica nada y
-  escribir + Enter llegó a recargar `/chat`: para 390 px se usa un iframe de 390 px y se
-  llena el formulario por JS.
-- El SMTP de Gmail está bloqueado en el egress de Railway (puertos 465 y 587); por eso
-  producción usa Resend por HTTP.
-- El túnel SSH de Railway (`railway connect Postgres --tunnel-only`) no funciona en
-  Windows en esta máquina; se usa Public Access de Postgres.
-- Una pestaña de Chrome en segundo plano estrangula `IntersectionObserver` y el repintado:
-  produce diagnósticos falsos ("el scrollspy no funciona", "la página no scrollea").
-  Comprobar `document.visibilityState`/`document.hasFocus()` antes de diagnosticar nada
-  medido en el navegador. Con la ventana maximizada, `resize_window` no cambia el
-  viewport: el móvil se mide dentro de un `<iframe>` de 390px del mismo origen.
-- `overflow-x: hidden` en `html` y `body` a la vez convierte al `body` en contenedor de
-  scroll y **mata todo `position: sticky`** (se pega a una caja que no se mueve). Por eso
-  `globals.css` usa `overflow-x: clip`. Ningún test unitario lo ve.
-- `npx tsc --noEmit` no revisa `tests/`; `npm run build` sí. En Windows, un archivo que
-  difiere solo en mayúsculas de otro (`bandaDatos.ts` junto a `BandaDatos.tsx`) rompe tsc.
-- `npm run lint` falla si existe la carpeta sin versionar `handoff_bloquesV2/` (trae un
-  `support.js`); `npx eslint src tests` es el chequeo real.
-- `docs/historico/` es archivo muerto por diseño: describe el proyecto de agosto de 2026
-  (suscripciones, N8N, Python, equipo de tres). Nunca citarlo como fuente de un hecho
-  actual.
-- `R2_PUBLIC_URL` se lee en `next.config.ts` al compilar y arrancar: si cambia, hay que
-  volver a desplegar o `next/image` rechaza las fotos subidas. Si no es una URL
-  `http(s)` absoluta, el panel queda en "almacenamiento no configurado". `R2_ACCOUNT_ID`
-  son 32 caracteres hexadecimales; cualquier otra cosa hace fallar toda subida.
-- El panel `/admin` lee `ADMIN_SECRET`, no `ADMIN_PASSWORD`. Ese nombre viejo estuvo en
-  `.env.example` hasta el 2026-09-12 sin que ningún módulo lo leyera, y es el tipo de
-  variable fantasma que hace perder una tarde: se carga, no pasa nada, y no hay error.
-- Las credenciales del motor de pagos (`FLOW_*`, `MP_ACCESS_TOKEN`, `PAYPAL_*`) ya no
-  figuran en `.env.example`: vuelven cuando ese microservicio esté desplegado.
-- Filas de `Sitio` escritas antes del 2026-09-20 conservan `primario`, `secundario` y
-  `texto` en su `configJson.colores` (D-32): son campos huérfanos, nadie los borra ni
-  los reescribe, y ningún código los lee — no confundirlos con el dato vigente.
+- Railway **no corre migraciones**: `npx prisma migrate deploy` a mano. Nunca `migrate dev`
+  (no hay staging); previsualizar con `migrate diff --script`. Prisma 7 exige driver adapter.
+- `db:seed-demo` es precondición: sin el `Cliente` demo, `POST /api/chat/lead` cae con `P2003`.
+- `https://devalpo.cl` es el WordPress de Bluehost, no WebBot; la app vive en
+  `webbot.devalpo.cl`. Cualquier otro host se enruta como sitio de cliente.
+- Gmail SMTP está bloqueado en Railway: producción usa Resend por HTTP. El túnel SSH de
+  Railway no funciona en Windows; se usa Public Access de Postgres.
+- Chrome en segundo plano estrangula `IntersectionObserver`; el móvil se mide en un `<iframe>`
+  de 390 px. `overflow-x: hidden` en `html` y `body` mata `position: sticky` (se usa `clip`).
+- `tsc --noEmit` no revisa `tests/` (`npm run build` sí); un archivo que difiere solo en
+  mayúsculas de otro rompe tsc en Windows. `npm run lint` falla con la carpeta sin versionar
+  `handoff_bloquesV2/`.
+- `R2_PUBLIC_URL` se lee al compilar: si cambia, redesplegar o `next/image` rechaza las fotos.
+  `R2_ACCOUNT_ID` son 32 hex. El panel lee `ADMIN_SECRET`, no `ADMIN_PASSWORD`.
+- `docs/historico/` es archivo muerto: nunca se cita como hecho actual.
+- Filas de `Sitio` previas al 2026-09-20 conservan `primario`/`secundario`/`texto` huérfanos
+  en `configJson.colores` (D-32); ningún código los lee.

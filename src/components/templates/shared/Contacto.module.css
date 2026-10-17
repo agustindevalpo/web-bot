@@ -148,7 +148,12 @@
   gap: 20px;
 }
 
-.tarjetas > :only-child {
+.tarjetasIguales {
+  grid-template-columns: 1fr 1fr;
+}
+
+.tarjetas > :only-child,
+.tarjetaAncha {
   grid-column: 1 / -1;
 }
 

@@ -152,7 +152,7 @@ export default async function Landing({ config }: TemplateProps) {
           titulo="Conversemos de tu proyecto"
           parrafo={formulario ? 'Cuéntanos qué necesitas y te respondemos por WhatsApp.' : null}
           formulario={formulario}
-          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} />}
+          datos={<ContactoDatos horarios={contacto.horarios} telefono={contacto.telefono} email={contacto.email} direccion={contacto.direccion} />}
         />
       ),
     },

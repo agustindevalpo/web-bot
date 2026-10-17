@@ -223,6 +223,7 @@ export function buildNosotros(config: SiteConfigDTO): NosotrosProps {
 export type ContactoProps = {
   telefono: string | null
   email: string | null
+  direccion: string | null
   formularioHabilitado: boolean
   horarios: Horario[]
 }
@@ -242,6 +243,7 @@ export function buildContacto(config: SiteConfigDTO): ContactoProps {
   return {
     telefono: comoStringNoVacio(config.contacto?.telefono),
     email: comoStringNoVacio(config.contacto?.email),
+    direccion: comoStringNoVacio(config.contacto?.direccion),
     formularioHabilitado,
     horarios: comoHorarios(config.horarios),
   }

@@ -6,7 +6,7 @@ import { Sitio } from '@/domain/entities/Sitio'
 import { Plan } from '@/domain/value-objects/Plan'
 import type { Template } from '@/domain/value-objects/Template'
 import { normalizarEmail } from '@/application/shared/email'
-import { telefonoLeadANormalizado } from '@/application/shared/datosLead'
+import { direccionLeadNormalizada, mensajeErrorDireccion, telefonoLeadANormalizado } from '@/application/shared/datosLead'
 import { calcularAvance } from '@/application/shared/avanceSitio'
 import { subdominioDemoDe } from '@/application/shared/subdominioDemo'
 import { LeadInvalidoException } from '@/domain/exceptions/LeadInvalidoException'
@@ -20,6 +20,8 @@ export interface CapturarLeadDemoInput {
   email: string
   // 8 dígitos después del +56 9; se acepta con espacios o guiones.
   telefono: string
+  // Opcional: una línea, hasta 60 caracteres; vacía equivale a ausente.
+  direccion?: string
   // Resuelto por la ruta (ver `resolverModoChat`), nunca leído acá desde
   // cookies o JWT — el caso de uso no depende de `NextRequest` (Decisión D4
   // en design.md).
@@ -65,6 +67,11 @@ export class CapturarLeadDemoUseCase {
       throw new LeadInvalidoException('Ingresa un teléfono válido.')
     }
 
+    if (mensajeErrorDireccion(input.direccion)) {
+      throw new LeadInvalidoException('La dirección admite hasta 60 caracteres.')
+    }
+    const direccion = direccionLeadNormalizada(input.direccion)
+
     const sesion = await this.sesionRepo.findBySessionId(input.sessionId)
     if (!sesion) {
       throw new SesionNoEncontradaException(input.sessionId)
@@ -98,6 +105,7 @@ export class CapturarLeadDemoUseCase {
     const datosJson = conContactoDelLead(sesion.datosJson as Record<string, unknown>, {
       telefono,
       email,
+      direccion,
     })
     const sitioExistente = await this.sitioRepo.findBySubdominio(subdominioDemo)
     if (sitioExistente) {
@@ -131,12 +139,12 @@ function resultadoDelSitio(subdominioDemo: string, config: Record<string, unknow
   }
 }
 
-// Merge defensivo: el teléfono y el correo del lead completan `contacto`, pero
+// Merge defensivo: el teléfono, el correo y la dirección del lead completan `contacto`, pero
 // nunca pisan un valor que ya tenga contenido ni descartan otras claves
 // (p. ej. `formulario`).
 function conContactoDelLead(
   datos: Record<string, unknown>,
-  lead: { telefono: string; email: string },
+  lead: { telefono: string; email: string; direccion: string | null },
 ): Record<string, unknown> {
   const actual =
     datos.contacto && typeof datos.contacto === 'object' ? (datos.contacto as Record<string, unknown>) : {}
@@ -148,6 +156,8 @@ function conContactoDelLead(
       ...actual,
       telefono: vacio(actual.telefono) ? lead.telefono : actual.telefono,
       email: vacio(actual.email) ? lead.email : actual.email,
+      // La clave solo existe si hay dirección: nada se escribe vacío.
+      ...(lead.direccion && vacio(actual.direccion) ? { direccion: lead.direccion } : {}),
     },
   }
 }

@@ -1,4 +1,4 @@
-import { parametrosSubidaImagen } from '@/app/admin/sitios/[id]/subirImagen'
+import { parametrosSubidaImagen, parametrosSubidaCartaPdf } from '@/app/admin/sitios/[id]/subirImagen'
 import { ResultadoSubirImagenSitio } from '@/application/use-cases/SubirImagenSitio.usecase'
 import { Sitio } from '@/domain/entities/Sitio'
 import { Template } from '@/domain/value-objects/Template'
@@ -45,5 +45,23 @@ describe('parametrosSubidaImagen', () => {
     const params = parametrosSubidaImagen(resultado, 'imagenes')
     expect(params.error).toContain('Foto de galería')
     expect(params.error).toContain('boom')
+  })
+})
+
+describe('parametrosSubidaCartaPdf', () => {
+  it('ok devuelve el código carta_pdf', () => {
+    expect(parametrosSubidaCartaPdf({ tipo: 'ok', url: 'https://media.devalpo.cl/x.pdf', sitio: SITIO })).toEqual({
+      ok: 'carta_pdf',
+    })
+  })
+
+  it('formato y tamaño dicen PDF y 10 MB', () => {
+    expect(parametrosSubidaCartaPdf({ tipo: 'formato_no_soportado' }).error).toContain('PDF')
+    expect(parametrosSubidaCartaPdf({ tipo: 'archivo_muy_grande' }).error).toContain('10 MB')
+  })
+
+  it('no_configurado y error explican el motivo', () => {
+    expect(parametrosSubidaCartaPdf({ tipo: 'no_configurado' }).error).toContain('no está configurado')
+    expect(parametrosSubidaCartaPdf({ tipo: 'error', detalle: 'boom' }).error).toContain('boom')
   })
 })

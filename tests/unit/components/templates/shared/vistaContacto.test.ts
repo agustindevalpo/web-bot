@@ -30,4 +30,18 @@ describe('datosContactoVista', () => {
     expect(tarjeta.valor).toBe('a@b.cl?cc=x@y.cl')
     expect(tarjeta.href).toBeNull()
   })
+
+  it('la dirección es una tarjeta sin enlace, al final, solo si existe', () => {
+    const vista = datosContactoVista({ telefono: '123', email: 'a@b.cl', direccion: '  Av. Libertad 1200  ' })
+    expect(vista.tarjetas.map((t) => t.clave)).toEqual(['telefono', 'correo', 'direccion'])
+    expect(vista.tarjetas[2]).toEqual({
+      clave: 'direccion',
+      etiqueta: 'Dirección',
+      valor: 'Av. Libertad 1200',
+      href: null,
+    })
+    expect(datosContactoVista({ direccion: '   ' }).tarjetas).toEqual([])
+    expect(datosContactoVista({ direccion: undefined }).tarjetas).toEqual([])
+    expect(datosContactoVista({ direccion: 42 }).tarjetas).toEqual([])
+  })
 })

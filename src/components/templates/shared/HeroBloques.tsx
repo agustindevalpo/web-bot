@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import Image from 'next/image'
 import { estiloCascada } from './navegacion'
 import { tramoDisplay, type TramoDisplay } from './displayHero'
@@ -6,7 +7,8 @@ import styles from './HeroBloques.module.css'
 // Hero de Bloques compartido por LANDING y SERVICIOS. Server Component puro:
 // cada plantilla decide los textos y enlaces de los botones; acá solo vive el
 // markup, la cascada de entrada (`data-dv-anim`) y los tramos del display.
-type Cta = { texto: string; href: string }
+// `interno`: ancla de la misma página o `mailto:`; se abre en la misma pestaña.
+type Cta = { texto: string; href: string; interno?: boolean }
 
 export type HeroBloquesProps = {
   eyebrow: string | null
@@ -15,6 +17,9 @@ export type HeroBloquesProps = {
   foto: string | null
   ctaPrimario: Cta | null
   ctaSecundario: Cta | null
+  // Alto de la foto en px. Por defecto 720 / 280 (LANDING, SERVICIOS); RESTAURANTE
+  // usa 680 / 220 (04-RESTAURANTE).
+  altoFoto?: { escritorio: number; movil: number }
 }
 
 const CLASE_TRAMO: Record<TramoDisplay, string> = {
@@ -23,7 +28,7 @@ const CLASE_TRAMO: Record<TramoDisplay, string> = {
   chico: styles.tramoChico,
 }
 
-export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPrimario, ctaSecundario }: HeroBloquesProps) {
+export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPrimario, ctaSecundario, altoFoto }: HeroBloquesProps) {
   const { tramo } = tramoDisplay(nombre)
 
   return (
@@ -44,7 +49,11 @@ export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPri
         )}
         <div className={styles.ctas} data-dv-anim="up" style={estiloCascada(3)}>
           {ctaPrimario && (
-            <a href={ctaPrimario.href} target="_blank" rel="noopener noreferrer" className={styles.ctaPrimaria}>
+            <a
+              href={ctaPrimario.href}
+              {...(ctaPrimario.interno ? null : { target: '_blank', rel: 'noopener noreferrer' })}
+              className={styles.ctaPrimaria}
+            >
               {ctaPrimario.texto}
             </a>
           )}
@@ -57,7 +66,10 @@ export default function HeroBloques({ eyebrow, nombre, descripcion, foto, ctaPri
       </div>
 
       {foto && (
-        <div className={styles.inicioFoto}>
+        <div
+          className={styles.inicioFoto}
+          style={altoFoto ? ({ '--alto-foto': `${altoFoto.escritorio}px`, '--alto-foto-movil': `${altoFoto.movil}px` } as CSSProperties) : undefined}
+        >
           <Image src={foto} alt={nombre} fill sizes="(max-width: 767px) 100vw, 50vw" className={styles.fotoImg} priority />
         </div>
       )}

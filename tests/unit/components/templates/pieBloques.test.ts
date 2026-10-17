@@ -41,6 +41,23 @@ describe('pieBloques — glosaPie', () => {
   })
 })
 
+describe('pieBloques — glosaPie, horarios cerrados y largos', () => {
+  const abierto = (dia: string) => ({ dia, rango: '12:00 a 22:00' })
+
+  it('un día "Cerrado" no se escribe como horario', () => {
+    expect(glosaPie('restaurante', 'Quilpué', [{ dia: 'Lunes', rango: 'Cerrado' }, abierto('Martes')])).toBe(
+      'Restaurante en Quilpué. Martes 12:00 a 22:00.',
+    )
+    expect(glosaPie('restaurante', 'Quilpué', [{ dia: 'Lunes', rango: ' cerrado ' }])).toBe('Restaurante en Quilpué.')
+  })
+
+  it('con 4 o más entradas queda solo la primera frase', () => {
+    const cuatro = ['Lunes', 'Martes', 'Miércoles', 'Jueves'].map(abierto)
+    expect(glosaPie('restaurante', 'Quilpué', cuatro)).toBe('Restaurante en Quilpué.')
+    expect(glosaPie('restaurante', 'Quilpué', cuatro.slice(0, 3))).toContain('Miércoles 12:00 a 22:00')
+  })
+})
+
 describe('pieBloques — lineaLegal', () => {
   it('con razón social y RUT', () => {
     expect(lineaLegal({ razonSocial: 'Trigal SpA', rut: '76.123.456-7' }, 'El Trigal', 2026)).toBe('© 2026 Trigal SpA · RUT 76.123.456-7')
@@ -86,5 +103,24 @@ describe('pieBloques — construirPie', () => {
   it('rechaza un email inseguro y omite lo que no existe', () => {
     const pie = construirPie(con({ contacto: { telefono: '', email: 'a@b.cl?cc=x' } }), 2026)
     expect(pie.contacto).toEqual([])
+  })
+})
+
+describe('pieBloques — glosaPie con preposición (RESTAURANTE)', () => {
+  const opciones = { conPreposicion: true }
+
+  it('escribe "de" antes del rango y baja a minúscula desde la segunda entrada', () => {
+    const horarios = [
+      { dia: 'Martes a sábado', rango: '12:30 a 23:00' },
+      { dia: 'Domingo', rango: '12:30 a 17:00' },
+    ]
+    expect(glosaPie('restaurante', 'Ñuñoa', horarios, opciones)).toBe(
+      'Restaurante en Ñuñoa. Martes a sábado de 12:30 a 23:00, domingo de 12:30 a 17:00.',
+    )
+  })
+
+  it('un rango que no empieza con dígito no lleva "de"; sin la opción nada cambia', () => {
+    expect(glosaPie('restaurante', null, [{ dia: 'Lunes', rango: 'de 9:00 a 18:00' }], opciones)).toBe('Restaurante. Lunes de 9:00 a 18:00.')
+    expect(glosaPie('restaurante', null, [{ dia: 'Lunes', rango: '9:00 a 18:00' }])).toBe('Restaurante. Lunes 9:00 a 18:00.')
   })
 })

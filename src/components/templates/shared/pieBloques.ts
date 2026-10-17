@@ -2,6 +2,7 @@ import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { rubroVisible } from '@/components/templates/shared/rubroVisible'
 import { buildTelUrl, buildMailtoUrl, buildInstagramUrl } from '@/components/templates/shared/enlaces'
 import { comoHorarios, comoLegal, type DatosLegales, type Horario } from '@/components/templates/shared/contenido'
+import { MAX_ITEMS_BANDA } from '@/components/templates/shared/layoutBanda'
 import { obtenerIniciales } from '@/components/templates/shared/iniciales'
 import { altosLogo, altoLogoMovilPie, comoDimensionesLogo, esLogotipo, type DimensionesLogo } from '@/components/templates/shared/logoOptico'
 
@@ -33,16 +34,37 @@ function comoTexto(valor: unknown): string | null {
   return typeof valor === 'string' && valor.trim() !== '' ? valor.trim() : null
 }
 
+// Con más entradas que la banda de datos, la glosa no las repite (recortar
+// mostraría una selección arbitraria): queda solo la primera frase (04-RESTAURANTE).
+const MAX_HORARIOS_GLOSA = MAX_ITEMS_BANDA
+
+function esDiaCerrado({ rango }: Horario): boolean {
+  return rango.trim().toLowerCase() === 'cerrado'
+}
+
 // "{Rubro} en {ciudad}." omitiendo la parte que falta, más los horarios como
-// texto simple ("Lunes 9:00 a 18:00, Sábado 10:00 a 14:00."). `null` si no
+// texto simple ("Lunes 9:00 a 18:00, Sábado 10:00 a 14:00."). Un día "Cerrado"
+// no se escribe como horario, y con 4 o más entradas no se agregan. `null` si no
 // queda nada que decir.
-export function glosaPie(rubro: string | null, ciudad: string | null, horarios: Horario[]): string | null {
+// `conPreposicion` (RESTAURANTE, 04): "Martes a sábado de 12:30 a 23:00, domingo
+// de 12:30 a 17:00." Solo cuando el rango empieza con un dígito (un texto libre
+// no admite el "de"); desde la segunda entrada el día va en minúscula.
+export type OpcionesGlosa = { conPreposicion?: boolean }
+
+function entradaGlosa({ dia, rango }: Horario, indice: number, conPreposicion: boolean): string {
+  if (!conPreposicion) return `${dia} ${rango}`
+  const diaTexto = indice === 0 ? dia : dia.charAt(0).toLowerCase() + dia.slice(1)
+  return /^\d/.test(rango.trim()) ? `${diaTexto} de ${rango}` : `${diaTexto} ${rango}`
+}
+
+export function glosaPie(rubro: string | null, ciudad: string | null, horarios: Horario[], opciones: OpcionesGlosa = {}): string | null {
   const rubroTexto = rubro ? rubroVisible(rubro) : null
   const oraciones: string[] = []
   if (rubroTexto && ciudad) oraciones.push(`${rubroTexto} en ${ciudad}.`)
   else if (rubroTexto) oraciones.push(`${rubroTexto}.`)
   else if (ciudad) oraciones.push(`${ciudad}.`)
-  if (horarios.length > 0) oraciones.push(`${horarios.map(({ dia, rango }) => `${dia} ${rango}`).join(', ')}.`)
+  const abiertos = horarios.length > MAX_HORARIOS_GLOSA ? [] : horarios.filter((horario) => !esDiaCerrado(horario))
+  if (abiertos.length > 0) oraciones.push(`${abiertos.map((horario, indice) => entradaGlosa(horario, indice, opciones.conPreposicion === true)).join(', ')}.`)
   return oraciones.length > 0 ? oraciones.join(' ') : null
 }
 
@@ -73,7 +95,7 @@ export type PieBloquesProps = {
   legal: string
 }
 
-export function construirPie(config: SiteConfigDTO, anio: number): PieBloquesProps {
+export function construirPie(config: SiteConfigDTO, anio: number, opciones: OpcionesGlosa = {}): PieBloquesProps {
   const nombre = comoTexto(config.nombre) ?? ''
   const dimensiones = comoDimensionesLogo(config.logoDimensiones)
   const src = comoTexto(config.logo)
@@ -101,7 +123,7 @@ export function construirPie(config: SiteConfigDTO, anio: number): PieBloquesPro
       : null,
     altosLogo: altosLogoPie(dimensiones),
     mostrarNombre: !(src && dimensiones && esLogotipo(dimensiones)),
-    glosa: glosaPie(rubro && rubro !== 'demo' ? rubro : null, comoTexto(config.ciudad), comoHorarios(config.horarios)),
+    glosa: glosaPie(rubro && rubro !== 'demo' ? rubro : null, comoTexto(config.ciudad), comoHorarios(config.horarios), opciones),
     contacto,
     legal: lineaLegal(comoLegal(config.legal), nombre, anio),
   }

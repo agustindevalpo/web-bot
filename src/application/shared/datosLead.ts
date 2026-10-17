@@ -7,17 +7,21 @@ export const MENSAJES_LEAD = {
   correoSinDominio: 'Revisa el correo: le falta el final, por ejemplo .cl o .com.',
   correoIncompleto: 'Revisa el correo, parece incompleto.',
   telefono: 'Escribe los 8 dígitos que van después del +56 9.',
+  direccionLarga: 'La dirección admite hasta 60 caracteres.',
 } as const
 
 export interface DatosLeadCrudos {
   nombre: string
   email: string
   telefono: string
+  // Opcional: una línea, hasta 60 caracteres. Vacía equivale a no haberla escrito.
+  direccion?: string
 }
 
 export type ErroresLead = Partial<Record<keyof DatosLeadCrudos, string>>
 
 const DIGITOS_TELEFONO = 8
+export const DIRECCION_MAX = 60
 const CORREO_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@.]+$/
 
 // Quita espacios, guiones y cualquier carácter no numérico mientras se escribe.
@@ -29,6 +33,17 @@ export function normalizarDigitosTelefono(valor: string): string {
 export function telefonoLeadANormalizado(valor: string): string | null {
   const digitos = valor.replace(/[\s-]/g, '')
   return /^\d{8}$/.test(digitos) ? `+569${digitos}` : null
+}
+
+// Dirección ya recortada, o null si quedó vacía (no se guarda la clave).
+export function direccionLeadNormalizada(valor: string | undefined): string | null {
+  const direccion = (valor ?? '').trim()
+  return direccion ? direccion : null
+}
+
+export function mensajeErrorDireccion(valor: string | undefined): string | null {
+  const direccion = direccionLeadNormalizada(valor)
+  return direccion && direccion.length > DIRECCION_MAX ? MENSAJES_LEAD.direccionLarga : null
 }
 
 export function mensajeErrorCorreo(valor: string): string | null {
@@ -46,5 +61,7 @@ export function validarDatosLead(datos: DatosLeadCrudos): ErroresLead {
   const errorCorreo = mensajeErrorCorreo(datos.email)
   if (errorCorreo) errores.email = errorCorreo
   if (!telefonoLeadANormalizado(datos.telefono)) errores.telefono = MENSAJES_LEAD.telefono
+  const errorDireccion = mensajeErrorDireccion(datos.direccion)
+  if (errorDireccion) errores.direccion = errorDireccion
   return errores
 }

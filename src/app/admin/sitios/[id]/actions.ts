@@ -10,6 +10,7 @@ import {
   actualizarDatosLegalesSitioUC,
   confirmarPagoSitioUC,
   subirImagenSitioUC,
+  subirCartaPdfSitioUC,
 } from '@/infrastructure/container'
 import { CampoImagenSitio } from '@/application/use-cases/SubirImagenSitio.usecase'
 import { DominioInvalidoException } from '@/domain/exceptions/DominioInvalidoException'
@@ -19,7 +20,7 @@ import { ClienteNoEncontradoException } from '@/domain/exceptions/ClienteNoEncon
 import { CompradorInvalidoException } from '@/domain/exceptions/CompradorInvalidoException'
 import { etiquetaCliente } from './etiquetaCliente'
 import { parsearFormularioPago } from './formularioPago'
-import { parametrosSubidaImagen } from './subirImagen'
+import { parametrosSubidaImagen, parametrosSubidaCartaPdf } from './subirImagen'
 
 // Todas las actions terminan en redirect (que lanza internamente), por eso
 // el try/catch solo envuelve el trabajo y el redirect queda afuera.
@@ -171,6 +172,44 @@ export async function subirImagenSitioAction(sitioId: string, campo: CampoImagen
     } catch (error) {
       params = { error: mensajeDeError(error) }
     }
+  }
+
+  irA(sitioId, params)
+}
+
+// Carta completa en PDF (R6): sube o reemplaza `configJson.cartaPdf`.
+export async function subirCartaPdfSitioAction(sitioId: string, formData: FormData): Promise<void> {
+  await exigirAdmin()
+
+  const archivo = formData.get('archivo')
+
+  let params: Record<string, string>
+  if (!(archivo instanceof File) || archivo.size === 0) {
+    params = { error: 'Selecciona un archivo para subir.' }
+  } else {
+    try {
+      const bytes = new Uint8Array(await archivo.arrayBuffer())
+      const resultado = await subirCartaPdfSitioUC.execute(sitioId, bytes)
+      params = parametrosSubidaCartaPdf(resultado)
+      if (resultado.tipo === 'ok') revalidar(sitioId, resultado.sitio.subdominio)
+    } catch (error) {
+      params = { error: mensajeDeError(error) }
+    }
+  }
+
+  irA(sitioId, params)
+}
+
+export async function quitarCartaPdfSitioAction(sitioId: string): Promise<void> {
+  await exigirAdmin()
+
+  let params: Record<string, string>
+  try {
+    const sitio = await subirCartaPdfSitioUC.quitar(sitioId)
+    revalidar(sitioId, sitio.subdominio)
+    params = { ok: 'carta_pdf_quitada' }
+  } catch (error) {
+    params = { error: mensajeDeError(error) }
   }
 
   irA(sitioId, params)

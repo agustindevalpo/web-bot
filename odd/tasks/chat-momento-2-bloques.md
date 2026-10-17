@@ -29,8 +29,8 @@ the Claude Design project `6b6d0664-fe8b-4d6c-9c13-996324a27b53`, `S3 Chat y mom
   URL in the Mercado Pago panel: Agustín set `https://webbot.devalpo.cl/gracias`. That host was created the
   same day (Railway custom domain on port 8080 + Cloudflare CNAME) and Railway's `NEXT_PUBLIC_APP_DOMAIN` /
   `NEXT_PUBLIC_APP_URL` moved from `panel.sitios.devalpo.cl` / the `up.railway.app` URL to it. `/gracias`
-  returns 404 until T6 is released to `main`.
-- C5 · `/admin` fields for razón social and RUT: optional, T7, not prioritized yet.
+  is live since the 2026-10-05 release.
+- C5 · `/admin` fields for razón social and RUT: built in T7, prioritized by Agustín on 2026-10-05.
 
 **Risk:** this is the sales funnel. Every change reaches production only on an explicit release.
 
@@ -138,9 +138,17 @@ RESTAURANTE/PORTFOLIO/TIENDA tasks, chat with real Claude, payment webhooks.
   site footer reads "© 2026 Peluquería Luz SpA · RUT 77.119.936-4". The `/admin` form itself was not
   exercised in the browser: logging in needs the real `ADMIN_SECRET`. ESTADO updated for the develop state.
 
+- 2026-10-05 · T7 merged: PR #72 → `6793a85`.
+- 2026-10-05 · **Released.** Agustín asked for it: `develop` → `main` `2c55b53` (no migrations, env vars or
+  dependencies), ESTADO + BITACORA in `fb70b87`, `main` = `develop` = `fb70b87`. Smoke on
+  `https://webbot.devalpo.cl`: `/chat` 200 serving "En seis preguntas", `/chat/completar` 200, `/gracias` 200,
+  `/admin/login` 200, `demo-veterinaria` 200.
+
 ## Next step
 
-All tasks done on `develop`. Release to `main` only when Agustín asks; then regenerate ESTADO and add the
-BITACORA entry. Follow-ups outside this plan: `/chat` reload mid-flow desyncs UI and server step; real-mode
-`ClaudeChatService` prompt still has 8 questions; a returning Cliente keeps its old phone; momento 2 saves
-have no locking.
+Feature closed and in production. Open items outside this plan:
+- Review the T5 writer's choices listed above (three strings, `#contacto` anchor, 4 antesala zones).
+- Browser-test the `/admin` legal form and the momento 2 closed state (needs Agustín's admin login).
+- `/chat` reload mid-flow desyncs UI and server step.
+- Real-mode `ClaudeChatService` prompt still has 8 questions.
+- A returning Cliente keeps its old phone; momento 2 saves have no locking.

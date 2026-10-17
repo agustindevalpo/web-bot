@@ -14,6 +14,12 @@ export type BandaDatosProps = {
   variante?: 'cifras' | 'horarios'
 }
 
+// Un rango "Cerrado" (sin distinguir mayúsculas) no se lee como un horario:
+// va en blanco y liviano, sin el cyan de los datos.
+function esCerrado(valor: string): boolean {
+  return valor.trim().toLowerCase() === 'cerrado'
+}
+
 // Server Component. Banda a sangre sobre `--ink`: no es una sección del nav
 // (sin ancla), vive dentro de la sección que la contiene. Sin ítems utilizables
 // no renderiza nada (el hero pasa directo a servicios).
@@ -29,7 +35,9 @@ export default function BandaDatos({ items, rotulo, variante = 'cifras' }: Banda
         {rotulo && <div className={styles.rotulo}>{rotulo}</div>}
         {items.map((item, indice) => (
           <div key={`${item.valor}-${indice}`} className={styles.item} data-dv-anim="up" style={estiloCascada(indice)}>
-            <div className={styles.valor}>{item.valor}</div>
+            <div className={variante === 'horarios' && esCerrado(item.valor) ? `${styles.valor} ${styles.cerrado}` : styles.valor}>
+              {item.valor}
+            </div>
             <p className={styles.etiqueta}>{item.etiqueta}</p>
           </div>
         ))}

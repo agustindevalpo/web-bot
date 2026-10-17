@@ -265,4 +265,40 @@ describe('CapturarLeadDemoUseCase', () => {
       })
     })
   })
+
+  describe('dirección', () => {
+    const base = { sessionId: 'sess-demo-1', nombre: 'Ana', email: 'ana@correo.cl', telefono: '12345678', esDemo: true }
+    const contactoGuardado = async () => {
+      const sitio = await sitioRepo.findBySubdominio('demo-sess-dem')
+      return (sitio!.configJson as { contacto: Record<string, unknown> }).contacto
+    }
+
+    it('la recorta y la escribe en contacto.direccion del sitio', async () => {
+      await useCase.execute({ ...base, direccion: '  Av. Libertad 1200, Viña del Mar  ' })
+
+      expect((await contactoGuardado()).direccion).toBe('Av. Libertad 1200, Viña del Mar')
+    })
+
+    it.each([undefined, '', '   '])('sin dirección (%j) no crea la clave', async (direccion) => {
+      await useCase.execute({ ...base, direccion })
+
+      expect(await contactoGuardado()).not.toHaveProperty('direccion')
+    })
+
+    it('acepta 60 caracteres y rechaza 61', async () => {
+      await expect(useCase.execute({ ...base, direccion: 'a'.repeat(61) })).rejects.toThrow(LeadInvalidoException)
+
+      await useCase.execute({ ...base, direccion: 'a'.repeat(60) })
+      expect((await contactoGuardado()).direccion).toBe('a'.repeat(60))
+    })
+
+    it('no pisa una dirección que el sitio ya traía', async () => {
+      sesionRepo = new MockSesionRepository([sesionConContacto({ telefono: '', email: '', direccion: 'Previa 1' })])
+      useCase = new CapturarLeadDemoUseCase(sesionRepo, sitioRepo, clienteRepo, CLIENTE_DEMO_ID)
+
+      await useCase.execute({ ...base, direccion: 'Nueva 2' })
+
+      expect((await contactoGuardado()).direccion).toBe('Previa 1')
+    })
+  })
 })

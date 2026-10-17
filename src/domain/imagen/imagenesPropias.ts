@@ -40,10 +40,18 @@ export function esImagenPropia(url: unknown, urlPublica: string | null): boolean
   return claveSiPropia(url, urlPublica, sitioId) !== null
 }
 
-// Todas las URLs de imagen que un configJson referencia: `logo` e
-// `imagenes[]` (SiteConfigDTO no tiene ningún otro campo de imagen).
+// Carta en PDF propia (R6): mismo saneo que una imagen propia y además debe ser
+// un `.pdf`. Una URL ajena, vieja o de otro tipo nunca se enlaza.
+export function esPdfPropio(url: unknown, urlPublica: string | null): boolean {
+  return esImagenPropia(url, urlPublica) && (url as string).toLowerCase().endsWith('.pdf')
+}
+
+// Todas las URLs de archivos propios que un configJson referencia: `logo`,
+// `imagenes[]` y `cartaPdf` (los únicos campos que apuntan a objetos del
+// bucket). El nombre es histórico; la limpieza de huérfanos usa esta lista.
 export function urlsImagenDeConfig(config: Record<string, unknown>): string[] {
   const urls: string[] = []
+  if (typeof config.cartaPdf === 'string') urls.push(config.cartaPdf)
   if (typeof config.logo === 'string') urls.push(config.logo)
   if (Array.isArray(config.imagenes)) {
     for (const valor of config.imagenes) {
