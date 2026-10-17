@@ -1,21 +1,23 @@
 import { cookies } from 'next/headers'
-import { obtenerMomento2UC } from '@/infrastructure/container'
+import { obtenerMomento2UC, sesionRepo, clienteRepo } from '@/infrastructure/container'
+import { resolverModoChat } from '@/infrastructure/auth/modoChat'
+import { SESSION_COOKIE_NAME } from '@/infrastructure/auth/JwtSessionService'
 import ChatWidget, { type DatosReveal } from './ChatWidget'
 import { COOKIE_NAME } from './sessionCookie'
+import { recuperarChat } from './recuperarChat'
 
 type Props = { searchParams: Promise<{ vista?: string | string[] }> }
 
-// `/chat` abre el chat. Solo con `?vista=sitio` (los enlaces de "Volver a mi
-// sitio" del momento 2) muestra directamente el reveal del sitio ya armado:
-// sin el parámetro, un visitante con la cookie de un año sigue empezando una
-// demo nueva, como hasta ahora.
+// Resume unfinished predefined chats. Completed demos still start fresh unless
+// the visitor explicitly returns to the reveal through ?vista=sitio.
 export default async function ChatPage({ searchParams }: Props) {
   const { vista } = await searchParams
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get(COOKIE_NAME)?.value
 
   let revealInicial: DatosReveal | undefined
   if (vista === 'sitio') {
-    const cookieStore = await cookies()
-    const estado = await obtenerMomento2UC.execute(cookieStore.get(COOKIE_NAME)?.value)
+    const estado = await obtenerMomento2UC.execute(sessionId)
     if (estado.estado === 'abierto') {
       revealInicial = {
         subdominioDemo: estado.subdominio,
@@ -26,5 +28,9 @@ export default async function ChatPage({ searchParams }: Props) {
     }
   }
 
-  return <ChatWidget revealInicial={revealInicial} />
+  const esDemo = sessionId && !revealInicial
+    ? await resolverModoChat(cookieStore.get(SESSION_COOKIE_NAME)?.value, clienteRepo)
+    : false
+  const chatInicial = esDemo ? recuperarChat(await sesionRepo.findBySessionId(sessionId!)) : undefined
+  return <ChatWidget revealInicial={revealInicial} chatInicial={chatInicial} />
 }

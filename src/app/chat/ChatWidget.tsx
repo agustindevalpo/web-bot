@@ -18,6 +18,7 @@ import {
 } from './preguntaActiva'
 import { COOKIE_NAME } from './sessionCookie'
 import { AVANCE_BASE } from '@/application/shared/avanceSitio'
+import type { ChatRecuperado } from './recuperarChat'
 
 interface Mensaje {
   rol: 'user' | 'assistant'
@@ -229,19 +230,21 @@ function sugerenciasDeRespuesta(valor: unknown): string[] {
   return Array.isArray(valor) ? valor.filter((s): s is string => typeof s === 'string') : []
 }
 
-export default function ChatWidget({ revealInicial }: { revealInicial?: DatosReveal }) {
-  const sessionIdRef = useRef<string | null>(null)
-  const [mensajes, setMensajes] = useState<Mensaje[]>([
+export default function ChatWidget({ revealInicial, chatInicial }: { revealInicial?: DatosReveal; chatInicial?: ChatRecuperado }) {
+  const sessionIdRef = useRef<string | null>(chatInicial?.sessionId ?? null)
+  const [mensajes, setMensajes] = useState<Mensaje[]>(chatInicial ? [
+    { rol: 'assistant', contenido: MENSAJE_INICIAL }, ...chatInicial.mensajes,
+  ] : [
     { rol: 'assistant', contenido: MENSAJE_INICIAL },
   ])
   const [input, setInput] = useState('')
   const [enviando, setEnviando] = useState(false)
   // Texto del último envío que no llegó al servidor: habilita "Reintentar"
   // sin perder lo que el visitante escribió.
-  const [falloEnvio, setFalloEnvio] = useState<string | null>(null)
+  const [falloEnvio, setFalloEnvio] = useState<string | null>(chatInicial?.reintentoExtraccion ?? null)
   const [limite, setLimite] = useState<LimiteAlcanzado>(null)
   const [mensajeLimite, setMensajeLimite] = useState('')
-  const [sugerencias, setSugerencias] = useState<string[]>([])
+  const [sugerencias, setSugerencias] = useState<string[]>(chatInicial?.sugerencias ?? [])
   const [solicitudFoco, setSolicitudFoco] = useState(0)
   const [completada, setCompletada] = useState(false)
   const [reveal, setReveal] = useState<DatosReveal | null>(revealInicial ?? null)
