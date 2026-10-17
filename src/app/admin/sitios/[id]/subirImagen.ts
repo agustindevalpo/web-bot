@@ -1,4 +1,5 @@
 import { ResultadoSubirImagenSitio, CampoImagenSitio } from '@/application/use-cases/SubirImagenSitio.usecase'
+import { ResultadoCartaPdfSitio } from '@/application/use-cases/SubirCartaPdfSitio.usecase'
 
 // Módulo puro, sin 'use server' — mismo motivo que formularioPago.ts: un
 // archivo con esa directiva solo puede exportar funciones async (son
@@ -32,5 +33,21 @@ export function parametrosSubidaImagen(resultado: ResultadoSubirImagenSitio, cam
       return { error: 'El almacenamiento de imágenes no está configurado en este entorno.' }
     case 'error':
       return { error: `${ETIQUETA_CAMPO[campo]}: ${resultado.detalle}` }
+  }
+}
+
+// Misma traducción para la carta en PDF (R6): los mensajes dicen "carta".
+export function parametrosSubidaCartaPdf(resultado: ResultadoCartaPdfSitio): Record<string, string> {
+  switch (resultado.tipo) {
+    case 'ok':
+      return { ok: 'carta_pdf' }
+    case 'formato_no_soportado':
+      return { error: 'Carta en PDF: formato no soportado. Solo se acepta un archivo PDF.' }
+    case 'archivo_muy_grande':
+      return { error: 'Carta en PDF: el archivo supera el máximo de 10 MB.' }
+    case 'no_configurado':
+      return { error: 'El almacenamiento de archivos no está configurado en este entorno.' }
+    case 'error':
+      return { error: `Carta en PDF: ${resultado.detalle}` }
   }
 }

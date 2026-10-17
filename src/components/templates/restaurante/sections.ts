@@ -1,6 +1,6 @@
 import { SiteConfigDTO } from '@/application/dtos/SiteConfigDTO'
 import { normalizarCarta, type GrupoCarta, type PlatoCarta } from '@/application/shared/carta'
-import { esImagenPropia } from '@/domain/imagen/imagenesPropias'
+import { esImagenPropia, esPdfPropio } from '@/domain/imagen/imagenesPropias'
 import { buildMailtoUrl, buildWhatsAppUrlConMensaje } from '@/components/templates/shared/enlaces'
 import { buildLugar, type LugarProps } from '@/components/templates/servicios/datosLugar'
 import { ubicacionLugar } from '@/components/templates/servicios/sections'
@@ -26,6 +26,7 @@ const TITULO_SIN_PRECIOS = 'Lo que preparamos'
 const NOTA_CON_PRECIOS = 'Precios referenciales. Algunos platos varían según el día; confírmalos al reservar.'
 const NOTA_MENU_DEL_DIA = 'Pregunta por el menú del día al reservar.'
 export const TEXTO_ENLACE_CARTA = 'Reserva o pide por WhatsApp →'
+export const TEXTO_ENLACE_PDF = 'Ver la carta completa (PDF)'
 const MENSAJE_CARTA = 'Hola, quiero hacer una consulta sobre la carta.'
 
 export type FormaCarta = 'guias' | 'grande'
@@ -43,11 +44,14 @@ export type CartaVista = {
   nota: string | null
   // Pie de la carta (derecha): `null` sin teléfono utilizable.
   enlaceWhatsapp: string | null
+  // Carta completa en PDF (R6): solo si `cartaPdf` es un archivo propio.
+  // Complementa la carta armada; nunca la reemplaza ni la resucita.
+  enlacePdf: string | null
 }
 
 // Sin platos utilizables → `null`: la sección no se renderiza y "Carta" sale
 // del nav (`filtrarSecciones`).
-export function buildCarta(config: SiteConfigDTO): CartaVista | null {
+export function buildCarta(config: SiteConfigDTO, urlPublica: string | null = null): CartaVista | null {
   const carta = normalizarCarta(config.menu, config.servicios)
   if (!carta) return null
   const telefono = comoStringNoVacio(config.contacto?.telefono)
@@ -62,6 +66,7 @@ export function buildCarta(config: SiteConfigDTO): CartaVista | null {
     totalPlatos: carta.totalPlatos,
     nota: carta.conPrecios ? NOTA_CON_PRECIOS : carta.notaMenuDelDia ? NOTA_MENU_DEL_DIA : null,
     enlaceWhatsapp: telefono ? buildWhatsAppUrlConMensaje(telefono, MENSAJE_CARTA) : null,
+    enlacePdf: esPdfPropio(config.cartaPdf, urlPublica) ? (config.cartaPdf as string) : null,
   }
 }
 

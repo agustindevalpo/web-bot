@@ -36,6 +36,7 @@ import { VerificarAccesoUseCase } from '@/application/use-cases/VerificarAcceso.
 import { ConfirmarPagoSitioUseCase } from '@/application/use-cases/ConfirmarPagoSitio.usecase'
 import { CapturarLeadDemoUseCase } from '@/application/use-cases/CapturarLeadDemo.usecase'
 import { SubirImagenSitioUseCase } from '@/application/use-cases/SubirImagenSitio.usecase'
+import { SubirCartaPdfSitioUseCase } from '@/application/use-cases/SubirCartaPdfSitio.usecase'
 import { ObtenerMomento2UseCase } from '@/application/use-cases/ObtenerMomento2.usecase'
 import { GuardarTareaMomento2UseCase } from '@/application/use-cases/GuardarTareaMomento2.usecase'
 import { CLIENTE_DEMO_ID } from './demo/rubroDefaults'
@@ -170,3 +171,4 @@ export const capturarLeadDemoUC = new CapturarLeadDemoUseCase(sesionRepo, sitioR
 export const obtenerMomento2UC = new ObtenerMomento2UseCase(sesionRepo, sitioRepo, CLIENTE_DEMO_ID)
 export const guardarTareaMomento2UC = new GuardarTareaMomento2UseCase(sesionRepo, sitioRepo, CLIENTE_DEMO_ID)
 export const subirImagenSitioUC = new SubirImagenSitioUseCase(sitioRepo, almacenamientoArchivosDiferido)
+export const subirCartaPdfSitioUC = new SubirCartaPdfSitioUseCase(sitioRepo, almacenamientoArchivosDiferido)

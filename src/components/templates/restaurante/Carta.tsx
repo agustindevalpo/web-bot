@@ -1,6 +1,6 @@
 import { estiloCascada } from '@/components/templates/shared/navegacion'
 import type { PlatoCarta } from '@/application/shared/carta'
-import { TEXTO_ENLACE_CARTA, type CartaVista } from './sections'
+import { TEXTO_ENLACE_CARTA, TEXTO_ENLACE_PDF, type CartaVista } from './sections'
 import styles from './Carta.module.css'
 
 // Carta tipográfica (S4, 04-RESTAURANTE.md "Carta"). Server Component puro. Es
@@ -36,7 +36,7 @@ function ListaGuias({ platos }: { platos: PlatoCarta[] }) {
 
 export default function Carta({ carta }: { carta: CartaVista }) {
   const { forma, grupos, hayCategorias, columnasSinCategorias } = carta
-  const hayPie = carta.nota !== null || carta.enlaceWhatsapp !== null
+  const hayPie = carta.nota !== null || carta.enlaceWhatsapp !== null || carta.enlacePdf !== null
 
   return (
     <section className={styles.seccion}>
@@ -93,10 +93,19 @@ export default function Carta({ carta }: { carta: CartaVista }) {
       {hayPie && (
         <div className={styles.pie} data-dv-anim="up" style={estiloCascada(0)}>
           {carta.nota && <p className={styles.nota}>{carta.nota}</p>}
-          {carta.enlaceWhatsapp && (
-            <a href={carta.enlaceWhatsapp} target="_blank" rel="noopener noreferrer" className={styles.enlace}>
-              {TEXTO_ENLACE_CARTA}
-            </a>
+          {(carta.enlacePdf || carta.enlaceWhatsapp) && (
+            <div className={styles.enlaces}>
+              {carta.enlacePdf && (
+                <a href={carta.enlacePdf} target="_blank" rel="noopener" className={styles.enlace}>
+                  {TEXTO_ENLACE_PDF}
+                </a>
+              )}
+              {carta.enlaceWhatsapp && (
+                <a href={carta.enlaceWhatsapp} target="_blank" rel="noopener noreferrer" className={styles.enlace}>
+                  {TEXTO_ENLACE_CARTA}
+                </a>
+              )}
+            </div>
           )}
         </div>
       )}

@@ -215,6 +215,33 @@ describe('RESTAURANTE — carta', () => {
     expect(markup).toContain(encodeURIComponent('Hola, quiero hacer una consulta sobre la carta.'))
   })
 
+  it('con PDF propio muestra «Ver la carta completa (PDF)» en el pie, en pestaña nueva', async () => {
+    const markup = await render(con(COMPLETO, { cartaPdf: `${BASE}/sitios/abc123/carta-1.pdf` }))
+    expect(markup).toContain('Ver la carta completa (PDF)')
+    expect(markup).toContain(`<a href="${BASE}/sitios/abc123/carta-1.pdf" target="_blank" rel="noopener"`)
+    expect(markup).toContain('Reserva o pide por WhatsApp →')
+  })
+
+  it('sin PDF o con una URL ajena no hay enlace al PDF', async () => {
+    expect(await render(COMPLETO)).not.toContain('Ver la carta completa (PDF)')
+    expect(await render(con(COMPLETO, { cartaPdf: 'https://ejemplo.cl/carta.pdf' }))).not.toContain(
+      'Ver la carta completa (PDF)',
+    )
+  })
+
+  it('con PDF y sin teléfono el pie lleva solo el enlace al PDF', async () => {
+    const markup = await render(
+      con(COMPLETO, { contacto: { email: 'a@b.cl' }, cartaPdf: `${BASE}/sitios/abc123/carta-1.pdf` }),
+    )
+    expect(markup).toContain('Ver la carta completa (PDF)')
+    expect(markup).not.toContain('Reserva o pide por WhatsApp')
+  })
+
+  it('sin carta (sin menu ni servicios) un PDF no resucita la sección', async () => {
+    const markup = await render(con(MINIMO, { servicios: [], cartaPdf: `${BASE}/sitios/abc123/carta-1.pdf` }))
+    expect(markup).not.toContain('Ver la carta completa (PDF)')
+  })
+
   it('sin teléfono el enlace de la carta no se renderiza', () => {
     const carta = buildCarta({ nombre: 'X', servicios: ['Sopa'] } as SiteConfigDTO)
     const markup = renderToStaticMarkup(React.createElement(Carta, { carta: carta! }))

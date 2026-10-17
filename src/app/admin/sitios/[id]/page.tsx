@@ -14,6 +14,8 @@ import {
   guardarDatosLegalesAction,
   confirmarPagoAction,
   subirImagenSitioAction,
+  subirCartaPdfSitioAction,
+  quitarCartaPdfSitioAction,
 } from './actions'
 import styles from '../../admin.module.css'
 
@@ -30,6 +32,8 @@ const MENSAJES_OK: Record<string, string> = {
   logo: 'Logo actualizado.',
   imagen_hero: 'Foto principal actualizada.',
   imagen_galeria: 'Foto agregada a la galería.',
+  carta_pdf: 'Carta en PDF actualizada.',
+  carta_pdf_quitada: 'Carta en PDF quitada.',
 }
 
 const FECHA_CL = new Intl.DateTimeFormat('es-CL', { dateStyle: 'long', timeZone: 'America/Santiago' })
@@ -97,6 +101,7 @@ export default async function AdminSitioPage({
     : []
   const fotoPrincipalActual = imagenesActuales[0] ?? null
   const galeriaActual = imagenesActuales.slice(1)
+  const cartaPdfActual = typeof sitio.configJson.cartaPdf === 'string' ? sitio.configJson.cartaPdf : null
 
   return (
     <div className={styles.page}>
@@ -423,6 +428,43 @@ export default async function AdminSitioPage({
                 Agregar foto a la galería
               </button>
             </form>
+          </div>
+        </section>
+
+        <section className={styles.seccion}>
+          <h2 className={styles.seccionTitulo}>Carta en PDF</h2>
+          <p className={styles.ayuda}>
+            Opcional. Solo la muestra la plantilla de restaurante: un enlace «Ver la carta completa (PDF)» bajo la
+            carta armada, que no se reemplaza. Un solo PDF, máximo 10 MB; subir uno nuevo reemplaza el anterior.
+          </p>
+          <div className={styles.imagenBloque}>
+            {cartaPdfActual ? (
+              <p className={styles.ayuda}>
+                Carta actual:{' '}
+                <a className={styles.link} href={cartaPdfActual} target="_blank" rel="noopener noreferrer">
+                  abrir PDF
+                </a>
+              </p>
+            ) : (
+              <p className={styles.ayuda}>Todavía no hay una carta en PDF.</p>
+            )}
+            <form
+              className={styles.form}
+              action={subirCartaPdfSitioAction.bind(null, sitio.id)}
+              encType="multipart/form-data"
+            >
+              <input className={styles.input} type="file" name="archivo" accept="application/pdf" required />
+              <button type="submit" className={styles.boton}>
+                {cartaPdfActual ? 'Reemplazar carta en PDF' : 'Subir carta en PDF'}
+              </button>
+            </form>
+            {cartaPdfActual && (
+              <form action={quitarCartaPdfSitioAction.bind(null, sitio.id)}>
+                <button type="submit" className={styles.botonPeligro}>
+                  Quitar carta en PDF
+                </button>
+              </form>
+            )}
           </div>
         </section>
 
