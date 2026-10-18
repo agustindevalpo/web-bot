@@ -18,22 +18,145 @@ export const NAV = {
   precio: { label: 'Precio', href: '#precio' } satisfies EnlaceCta,
   preguntas: { label: 'Preguntas', href: '#faq' } satisfies EnlaceCta,
   cta: { label: 'Ver mi sitio gratis', href: '/chat' } satisfies EnlaceCta,
+  logoLabel: 'Devalpo, inicio',
+  navLabel: 'Secciones',
+}
+
+const HERO_TITULO = {
+  antes: 'Tu sitio web listo',
+  destacado: 'en 1 día.',
+  despues: 'Con tu dominio. Pago único.',
 }
 
 export const HERO = {
-  badge: 'DEVALPO · VALPARAÍSO',
-  titulo: 'Tu sitio web listo en 1 día. Con tu dominio. Pago único.',
+  badge: { marca: 'DEVALPO', texto: 'Hecho en Valparaíso' },
+  // El H1 se parte para subrayar `destacado`; `titulo` es el texto plano completo.
+  tituloPartes: HERO_TITULO,
+  titulo: `${HERO_TITULO.antes} ${HERO_TITULO.destacado} ${HERO_TITULO.despues}`,
   subtitulo:
     'Cuéntanos de tu negocio en un chat, revisas tu sitio y lo publicamos en tu propio dominio. Sin mensualidades ni contratos.',
   ctaPrimario: { label: 'Ver mi sitio gratis', href: '/chat' } satisfies EnlaceCta,
   ctaSecundario: { label: 'Ver ejemplos reales', href: '#ejemplos' } satisfies EnlaceCta,
   confianza: ['Pago único', 'Publicado en 1 día hábil', 'Dominio a tu nombre'],
-  demo: {
-    etiqueta: 'Sitio real publicado',
-    botonAbrir: 'Ver el sitio funcionando',
-    enlaceVerEnVivo: 'Ver en vivo →',
-  },
 }
+
+// Franja de beneficios bajo el hero (se duplica para el bucle del marquee).
+export const BENEFICIOS_LABEL = 'Lo que incluye'
+export const BENEFICIOS = [
+  'Pago único',
+  'Publicado en 1 día hábil',
+  'Dominio a tu nombre',
+  'Hosting y SSL el primer año',
+  'Una ronda de ajustes',
+  'Hecho en Chile',
+]
+
+// Diálogo ilustrativo de la tarjeta de chat flotante del hero.
+export interface MensajeChat {
+  quien: 'bot' | 'persona'
+  texto: string
+}
+
+export const HERO_CHAT = {
+  nombre: 'WebBot',
+  enLinea: 'en línea',
+  guion: [
+    { quien: 'bot', texto: '¡Hola! ¿Cómo se llama tu negocio?' },
+    { quien: 'persona', texto: 'El Rincón del Sabor' },
+    { quien: 'bot', texto: '¿A qué se dedica?' },
+    { quien: 'persona', texto: 'Comida chilena casera' },
+    { quien: 'bot', texto: 'Listo. Estoy armando tu sitio…' },
+  ] satisfies MensajeChat[],
+}
+
+// Mini-maquetas de la ventana del hero: los tres sitios demo reales, con los
+// datos de prisma/seed-demo.ts (nombre, color de acento, servicios, destacado).
+export type Maqueta =
+  | {
+      tipo: 'carta'
+      subdominio: string
+      iniciales: string
+      nombre: string
+      titulo: string[]
+      descripcion: string
+      cta: string
+      acento: string
+      textoAcento: string
+      etiqueta: string
+      filas: { texto: string; valor?: string }[]
+    }
+  | {
+      tipo: 'catalogo'
+      subdominio: string
+      iniciales: string
+      nombre: string
+      titulo: string[]
+      descripcion: string
+      cta: string
+      acento: string
+      textoAcento: string
+      productos: string[]
+      pie: string
+    }
+  | {
+      tipo: 'servicios'
+      subdominio: string
+      iniciales: string
+      nombre: string
+      titulo: string[]
+      descripcion: string
+      cta: string
+      acento: string
+      textoAcento: string
+      servicios: string[]
+      franja: { etiqueta: string; valor: string }
+    }
+
+export const HERO_MAQUETAS: Maqueta[] = [
+  {
+    tipo: 'carta',
+    subdominio: 'demo-restaurante',
+    iniciales: 'RS',
+    nombre: 'El Rincón del Sabor',
+    titulo: ['El Rincón', 'del Sabor'],
+    descripcion: 'Comida casera chilena con ingredientes frescos del mercado.',
+    cta: 'Reservar mesa',
+    acento: '#FF6B35',
+    textoAcento: '#ffffff',
+    etiqueta: 'LA CARTA',
+    filas: [
+      { texto: 'Menú del día', valor: '$4.500' },
+      { texto: 'Almuerzo ejecutivo' },
+      { texto: 'Cenas y eventos privados' },
+    ],
+  },
+  {
+    tipo: 'catalogo',
+    subdominio: 'demo-tienda',
+    iniciales: 'LN',
+    nombre: 'Boutique Luna Nueva',
+    titulo: ['Moda femenina,', 'del XS al XXL'],
+    descripcion: 'Diseños exclusivos con despacho a todo Chile.',
+    cta: 'Ver catálogo',
+    acento: '#F39C12',
+    textoAcento: '#2A1800',
+    productos: ['Ropa casual', 'Ropa de trabajo', 'Accesorios'],
+    pie: 'Envío gratis sobre $30.000',
+  },
+  {
+    tipo: 'servicios',
+    subdominio: 'demo-dentista',
+    iniciales: 'CS',
+    nombre: 'Clínica Dental Sonrisas',
+    titulo: ['Tu sonrisa,', 'en buenas manos'],
+    descripcion: 'Atención dental familiar y personalizada.',
+    cta: 'Agendar hora',
+    acento: '#0891B2',
+    textoAcento: '#ffffff',
+    servicios: ['Limpieza dental', 'Ortodoncia invisible'],
+    franja: { etiqueta: 'PRIMERA CONSULTA', valor: 'Evaluación sin costo' },
+  },
+]
 
 export const EJEMPLOS_INTRO = {
   titulo: 'Sitios que ya están publicados',

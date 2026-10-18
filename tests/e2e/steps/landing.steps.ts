@@ -1,4 +1,4 @@
-import { Given, When, Then, DataTable } from '@cucumber/cucumber'
+import { Given, Then, DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 import { construirUrlPreview } from '@/app/admin/_lib/urlPreview'
 import { SitioWorld } from './sitio-por-subdominio.steps'
@@ -93,32 +93,16 @@ Then(
   },
 )
 
-Then('la imagen del poster del hero tiene ancho y alto definidos', async function (this: SitioWorld) {
-  const poster = heroSection(this).locator('img').first()
-  await expect(poster).toBeVisible()
-  const ancho = await poster.getAttribute('width')
-  const alto = await poster.getAttribute('height')
-  expect(Number(ancho)).toBeGreaterThan(0)
-  expect(Number(alto)).toBeGreaterThan(0)
+Then('la barra de URL del hero muestra un sitio demo real', async function (this: SitioWorld) {
+  const hosts = ['demo-restaurante', 'demo-tienda', 'demo-dentista'].map(
+    (subdominio) => `${subdominio}.${BASE_DOMAIN}`,
+  )
+  const textoHero = (await heroSection(this).innerText()).toLowerCase()
+  expect(hosts.some((host) => textoHero.includes(host))).toBe(true)
 })
 
 Then('no hay ningún iframe en la página antes de interactuar', async function (this: SitioWorld) {
   await expect(this.page.locator('iframe')).toHaveCount(0)
-})
-
-Then('el enlace {string} del hero es visible', async function (this: SitioWorld, texto: string) {
-  const enlace = heroSection(this).getByRole('link', { name: texto })
-  await expect(enlace).toBeVisible()
-  const href = await enlace.getAttribute('href')
-  expect(href).not.toBe('')
-})
-
-When('hago clic en {string}', async function (this: SitioWorld, texto: string) {
-  await this.page.getByRole('button', { name: texto }).click()
-})
-
-Then('aparece un iframe en la página', async function (this: SitioWorld) {
-  await expect(this.page.locator('iframe')).toHaveCount(1)
 })
 
 Then('el precio {string} es visible', async function (this: SitioWorld, precio: string) {

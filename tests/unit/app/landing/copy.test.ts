@@ -1,10 +1,13 @@
 import {
+  BENEFICIOS,
   COMO_FUNCIONA,
   CTA_FINAL,
   EJEMPLOS_INTRO,
   FAQ,
   FRASES_PROHIBIDAS,
   HERO,
+  HERO_CHAT,
+  HERO_MAQUETAS,
   NAV,
   POR_QUE_DEVALPO,
   PRECIO,
@@ -61,6 +64,9 @@ describe('copy de nav, hero, ejemplos y cómo funciona — sin frases prohibidas
     const textos = [
       ...recolectarStrings(NAV),
       ...recolectarStrings(HERO),
+      ...recolectarStrings(BENEFICIOS),
+      ...recolectarStrings(HERO_CHAT),
+      ...recolectarStrings(HERO_MAQUETAS),
       ...recolectarStrings(EJEMPLOS_INTRO),
       ...recolectarStrings(COMO_FUNCIONA),
     ]
@@ -93,6 +99,25 @@ describe('HERO', () => {
 
   it('expone al menos una línea de confianza', () => {
     expect(HERO.confianza.length).toBeGreaterThan(0)
+  })
+
+  it('el H1 partido reconstruye el título y destaca "en 1 día."', () => {
+    const { antes, destacado, despues } = HERO.tituloPartes
+    expect(`${antes} ${destacado} ${despues}`).toBe(HERO.titulo)
+    expect(destacado).toBe('en 1 día.')
+  })
+})
+
+describe('BENEFICIOS', () => {
+  it('define los seis beneficios de la franja', () => {
+    expect(BENEFICIOS).toEqual([
+      'Pago único',
+      'Publicado en 1 día hábil',
+      'Dominio a tu nombre',
+      'Hosting y SSL el primer año',
+      'Una ronda de ajustes',
+      'Hecho en Chile',
+    ])
   })
 })
 

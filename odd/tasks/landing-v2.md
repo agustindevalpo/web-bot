@@ -1,0 +1,76 @@
+# Landing v2 (webbot.devalpo.cl redesign)
+
+**Objective:** rebuild the commercial landing `/` to match the high-fidelity handoff in
+`docs/design_handoff_landing_v2/` (README + prototype `WebBot Landing v2.dc.html`), keeping
+every current text, price and link.
+
+**Problem / why:** Agustín (2026-10-18) judged the v2 design much better than the current
+landing; the landing is the entry point of the funnel he wants to sell from in November.
+
+## Scope
+
+Header (sticky, shrinks on scroll) · Hero · Benefits strip (new marquee) · Ejemplos · Cómo
+funciona · Precio · Por qué Devalpo · FAQ · CTA final · Footer · Mobile fixed CTA (new).
+Reveal-on-scroll animations, `prefers-reduced-motion`, responsive at 390/768/1024/1280.
+
+**Out of scope:** chat, client templates, `/terminos`, `/privacidad`, page metadata, prices.
+
+## Decisions
+
+- **Hero shows the three real demo sites, not the prototype's fictional businesses**
+  (Agustín, 2026-10-18). The prototype rotates "Cocinería Doña Rosa / donarosa.cl",
+  "Almacén Las Lomas", "Clínica Dental Sonríe" with a green "online" dot. With zero sales that
+  reads as fake clients and contradicts "Sitios que ya están publicados". Keep the animated
+  browser window, but the three slides are `demo-restaurante`, `demo-tienda`, `demo-dentista`,
+  with their real business names (from the demo seed) and real URLs
+  `demo-*.sitios.devalpo.cl`.
+- **Texts, prices and links stay as they are today** (handoff README §Overview): copy from
+  `src/app/_landing/copy.ts`, prices and promo state from `precios.ts` (including the
+  "cupos agotados" variant), examples from `ejemplos.ts`, FAQ answers from the current site
+  (the prototype's FAQ answers 2–6 are drafts, README §8). Footer keeps the e-mail
+  (README §10 notes it was missing from the prototype).
+- Handoff files arrived with swapped names (`support.js` was the prototype HTML,
+  `WebBot Landing v2.dc.html` was the README, plus an identical duplicate
+  `support (1).js`, same SHA-1). Renamed into `docs/design_handoff_landing_v2/`; the duplicate
+  was removed. The prototype's real runtime is not included, so it does not open in a
+  browser: read values from its inline styles.
+
+## Method and checks
+
+**TDD:** off (project convention, same as `restaurante-bloques`). **RDD:** off
+(`gentle-ai review mode status`: clone-local off).
+**Checks per task:** `npx tsc --noEmit`, `npx eslint src tests`, `npm run test:unit`,
+`npm run build`, then Chrome at 1280 px and 390 px (iframe method, see trampas in ESTADO).
+**Delivery:** one PR per task to `develop`, branches `feat/landing-v2-0N-*`, each cut from the
+previous task's branch. Merge only with Agustín's OK (the standing merge OK of
+`landing-geometria-bloques` does not extend to this feature). Release to `main` only on his
+explicit request.
+
+## Tasks
+
+- [ ] **L1 — Foundation, header, hero, benefits strip.** Design tokens, reveal-on-scroll
+  hook, reduced motion, sticky header that shrinks at `scrollY > 12` and hides the nav under
+  900 px, hero (pill, H1 with animated cyan underline, CTAs, ticks, browser window with the
+  three real demos rotating every 4.2 s, floating chat card), navy marquee strip. Also commits
+  the handoff folder and this document. Route: delegated writer (2+ non-trivial files).
+- [ ] **L2 — Ejemplos and Cómo funciona.** Example cards with hover, sticky left column,
+  vertical rail filled by scroll progress, step circles and their UI illustrations.
+  Route: delegated writer.
+- [ ] **L3 — Precio, Por qué Devalpo, FAQ.** Navy price block driven by `precios.ts`
+  (promo and agotados), extra price cards, bento grid, accordion (one open, first open by
+  default, `grid-template-rows` animation, `aria-expanded`). Route: delegated writer.
+- [ ] **L4 — CTA final, footer, mobile fixed CTA, cleanup, docs.** Remove dead CSS and
+  components, update `docs/ESTADO.md` if it names the old landing, e2e `landing.feature`
+  still green. Route: delegated writer.
+
+## Acceptance criteria
+
+- Every text, price, link and anchor of the current landing is still present and correct.
+- Visually matches the prototype at 1280 and 390 px; no horizontal scroll at 390 px.
+- With `prefers-reduced-motion: reduce`, no animation runs and all content is visible.
+- Intervals and listeners are cleaned up on unmount; scroll work uses `requestAnimationFrame`.
+- All checks above pass.
+
+## Progress
+
+_Next step:_ L1.
