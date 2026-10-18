@@ -776,62 +776,6 @@
   background: var(--wb-color-surface);
 }
 
-/* ── GENERIC SECTION ── */
-
-.section {
-  padding: 88px 48px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-.sectionMuted {
-  max-width: none;
-  background: #f7f8fd;
-}
-
-.sectionMuted > * {
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.sectionHeader {
-  text-align: center;
-  max-width: 620px;
-  margin: 0 auto 56px;
-}
-
-.sectionLabel {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--wb-color-secondary);
-  margin-bottom: 10px;
-}
-
-.sectionTitle {
-  font-family: var(--font-fredoka), sans-serif;
-  font-size: 34px;
-  font-weight: 600;
-  line-height: 1.2;
-  margin: 0;
-}
-
-.sectionTitleSmall {
-  font-family: var(--font-fredoka), sans-serif;
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0;
-  text-align: center;
-}
-
-.sectionSubtitle {
-  font-size: 16px;
-  color: #4b4d78;
-  margin-top: 14px;
-  line-height: 1.6;
-}
-
 /* ── EJEMPLOS Y CÓMO FUNCIONA (README del handoff §4 y §5) ── */
 
 .ejemplos,
@@ -1184,176 +1128,478 @@
   border-radius: 999px;
 }
 
-.cardTitleSmall {
-  font-family: var(--font-fredoka), sans-serif;
-  font-size: 16px;
-  font-weight: 600;
+/* ── PRECIO, POR QUÉ DEVALPO Y FAQ (README del handoff §6, §7 y §8) ── */
+
+.precio,
+.faq {
+  padding: clamp(88px, 11vw, 160px) var(--lv-gutter);
 }
 
-.cardTextSmall {
-  font-size: 13.5px;
-  color: #4b4d78;
-  line-height: 1.5;
+.precio {
+  background: #ffffff;
 }
 
-/* ── PRECIO ── */
+.faq {
+  background: var(--lv-surface-soft);
+}
 
-.precioCard {
-  max-width: 460px;
-  margin: 0 auto;
-  background: var(--wb-color-surface);
-  border: 1px solid var(--wb-color-border);
-  border-radius: var(--wb-radius-lg);
-  padding: var(--wb-space-8) var(--wb-space-6);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--wb-space-4);
+.precioCabecera {
   text-align: center;
-  box-shadow: 0 30px 60px -30px rgba(8, 0, 86, 0.25);
+  margin: 0 auto clamp(40px, 5vw, 64px);
+  max-width: 760px;
+}
+
+.precioBloque {
+  position: relative;
+  background: var(--lv-navy);
+  border-radius: 32px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.precioMancha1,
+.precioMancha2 {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.precioMancha1 {
+  width: 520px;
+  height: 520px;
+  left: -160px;
+  top: -200px;
+  background: radial-gradient(circle, rgba(91, 70, 248, 0.55), transparent 65%);
+}
+
+.precioMancha2 {
+  width: 420px;
+  height: 420px;
+  right: -120px;
+  bottom: -200px;
+  background: radial-gradient(circle, rgba(21, 222, 250, 0.25), transparent 65%);
+}
+
+.precioIzquierda,
+.precioDerecha {
+  position: relative;
+  padding: clamp(36px, 5vw, 72px);
+}
+
+.precioDerecha {
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Breakpoint explícito: el borde que separa las columnas pasa de arriba a la
+   izquierda solo cuando hay dos columnas. */
+@media (min-width: 860px) {
+  .precioBloque {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .precioDerecha {
+    border-top: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }
 
 .precioNombre {
-  font-family: var(--wb-font-display);
-  font-size: var(--wb-text-lg);
-  font-weight: 600;
-  color: var(--wb-color-primary);
+  font: 600 15px var(--font-montserrat), sans-serif;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 18px;
 }
 
-.precioMontoRow {
+.precioEtiqueta {
+  display: inline-flex;
+  align-items: center;
+  background: var(--lv-orange);
+  color: #2a1800;
+  font: 700 12px var(--font-montserrat), sans-serif;
+  padding: 7px 13px;
+  border-radius: 999px;
+  margin: 0 0 18px;
+}
+
+.precioMontoFila {
   display: flex;
   align-items: baseline;
-  gap: var(--wb-space-2);
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0 0 6px;
 }
 
 .precioMonto {
-  font-family: var(--wb-font-display);
-  font-size: var(--wb-text-4xl);
-  font-weight: 600;
-  color: var(--wb-color-ink);
+  font: 800 clamp(56px, 7vw, 92px) / 1 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.05em;
+  color: #ffffff;
 }
 
 .precioTachado {
-  font-size: var(--wb-text-base);
-  color: var(--wb-color-muted);
+  font: 500 clamp(18px, 2vw, 24px) var(--font-montserrat), sans-serif;
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: line-through;
 }
 
-.precioPagoUnico {
-  font-size: var(--wb-text-sm);
-  color: var(--wb-color-muted);
+.precioLinea {
+  font: 500 15px var(--font-montserrat), sans-serif;
+  color: var(--lv-cyan);
+  margin: 0 0 36px;
 }
 
-.precioEstado {
-  font-size: var(--wb-text-sm);
-  font-weight: 600;
-  color: var(--wb-color-secondary);
-  margin: 0;
+.precioAgotado {
+  font: 500 14px var(--font-montserrat), sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  margin: -24px 0 36px;
 }
 
-.precioIncluyeLista {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--wb-space-2);
-  text-align: left;
-  width: 100%;
-}
-
-.precioIncluyeItem {
-  font-size: var(--wb-text-sm);
-  color: var(--wb-color-ink);
-  padding-left: var(--wb-space-5);
-  position: relative;
-}
-
-.precioIncluyeItem::before {
-  content: '✓';
-  position: absolute;
-  left: 0;
-  color: var(--wb-color-secondary);
-  font-weight: 700;
-}
-
-.precioLetraChica {
-  font-size: var(--wb-text-xs);
-  color: var(--wb-color-muted);
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* ── POR QUÉ DEVALPO ── */
-
-.porqueGrid {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--wb-space-5);
-}
-
-.porqueCard {
-  background: var(--wb-color-surface);
-  border: 1px solid var(--wb-color-border);
-  border-radius: var(--wb-radius-md);
-  padding: var(--wb-space-6) var(--wb-space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--wb-space-2);
-}
-
-/* ── FAQ ── */
-
-.faqSection {
-  padding: 90px 48px;
-  max-width: 820px;
-  margin: 0 auto;
-}
-
-.faqList {
-  display: flex;
-  flex-direction: column;
+.precioCta {
+  display: inline-flex;
+  align-items: center;
   gap: 12px;
+  font: 600 15px var(--font-montserrat), sans-serif;
+  color: var(--lv-navy);
+  background: var(--lv-cyan);
+  padding: 19px 30px;
+  border-radius: 999px;
+  transition:
+    background 0.2s,
+    transform 0.2s;
 }
 
-.faqItem {
-  border: 1px solid #e9ebf7;
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--wb-color-surface);
+.precioCta:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
 }
 
-.faqQuestion {
-  width: 100%;
-  padding: 18px 22px;
+.precioIncluyeTitulo {
+  font: 700 11.5px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 22px;
+}
+
+.precioLista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.precioItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font: 500 15.5px / 1.5 var(--font-montserrat), sans-serif;
+  color: #ffffff;
+}
+
+.precioCheck {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: rgba(21, 222, 250, 0.16);
+  color: var(--lv-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 11px var(--font-montserrat), sans-serif;
+}
+
+.precioExtras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  margin: 16px 0 0;
+}
+
+.precioExtra {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  text-align: left;
-  font-family: var(--font-fredoka), sans-serif;
-  font-size: 15.5px;
+  gap: 16px;
+  background: var(--lv-surface-soft);
+  border-radius: 20px;
+  padding: 24px 28px;
+}
+
+.precioExtraTexto {
+  font: 500 15px / 1.4 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+}
+
+.precioExtraMonto {
+  flex: none;
+  font: 800 22px var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--lv-navy);
+}
+
+/* Por qué Devalpo: pega con Precio (mismo fondo blanco), así que solo lleva
+   padding inferior. */
+.porque {
+  padding: 0 var(--lv-gutter) clamp(88px, 11vw, 160px);
+  background: #ffffff;
+}
+
+.porqueCabecera {
+  margin: 0 0 clamp(40px, 5vw, 64px);
+}
+
+.porqueTitulo {
+  max-width: 18ch;
+}
+
+/* Una columna apilada; dos desde 900 px, con la tarjeta grande ocupando las
+   dos filas. Sin auto-fit: el span de filas solo tiene sentido con dos columnas. */
+.porqueGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .porqueGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .porqueGrande {
+    grid-row: span 2;
+  }
+}
+
+.porqueGrande {
+  background: var(--lv-purple);
+  border-radius: 28px;
+  padding: clamp(32px, 4vw, 52px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  min-height: 420px;
+}
+
+.porqueRotulo {
+  font: 700 11.5px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0 0 22px;
+}
+
+.porqueTextoGrande {
+  margin: 0;
+  font: 600 clamp(20px, 2vw, 26px) / 1.4 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-wrap: pretty;
+}
+
+.porqueFirma {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.porqueAvatar {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--lv-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 17px var(--font-montserrat), sans-serif;
+}
+
+.porqueFirmaFrase {
+  font: 700 15px var(--font-montserrat), sans-serif;
+  color: #ffffff;
+}
+
+.porqueFirmaPersona {
+  font: 400 13px var(--font-montserrat), sans-serif;
+  color: #ffffff;
+  margin: 4px 0 0;
+}
+
+.porqueTarjeta {
+  border-radius: 28px;
+  padding: clamp(28px, 3.5vw, 44px);
+}
+
+.porqueGris {
+  background: var(--lv-surface-soft);
+}
+
+.porqueCyan {
+  background: var(--lv-cyan-soft);
+}
+
+.porqueTitulo3 {
+  margin: 0 0 12px;
+  font: 800 24px / 1.2 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--lv-navy);
+}
+
+.porqueTexto {
+  margin: 0 0 24px;
+  font: 400 15.5px / 1.7 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+}
+
+.porqueTextoCyan {
+  margin: 0;
+  color: #2d3846;
+}
+
+.porquePastillas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.porquePastilla {
+  font: 600 13px var(--font-montserrat), sans-serif;
+  color: var(--lv-navy);
+  background: #ffffff;
+  border: 1px solid var(--lv-line);
+  padding: 8px 14px;
+  border-radius: 999px;
+}
+
+/* Breakpoint explícito (sin auto-fit), como Cómo funciona. */
+.faqGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .faqGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.faqTitulo {
+  margin: 0 0 20px;
+}
+
+.faqOtraDuda {
+  margin: 0;
+  font: 400 16px / 1.7 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+  max-width: 34ch;
+}
+
+.faqEnlace {
   font-weight: 600;
-  color: var(--wb-color-ink);
+  white-space: nowrap;
+  color: var(--lv-purple);
+  border-bottom: 1.5px solid #c9c2fb;
 }
 
-.faqIcon {
-  font-size: 20px;
-  color: var(--wb-color-secondary);
-  font-weight: 300;
-  flex-shrink: 0;
+.faqLista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.faqAnswer {
-  padding: 0 22px 20px;
-  font-size: 14px;
-  color: #4b4d78;
-  line-height: 1.6;
+.faqItem {
+  background: #ffffff;
+  border-radius: 18px;
+  transition: box-shadow 0.3s;
+}
+
+.faqItem[data-abierto='true'] {
+  box-shadow: 0 18px 40px -22px rgba(8, 0, 86, 0.28);
+}
+
+.faqPregunta {
+  margin: 0;
+  font: inherit;
+}
+
+.faqBoton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  background: none;
+  border: 0;
+  border-radius: 18px;
+  cursor: pointer;
+  text-align: left;
+  font: 700 16.5px / 1.4 var(--font-montserrat), sans-serif;
+  color: var(--lv-navy);
+}
+
+.faqIcono {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--lv-purple-7);
+  color: var(--lv-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 20px / 1 var(--font-montserrat), sans-serif;
+  transition:
+    transform 0.35s var(--lv-ease),
+    background 0.3s,
+    color 0.3s;
+}
+
+.faqItem[data-abierto='true'] .faqIcono {
+  transform: rotate(45deg);
+  background: var(--lv-purple);
+  color: #ffffff;
+}
+
+/* Cerrado: 0fr y `visibility: hidden` (con retraso para que se vea el cierre)
+   sacan la respuesta del árbol de accesibilidad y del foco, pero queda en el DOM. */
+.faqPanel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.4s var(--lv-ease),
+    visibility 0s linear 0.4s;
+}
+
+.faqItem[data-abierto='true'] .faqPanel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.faqPanelInterior {
+  overflow: hidden;
+}
+
+.faqRespuesta {
+  margin: 0;
+  padding: 0 24px 24px;
+  font: 400 15px / 1.75 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+  max-width: 60ch;
 }
 
 /* ── CTA FINAL ── */
@@ -1448,31 +1694,11 @@
   .headerNav {
     display: none;
   }
-
-  .porqueGrid {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 @media (max-width: 640px) {
   .heroVisual {
     padding: 0 0 120px;
-  }
-
-  .section,
-  .sectionMuted > *,
-  .faqSection {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
-
-  .section {
-    padding-top: 56px;
-    padding-bottom: 56px;
-  }
-
-  .porqueGrid {
-    grid-template-columns: 1fr;
   }
 
   .footer {

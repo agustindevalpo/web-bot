@@ -204,9 +204,11 @@ export const COMO_FUNCIONA = {
 // partir de `_landing/precios.ts`; acá solo va el texto fijo.
 
 export const PRECIO = {
+  eyebrow: 'Precio',
   titulo: 'Un pago. Un sitio. Sin mensualidades.',
   nombreTarjeta: 'Sitio web de una página',
-  etiquetaPagoUnico: 'pago único',
+  etiquetaPagoUnico: 'Pago único',
+  incluyeTitulo: 'Incluye',
   incluye: [
     'Diseño con los datos de tu negocio',
     'Tu dominio .cl o .com, a tu nombre y configurado',
@@ -216,24 +218,35 @@ export const PRECIO = {
   ],
   lanzamiento: {
     prefijo: 'Precio de lanzamiento',
-    primeros: 'para los primeros 10',
+    primeros: (total: number) => `para los primeros ${total}`,
     cupos: (restantes: number) => `quedan ${restantes} cupos`,
   },
   agotado: {
     etiqueta: 'Cupos agotados',
     nota: (precioNormal: string) => `precio normal ${precioNormal}`,
   },
-  letraChica:
-    'Sitio de varias páginas: $249.990. Renovación anual de dominio y hosting: $39.990 desde el segundo año.',
+  // Tarjetas bajo el bloque navy; los montos salen de precios.ts.
+  extras: {
+    multipagina: 'Sitio de varias páginas',
+    renovacion: 'Renovación anual de dominio y hosting, desde el segundo año',
+  },
   cta: { label: 'Ver mi sitio gratis', href: '/chat' } satisfies EnlaceCta,
 }
 
 export const POR_QUE_DEVALPO = {
+  eyebrow: 'Por qué Devalpo',
   titulo: 'Por qué trabajar con nosotros',
+  // Pie de la tarjeta "¿Quiénes somos?" y píldoras de "Lo publicamos nosotros".
+  firma: {
+    iniciales: 'AR',
+    frase: 'Hablas con una persona, no con un ticket.',
+    persona: 'Agustín Romero · CEO & Co-Founder',
+  },
+  pastillas: ['Dominio', 'Hosting', 'Certificado SSL'],
   puntos: [
     {
       titulo: '¿Quiénes somos?',
-      desc: 'Empresa chilena de transformación digital fundada en 2020 en Valparaíso. Hacemos la tecnología accesible para empresas que buscan optimizar operaciones. Hablas con una persona, no con un ticket.',
+      desc: 'Empresa chilena de transformación digital fundada en 2020 en Valparaíso. Hacemos la tecnología accesible para empresas que buscan optimizar operaciones.',
     },
     {
       titulo: 'Lo publicamos nosotros',
@@ -250,7 +263,13 @@ export const POR_QUE_DEVALPO = {
 // orden prioriza al lector (una FAQ de landing no debería abrir con la
 // facturación del segundo año) — ver design, sección "FAQ".
 export const FAQ = {
+  eyebrow: 'Preguntas',
   titulo: 'Preguntas frecuentes',
+  otraDuda: {
+    prefijo: '¿Otra duda? Escríbenos al',
+    telefono: '+56 9 7642 4587',
+    href: 'https://wa.me/56976424587',
+  },
   items: [
     {
       q: '¿Qué incluye el precio?',

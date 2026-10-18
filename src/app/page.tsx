@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
-import { LandingFAQ } from './LandingFAQ'
+import { FaqAcordeon } from './_landing/FaqAcordeon'
 import { HeroVisual } from './_landing/HeroVisual'
 import { MaquetaSitio } from './_landing/MaquetaSitio'
 import { PasosRiel } from './_landing/PasosRiel'
@@ -20,7 +20,8 @@ import {
   PRECIO,
 } from './_landing/copy'
 import { EJEMPLOS } from './_landing/ejemplos'
-import { estadoPromo, formatCLP, PRECIO_PROMO, PRECIO_SITIO } from './_landing/precios'
+import { estadoPromo } from './_landing/precios'
+import { vistaPrecio } from './_landing/vistaPrecio'
 
 // Componentes de sección a nivel de módulo (no dentro de LandingPage) para
 // cumplir react-hooks/static-components — ver design D3.
@@ -154,70 +155,120 @@ function ComoFunciona() {
 }
 
 function Precio() {
-  const promo = estadoPromo()
+  const vista = vistaPrecio(estadoPromo())
 
   return (
-    <section id="precio" className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{PRECIO.titulo}</h2>
-      </div>
-      <div className={styles.precioCard}>
-        <div className={styles.precioNombre}>{PRECIO.nombreTarjeta}</div>
-        <div className={styles.precioMontoRow}>
-          <span className={styles.precioMonto}>{formatCLP(PRECIO_SITIO)}</span>
-          <span className={styles.precioPagoUnico}>{PRECIO.etiquetaPagoUnico}</span>
+    <Reveal id="precio" className={styles.precio}>
+      <div className={styles.seccionInner}>
+        <div className={styles.precioCabecera}>
+          <div className={styles.eyebrow} data-r>{PRECIO.eyebrow}</div>
+          <h2 className={styles.titulo2} data-r>{PRECIO.titulo}</h2>
         </div>
-        <ul className={styles.precioIncluyeLista}>
-          {PRECIO.incluye.map((item) => (
-            <li key={item} className={styles.precioIncluyeItem}>{item}</li>
-          ))}
-        </ul>
-        <p className={styles.precioEstado}>
-          {promo.agotada ? (
-            <>
-              <span className={styles.precioTachado}>{formatCLP(PRECIO_PROMO)}</span>{' '}
-              {PRECIO.agotado.etiqueta} — {PRECIO.agotado.nota(formatCLP(PRECIO_SITIO))}
-            </>
-          ) : (
-            <>
-              {PRECIO.lanzamiento.prefijo}: {formatCLP(PRECIO_PROMO)} {PRECIO.lanzamiento.primeros} ·{' '}
-              {PRECIO.lanzamiento.cupos(promo.restantes)}
-            </>
-          )}
-        </p>
-        <Link href={PRECIO.cta.href} className={styles.ctaPrimary}>{PRECIO.cta.label}</Link>
-        <p className={styles.precioLetraChica}>{PRECIO.letraChica}</p>
+        <div className={styles.precioBloque} data-r>
+          <div className={styles.precioMancha1} aria-hidden="true" />
+          <div className={styles.precioMancha2} aria-hidden="true" />
+          <div className={styles.precioIzquierda}>
+            <div className={styles.precioNombre}>{PRECIO.nombreTarjeta}</div>
+            {vista.etiquetaPromo && <div className={styles.precioEtiqueta}>{vista.etiquetaPromo}</div>}
+            <div className={styles.precioMontoFila}>
+              <span className={styles.precioMonto}>{vista.monto}</span>
+              {vista.montoTachado && <span className={styles.precioTachado}>{vista.montoTachado}</span>}
+            </div>
+            <div className={styles.precioLinea}>{vista.lineaPagoUnico}</div>
+            {vista.notaAgotado && <p className={styles.precioAgotado}>{vista.notaAgotado}</p>}
+            <Link href={PRECIO.cta.href} className={styles.precioCta}>
+              {PRECIO.cta.label}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <div className={styles.precioDerecha}>
+            <h3 className={styles.precioIncluyeTitulo}>{PRECIO.incluyeTitulo}</h3>
+            <ul className={styles.precioLista}>
+              {PRECIO.incluye.map((item) => (
+                <li key={item} className={styles.precioItem}>
+                  <span className={styles.precioCheck} aria-hidden="true">✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className={styles.precioExtras} data-r>
+          <div className={styles.precioExtra}>
+            <span className={styles.precioExtraTexto}>{PRECIO.extras.multipagina}</span>
+            <span className={styles.precioExtraMonto}>{vista.multipagina}</span>
+          </div>
+          <div className={styles.precioExtra}>
+            <span className={styles.precioExtraTexto}>{PRECIO.extras.renovacion}</span>
+            <span className={styles.precioExtraMonto}>{vista.renovacion}</span>
+          </div>
+        </div>
       </div>
-    </section>
+    </Reveal>
   )
 }
 
 function PorQueDevalpo() {
+  const [quienes, publicamos, piden] = POR_QUE_DEVALPO.puntos
+  const { firma } = POR_QUE_DEVALPO
+
   return (
-    <section className={`${styles.section} ${styles.sectionMuted}`}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{POR_QUE_DEVALPO.titulo}</h2>
-      </div>
-      <div className={styles.porqueGrid}>
-        {POR_QUE_DEVALPO.puntos.map((punto) => (
-          <div key={punto.titulo} className={styles.porqueCard}>
-            <h3 className={styles.cardTitleSmall}>{punto.titulo}</h3>
-            <p className={styles.cardTextSmall}>{punto.desc}</p>
+    <Reveal className={styles.porque}>
+      <div className={styles.seccionInner}>
+        <div className={styles.porqueCabecera}>
+          <div className={styles.eyebrow} data-r>{POR_QUE_DEVALPO.eyebrow}</div>
+          <h2 className={`${styles.titulo2} ${styles.porqueTitulo}`} data-r>{POR_QUE_DEVALPO.titulo}</h2>
+        </div>
+        <div className={styles.porqueGrid}>
+          <div className={styles.porqueGrande} data-r>
+            <div>
+              <h3 className={styles.porqueRotulo}>{quienes.titulo}</h3>
+              <p className={styles.porqueTextoGrande}>{quienes.desc}</p>
+            </div>
+            <div className={styles.porqueFirma}>
+              <span className={styles.porqueAvatar} aria-hidden="true">{firma.iniciales}</span>
+              <div>
+                <div className={styles.porqueFirmaFrase}>{firma.frase}</div>
+                <div className={styles.porqueFirmaPersona}>{firma.persona}</div>
+              </div>
+            </div>
           </div>
-        ))}
+          <div className={`${styles.porqueTarjeta} ${styles.porqueGris}`} data-r>
+            <h3 className={styles.porqueTitulo3}>{publicamos.titulo}</h3>
+            <p className={styles.porqueTexto}>{publicamos.desc}</p>
+            <ul className={styles.porquePastillas}>
+              {POR_QUE_DEVALPO.pastillas.map((pastilla) => (
+                <li key={pastilla} className={styles.porquePastilla}>{pastilla}</li>
+              ))}
+            </ul>
+          </div>
+          <div className={`${styles.porqueTarjeta} ${styles.porqueCyan}`} data-r>
+            <h3 className={styles.porqueTitulo3}>{piden.titulo}</h3>
+            <p className={`${styles.porqueTexto} ${styles.porqueTextoCyan}`}>{piden.desc}</p>
+          </div>
+        </div>
       </div>
-    </section>
+    </Reveal>
   )
 }
 
 function Faq() {
   return (
-    <section id="faq" className={styles.faqSection}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{FAQ.titulo}</h2>
+    <Reveal id="faq" className={styles.faq}>
+      <div className={`${styles.seccionInner} ${styles.faqGrid}`}>
+        <div>
+          <div className={styles.eyebrow} data-r>{FAQ.eyebrow}</div>
+          <h2 className={`${styles.titulo2} ${styles.faqTitulo}`} data-r>{FAQ.titulo}</h2>
+          <p className={styles.faqOtraDuda} data-r>
+            {FAQ.otraDuda.prefijo}{' '}
+            <a href={FAQ.otraDuda.href} className={styles.faqEnlace}>{FAQ.otraDuda.telefono}</a>.
+          </p>
+        </div>
+        <div data-r>
+          <FaqAcordeon items={FAQ.items} />
+        </div>
       </div>
-      <LandingFAQ items={FAQ.items} />
-    </section>
+    </Reveal>
   )
 }
 
