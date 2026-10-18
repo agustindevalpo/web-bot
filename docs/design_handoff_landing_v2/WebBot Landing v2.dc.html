@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+@keyframes wbUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes wbMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes wbDot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+@keyframes wbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes wbPulse{0%{box-shadow:0 0 0 0 rgba(37,211,102,.5)}100%{box-shadow:0 0 0 10px rgba(37,211,102,0)}}
+@keyframes wbSwipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+html{scroll-behavior:smooth}
+body{margin:0;background:#fff;font-family:Montserrat,system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#101218}
+a{color:#5B46F8;text-decoration:none}a:hover{color:#4632DE}
+*{box-sizing:border-box}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#fff;overflow-x:clip">
+
+<header style="position:sticky;top:0;z-index:50;background:{{ hdrBg }};backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid {{ hdrLine }};transition:background .3s ease,border-color .3s ease">
+<div style="max-width:1280px;margin:0 auto;padding:0 clamp(20px,5vw,64px);height:{{ hdrH }};display:flex;align-items:center;justify-content:space-between;gap:24px;transition:height .3s ease">
+<a href="#inicio" aria-label="Devalpo, inicio" style="display:flex;align-items:center;gap:12px"><img src="https://webbot.devalpo.cl/_next/image?url=%2Fdevalpo-logo.png&w=256&q=75" alt="Devalpo" style="height:40px;width:auto;display:block"></a>
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Secciones" style="display:flex;gap:36px">
+<a href="#ejemplos" style="font:500 14px Montserrat,sans-serif;color:#565E6B;transition:color .2s" style-hover="color:#080056">Ejemplos</a>
+<a href="#como-funciona" style="font:500 14px Montserrat,sans-serif;color:#565E6B;transition:color .2s" style-hover="color:#080056">Cómo funciona</a>
+<a href="#precio" style="font:500 14px Montserrat,sans-serif;color:#565E6B;transition:color .2s" style-hover="color:#080056">Precio</a>
+<a href="#faq" style="font:500 14px Montserrat,sans-serif;color:#565E6B;transition:color .2s" style-hover="color:#080056">Preguntas</a>
+</nav>
+</sc-if>
+<a href="https://webbot.devalpo.cl/chat" style="display:inline-flex;align-items:center;gap:10px;font:600 14px Montserrat,sans-serif;color:#fff;background:#5B46F8;padding:13px 22px;border-radius:999px;transition:background .2s,transform .2s" style-hover="background:#4632DE;color:#fff;transform:translateY(-1px)">Ver mi sitio gratis<span aria-hidden="true">→</span></a>
+</div>
+</header>
+
+<section id="inicio" data-revsec style="position:relative;padding:clamp(56px,8vw,112px) clamp(20px,5vw,64px) clamp(72px,9vw,128px);overflow:hidden">
+<div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(#EFEEF4 1px,transparent 1px),linear-gradient(90deg,#EFEEF4 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 70% 30%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 70% 60% at 70% 30%,#000 20%,transparent 75%)"></div>
+<div aria-hidden="true" style="position:absolute;width:560px;height:560px;right:-120px;top:-140px;border-radius:50%;background:radial-gradient(circle,rgba(21,222,250,.22),transparent 65%);filter:blur(10px)"></div>
+<div aria-hidden="true" style="position:absolute;width:520px;height:520px;right:22%;top:30%;border-radius:50%;background:radial-gradient(circle,rgba(91,70,248,.14),transparent 65%);filter:blur(10px)"></div>
+
+<div style="position:relative;max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:clamp(56px,6vw,96px);align-items:center">
+<div>
+<div data-r style="display:inline-flex;align-items:center;gap:10px;background:#F0EEFE;padding:9px 16px 9px 10px;border-radius:999px;margin:0 0 32px">
+<span style="font:700 10.5px Montserrat,sans-serif;letter-spacing:.14em;color:#fff;background:#080056;padding:5px 9px;border-radius:999px">DEVALPO</span>
+<span style="font:600 12.5px Montserrat,sans-serif;color:#4632DE">Hecho en Valparaíso</span>
+</div>
+<h1 data-r style="margin:0 0 28px;font:800 clamp(42px,6.4vw,84px)/1.0 Montserrat,sans-serif;letter-spacing:-.045em;color:#080056;text-wrap:balance">Tu sitio web listo <span style="position:relative;z-index:0;isolation:isolate;display:inline-block;white-space:nowrap">en 1 día.<span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:.04em;height:.2em;background:#15DEFA;z-index:-1;transform-origin:left;transform:scaleX(1);animation:wbSwipe .9s .9s cubic-bezier(.7,0,.2,1) backwards"></span></span> Con tu dominio. Pago único.</h1>
+<p data-r style="margin:0 0 40px;font:400 clamp(16px,1.5vw,19px)/1.75 Montserrat,sans-serif;color:#565E6B;max-width:44ch;text-wrap:pretty">Cuéntanos de tu negocio en un chat, revisas tu sitio y lo publicamos en tu propio dominio. Sin mensualidades ni contratos.</p>
+<div data-r style="display:flex;flex-wrap:wrap;gap:14px;margin:0 0 40px">
+<a href="https://webbot.devalpo.cl/chat" style="display:inline-flex;align-items:center;gap:12px;white-space:nowrap;font:600 15px Montserrat,sans-serif;color:#fff;background:#5B46F8;padding:19px 30px;border-radius:999px;box-shadow:0 12px 28px rgba(91,70,248,.32);transition:background .2s,transform .2s,box-shadow .2s" style-hover="background:#4632DE;color:#fff;transform:translateY(-2px);box-shadow:0 16px 34px rgba(91,70,248,.4)">Ver mi sitio gratis<span aria-hidden="true">→</span></a>
+<a href="#ejemplos" style="display:inline-flex;align-items:center;white-space:nowrap;font:600 15px Montserrat,sans-serif;color:#080056;border:1.5px solid #D8D6E4;background:#fff;padding:19px 30px;border-radius:999px;transition:border-color .2s,background .2s" style-hover="border-color:#5B46F8;background:#F6F4FE;color:#080056">Ver ejemplos reales</a>
+</div>
+<div data-r style="display:flex;flex-wrap:wrap;gap:10px 26px">
+<span style="display:flex;align-items:center;gap:9px;font:500 14px Montserrat,sans-serif;color:#101218"><span style="width:20px;height:20px;border-radius:50%;background:#DFFBFF;color:#007C8F;display:flex;align-items:center;justify-content:center;font:800 11px Montserrat,sans-serif">✓</span>Pago único</span>
+<span style="display:flex;align-items:center;gap:9px;font:500 14px Montserrat,sans-serif;color:#101218"><span style="width:20px;height:20px;border-radius:50%;background:#DFFBFF;color:#007C8F;display:flex;align-items:center;justify-content:center;font:800 11px Montserrat,sans-serif">✓</span>Publicado en 1 día hábil</span>
+<span style="display:flex;align-items:center;gap:9px;font:500 14px Montserrat,sans-serif;color:#101218"><span style="width:20px;height:20px;border-radius:50%;background:#DFFBFF;color:#007C8F;display:flex;align-items:center;justify-content:center;font:800 11px Montserrat,sans-serif">✓</span>Dominio a tu nombre</span>
+</div>
+</div>
+
+<div data-r style="position:relative;padding:0 0 {{ chatPadB }} {{ chatPadL }}">
+<div style="background:#fff;border-radius:20px;box-shadow:0 40px 80px -20px rgba(8,0,86,.28),0 0 0 1px rgba(8,0,86,.06);overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#F6F5F2;border-bottom:1px solid #EFEEF4">
+<div style="display:flex;gap:6px"><span style="width:10px;height:10px;border-radius:50%;background:#E0554C"></span><span style="width:10px;height:10px;border-radius:50%;background:#E8B23A"></span><span style="width:10px;height:10px;border-radius:50%;background:#4CAF6D"></span></div>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font:500 12px Montserrat,sans-serif;color:#565E6B;background:#fff;border:1px solid #E3E5EA;border-radius:999px;padding:6px 12px;min-width:0;overflow:hidden;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:#25D366;flex:none"></span>{{ slideUrl }}</div>
+</div>
+<div style="position:relative;aspect-ratio:4/3.1;overflow:hidden">
+
+<div style="position:absolute;inset:0;padding:22px 26px;background:#fff;opacity:{{ s0.op }};transform:{{ s0.tf }};transition:opacity .8s ease,transform 1.2s cubic-bezier(.2,.7,.2,1)">
+<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 22px"><div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#B5482A;color:#fff;font:800 8px Montserrat,sans-serif;display:flex;align-items:center;justify-content:center">DR</span><span style="font:700 10px Montserrat,sans-serif;color:#101218">Cocinería Doña Rosa</span></div><span style="font:600 8.5px Montserrat,sans-serif;color:#fff;background:#B5482A;padding:6px 11px;border-radius:999px">Reservar mesa</span></div>
+<div style="font:800 clamp(22px,2.6vw,32px)/1 Montserrat,sans-serif;letter-spacing:-.045em;color:#101218;margin:0 0 8px">Cocinería<br>Doña Rosa</div>
+<div style="font:400 9.5px/1.6 Montserrat,sans-serif;color:#565E6B;margin:0 0 18px;max-width:32ch">Cocina chilena casera, menú del día y platos de olla.</div>
+<div style="background:#F2F1ED;padding:14px 16px;border-radius:4px">
+<div style="font:700 7.5px Montserrat,sans-serif;letter-spacing:.24em;color:#B5482A;margin:0 0 6px">LA CARTA</div>
+<div style="display:flex;align-items:baseline;gap:8px;padding:5px 0;font:700 11px Montserrat,sans-serif;color:#101218"><span>Pastel de choclo</span><span style="flex:1;border-bottom:1.5px dotted #B9B5AA"></span><span style="font-weight:800">$11.900</span></div>
+<div style="display:flex;align-items:baseline;gap:8px;padding:5px 0;font:700 11px Montserrat,sans-serif;color:#101218"><span>Cazuela de vacuno</span><span style="flex:1;border-bottom:1.5px dotted #B9B5AA"></span><span style="font-weight:800">$10.500</span></div>
+<div style="display:flex;align-items:baseline;gap:8px;padding:5px 0;font:700 11px Montserrat,sans-serif;color:#101218"><span>Empanada de pino</span><span style="flex:1;border-bottom:1.5px dotted #B9B5AA"></span><span style="font-weight:800">$3.200</span></div>
+</div>
+</div>
+
+<div style="position:absolute;inset:0;padding:22px 26px;background:#fff;opacity:{{ s1.op }};transform:{{ s1.tf }};transition:opacity .8s ease,transform 1.2s cubic-bezier(.2,.7,.2,1)">
+<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 22px"><div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#0F7A5C;color:#fff;font:800 8px Montserrat,sans-serif;display:flex;align-items:center;justify-content:center">AL</span><span style="font:700 10px Montserrat,sans-serif;color:#101218">Almacén Las Lomas</span></div><span style="font:600 8.5px Montserrat,sans-serif;color:#fff;background:#0F7A5C;padding:6px 11px;border-radius:999px">Pedir por WhatsApp</span></div>
+<div style="font:800 clamp(22px,2.6vw,32px)/1 Montserrat,sans-serif;letter-spacing:-.045em;color:#101218;margin:0 0 18px">Productos de<br>la zona</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+<div><div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,#E4E2DC 0 8px,#EDEBE5 8px 16px);border-radius:4px;margin:0 0 7px"></div><div style="font:700 9px Montserrat,sans-serif;color:#101218">Miel de ulmo</div><div style="font:800 9px Montserrat,sans-serif;color:#0F7A5C">$6.500</div></div>
+<div><div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,#E4E2DC 0 8px,#EDEBE5 8px 16px);border-radius:4px;margin:0 0 7px"></div><div style="font:700 9px Montserrat,sans-serif;color:#101218">Mermelada</div><div style="font:800 9px Montserrat,sans-serif;color:#0F7A5C">$4.200</div></div>
+<div><div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,#E4E2DC 0 8px,#EDEBE5 8px 16px);border-radius:4px;margin:0 0 7px"></div><div style="font:700 9px Montserrat,sans-serif;color:#101218">Aceite de oliva</div><div style="font:800 9px Montserrat,sans-serif;color:#0F7A5C">$8.900</div></div>
+</div>
+</div>
+
+<div style="position:absolute;inset:0;padding:22px 26px;background:#fff;opacity:{{ s2.op }};transform:{{ s2.tf }};transition:opacity .8s ease,transform 1.2s cubic-bezier(.2,.7,.2,1)">
+<div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 22px"><div style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;background:#5B46F8;color:#fff;font:800 8px Montserrat,sans-serif;display:flex;align-items:center;justify-content:center">CS</span><span style="font:700 10px Montserrat,sans-serif;color:#101218">Clínica Dental Sonríe</span></div><span style="font:600 8.5px Montserrat,sans-serif;color:#fff;background:#5B46F8;padding:6px 11px;border-radius:999px">Agendar hora</span></div>
+<div style="font:800 clamp(22px,2.6vw,32px)/1 Montserrat,sans-serif;letter-spacing:-.045em;color:#101218;margin:0 0 18px">Tu sonrisa,<br>en buenas manos</div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center;padding:12px 0;border-top:1px solid #EFEEF4"><span style="font:800 30px/1 Montserrat,sans-serif;letter-spacing:-.05em;color:#DAD7F7">01</span><span style="font:700 11px Montserrat,sans-serif;color:#101218">Limpieza y control</span></div>
+<div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center;padding:12px 0;border-top:1px solid #EFEEF4"><span style="font:800 30px/1 Montserrat,sans-serif;letter-spacing:-.05em;color:#DAD7F7">02</span><span style="font:700 11px Montserrat,sans-serif;color:#101218">Ortodoncia</span></div>
+<div style="background:#101218;color:#fff;padding:9px 12px;font:600 8.5px Montserrat,sans-serif;display:flex;gap:16px"><span style="color:rgba(255,255,255,.7)">HORARIOS</span><span style="color:#15DEFA;font-weight:800">Lun a vie 9:00 – 19:00</span></div>
+</div>
+
+</div>
+<div style="display:flex;gap:6px;justify-content:center;padding:12px 0 14px;border-top:1px solid #EFEEF4">
+<span style="height:4px;border-radius:2px;background:{{ s0.dot }};width:{{ s0.dw }};transition:all .4s ease"></span>
+<span style="height:4px;border-radius:2px;background:{{ s1.dot }};width:{{ s1.dw }};transition:all .4s ease"></span>
+<span style="height:4px;border-radius:2px;background:{{ s2.dot }};width:{{ s2.dw }};transition:all .4s ease"></span>
+</div>
+</div>
+
+<div style="position:absolute;left:0;bottom:0;width:min(290px,78%);background:#fff;border-radius:18px;box-shadow:0 24px 50px -12px rgba(8,0,86,.3),0 0 0 1px rgba(8,0,86,.06);padding:14px;animation:wbFloat 6s ease-in-out infinite">
+<div style="display:flex;align-items:center;gap:10px;padding:0 2px 12px;border-bottom:1px solid #EFEEF4;margin:0 0 12px">
+<span style="width:30px;height:30px;border-radius:50%;background:#080056;color:#15DEFA;display:flex;align-items:center;justify-content:center;font:800 11px Montserrat,sans-serif">W</span>
+<div style="flex:1"><div style="font:700 12.5px Montserrat,sans-serif;color:#101218">WebBot</div><div style="display:flex;align-items:center;gap:6px;font:500 10.5px Montserrat,sans-serif;color:#565E6B"><span style="width:6px;height:6px;border-radius:50%;background:#25D366;animation:wbPulse 1.8s infinite"></span>en línea</div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:7px;min-height:150px;justify-content:flex-end">
+<sc-for list="{{ chat }}" as="m" hint-placeholder-count="0">
+<div style="display:flex;justify-content:{{ m.justify }};opacity:{{ m.op }};transform:{{ m.tf }};transition:opacity .4s ease,transform .4s cubic-bezier(.2,.7,.2,1)">
+<span style="max-width:86%;font:500 11.5px/1.45 Montserrat,sans-serif;padding:8px 12px;border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.color }}">{{ m.text }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex"><span style="display:flex;gap:4px;padding:11px 13px;background:#F2F1ED;border-radius:14px 14px 14px 4px"><span style="width:5px;height:5px;border-radius:50%;background:#565E6B;animation:wbDot 1.2s infinite"></span><span style="width:5px;height:5px;border-radius:50%;background:#565E6B;animation:wbDot 1.2s .15s infinite"></span><span style="width:5px;height:5px;border-radius:50%;background:#565E6B;animation:wbDot 1.2s .3s infinite"></span></span></div>
+</sc-if>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div style="background:#080056;padding:22px 0;overflow:hidden" aria-label="Lo que incluye">
+<div style="display:flex;width:max-content;animation:wbMarquee 38s linear infinite">
+<sc-for list="{{ marquee }}" as="t" hint-placeholder-count="8">
+<span style="display:flex;align-items:center;gap:28px;padding:0 28px;font:700 clamp(15px,1.6vw,20px) Montserrat,sans-serif;letter-spacing:-.01em;color:#fff;white-space:nowrap">{{ t }}<span aria-hidden="true" style="width:8px;height:8px;background:#15DEFA;transform:rotate(45deg)"></span></span>
+</sc-for>
+</div>
+</div>
+
+<section id="ejemplos" data-revsec style="padding:clamp(88px,11vw,160px) clamp(20px,5vw,64px);background:#fff">
+<div style="max-width:1280px;margin:0 auto">
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px 48px;margin:0 0 clamp(40px,5vw,64px)">
+<div>
+<div data-r style="font:700 12px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#5B46F8;margin:0 0 20px">Ejemplos</div>
+<h2 data-r style="margin:0;font:800 clamp(34px,4.6vw,60px)/1.04 Montserrat,sans-serif;letter-spacing:-.042em;color:#080056;max-width:16ch;text-wrap:balance">Sitios que ya están publicados</h2>
+</div>
+<p data-r style="margin:0;font:400 17px/1.7 Montserrat,sans-serif;color:#565E6B;max-width:34ch">Son sitios reales en línea, no maquetas. Ábrelos y revísalos.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px">
+
+<a data-r href="https://demo-restaurante.sitios.devalpo.cl" target="_blank" rel="noopener" style="display:block;background:#F6F5F2;border-radius:24px;padding:14px;color:#101218;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s" style-hover="transform:translateY(-6px);box-shadow:0 30px 60px -24px rgba(8,0,86,.3);color:#101218">
+<div style="background:#fff;border-radius:14px;height:250px;overflow:hidden;padding:22px;position:relative">
+<div style="font:800 26px/1 Montserrat,sans-serif;letter-spacing:-.045em;margin:0 0 16px">Restaurante</div>
+<div style="display:flex;gap:8px;padding:6px 0;font:700 11.5px Montserrat,sans-serif"><span>Plato de la casa</span><span style="flex:1;border-bottom:1.5px dotted #B9B5AA"></span><span>$11.900</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;font:700 11.5px Montserrat,sans-serif"><span>Entrada</span><span style="flex:1;border-bottom:1.5px dotted #B9B5AA"></span><span>$4.500</span></div>
+<div style="display:flex;gap:8px;padding:6px 0;font:700 11.5px Montserrat,sans-serif"><span>Postre</span><span style="flex:1;border-bottom:1.5px dotted #B9B5AA"></span><span>$3.900</span></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:62px;background:#B5482A;display:flex;align-items:center;padding:0 22px;font:600 11px Montserrat,sans-serif;color:#fff">Reservar por WhatsApp</div>
+</div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:22px 10px 8px">
+<div><div style="font:700 20px Montserrat,sans-serif;letter-spacing:-.02em;margin:0 0 6px">Restaurante</div><div style="font:400 14px/1.5 Montserrat,sans-serif;color:#565E6B">Menú, fotos y datos de reserva</div></div>
+<span style="flex:none;width:44px;height:44px;border-radius:50%;background:#080056;color:#fff;display:flex;align-items:center;justify-content:center;font:600 16px Montserrat,sans-serif">↗</span>
+</div>
+</a>
+
+<a data-r href="https://demo-tienda.sitios.devalpo.cl" target="_blank" rel="noopener" style="display:block;background:#F6F5F2;border-radius:24px;padding:14px;color:#101218;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s" style-hover="transform:translateY(-6px);box-shadow:0 30px 60px -24px rgba(8,0,86,.3);color:#101218">
+<div style="background:#fff;border-radius:14px;height:250px;overflow:hidden;padding:22px">
+<div style="font:800 26px/1 Montserrat,sans-serif;letter-spacing:-.045em;margin:0 0 16px">Tienda</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+<div><div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,#E4E2DC 0 8px,#EDEBE5 8px 16px);border-radius:6px;margin:0 0 8px"></div><div style="height:6px;width:80%;background:#E2E0EC;border-radius:3px;margin:0 0 5px"></div><div style="height:6px;width:40%;background:#0F7A5C;border-radius:3px"></div></div>
+<div><div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,#E4E2DC 0 8px,#EDEBE5 8px 16px);border-radius:6px;margin:0 0 8px"></div><div style="height:6px;width:70%;background:#E2E0EC;border-radius:3px;margin:0 0 5px"></div><div style="height:6px;width:45%;background:#0F7A5C;border-radius:3px"></div></div>
+<div><div style="aspect-ratio:1;background:repeating-linear-gradient(135deg,#E4E2DC 0 8px,#EDEBE5 8px 16px);border-radius:6px;margin:0 0 8px"></div><div style="height:6px;width:85%;background:#E2E0EC;border-radius:3px;margin:0 0 5px"></div><div style="height:6px;width:35%;background:#0F7A5C;border-radius:3px"></div></div>
+</div>
+</div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:22px 10px 8px">
+<div><div style="font:700 20px Montserrat,sans-serif;letter-spacing:-.02em;margin:0 0 6px">Tienda</div><div style="font:400 14px/1.5 Montserrat,sans-serif;color:#565E6B">Catálogo de productos y contacto directo</div></div>
+<span style="flex:none;width:44px;height:44px;border-radius:50%;background:#080056;color:#fff;display:flex;align-items:center;justify-content:center;font:600 16px Montserrat,sans-serif">↗</span>
+</div>
+</a>
+
+<a data-r href="https://demo-dentista.sitios.devalpo.cl" target="_blank" rel="noopener" style="display:block;background:#F6F5F2;border-radius:24px;padding:14px;color:#101218;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s" style-hover="transform:translateY(-6px);box-shadow:0 30px 60px -24px rgba(8,0,86,.3);color:#101218">
+<div style="background:#fff;border-radius:14px;height:250px;overflow:hidden;padding:22px">
+<div style="font:800 26px/1 Montserrat,sans-serif;letter-spacing:-.045em;margin:0 0 12px">Consulta dental</div>
+<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-top:1px solid #EFEEF4"><span style="font:800 32px/1 Montserrat,sans-serif;letter-spacing:-.05em;color:#DAD7F7">01</span><span style="font:700 12px Montserrat,sans-serif">Limpieza</span></div>
+<div style="display:flex;align-items:center;gap:14px;padding:10px 0;border-top:1px solid #EFEEF4"><span style="font:800 32px/1 Montserrat,sans-serif;letter-spacing:-.05em;color:#DAD7F7">02</span><span style="font:700 12px Montserrat,sans-serif">Ortodoncia</span></div>
+<div style="background:#101218;border-radius:6px;padding:10px 12px;font:600 10px Montserrat,sans-serif;display:flex;gap:14px"><span style="color:rgba(255,255,255,.7)">HORARIOS</span><span style="color:#15DEFA;font-weight:800">9:00 – 19:00</span></div>
+</div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:22px 10px 8px">
+<div><div style="font:700 20px Montserrat,sans-serif;letter-spacing:-.02em;margin:0 0 6px">Consulta dental</div><div style="font:400 14px/1.5 Montserrat,sans-serif;color:#565E6B">Servicios, horarios y formulario de contacto</div></div>
+<span style="flex:none;width:44px;height:44px;border-radius:50%;background:#080056;color:#fff;display:flex;align-items:center;justify-content:center;font:600 16px Montserrat,sans-serif">↗</span>
+</div>
+</a>
+
+</div>
+</div>
+</section>
+
+<section id="como-funciona" data-revsec style="padding:clamp(88px,11vw,160px) clamp(20px,5vw,64px);background:#F6F5F2">
+<div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:clamp(48px,7vw,120px);align-items:start">
+<div style="position:sticky;top:120px">
+<div data-r style="font:700 12px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#5B46F8;margin:0 0 20px">Cómo funciona</div>
+<h2 data-r style="margin:0 0 24px;font:800 clamp(34px,4.6vw,60px)/1.04 Montserrat,sans-serif;letter-spacing:-.042em;color:#080056;text-wrap:balance">Tres pasos, sin vueltas</h2>
+<p data-r style="margin:0 0 36px;font:400 17px/1.75 Montserrat,sans-serif;color:#565E6B;max-width:36ch">No pagas nada hasta ver tu sitio armado con los datos de tu negocio.</p>
+<a data-r href="https://webbot.devalpo.cl/chat" style="display:inline-flex;align-items:center;gap:12px;font:600 15px Montserrat,sans-serif;color:#fff;background:#080056;padding:18px 28px;border-radius:999px;transition:background .2s,transform .2s" style-hover="background:#5B46F8;color:#fff;transform:translateY(-2px)">Empezar el chat<span aria-hidden="true">→</span></a>
+</div>
+
+<div ref="{{ stepsRef }}" style="position:relative;padding:0 0 0 76px">
+<div aria-hidden="true" style="position:absolute;left:27px;top:28px;bottom:28px;width:2px;background:#E2E0EC"></div>
+<div aria-hidden="true" style="position:absolute;left:27px;top:28px;width:2px;height:{{ stepFill }};background:linear-gradient(#5B46F8,#15DEFA);transition:height .15s linear"></div>
+
+<div data-r style="position:relative;padding:0 0 clamp(48px,6vw,80px)">
+<span style="position:absolute;left:-76px;top:0;width:56px;height:56px;border-radius:50%;background:{{ st0 }};border:2px solid #5B46F8;color:{{ st0c }};display:flex;align-items:center;justify-content:center;font:800 20px Montserrat,sans-serif;transition:background .4s,color .4s">1</span>
+<h3 style="margin:10px 0 12px;font:800 clamp(24px,2.6vw,32px)/1.15 Montserrat,sans-serif;letter-spacing:-.03em;color:#080056">Conversas con el bot</h3>
+<p style="margin:0 0 24px;font:400 16px/1.75 Montserrat,sans-serif;color:#565E6B;max-width:40ch">Nos cuentas qué haces, tus servicios y tus datos de contacto.</p>
+<div style="display:flex;flex-direction:column;gap:8px;max-width:360px;background:#fff;border-radius:18px;padding:16px;box-shadow:0 1px 0 #E2E0EC">
+<span style="align-self:flex-start;font:500 13px Montserrat,sans-serif;background:#F2F1ED;color:#101218;padding:9px 13px;border-radius:14px 14px 14px 4px">¿Qué servicios ofreces?</span>
+<span style="align-self:flex-end;font:500 13px Montserrat,sans-serif;background:#5B46F8;color:#fff;padding:9px 13px;border-radius:14px 14px 4px 14px">Limpieza, ortodoncia y blanqueamiento</span>
+</div>
+</div>
+
+<div data-r style="position:relative;padding:0 0 clamp(48px,6vw,80px)">
+<span style="position:absolute;left:-76px;top:0;width:56px;height:56px;border-radius:50%;background:{{ st1 }};border:2px solid #5B46F8;color:{{ st1c }};display:flex;align-items:center;justify-content:center;font:800 20px Montserrat,sans-serif;transition:background .4s,color .4s">2</span>
+<h3 style="margin:10px 0 12px;font:800 clamp(24px,2.6vw,32px)/1.15 Montserrat,sans-serif;letter-spacing:-.03em;color:#080056">Revisas tu sitio</h3>
+<p style="margin:0 0 24px;font:400 16px/1.75 Montserrat,sans-serif;color:#565E6B;max-width:40ch">Te mostramos el sitio armado antes de que pagues.</p>
+<div style="max-width:360px;background:#fff;border-radius:18px;padding:16px;box-shadow:0 1px 0 #E2E0EC;display:flex;align-items:center;gap:14px">
+<div style="flex:none;width:76px;height:56px;border-radius:8px;background:#F0EEFE;padding:9px"><div style="height:6px;width:70%;background:#5B46F8;border-radius:3px;margin:0 0 6px"></div><div style="height:4px;width:90%;background:#C9C2FB;border-radius:2px;margin:0 0 4px"></div><div style="height:4px;width:60%;background:#C9C2FB;border-radius:2px"></div></div>
+<div><div style="font:700 14px Montserrat,sans-serif;color:#101218;margin:0 0 4px">Tu sitio está listo</div><div style="font:400 12.5px Montserrat,sans-serif;color:#565E6B">Revísalo antes de pagar</div></div>
+</div>
+</div>
+
+<div data-r style="position:relative">
+<span style="position:absolute;left:-76px;top:0;width:56px;height:56px;border-radius:50%;background:{{ st2 }};border:2px solid #5B46F8;color:{{ st2c }};display:flex;align-items:center;justify-content:center;font:800 20px Montserrat,sans-serif;transition:background .4s,color .4s">3</span>
+<h3 style="margin:10px 0 12px;font:800 clamp(24px,2.6vw,32px)/1.15 Montserrat,sans-serif;letter-spacing:-.03em;color:#080056">Pagas y queda publicado</h3>
+<p style="margin:0 0 24px;font:400 16px/1.75 Montserrat,sans-serif;color:#565E6B;max-width:40ch">Lo dejamos en línea con tu dominio en un día hábil.</p>
+<div style="display:inline-flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:12px 18px 12px 14px;box-shadow:0 1px 0 #E2E0EC;font:600 14px Montserrat,sans-serif;color:#101218"><span style="width:9px;height:9px;border-radius:50%;background:#25D366;animation:wbPulse 1.8s infinite"></span>tunegocio.cl<span style="font:600 11px Montserrat,sans-serif;color:#0F7A5C;background:#E3F7EE;padding:4px 9px;border-radius:999px">En línea</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section id="precio" data-revsec style="padding:clamp(88px,11vw,160px) clamp(20px,5vw,64px);background:#fff">
+<div style="max-width:1280px;margin:0 auto">
+<div style="text-align:center;margin:0 auto clamp(40px,5vw,64px);max-width:760px">
+<div data-r style="font:700 12px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#5B46F8;margin:0 0 20px">Precio</div>
+<h2 data-r style="margin:0;font:800 clamp(34px,4.6vw,60px)/1.04 Montserrat,sans-serif;letter-spacing:-.042em;color:#080056;text-wrap:balance">Un pago. Un sitio. Sin mensualidades.</h2>
+</div>
+<div data-r style="position:relative;background:#080056;border-radius:32px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))">
+<div aria-hidden="true" style="position:absolute;width:520px;height:520px;left:-160px;top:-200px;border-radius:50%;background:radial-gradient(circle,rgba(91,70,248,.55),transparent 65%)"></div>
+<div aria-hidden="true" style="position:absolute;width:420px;height:420px;right:-120px;bottom:-200px;border-radius:50%;background:radial-gradient(circle,rgba(21,222,250,.25),transparent 65%)"></div>
+<div style="position:relative;padding:clamp(36px,5vw,72px)">
+<div style="font:600 15px Montserrat,sans-serif;color:rgba(255,255,255,.8);margin:0 0 18px">Sitio web de una página</div>
+<div style="display:inline-flex;align-items:center;gap:8px;background:#FFAF4D;color:#2A1800;font:700 12px Montserrat,sans-serif;padding:7px 13px;border-radius:999px;margin:0 0 18px">Precio de lanzamiento · quedan 10 cupos</div>
+<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 18px;margin:0 0 6px">
+<span style="font:800 clamp(56px,7vw,92px)/1 Montserrat,sans-serif;letter-spacing:-.05em;color:#fff">$119.990</span>
+<span style="font:500 clamp(18px,2vw,24px) Montserrat,sans-serif;color:rgba(255,255,255,.6);text-decoration:line-through">$149.990</span>
+</div>
+<div style="font:500 15px Montserrat,sans-serif;color:#15DEFA;margin:0 0 36px">Pago único, para los primeros 10</div>
+<a href="https://webbot.devalpo.cl/chat" style="display:inline-flex;align-items:center;gap:12px;font:600 15px Montserrat,sans-serif;color:#080056;background:#15DEFA;padding:19px 30px;border-radius:999px;transition:background .2s,transform .2s" style-hover="background:#fff;color:#080056;transform:translateY(-2px)">Ver mi sitio gratis<span aria-hidden="true">→</span></a>
+</div>
+<div style="position:relative;padding:clamp(36px,5vw,72px);background:rgba(255,255,255,.05);border-left:1px solid rgba(255,255,255,.1)">
+<div style="font:700 11.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:0 0 22px">Incluye</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ incluye }}" as="i" hint-placeholder-count="5">
+<div style="display:flex;align-items:flex-start;gap:14px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.1)"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:rgba(21,222,250,.16);color:#15DEFA;display:flex;align-items:center;justify-content:center;font:800 11px Montserrat,sans-serif;margin:1px 0 0">✓</span><span style="font:500 15.5px/1.5 Montserrat,sans-serif;color:#fff">{{ i }}</span></div>
+</sc-for>
+</div>
+</div>
+</div>
+<div data-r style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin:16px 0 0">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:#F6F5F2;border-radius:20px;padding:24px 28px"><span style="font:500 15px Montserrat,sans-serif;color:#565E6B">Sitio de varias páginas</span><span style="font:800 22px Montserrat,sans-serif;letter-spacing:-.03em;color:#080056">$249.990</span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:#F6F5F2;border-radius:20px;padding:24px 28px"><span style="font:500 15px/1.4 Montserrat,sans-serif;color:#565E6B">Renovación anual de dominio y hosting, desde el segundo año</span><span style="flex:none;font:800 22px Montserrat,sans-serif;letter-spacing:-.03em;color:#080056">$39.990</span></div>
+</div>
+</div>
+</section>
+
+<section data-revsec style="padding:0 clamp(20px,5vw,64px) clamp(88px,11vw,160px);background:#fff">
+<div style="max-width:1280px;margin:0 auto">
+<div style="margin:0 0 clamp(40px,5vw,64px)">
+<div data-r style="font:700 12px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#5B46F8;margin:0 0 20px">Por qué Devalpo</div>
+<h2 data-r style="margin:0;font:800 clamp(34px,4.6vw,60px)/1.04 Montserrat,sans-serif;letter-spacing:-.042em;color:#080056;max-width:18ch;text-wrap:balance">Por qué trabajar con nosotros</h2>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px">
+<div data-r style="grid-row:span 2;background:#5B46F8;border-radius:28px;padding:clamp(32px,4vw,52px);display:flex;flex-direction:column;justify-content:space-between;gap:40px;min-height:420px">
+<div>
+<div style="font:700 11.5px Montserrat,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#fff;margin:0 0 22px">¿Quiénes somos?</div>
+<p style="margin:0;font:600 clamp(20px,2vw,26px)/1.4 Montserrat,sans-serif;letter-spacing:-.02em;color:#fff;text-wrap:pretty">Empresa chilena de transformación digital fundada en 2020 en Valparaíso. Hacemos la tecnología accesible para empresas que buscan optimizar operaciones.</p>
+</div>
+<div style="display:flex;align-items:center;gap:16px;padding:22px 0 0;border-top:1px solid rgba(255,255,255,.25)">
+<span style="flex:none;width:52px;height:52px;border-radius:50%;background:#fff;color:#5B46F8;display:flex;align-items:center;justify-content:center;font:800 17px Montserrat,sans-serif">AR</span>
+<div><div style="font:700 15px Montserrat,sans-serif;color:#fff">Hablas con una persona, no con un ticket.</div><div style="font:400 13px Montserrat,sans-serif;color:#fff;margin:4px 0 0">Agustín Romero · CEO & Co-Founder</div></div>
+</div>
+</div>
+<div data-r style="background:#F6F5F2;border-radius:28px;padding:clamp(28px,3.5vw,44px)">
+<h3 style="margin:0 0 12px;font:800 24px/1.2 Montserrat,sans-serif;letter-spacing:-.03em;color:#080056">Lo publicamos nosotros</h3>
+<p style="margin:0 0 24px;font:400 15.5px/1.7 Montserrat,sans-serif;color:#565E6B">Nos hacemos cargo del dominio, el hosting y el certificado. Tú revisas y apruebas.</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><span style="font:600 13px Montserrat,sans-serif;color:#080056;background:#fff;border:1px solid #E2E0EC;padding:8px 14px;border-radius:999px">Dominio</span><span style="font:600 13px Montserrat,sans-serif;color:#080056;background:#fff;border:1px solid #E2E0EC;padding:8px 14px;border-radius:999px">Hosting</span><span style="font:600 13px Montserrat,sans-serif;color:#080056;background:#fff;border:1px solid #E2E0EC;padding:8px 14px;border-radius:999px">Certificado SSL</span></div>
+</div>
+<div data-r style="background:#DFFBFF;border-radius:28px;padding:clamp(28px,3.5vw,44px)">
+<h3 style="margin:0 0 12px;font:800 24px/1.2 Montserrat,sans-serif;letter-spacing:-.03em;color:#080056">¿Te piden un sitio web?</h3>
+<p style="margin:0;font:400 15.5px/1.7 Montserrat,sans-serif;color:#2D3846">Si estás activando Webpay o Mercado Pago y te piden un sitio, te lo entregamos listo para mostrar: los datos de tu negocio, cómo contactarte y la descripción de lo que ofreces.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section id="faq" data-revsec style="padding:clamp(88px,11vw,160px) clamp(20px,5vw,64px);background:#F6F5F2">
+<div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:clamp(40px,6vw,96px);align-items:start">
+<div>
+<div data-r style="font:700 12px Montserrat,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:#5B46F8;margin:0 0 20px">Preguntas</div>
+<h2 data-r style="margin:0 0 20px;font:800 clamp(34px,4.6vw,60px)/1.04 Montserrat,sans-serif;letter-spacing:-.042em;color:#080056">Preguntas frecuentes</h2>
+<p data-r style="margin:0;font:400 16px/1.7 Montserrat,sans-serif;color:#565E6B;max-width:34ch">¿Otra duda? Escríbenos al <a href="https://wa.me/56976424587" style="font-weight:600;color:#5B46F8;border-bottom:1.5px solid #C9C2FB">+56 9 7642 4587</a>.</p>
+</div>
+<div data-r style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ faqs }}" as="f" hint-placeholder-count="6">
+<div style="background:#fff;border-radius:18px;box-shadow:{{ f.shadow }};transition:box-shadow .3s">
+<button type="button" onClick="{{ f.toggle }}" aria-expanded="{{ f.expanded }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px 24px;background:none;border:0;cursor:pointer;text-align:left;font:700 16.5px/1.4 Montserrat,sans-serif;color:#080056">{{ f.q }}<span aria-hidden="true" style="flex:none;width:32px;height:32px;border-radius:50%;background:{{ f.iconBg }};color:{{ f.iconColor }};display:flex;align-items:center;justify-content:center;font:500 20px/1 Montserrat,sans-serif;transform:{{ f.rot }};transition:transform .35s cubic-bezier(.2,.7,.2,1),background .3s,color .3s">+</span></button>
+<div style="display:grid;grid-template-rows:{{ f.rows }};transition:grid-template-rows .4s cubic-bezier(.2,.7,.2,1)"><div style="overflow:hidden"><p style="margin:0;padding:0 24px 24px;font:400 15px/1.75 Montserrat,sans-serif;color:#565E6B;max-width:60ch">{{ f.a }}</p></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section data-revsec style="padding:clamp(20px,3vw,32px);background:#F6F5F2">
+<div style="position:relative;max-width:1376px;margin:0 auto;background:#080056;border-radius:clamp(24px,3vw,40px);overflow:hidden;padding:clamp(72px,10vw,150px) clamp(24px,6vw,96px);text-align:center">
+<div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 60% 70% at 50% 50%,#000,transparent 75%);mask-image:radial-gradient(ellipse 60% 70% at 50% 50%,#000,transparent 75%)"></div>
+<div aria-hidden="true" style="position:absolute;width:640px;height:640px;left:50%;top:50%;margin:-320px 0 0 -320px;border-radius:50%;background:radial-gradient(circle,rgba(91,70,248,.5),transparent 62%)"></div>
+<div style="position:relative">
+<h2 data-r style="margin:0 auto 24px;font:800 clamp(38px,6vw,80px)/1.02 Montserrat,sans-serif;letter-spacing:-.045em;color:#fff;max-width:14ch;text-wrap:balance">Tu sitio puede estar publicado <span style="color:#15DEFA">mañana.</span></h2>
+<p data-r style="margin:0 auto 44px;font:400 clamp(16px,1.5vw,19px)/1.7 Montserrat,sans-serif;color:rgba(255,255,255,.82);max-width:40ch">Empieza la conversación ahora. No pagas nada hasta ver tu sitio listo.</p>
+<a data-r href="https://webbot.devalpo.cl/chat" style="display:inline-flex;align-items:center;gap:12px;font:600 16px Montserrat,sans-serif;color:#080056;background:#15DEFA;padding:21px 36px;border-radius:999px;box-shadow:0 0 0 8px rgba(21,222,250,.14);transition:background .2s,transform .2s,box-shadow .3s" style-hover="background:#fff;color:#080056;transform:translateY(-2px);box-shadow:0 0 0 14px rgba(21,222,250,.12)">Ver mi sitio gratis<span aria-hidden="true">→</span></a>
+</div>
+</div>
+</section>
+
+<footer style="background:#F6F5F2;padding:clamp(56px,7vw,96px) clamp(20px,5vw,64px) 32px">
+<div style="max-width:1280px;margin:0 auto">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:40px;padding:0 0 48px;border-bottom:1px solid #E2E0EC">
+<div><img src="https://webbot.devalpo.cl/_next/image?url=%2Fdevalpo-logo.png&w=256&q=75" alt="Devalpo" style="height:44px;width:auto;display:block;margin:0 0 20px"><div style="font:400 14px/1.7 Montserrat,sans-serif;color:#565E6B;max-width:30ch">Sitios web para pymes, publicados en tu dominio en 1 día hábil.</div></div>
+<div><div style="font:700 11px Montserrat,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#080056;margin:0 0 18px">Contacto</div><div style="display:flex;flex-direction:column;gap:10px;font:400 14px Montserrat,sans-serif;color:#565E6B"><span>Agustín Nicolás Romero Salazar</span><span>CEO & Co-Founder</span><a href="https://wa.me/56976424587" style="color:#565E6B" style-hover="color:#5B46F8">+56 9 7642 4587</a></div></div>
+<div><div style="font:700 11px Montserrat,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#080056;margin:0 0 18px">Empresa</div><div style="display:flex;flex-direction:column;gap:10px;font:400 14px/1.6 Montserrat,sans-serif;color:#565E6B"><span>Devalpo Soluciones Tecnológicas SpA</span><span>RUT 77.119.936-4</span><span>Reñaca Norte 265, of. 510, Viña del Mar</span></div></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:28px 0 0;font:400 13px Montserrat,sans-serif;color:#565E6B">
+<span>© 2026 Devalpo · Soluciones Tecnológicas</span>
+<div style="display:flex;gap:24px"><a href="https://webbot.devalpo.cl/terminos" style="color:#565E6B" style-hover="color:#5B46F8">Términos y condiciones</a><a href="https://webbot.devalpo.cl/privacidad" style="color:#565E6B" style-hover="color:#5B46F8">Privacidad</a></div>
+</div>
+</div>
+</footer>
+
+<sc-if value="{{ showBar }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;left:12px;right:12px;bottom:12px;z-index:60;animation:wbUp .4s cubic-bezier(.2,.7,.2,1) both">
+<a href="https://webbot.devalpo.cl/chat" style="display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;font:700 15px Montserrat,sans-serif;color:#fff;background:#5B46F8;border-radius:999px;box-shadow:0 14px 30px rgba(8,0,86,.35)">Ver mi sitio gratis<span aria-hidden="true">→</span></a>
+</div>
+</sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;animaciones&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { w: typeof window !== 'undefined' ? window.innerWidth : 1280, y: 0, slide: 0, chatStep: 0, open: 0, fill: 0 };
+  stepsRef = React.createRef();
+  componentDidMount(){
+    this.onScroll = () => { if (this.raf) return; this.raf = requestAnimationFrame(() => { this.raf = null; this.measure(); }); };
+    this.onResize = () => this.setState({ w: window.innerWidth });
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    window.addEventListener('resize', this.onResize);
+    this.measure();
+    const anim = this.props.animaciones !== false;
+    if (anim) {
+      this.t1 = setInterval(() => this.setState(s => ({ slide: (s.slide + 1) % 3 })), 4200);
+      this.t2 = setInterval(() => this.setState(s => ({ chatStep: (s.chatStep + 1) % 9 })), 1100);
+    } else this.setState({ chatStep: 6 });
+    this.io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        this.io.unobserve(e.target);
+        if (!anim) return;
+        Array.from(e.target.querySelectorAll('[data-r]')).forEach((el, i) => {
+          el.style.animation = 'wbUp .8s cubic-bezier(.2,.7,.2,1) ' + (i * 90) + 'ms both';
+        });
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('[data-revsec]').forEach(el => this.io.observe(el));
+  }
+  componentWillUnmount(){
+    window.removeEventListener('scroll', this.onScroll); window.removeEventListener('resize', this.onResize);
+    clearInterval(this.t1); clearInterval(this.t2); if (this.io) this.io.disconnect();
+  }
+  measure(){
+    const el = this.stepsRef.current; let fill = this.state.fill;
+    if (el) { const r = el.getBoundingClientRect(); const mid = window.innerHeight * 0.6; fill = Math.max(0, Math.min(1, (mid - r.top) / Math.max(1, r.height - 56))); }
+    this.setState({ y: window.scrollY, fill });
+  }
+  renderVals(){
+    const { w, y, slide, chatStep, open, fill } = this.state;
+    const wide = w >= 900, mobile = w < 640;
+    const urls = ['donarosa.cl', 'almacenlaslomas.cl', 'clinicasonrie.cl'];
+    const sl = (i) => ({ op: slide === i ? 1 : 0, tf: slide === i ? 'scale(1)' : 'scale(1.03)', dot: slide === i ? '#5B46F8' : '#E2E0EC', dw: slide === i ? '22px' : '8px' });
+    const script = [
+      { who: 'bot', text: '¡Hola! ¿Cómo se llama tu negocio?' },
+      { who: 'me', text: 'Cocinería Doña Rosa' },
+      { who: 'bot', text: '¿A qué se dedica?' },
+      { who: 'me', text: 'Comida chilena casera' },
+      { who: 'bot', text: 'Listo. Estoy armando tu sitio…' }
+    ];
+    const shown = Math.min(script.length, Math.floor((chatStep + 1) / 1.6));
+    const chat = script.slice(0, Math.max(1, shown)).map(m => {
+      const bot = m.who === 'bot';
+      return { text: m.text, justify: bot ? 'flex-start' : 'flex-end', op: 1, tf: 'none',
+        bg: bot ? '#F2F1ED' : '#5B46F8', color: bot ? '#101218' : '#fff', radius: bot ? '14px 14px 14px 4px' : '14px 14px 4px 14px' };
+    });
+    const typing = shown < script.length && chatStep % 2 === 0 && script[shown] && script[shown].who === 'bot';
+    const faqData = [
+      ['¿Qué incluye el precio?', 'El diseño del sitio con los datos de tu negocio, tu dominio configurado, el hosting y el certificado SSL del primer año, los textos e imágenes listos para publicar y una ronda de ajustes antes de publicar. Es un pago único: no hay mensualidad.'],
+      ['¿Cuánto tarda?', 'Una vez que pagas, tu sitio queda publicado en tu dominio en 1 día hábil.'],
+      ['¿Y si ya tengo dominio?', 'Lo usamos. Lo conectamos a tu sitio nuevo y sigue a tu nombre.'],
+      ['¿Puedo pedir cambios?', 'Sí. El precio incluye una ronda de ajustes antes de publicar.'],
+      ['¿Necesito saber de tecnología?', 'No. Conversas con el bot, revisas tu sitio y nosotros nos encargamos del dominio, el hosting y el certificado.'],
+      ['¿Qué pasa desde el segundo año?', 'Desde el segundo año se paga la renovación anual de dominio y hosting: $39.990.']
+    ];
+    const faqs = faqData.map(([q, a], i) => {
+      const o = open === i;
+      return { q, a, rows: o ? '1fr' : '0fr', rot: o ? 'rotate(45deg)' : 'none', iconBg: o ? '#5B46F8' : '#F0EEFE', iconColor: o ? '#fff' : '#5B46F8',
+        shadow: o ? '0 18px 40px -20px rgba(8,0,86,.25)' : 'none', expanded: o ? 'true' : 'false',
+        toggle: () => this.setState({ open: o ? -1 : i }) };
+    });
+    const st = (i) => fill >= i / 2 - 0.02;
+    const items = ['Pago único', 'Publicado en 1 día hábil', 'Dominio a tu nombre', 'Hosting y SSL el primer año', 'Una ronda de ajustes', 'Hecho en Chile'];
+    return {
+      isWide: wide,
+      hdrBg: y > 12 ? 'rgba(255,255,255,.86)' : 'rgba(255,255,255,0)',
+      hdrLine: y > 12 ? '#EFEEF4' : 'transparent',
+      hdrH: y > 12 ? '68px' : '84px',
+      chatPadB: mobile ? '120px' : '64px', chatPadL: mobile ? '0px' : '48px',
+      slideUrl: urls[slide], s0: sl(0), s1: sl(1), s2: sl(2),
+      chat, typing,
+      marquee: items.concat(items),
+      stepsRef: this.stepsRef, stepFill: 'calc(' + (fill * 100) + '% - ' + (fill * 56) + 'px)',
+      st0: st(0) ? '#5B46F8' : '#fff', st0c: st(0) ? '#fff' : '#5B46F8',
+      st1: st(1) ? '#5B46F8' : '#fff', st1c: st(1) ? '#fff' : '#5B46F8',
+      st2: st(2) ? '#5B46F8' : '#fff', st2c: st(2) ? '#fff' : '#5B46F8',
+      incluye: ['Diseño con los datos de tu negocio', 'Tu dominio .cl o .com, a tu nombre y configurado', 'Hosting y certificado SSL el primer año', 'Textos e imágenes listos para publicar', 'Una ronda de ajustes antes de publicar'],
+      faqs,
+      showBar: mobile && y > 700
+    };
+  }
+}
+
+</script>
+</body>
+</html>

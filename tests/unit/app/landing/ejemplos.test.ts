@@ -71,3 +71,22 @@ describe('EJEMPLOS — construcción de URL vía construirUrlPreview', () => {
     expect(tienda?.url).toBe('https://demo-tienda.sitios.devalpo.cl')
   })
 })
+
+describe('EJEMPLOS — host público', () => {
+  it('siempre usa el dominio real, incluso cuando la URL es la local', () => {
+    jest.resetModules()
+    process.env = {
+      ...ORIGINAL_ENV,
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+      NEXT_PUBLIC_BASE_DOMAIN: 'sitios.devalpo.cl',
+    }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { EJEMPLOS } = require('@/app/_landing/ejemplos') as { EJEMPLOS: EjemploReal[] }
+
+    expect(EJEMPLOS.map((ejemplo) => ejemplo.host)).toEqual([
+      'demo-restaurante.sitios.devalpo.cl',
+      'demo-tienda.sitios.devalpo.cl',
+      'demo-dentista.sitios.devalpo.cl',
+    ])
+  })
+})

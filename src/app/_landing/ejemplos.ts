@@ -8,13 +8,22 @@ export interface EjemploReal {
   rubro: string
   descripcion: string
   url: string
+  // Host público (sin esquema), siempre sobre el dominio real: lo muestra la barra
+  // de URL de la ventana del hero, incluso en local.
+  host: string
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || ''
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN || 'sitios.devalpo.cl'
 
 function crearEjemplo(subdominio: string, rubro: string, descripcion: string): EjemploReal {
-  return { subdominio, rubro, descripcion, url: construirUrlPreview(subdominio, APP_URL, BASE_DOMAIN) }
+  return {
+    subdominio,
+    rubro,
+    descripcion,
+    url: construirUrlPreview(subdominio, APP_URL, BASE_DOMAIN),
+    host: `${subdominio}.${BASE_DOMAIN}`,
+  }
 }
 
 export const EJEMPLOS: EjemploReal[] = [

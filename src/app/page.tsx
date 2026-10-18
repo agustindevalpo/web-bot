@@ -2,78 +2,89 @@ import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
 import { LandingFAQ } from './LandingFAQ'
-import { HeroDemo } from './_landing/HeroDemo'
+import { HeroVisual } from './_landing/HeroVisual'
+import { Reveal } from './_landing/Reveal'
+import { SiteHeader } from './_landing/SiteHeader'
 import {
+  BENEFICIOS,
+  BENEFICIOS_LABEL,
   COMO_FUNCIONA,
   CTA_FINAL,
   EJEMPLOS_INTRO,
   FAQ,
   HERO,
-  NAV,
   POR_QUE_DEVALPO,
   PRECIO,
 } from './_landing/copy'
 import { EJEMPLOS } from './_landing/ejemplos'
 import { estadoPromo, formatCLP, PRECIO_PROMO, PRECIO_SITIO } from './_landing/precios'
-import { urlPreviewDesdeEnv } from './admin/_lib/urlPreview'
-
-// El poster viene de scripts/capturar-posters.ts (slice 1): viewport móvil
-// 390×844 con deviceScaleFactor 2 → PNG de 780×1688px.
-const HERO_DEMO_SUBDOMINIO = 'demo-restaurante'
-const HERO_DEMO_URL = urlPreviewDesdeEnv(HERO_DEMO_SUBDOMINIO)
-const HERO_DEMO_POSTER = '/demo-restaurante-poster.png'
-const HERO_DEMO_POSTER_ANCHO = 780
-const HERO_DEMO_POSTER_ALTO = 1688
-const HERO_DEMO_TITULO = 'Sitio real publicado — demo de restaurante'
 
 // Componentes de sección a nivel de módulo (no dentro de LandingPage) para
 // cumplir react-hooks/static-components — ver design D3.
 
-function Nav() {
-  return (
-    <nav className={styles.nav}>
-      <Image src="/devalpo-logo.png" alt="Devalpo" width={120} height={44} className={styles.navLogo} priority />
-      <div className={styles.navLinks}>
-        <a href={NAV.ejemplos.href} className={styles.navLink}>{NAV.ejemplos.label}</a>
-        <a href={NAV.comoFunciona.href} className={styles.navLink}>{NAV.comoFunciona.label}</a>
-        <a href={NAV.precio.href} className={styles.navLink}>{NAV.precio.label}</a>
-        <a href={NAV.preguntas.href} className={styles.navLink}>{NAV.preguntas.label}</a>
-        <Link href={NAV.cta.href} className={styles.navCta}>{NAV.cta.label}</Link>
-      </div>
-    </nav>
-  )
-}
-
 function Hero() {
+  const { antes, destacado, despues } = HERO.tituloPartes
+
   return (
-    <section className={styles.hero}>
+    <Reveal id="inicio" className={styles.hero}>
+      <div className={styles.heroCuadricula} aria-hidden="true" />
+      <div className={styles.heroMancha1} aria-hidden="true" />
+      <div className={styles.heroMancha2} aria-hidden="true" />
       <div className={styles.heroInner}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>{HERO.badge}</div>
-          <h1 className={styles.heroTitle}>{HERO.titulo}</h1>
-          <p className={styles.heroSubtitle}>{HERO.subtitulo}</p>
-          <div className={styles.heroCtas}>
-            <Link href={HERO.ctaPrimario.href} className={styles.ctaPrimary}>{HERO.ctaPrimario.label}</Link>
-            <a href={HERO.ctaSecundario.href} className={styles.ctaSecondary}>{HERO.ctaSecundario.label}</a>
+        <div>
+          <div className={styles.heroBadge} data-r>
+            <span className={styles.heroBadgeMarca}>{HERO.badge.marca}</span>
+            <span className={styles.heroBadgeTexto}>{HERO.badge.texto}</span>
           </div>
-          <div className={styles.heroTrust}>
+          <h1 className={styles.heroTitle} data-r>
+            {antes}{' '}
+            <span className={styles.heroSubrayado}>
+              {destacado}
+              <span className={styles.heroSubrayadoBarra} aria-hidden="true" />
+            </span>{' '}
+            {despues}
+          </h1>
+          <p className={styles.heroSubtitle} data-r>{HERO.subtitulo}</p>
+          <div className={styles.heroCtas} data-r>
+            <Link href={HERO.ctaPrimario.href} className={styles.heroCtaPrimario}>
+              {HERO.ctaPrimario.label}
+              <span aria-hidden="true">→</span>
+            </Link>
+            <a href={HERO.ctaSecundario.href} className={styles.heroCtaSecundario}>{HERO.ctaSecundario.label}</a>
+          </div>
+          <div className={styles.heroTrust} data-r>
             {HERO.confianza.map((linea) => (
-              <span key={linea}>✓ {linea}</span>
+              <span key={linea} className={styles.heroTick}>
+                <span className={styles.heroTickIcono} aria-hidden="true">✓</span>
+                {linea}
+              </span>
             ))}
           </div>
         </div>
-        <div className={styles.heroDemoWrap}>
-          <span className={styles.heroDemoEtiqueta}>{HERO.demo.etiqueta}</span>
-          <HeroDemo
-            url={HERO_DEMO_URL}
-            poster={HERO_DEMO_POSTER}
-            posterAncho={HERO_DEMO_POSTER_ANCHO}
-            posterAlto={HERO_DEMO_POSTER_ALTO}
-            titulo={HERO_DEMO_TITULO}
-          />
+        <div data-r>
+          <HeroVisual />
         </div>
       </div>
-    </section>
+    </Reveal>
+  )
+}
+
+function FranjaBeneficios() {
+  // La lista se duplica para que el bucle del marquee no tenga corte; la copia
+  // es decorativa y queda fuera del árbol de accesibilidad.
+  return (
+    <div className={styles.franja} aria-label={BENEFICIOS_LABEL}>
+      <div className={styles.franjaPista}>
+        {[0, 1].map((copia) =>
+          BENEFICIOS.map((texto) => (
+            <span key={`${copia}-${texto}`} className={styles.franjaItem} aria-hidden={copia === 1 || undefined}>
+              {texto}
+              <span className={styles.franjaRombo} aria-hidden="true" />
+            </span>
+          )),
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -224,8 +235,9 @@ function Footer() {
 export default function LandingPage() {
   return (
     <div className={styles.page}>
-      <Nav />
+      <SiteHeader />
       <Hero />
+      <FranjaBeneficios />
       <EjemplosReales />
       <ComoFunciona />
       <Precio />
