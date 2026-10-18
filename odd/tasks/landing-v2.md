@@ -72,7 +72,16 @@ explicit request.
   Original scope: Example cards with hover, sticky left column,
   vertical rail filled by scroll progress, step circles and their UI illustrations.
   Route: delegated writer.
-- [ ] **L3 — Precio, Por qué Devalpo, FAQ.** Navy price block driven by `precios.ts`
+- [x] **L3 — Precio, Por qué Devalpo, FAQ.** Done in `54c2348` (+697/−274, mostly CSS for
+  three sections) and `58dfe0e`. Price view derived from `precios.ts` by `vistaPrecio.ts`;
+  accordion in `FaqAcordeon.tsx` (only client component; first item server-rendered open);
+  `LandingFAQ.tsx` deleted. Bento, price block and FAQ use explicit breakpoints (900/860 px),
+  no sticky. Checks: tsc 0 errors, eslint 0 errors (22 known warnings), test:unit 106 suites /
+  1595 tests, build OK. Chrome 390/768/1024/1280: no horizontal overflow; FAQ opens only the
+  clicked item and toggles closed; agotados variant verified by temporarily setting
+  `CUPOS_VENDIDOS = 10` (normal price, no tag, no strike-through; reverted to 0). Found and
+  fixed: the FAQ phone number wrapped at 390 px (`58dfe0e`).
+  Original scope: Navy price block driven by `precios.ts`
   (promo and agotados), extra price cards, bento grid, accordion (one open, first open by
   default, `grid-template-rows` animation, `aria-expanded`). Route: delegated writer.
 - [ ] **L4 — CTA final, footer, mobile fixed CTA, cleanup, docs.** Remove dead CSS and
@@ -89,4 +98,4 @@ explicit request.
 
 ## Progress
 
-_Next step:_ L3. Push and PRs of L1 and L2 pending Agustín's OK.
+_Next step:_ L4. Push and PRs of L1–L3 pending Agustín's OK.
