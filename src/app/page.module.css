@@ -832,87 +832,348 @@
   line-height: 1.6;
 }
 
-/* ── EJEMPLOS REALES ── */
+/* ── EJEMPLOS Y CÓMO FUNCIONA (README del handoff §4 y §5) ── */
+
+.ejemplos,
+.comoFunciona {
+  padding: clamp(88px, 11vw, 160px) var(--lv-gutter);
+}
+
+.ejemplos {
+  background: #ffffff;
+}
+
+.comoFunciona {
+  background: var(--lv-surface-soft);
+}
+
+.seccionInner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font: 700 12px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lv-purple);
+  margin: 0 0 20px;
+}
+
+.titulo2 {
+  margin: 0;
+  font: 800 clamp(34px, 4.6vw, 60px) / 1.04 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.042em;
+  color: var(--lv-navy);
+  text-wrap: balance;
+}
+
+.soloLectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ejemplosCabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px 48px;
+  margin: 0 0 clamp(40px, 5vw, 64px);
+}
+
+.ejemplosTitulo {
+  max-width: 16ch;
+}
+
+.ejemplosIntro {
+  margin: 0;
+  font: 400 17px / 1.7 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+  max-width: 34ch;
+}
 
 .ejemplosGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--wb-space-5);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 24px;
 }
 
 .ejemploCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--wb-space-2);
-  padding: var(--wb-space-6) var(--wb-space-5);
-  background: var(--wb-color-surface-muted);
-  border: 1px solid var(--wb-color-border);
-  border-radius: var(--wb-radius-lg);
-  transition: transform 0.15s ease;
+  position: relative;
+  display: block;
+  background: var(--lv-surface-soft);
+  border-radius: 24px;
+  padding: 14px;
+  color: var(--lv-ink);
+  transition:
+    transform 0.35s var(--lv-ease),
+    box-shadow 0.35s;
 }
 
 .ejemploCard:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 30px 60px -24px rgba(8, 0, 86, 0.3);
+}
+
+.ejemploPrevia {
+  height: 250px;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 14px;
+}
+
+.ejemploPie {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 10px 8px;
 }
 
 .ejemploRubro {
-  font-family: var(--wb-font-display);
-  font-size: var(--wb-text-lg);
-  font-weight: 600;
-  color: var(--wb-color-primary);
+  font: 700 20px var(--font-montserrat), sans-serif;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
 }
 
 .ejemploDescripcion {
   margin: 0;
-  font-size: var(--wb-text-sm);
-  color: var(--wb-color-muted);
-  line-height: 1.6;
+  font: 400 14px / 1.5 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
 }
 
-.ejemploLink {
-  margin-top: auto;
-  font-size: var(--wb-text-sm);
-  font-weight: 600;
-  color: var(--wb-color-secondary);
-}
-
-/* ── CÓMO FUNCIONA ── */
-
-.pasosGrid {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--wb-space-5);
-}
-
-.pasoCard {
-  background: var(--wb-color-surface);
-  border-radius: var(--wb-radius-md);
-  padding: var(--wb-space-6) var(--wb-space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--wb-space-2);
-  border: 1px solid var(--wb-color-border);
-  transition: transform 0.15s ease;
-}
-
-.pasoCard:hover {
-  transform: translateY(-4px);
-}
-
-.pasoNumero {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--wb-radius-sm);
-  background: var(--wb-color-primary);
-  color: var(--wb-color-surface);
+.ejemploFlecha {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--lv-navy);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--wb-font-display);
-  font-weight: 600;
-  font-size: var(--wb-text-sm);
+  font: 600 16px var(--font-montserrat), sans-serif;
+}
+
+.comoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  gap: clamp(48px, 7vw, 120px);
+  align-items: start;
+}
+
+.comoIzquierda {
+  position: sticky;
+  top: 120px;
+}
+
+.comoTitulo {
+  margin: 0 0 24px;
+}
+
+.comoTexto {
+  margin: 0 0 36px;
+  font: 400 17px / 1.75 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+  max-width: 36ch;
+}
+
+.comoCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 15px var(--font-montserrat), sans-serif;
+  color: #ffffff;
+  background: var(--lv-navy);
+  padding: 18px 28px;
+  border-radius: 999px;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+
+.comoCta:hover {
+  background: var(--lv-purple);
+  transform: translateY(-2px);
+}
+
+.pasosColumna {
+  position: relative;
+  padding: 0 0 0 76px;
+}
+
+.pasosRiel {
+  position: absolute;
+  left: 27px;
+  top: 28px;
+  bottom: 28px;
+  width: 2px;
+  background: var(--lv-line);
+}
+
+.pasosRielRelleno {
+  width: 100%;
+  background: linear-gradient(var(--lv-purple), var(--lv-cyan));
+  transition: height 0.15s linear;
+}
+
+.paso {
+  position: relative;
+  padding: 0 0 clamp(48px, 6vw, 80px);
+}
+
+.paso:last-child {
+  padding-bottom: 0;
+}
+
+.pasoCirculo {
+  position: absolute;
+  left: -76px;
+  top: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--lv-purple);
+  color: var(--lv-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 20px var(--font-montserrat), sans-serif;
+  transition:
+    background 0.4s,
+    color 0.4s;
+}
+
+.pasoCirculo[data-activo='true'] {
+  background: var(--lv-purple);
+  color: #ffffff;
+}
+
+.pasoTitulo {
+  margin: 10px 0 12px;
+  font: 800 clamp(24px, 2.6vw, 32px) / 1.15 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.03em;
+  color: var(--lv-navy);
+}
+
+.pasoTexto {
+  margin: 0 0 24px;
+  font: 400 16px / 1.75 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+  max-width: 40ch;
+}
+
+.pasoIlustracion {
+  background: #ffffff;
+  box-shadow: 0 1px 0 var(--lv-line);
+}
+
+.pasoChat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 360px;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.pasoBurbuja {
+  align-self: flex-start;
+  font: 500 13px var(--font-montserrat), sans-serif;
+  background: #f2f1ed;
+  color: var(--lv-ink);
+  padding: 9px 13px;
+  border-radius: 14px 14px 14px 4px;
+}
+
+.pasoBurbuja[data-quien='persona'] {
+  align-self: flex-end;
+  background: var(--lv-purple);
+  color: #ffffff;
+  border-radius: 14px 14px 4px 14px;
+}
+
+.pasoSitio {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 360px;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.pasoMiniatura {
+  flex: none;
+  width: 76px;
+  height: 56px;
+  border-radius: 8px;
+  background: var(--lv-purple-7);
+  padding: 9px;
+}
+
+.pasoMiniatura span {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: #c9c2fb;
+  margin: 0 0 4px;
+}
+
+.pasoMiniatura span:first-child {
+  height: 6px;
+  width: 70%;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  background: var(--lv-purple);
+}
+
+.pasoMiniatura span:nth-child(2) {
+  width: 90%;
+}
+
+.pasoMiniatura span:last-child {
+  width: 60%;
+  margin: 0;
+}
+
+.pasoSitioTitulo {
+  font: 700 14px var(--font-montserrat), sans-serif;
+  color: var(--lv-ink);
+  margin: 0 0 4px;
+}
+
+.pasoSitioTexto {
+  font: 400 12.5px var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+}
+
+.pasoLinea {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 999px;
+  padding: 12px 18px 12px 14px;
+  font: 600 14px var(--font-montserrat), sans-serif;
+  color: var(--lv-ink);
+}
+
+.pasoLinea .puntoPulso {
+  width: 9px;
+  height: 9px;
+}
+
+.pasoEtiqueta {
+  font: 600 11px var(--font-montserrat), sans-serif;
+  color: #0f7a5c;
+  background: #e3f7ee;
+  padding: 4px 9px;
+  border-radius: 999px;
 }
 
 .cardTitleSmall {
@@ -1180,8 +1441,6 @@
     display: none;
   }
 
-  .ejemplosGrid,
-  .pasosGrid,
   .porqueGrid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1204,8 +1463,6 @@
     padding-bottom: 56px;
   }
 
-  .ejemplosGrid,
-  .pasosGrid,
   .porqueGrid {
     grid-template-columns: 1fr;
   }
