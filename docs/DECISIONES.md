@@ -1356,3 +1356,23 @@ que renderizar, no hay carta aunque exista `cartaPdf`. Solo se enlazan PDFs prop
 nuestro bucket R2, D-42); una URL ajena no se muestra.
 **Evidencia:** `src/components/templates/restaurante/Carta.tsx:98-100` (enlace
 `TEXTO_ENLACE_PDF`); commit `f78c423`; PR #79; Engram `odd/restaurante-bloques/tasks`.
+
+---
+
+## D-47 — La landing muestra los sitios demo reales, nunca negocios ficticios
+
+**Fecha:** 2026-10-18 · **Estado:** vigente
+**Contexto:** el handoff del rediseño v2 traía un hero que rota tres negocios inventados
+("Cocinería Doña Rosa" en `donarosa.cl`, "Almacén Las Lomas", "Clínica Dental Sonríe") con un
+punto verde de "en línea". Con cero ventas, eso se lee como clientes que no existen.
+**Decisión (Agustín):** el hero y las vistas previas de ejemplos usan los tres demos reales,
+con los nombres de `prisma/seed-demo.ts` (El Rincón del Sabor, Boutique Luna Nueva, Clínica
+Dental Sonrisas) y sus URLs reales `demo-*.sitios.devalpo.cl`. No se muestra ningún dominio
+ni negocio que no exista.
+**Por qué:** no insinuar clientes falsos, y coherencia con el título "Sitios que ya están
+publicados": lo que se ve en la landing se puede abrir y recorrer.
+**Consecuencia:** cualquier negocio o dominio nuevo en la landing debe corresponder a un
+sitio publicado de verdad. Si cambia un demo, se actualizan `HERO_MAQUETAS` y la semilla
+juntos.
+**Evidencia:** `src/app/_landing/copy.ts:115` (`HERO_MAQUETAS`); commit `97cbe04` (L1 de la
+landing v2); `odd/tasks/landing-v2.md` (sección Decisions); `prisma/seed-demo.ts:67,87`.

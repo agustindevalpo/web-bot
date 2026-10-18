@@ -55,6 +55,7 @@ Then('las secciones de la página aparecen en este orden:', async function (this
     const nodos = Array.from(document.querySelectorAll('body section, body footer'))
     return nodos.map((nodo) => {
       if (nodo.tagName === 'FOOTER') return 'footer'
+      if (nodo.id === 'inicio') return 'hero'
       if (nodo.id) return nodo.id
       const texto = nodo.textContent || ''
       if (texto.includes('Tu sitio web listo en 1 día')) return 'hero'

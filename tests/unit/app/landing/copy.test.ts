@@ -4,6 +4,7 @@ import {
   CTA_FINAL,
   EJEMPLOS_INTRO,
   FAQ,
+  FOOTER,
   FRASES_PROHIBIDAS,
   HERO,
   HERO_CHAT,
@@ -228,6 +229,36 @@ describe('CTA_FINAL', () => {
     expect(CTA_FINAL.subtitulo.length).toBeGreaterThan(0)
     expect(CTA_FINAL.cta).toEqual({ label: 'Ver mi sitio gratis', href: '/chat' })
   })
+
+  it('el título plano es la unión de las partes y destaca "mañana."', () => {
+    expect(CTA_FINAL.titulo).toBe('Tu sitio puede estar publicado mañana.')
+    expect(CTA_FINAL.tituloPartes.destacado).toBe('mañana.')
+  })
+})
+
+describe('FOOTER', () => {
+  it('conserva el correo y el teléfono como enlaces, con la identidad legal completa', () => {
+    expect(FOOTER.contacto.correo).toEqual({
+      label: 'agustin.romero@devalpo.cl',
+      href: 'mailto:agustin.romero@devalpo.cl',
+    })
+    expect(FOOTER.contacto.telefono.label).toBe('+56 9 7642 4587')
+    expect(FOOTER.contacto.telefono.href).toBe('https://wa.me/56976424587')
+    expect(FOOTER.contacto.nombre).toBe('Agustín Nicolás Romero Salazar')
+    expect(FOOTER.empresa.lineas).toEqual([
+      'Devalpo Soluciones Tecnológicas SpA',
+      'RUT 77.119.936-4',
+      'Reñaca Norte 265, of. 510, Viña del Mar',
+    ])
+  })
+
+  it('enlaza a términos y privacidad y lleva el copyright', () => {
+    expect(FOOTER.enlaces).toEqual([
+      { label: 'Términos y condiciones', href: '/terminos' },
+      { label: 'Privacidad', href: '/privacidad' },
+    ])
+    expect(FOOTER.copyright).toBe('© 2026 Devalpo · Soluciones Tecnológicas')
+  })
 })
 
 describe('copy completo (todos los módulos) — sin frases prohibidas ni voseo', () => {
@@ -240,6 +271,7 @@ describe('copy completo (todos los módulos) — sin frases prohibidas ni voseo'
     ...recolectarStrings(POR_QUE_DEVALPO),
     ...recolectarStrings(FAQ),
     ...recolectarStrings(CTA_FINAL),
+    ...recolectarStrings(FOOTER),
   ]
 
   it('ningún string exportado por copy.ts contiene una frase prohibida (guarda total, R8)', () => {

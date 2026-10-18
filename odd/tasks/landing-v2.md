@@ -84,7 +84,20 @@ explicit request.
   Original scope: Navy price block driven by `precios.ts`
   (promo and agotados), extra price cards, bento grid, accordion (one open, first open by
   default, `grid-template-rows` animation, `aria-expanded`). Route: delegated writer.
-- [ ] **L4 — CTA final, footer, mobile fixed CTA, cleanup, docs.** Remove dead CSS and
+- [x] **L4 — CTA final, footer, mobile fixed CTA, cleanup, docs.** Done in `28adca1`
+  (+311/−147; deletes `public/demo-restaurante-poster.png` and `scripts/capturar-posters.ts`,
+  unreferenced) and `fdc3207` (D-47 in `docs/DECISIONES.md`; evidence lines verified).
+  `ESTADO.md` unchanged: it states nothing about the landing structure that became false.
+  Stale e2e "ley chilena" scenario rewritten to the current copy. Checks: tsc 0 errors, eslint
+  0 errors, test:unit 106 suites / 1598 tests, build OK; e2e `landing.feature` alone 18/18
+  scenarios. Chrome 390/768/1024/1280: no overflow; mobile CTA hidden at load and at 400 px,
+  shown past 700 px, hidden from 640 px; at the page bottom the legal links (bottom 636 px)
+  stay above the pill (top 672 px).
+  Incident: a full `cucumber-js` run hit the production database, because `.env`
+  `DATABASE_URL` points to Railway. A read-only check found no leftover rows (no e2e
+  subdomains, no Cliente or Sitio created in the last 90 minutes). Its 10 failures were HTTP
+  500s from a stale dev server (Jest worker crash); after a restart the demo sites return 200.
+  Original scope: Remove dead CSS and
   components, update `docs/ESTADO.md` if it names the old landing, e2e `landing.feature`
   still green. Route: delegated writer.
 
@@ -98,4 +111,5 @@ explicit request.
 
 ## Progress
 
-_Next step:_ L4. Push and PRs of L1–L3 pending Agustín's OK.
+All four tasks done locally. _Next step:_ Agustín's OK to push the four stacked branches and
+open their PRs to `develop`; after merge, release to `main` only on his explicit request.
