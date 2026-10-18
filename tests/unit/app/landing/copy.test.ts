@@ -1,10 +1,14 @@
 import {
+  BENEFICIOS,
   COMO_FUNCIONA,
   CTA_FINAL,
   EJEMPLOS_INTRO,
   FAQ,
+  FOOTER,
   FRASES_PROHIBIDAS,
   HERO,
+  HERO_CHAT,
+  HERO_MAQUETAS,
   NAV,
   POR_QUE_DEVALPO,
   PRECIO,
@@ -61,6 +65,9 @@ describe('copy de nav, hero, ejemplos y cómo funciona — sin frases prohibidas
     const textos = [
       ...recolectarStrings(NAV),
       ...recolectarStrings(HERO),
+      ...recolectarStrings(BENEFICIOS),
+      ...recolectarStrings(HERO_CHAT),
+      ...recolectarStrings(HERO_MAQUETAS),
       ...recolectarStrings(EJEMPLOS_INTRO),
       ...recolectarStrings(COMO_FUNCIONA),
     ]
@@ -94,6 +101,25 @@ describe('HERO', () => {
   it('expone al menos una línea de confianza', () => {
     expect(HERO.confianza.length).toBeGreaterThan(0)
   })
+
+  it('el H1 partido reconstruye el título y destaca "en 1 día."', () => {
+    const { antes, destacado, despues } = HERO.tituloPartes
+    expect(`${antes} ${destacado} ${despues}`).toBe(HERO.titulo)
+    expect(destacado).toBe('en 1 día.')
+  })
+})
+
+describe('BENEFICIOS', () => {
+  it('define los seis beneficios de la franja', () => {
+    expect(BENEFICIOS).toEqual([
+      'Pago único',
+      'Publicado en 1 día hábil',
+      'Dominio a tu nombre',
+      'Hosting y SSL el primer año',
+      'Una ronda de ajustes',
+      'Hecho en Chile',
+    ])
+  })
 })
 
 describe('EJEMPLOS_INTRO', () => {
@@ -122,13 +148,13 @@ describe('PRECIO', () => {
     expect(PRECIO.cta).toEqual({ label: 'Ver mi sitio gratis', href: '/chat' })
   })
 
-  it('la letra chica menciona el sitio multipágina ($249.990) y la renovación anual ($39.990)', () => {
-    expect(PRECIO.letraChica).toContain('$249.990')
-    expect(PRECIO.letraChica).toContain('$39.990')
+  it('nombra las tarjetas del sitio multipágina y de la renovación anual (los montos salen de precios.ts)', () => {
+    expect(PRECIO.extras.multipagina).toBe('Sitio de varias páginas')
+    expect(PRECIO.extras.renovacion).toContain('desde el segundo año')
   })
 
-  it('expone la etiqueta de lanzamiento "primeros 10" y el texto dinámico de cupos restantes', () => {
-    expect(PRECIO.lanzamiento.primeros).toContain('primeros 10')
+  it('expone la etiqueta de lanzamiento con el total de cupos y el texto dinámico de cupos restantes', () => {
+    expect(PRECIO.lanzamiento.primeros(10)).toBe('para los primeros 10')
     expect(PRECIO.lanzamiento.cupos(3)).toBe('quedan 3 cupos')
   })
 
@@ -203,6 +229,36 @@ describe('CTA_FINAL', () => {
     expect(CTA_FINAL.subtitulo.length).toBeGreaterThan(0)
     expect(CTA_FINAL.cta).toEqual({ label: 'Ver mi sitio gratis', href: '/chat' })
   })
+
+  it('el título plano es la unión de las partes y destaca "mañana."', () => {
+    expect(CTA_FINAL.titulo).toBe('Tu sitio puede estar publicado mañana.')
+    expect(CTA_FINAL.tituloPartes.destacado).toBe('mañana.')
+  })
+})
+
+describe('FOOTER', () => {
+  it('conserva el correo y el teléfono como enlaces, con la identidad legal completa', () => {
+    expect(FOOTER.contacto.correo).toEqual({
+      label: 'agustin.romero@devalpo.cl',
+      href: 'mailto:agustin.romero@devalpo.cl',
+    })
+    expect(FOOTER.contacto.telefono.label).toBe('+56 9 7642 4587')
+    expect(FOOTER.contacto.telefono.href).toBe('https://wa.me/56976424587')
+    expect(FOOTER.contacto.nombre).toBe('Agustín Nicolás Romero Salazar')
+    expect(FOOTER.empresa.lineas).toEqual([
+      'Devalpo Soluciones Tecnológicas SpA',
+      'RUT 77.119.936-4',
+      'Reñaca Norte 265, of. 510, Viña del Mar',
+    ])
+  })
+
+  it('enlaza a términos y privacidad y lleva el copyright', () => {
+    expect(FOOTER.enlaces).toEqual([
+      { label: 'Términos y condiciones', href: '/terminos' },
+      { label: 'Privacidad', href: '/privacidad' },
+    ])
+    expect(FOOTER.copyright).toBe('© 2026 Devalpo · Soluciones Tecnológicas')
+  })
 })
 
 describe('copy completo (todos los módulos) — sin frases prohibidas ni voseo', () => {
@@ -215,6 +271,7 @@ describe('copy completo (todos los módulos) — sin frases prohibidas ni voseo'
     ...recolectarStrings(POR_QUE_DEVALPO),
     ...recolectarStrings(FAQ),
     ...recolectarStrings(CTA_FINAL),
+    ...recolectarStrings(FOOTER),
   ]
 
   it('ningún string exportado por copy.ts contiene una frase prohibida (guarda total, R8)', () => {

@@ -1,222 +1,346 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
-import { LandingFAQ } from './LandingFAQ'
-import { HeroDemo } from './_landing/HeroDemo'
+import { CtaMovil } from './_landing/CtaMovil'
+import { FaqAcordeon } from './_landing/FaqAcordeon'
+import { HeroVisual } from './_landing/HeroVisual'
+import { MaquetaSitio } from './_landing/MaquetaSitio'
+import { PasosRiel } from './_landing/PasosRiel'
+import { Reveal } from './_landing/Reveal'
+import { SiteHeader } from './_landing/SiteHeader'
 import {
+  BENEFICIOS,
+  BENEFICIOS_LABEL,
   COMO_FUNCIONA,
   CTA_FINAL,
   EJEMPLOS_INTRO,
   FAQ,
+  FOOTER,
   HERO,
-  NAV,
+  HERO_MAQUETAS,
   POR_QUE_DEVALPO,
   PRECIO,
 } from './_landing/copy'
 import { EJEMPLOS } from './_landing/ejemplos'
-import { estadoPromo, formatCLP, PRECIO_PROMO, PRECIO_SITIO } from './_landing/precios'
-import { urlPreviewDesdeEnv } from './admin/_lib/urlPreview'
-
-// El poster viene de scripts/capturar-posters.ts (slice 1): viewport móvil
-// 390×844 con deviceScaleFactor 2 → PNG de 780×1688px.
-const HERO_DEMO_SUBDOMINIO = 'demo-restaurante'
-const HERO_DEMO_URL = urlPreviewDesdeEnv(HERO_DEMO_SUBDOMINIO)
-const HERO_DEMO_POSTER = '/demo-restaurante-poster.png'
-const HERO_DEMO_POSTER_ANCHO = 780
-const HERO_DEMO_POSTER_ALTO = 1688
-const HERO_DEMO_TITULO = 'Sitio real publicado — demo de restaurante'
+import { estadoPromo } from './_landing/precios'
+import { vistaPrecio } from './_landing/vistaPrecio'
 
 // Componentes de sección a nivel de módulo (no dentro de LandingPage) para
 // cumplir react-hooks/static-components — ver design D3.
 
-function Nav() {
-  return (
-    <nav className={styles.nav}>
-      <Image src="/devalpo-logo.png" alt="Devalpo" width={120} height={44} className={styles.navLogo} priority />
-      <div className={styles.navLinks}>
-        <a href={NAV.ejemplos.href} className={styles.navLink}>{NAV.ejemplos.label}</a>
-        <a href={NAV.comoFunciona.href} className={styles.navLink}>{NAV.comoFunciona.label}</a>
-        <a href={NAV.precio.href} className={styles.navLink}>{NAV.precio.label}</a>
-        <a href={NAV.preguntas.href} className={styles.navLink}>{NAV.preguntas.label}</a>
-        <Link href={NAV.cta.href} className={styles.navCta}>{NAV.cta.label}</Link>
-      </div>
-    </nav>
-  )
-}
-
 function Hero() {
+  const { antes, destacado, despues } = HERO.tituloPartes
+
   return (
-    <section className={styles.hero}>
+    <Reveal id="inicio" className={styles.hero}>
+      <div className={styles.heroCuadricula} aria-hidden="true" />
+      <div className={styles.heroMancha1} aria-hidden="true" />
+      <div className={styles.heroMancha2} aria-hidden="true" />
       <div className={styles.heroInner}>
-        <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>{HERO.badge}</div>
-          <h1 className={styles.heroTitle}>{HERO.titulo}</h1>
-          <p className={styles.heroSubtitle}>{HERO.subtitulo}</p>
-          <div className={styles.heroCtas}>
-            <Link href={HERO.ctaPrimario.href} className={styles.ctaPrimary}>{HERO.ctaPrimario.label}</Link>
-            <a href={HERO.ctaSecundario.href} className={styles.ctaSecondary}>{HERO.ctaSecundario.label}</a>
+        <div>
+          <div className={styles.heroBadge} data-r>
+            <span className={styles.heroBadgeMarca}>{HERO.badge.marca}</span>
+            <span className={styles.heroBadgeTexto}>{HERO.badge.texto}</span>
           </div>
-          <div className={styles.heroTrust}>
+          <h1 className={styles.heroTitle} data-r>
+            {antes}{' '}
+            <span className={styles.heroSubrayado}>
+              {destacado}
+              <span className={styles.heroSubrayadoBarra} aria-hidden="true" />
+            </span>{' '}
+            {despues}
+          </h1>
+          <p className={styles.heroSubtitle} data-r>{HERO.subtitulo}</p>
+          <div className={styles.heroCtas} data-r>
+            <Link href={HERO.ctaPrimario.href} className={styles.heroCtaPrimario}>
+              {HERO.ctaPrimario.label}
+              <span aria-hidden="true">→</span>
+            </Link>
+            <a href={HERO.ctaSecundario.href} className={styles.heroCtaSecundario}>{HERO.ctaSecundario.label}</a>
+          </div>
+          <div className={styles.heroTrust} data-r>
             {HERO.confianza.map((linea) => (
-              <span key={linea}>✓ {linea}</span>
+              <span key={linea} className={styles.heroTick}>
+                <span className={styles.heroTickIcono} aria-hidden="true">✓</span>
+                {linea}
+              </span>
             ))}
           </div>
         </div>
-        <div className={styles.heroDemoWrap}>
-          <span className={styles.heroDemoEtiqueta}>{HERO.demo.etiqueta}</span>
-          <HeroDemo
-            url={HERO_DEMO_URL}
-            poster={HERO_DEMO_POSTER}
-            posterAncho={HERO_DEMO_POSTER_ANCHO}
-            posterAlto={HERO_DEMO_POSTER_ALTO}
-            titulo={HERO_DEMO_TITULO}
-          />
+        <div data-r>
+          <HeroVisual />
         </div>
       </div>
-    </section>
+    </Reveal>
+  )
+}
+
+function FranjaBeneficios() {
+  // La lista se duplica para que el bucle del marquee no tenga corte; la copia
+  // es decorativa y queda fuera del árbol de accesibilidad.
+  return (
+    <div className={styles.franja} aria-label={BENEFICIOS_LABEL}>
+      <div className={styles.franjaPista}>
+        {[0, 1].map((copia) =>
+          BENEFICIOS.map((texto) => (
+            <span key={`${copia}-${texto}`} className={styles.franjaItem} aria-hidden={copia === 1 || undefined}>
+              {texto}
+              <span className={styles.franjaRombo} aria-hidden="true" />
+            </span>
+          )),
+        )}
+      </div>
+    </div>
   )
 }
 
 function EjemplosReales() {
   return (
-    <section id="ejemplos" className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{EJEMPLOS_INTRO.titulo}</h2>
-        <p className={styles.sectionSubtitle}>{EJEMPLOS_INTRO.subtitulo}</p>
+    <Reveal id="ejemplos" className={styles.ejemplos}>
+      <div className={styles.seccionInner}>
+        <div className={styles.ejemplosCabecera}>
+          <div>
+            <div className={styles.eyebrow} data-r>{EJEMPLOS_INTRO.eyebrow}</div>
+            <h2 className={`${styles.titulo2} ${styles.ejemplosTitulo}`} data-r>{EJEMPLOS_INTRO.titulo}</h2>
+          </div>
+          <p className={styles.ejemplosIntro} data-r>{EJEMPLOS_INTRO.subtitulo}</p>
+        </div>
+        <div className={styles.ejemplosGrid}>
+          {EJEMPLOS.map((ejemplo) => {
+            const maqueta = HERO_MAQUETAS.find((m) => m.subdominio === ejemplo.subdominio)
+            return (
+              <a
+                key={ejemplo.subdominio}
+                href={ejemplo.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.ejemploCard}
+                data-r
+              >
+                <div className={styles.ejemploPrevia} aria-hidden="true">
+                  {maqueta && <MaquetaSitio m={maqueta} />}
+                </div>
+                <div className={styles.ejemploPie}>
+                  <div>
+                    <div className={styles.ejemploRubro}>{ejemplo.rubro}</div>
+                    <p className={styles.ejemploDescripcion}>{ejemplo.descripcion}</p>
+                  </div>
+                  <span className={styles.ejemploFlecha} aria-hidden="true">↗</span>
+                  <span className={styles.soloLectores}>{EJEMPLOS_INTRO.linkTarjeta}</span>
+                </div>
+              </a>
+            )
+          })}
+        </div>
       </div>
-      <div className={styles.ejemplosGrid}>
-        {EJEMPLOS.map((ejemplo) => (
-          <a
-            key={ejemplo.subdominio}
-            href={ejemplo.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.ejemploCard}
-          >
-            <div className={styles.ejemploRubro}>{ejemplo.rubro}</div>
-            <p className={styles.ejemploDescripcion}>{ejemplo.descripcion}</p>
-            <span className={styles.ejemploLink}>{EJEMPLOS_INTRO.linkTarjeta}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    </Reveal>
   )
 }
 
 function ComoFunciona() {
   return (
-    <section id="como-funciona" className={`${styles.section} ${styles.sectionMuted}`}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{COMO_FUNCIONA.titulo}</h2>
+    <Reveal id="como-funciona" className={styles.comoFunciona}>
+      <div className={`${styles.seccionInner} ${styles.comoGrid}`}>
+        <div className={styles.comoIzquierda}>
+          <div className={styles.eyebrow} data-r>{COMO_FUNCIONA.eyebrow}</div>
+          <h2 className={`${styles.titulo2} ${styles.comoTitulo}`} data-r>{COMO_FUNCIONA.titulo}</h2>
+          <p className={styles.comoTexto} data-r>{COMO_FUNCIONA.texto}</p>
+          <Link href={COMO_FUNCIONA.cta.href} className={styles.comoCta} data-r>
+            {COMO_FUNCIONA.cta.label}
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+        <PasosRiel />
       </div>
-      <div className={styles.pasosGrid}>
-        {COMO_FUNCIONA.pasos.map((paso) => (
-          <div key={paso.n} className={styles.pasoCard}>
-            <div className={styles.pasoNumero}>{paso.n}</div>
-            <h3 className={styles.cardTitleSmall}>{paso.titulo}</h3>
-            <p className={styles.cardTextSmall}>{paso.desc}</p>
-          </div>
-        ))}
-      </div>
-    </section>
+    </Reveal>
   )
 }
 
 function Precio() {
-  const promo = estadoPromo()
+  const vista = vistaPrecio(estadoPromo())
 
   return (
-    <section id="precio" className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{PRECIO.titulo}</h2>
-      </div>
-      <div className={styles.precioCard}>
-        <div className={styles.precioNombre}>{PRECIO.nombreTarjeta}</div>
-        <div className={styles.precioMontoRow}>
-          <span className={styles.precioMonto}>{formatCLP(PRECIO_SITIO)}</span>
-          <span className={styles.precioPagoUnico}>{PRECIO.etiquetaPagoUnico}</span>
+    <Reveal id="precio" className={styles.precio}>
+      <div className={styles.seccionInner}>
+        <div className={styles.precioCabecera}>
+          <div className={styles.eyebrow} data-r>{PRECIO.eyebrow}</div>
+          <h2 className={styles.titulo2} data-r>{PRECIO.titulo}</h2>
         </div>
-        <ul className={styles.precioIncluyeLista}>
-          {PRECIO.incluye.map((item) => (
-            <li key={item} className={styles.precioIncluyeItem}>{item}</li>
-          ))}
-        </ul>
-        <p className={styles.precioEstado}>
-          {promo.agotada ? (
-            <>
-              <span className={styles.precioTachado}>{formatCLP(PRECIO_PROMO)}</span>{' '}
-              {PRECIO.agotado.etiqueta} — {PRECIO.agotado.nota(formatCLP(PRECIO_SITIO))}
-            </>
-          ) : (
-            <>
-              {PRECIO.lanzamiento.prefijo}: {formatCLP(PRECIO_PROMO)} {PRECIO.lanzamiento.primeros} ·{' '}
-              {PRECIO.lanzamiento.cupos(promo.restantes)}
-            </>
-          )}
-        </p>
-        <Link href={PRECIO.cta.href} className={styles.ctaPrimary}>{PRECIO.cta.label}</Link>
-        <p className={styles.precioLetraChica}>{PRECIO.letraChica}</p>
+        <div className={styles.precioBloque} data-r>
+          <div className={styles.precioMancha1} aria-hidden="true" />
+          <div className={styles.precioMancha2} aria-hidden="true" />
+          <div className={styles.precioIzquierda}>
+            <div className={styles.precioNombre}>{PRECIO.nombreTarjeta}</div>
+            {vista.etiquetaPromo && <div className={styles.precioEtiqueta}>{vista.etiquetaPromo}</div>}
+            <div className={styles.precioMontoFila}>
+              <span className={styles.precioMonto}>{vista.monto}</span>
+              {vista.montoTachado && <span className={styles.precioTachado}>{vista.montoTachado}</span>}
+            </div>
+            <div className={styles.precioLinea}>{vista.lineaPagoUnico}</div>
+            {vista.notaAgotado && <p className={styles.precioAgotado}>{vista.notaAgotado}</p>}
+            <Link href={PRECIO.cta.href} className={styles.precioCta}>
+              {PRECIO.cta.label}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+          <div className={styles.precioDerecha}>
+            <h3 className={styles.precioIncluyeTitulo}>{PRECIO.incluyeTitulo}</h3>
+            <ul className={styles.precioLista}>
+              {PRECIO.incluye.map((item) => (
+                <li key={item} className={styles.precioItem}>
+                  <span className={styles.precioCheck} aria-hidden="true">✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className={styles.precioExtras} data-r>
+          <div className={styles.precioExtra}>
+            <span className={styles.precioExtraTexto}>{PRECIO.extras.multipagina}</span>
+            <span className={styles.precioExtraMonto}>{vista.multipagina}</span>
+          </div>
+          <div className={styles.precioExtra}>
+            <span className={styles.precioExtraTexto}>{PRECIO.extras.renovacion}</span>
+            <span className={styles.precioExtraMonto}>{vista.renovacion}</span>
+          </div>
+        </div>
       </div>
-    </section>
+    </Reveal>
   )
 }
 
 function PorQueDevalpo() {
+  const [quienes, publicamos, piden] = POR_QUE_DEVALPO.puntos
+  const { firma } = POR_QUE_DEVALPO
+
   return (
-    <section className={`${styles.section} ${styles.sectionMuted}`}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{POR_QUE_DEVALPO.titulo}</h2>
-      </div>
-      <div className={styles.porqueGrid}>
-        {POR_QUE_DEVALPO.puntos.map((punto) => (
-          <div key={punto.titulo} className={styles.porqueCard}>
-            <h3 className={styles.cardTitleSmall}>{punto.titulo}</h3>
-            <p className={styles.cardTextSmall}>{punto.desc}</p>
+    <Reveal className={styles.porque}>
+      <div className={styles.seccionInner}>
+        <div className={styles.porqueCabecera}>
+          <div className={styles.eyebrow} data-r>{POR_QUE_DEVALPO.eyebrow}</div>
+          <h2 className={`${styles.titulo2} ${styles.porqueTitulo}`} data-r>{POR_QUE_DEVALPO.titulo}</h2>
+        </div>
+        <div className={styles.porqueGrid}>
+          <div className={styles.porqueGrande} data-r>
+            <div>
+              <h3 className={styles.porqueRotulo}>{quienes.titulo}</h3>
+              <p className={styles.porqueTextoGrande}>{quienes.desc}</p>
+            </div>
+            <div className={styles.porqueFirma}>
+              <span className={styles.porqueAvatar} aria-hidden="true">{firma.iniciales}</span>
+              <div>
+                <div className={styles.porqueFirmaFrase}>{firma.frase}</div>
+                <div className={styles.porqueFirmaPersona}>{firma.persona}</div>
+              </div>
+            </div>
           </div>
-        ))}
+          <div className={`${styles.porqueTarjeta} ${styles.porqueGris}`} data-r>
+            <h3 className={styles.porqueTitulo3}>{publicamos.titulo}</h3>
+            <p className={styles.porqueTexto}>{publicamos.desc}</p>
+            <ul className={styles.porquePastillas}>
+              {POR_QUE_DEVALPO.pastillas.map((pastilla) => (
+                <li key={pastilla} className={styles.porquePastilla}>{pastilla}</li>
+              ))}
+            </ul>
+          </div>
+          <div className={`${styles.porqueTarjeta} ${styles.porqueCyan}`} data-r>
+            <h3 className={styles.porqueTitulo3}>{piden.titulo}</h3>
+            <p className={`${styles.porqueTexto} ${styles.porqueTextoCyan}`}>{piden.desc}</p>
+          </div>
+        </div>
       </div>
-    </section>
+    </Reveal>
   )
 }
 
 function Faq() {
   return (
-    <section id="faq" className={styles.faqSection}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{FAQ.titulo}</h2>
+    <Reveal id="faq" className={styles.faq}>
+      <div className={`${styles.seccionInner} ${styles.faqGrid}`}>
+        <div>
+          <div className={styles.eyebrow} data-r>{FAQ.eyebrow}</div>
+          <h2 className={`${styles.titulo2} ${styles.faqTitulo}`} data-r>{FAQ.titulo}</h2>
+          <p className={styles.faqOtraDuda} data-r>
+            {FAQ.otraDuda.prefijo}{' '}
+            <a href={FAQ.otraDuda.href} className={styles.faqEnlace}>{FAQ.otraDuda.telefono}</a>.
+          </p>
+        </div>
+        <div data-r>
+          <FaqAcordeon items={FAQ.items} />
+        </div>
       </div>
-      <LandingFAQ items={FAQ.items} />
-    </section>
+    </Reveal>
   )
 }
 
 function CtaFinal() {
+  const { antes, destacado } = CTA_FINAL.tituloPartes
+
   return (
-    <section className={styles.ctaFinal}>
-      <div className={styles.ctaFinalInner}>
-        <h2 className={styles.ctaFinalTitle}>{CTA_FINAL.titulo}</h2>
-        <p className={styles.ctaFinalSubtitle}>{CTA_FINAL.subtitulo}</p>
-        <Link href={CTA_FINAL.cta.href} className={styles.ctaPrimary}>{CTA_FINAL.cta.label}</Link>
+    <Reveal className={styles.ctaFinal}>
+      <div className={styles.ctaFinalTarjeta}>
+        <div className={styles.ctaFinalCuadricula} aria-hidden="true" />
+        <div className={styles.ctaFinalMancha} aria-hidden="true" />
+        <div className={styles.ctaFinalContenido}>
+          <h2 className={styles.ctaFinalTitle} data-r>
+            {antes} <span className={styles.ctaFinalDestacado}>{destacado}</span>
+          </h2>
+          <p className={styles.ctaFinalSubtitle} data-r>{CTA_FINAL.subtitulo}</p>
+          <Link href={CTA_FINAL.cta.href} className={styles.ctaFinalBoton} data-r>
+            {CTA_FINAL.cta.label}
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
       </div>
-    </section>
+    </Reveal>
   )
 }
 
 function Footer() {
+  const { contacto, empresa } = FOOTER
+
   return (
     <footer className={styles.footer}>
-      <Image src="/devalpo-logo.png" alt="Devalpo" width={100} height={37} className={styles.footerLogo} />
-      <div className={styles.footerText}>
-        Agustín Nicolás Romero Salazar · CEO &amp; Co-Founder · agustin.romero@devalpo.cl · +56 9 7642 4587
+      <div className={styles.footerInner}>
+        <div className={styles.footerColumnas}>
+          <div>
+            <Image src="/devalpo-logo.png" alt="Devalpo" width={120} height={44} className={styles.footerLogo} />
+            <p className={styles.footerGlosa}>{FOOTER.glosa}</p>
+          </div>
+          <div>
+            <h2 className={styles.footerRotulo}>{contacto.titulo}</h2>
+            <div className={styles.footerLista}>
+              <span>{contacto.nombre}</span>
+              <span>{contacto.cargo}</span>
+              <a href={contacto.correo.href} className={`${styles.footerEnlace} ${styles.footerSinCorte}`}>
+                {contacto.correo.label}
+              </a>
+              <a href={contacto.telefono.href} className={`${styles.footerEnlace} ${styles.footerSinCorte}`}>
+                {contacto.telefono.label}
+              </a>
+            </div>
+          </div>
+          <div>
+            <h2 className={styles.footerRotulo}>{empresa.titulo}</h2>
+            <div className={styles.footerLista}>
+              {empresa.lineas.map((linea) => (
+                <span key={linea}>{linea}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className={styles.footerInferior}>
+          <span>{FOOTER.copyright}</span>
+          <div className={styles.footerLinks}>
+            {FOOTER.enlaces.map((enlace) => (
+              <Link key={enlace.href} href={enlace.href} className={styles.footerEnlace}>
+                {enlace.label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className={styles.footerLegal}>
-        Devalpo Soluciones Tecnológicas SpA · RUT 77.119.936-4 · Reñaca Norte 265, of. 510, Viña del Mar
-      </div>
-      <div className={styles.footerLinks}>
-        <Link href="/terminos" className={styles.footerLink}>Términos y condiciones</Link>
-        <Link href="/privacidad" className={styles.footerLink}>Privacidad</Link>
-      </div>
-      <div className={styles.footerCopy}>© 2026 Devalpo · Soluciones Tecnológicas</div>
     </footer>
   )
 }
@@ -224,8 +348,9 @@ function Footer() {
 export default function LandingPage() {
   return (
     <div className={styles.page}>
-      <Nav />
+      <SiteHeader />
       <Hero />
+      <FranjaBeneficios />
       <EjemplosReales />
       <ComoFunciona />
       <Precio />
@@ -233,6 +358,7 @@ export default function LandingPage() {
       <Faq />
       <CtaFinal />
       <Footer />
+      <CtaMovil />
     </div>
   )
 }
