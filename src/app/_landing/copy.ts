@@ -298,10 +298,36 @@ export const FAQ = {
   ],
 }
 
+const CTA_FINAL_TITULO = { antes: 'Tu sitio puede estar publicado', destacado: 'mañana.' }
+
 export const CTA_FINAL = {
-  titulo: 'Tu sitio puede estar publicado mañana.',
+  // El H2 se parte para pintar `destacado` en cyan; `titulo` es el texto plano completo.
+  tituloPartes: CTA_FINAL_TITULO,
+  titulo: `${CTA_FINAL_TITULO.antes} ${CTA_FINAL_TITULO.destacado}`,
   subtitulo: 'Empieza la conversación ahora. No pagas nada hasta ver tu sitio listo.',
   cta: { label: 'Ver mi sitio gratis', href: '/chat' } satisfies EnlaceCta,
+}
+
+// Footer (README del handoff §10). Se conserva cada dato del footer anterior;
+// el teléfono enlaza a WhatsApp igual que el de las preguntas frecuentes.
+export const FOOTER = {
+  glosa: 'Sitios web para pymes, publicados en tu dominio en 1 día hábil.',
+  contacto: {
+    titulo: 'Contacto',
+    nombre: 'Agustín Nicolás Romero Salazar',
+    cargo: 'CEO & Co-Founder',
+    correo: { label: 'agustin.romero@devalpo.cl', href: 'mailto:agustin.romero@devalpo.cl' },
+    telefono: { label: '+56 9 7642 4587', href: 'https://wa.me/56976424587' },
+  },
+  empresa: {
+    titulo: 'Empresa',
+    lineas: ['Devalpo Soluciones Tecnológicas SpA', 'RUT 77.119.936-4', 'Reñaca Norte 265, of. 510, Viña del Mar'],
+  },
+  copyright: '© 2026 Devalpo · Soluciones Tecnológicas',
+  enlaces: [
+    { label: 'Términos y condiciones', href: '/terminos' },
+    { label: 'Privacidad', href: '/privacidad' },
+  ],
 }
 
 // Unión de las 4 frases exigidas por R8 (spec obs #299) y las heredadas de la

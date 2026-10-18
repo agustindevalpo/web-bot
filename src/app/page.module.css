@@ -762,20 +762,6 @@
   transform: rotate(45deg);
 }
 
-.ctaPrimary {
-  background: var(--wb-color-highlight);
-  color: var(--wb-color-primary);
-  padding: 15px 30px;
-  border-radius: var(--wb-radius-pill);
-  font-size: var(--wb-text-base);
-  font-weight: 700;
-  transition: background 0.15s ease;
-}
-
-.ctaPrimary:hover {
-  background: var(--wb-color-surface);
-}
-
 /* ── EJEMPLOS Y CÓMO FUNCIONA (README del handoff §4 y §5) ── */
 
 .ejemplos,
@@ -1602,90 +1588,202 @@
   max-width: 60ch;
 }
 
-/* ── CTA FINAL ── */
+/* ── CTA FINAL (README del handoff §9) ── */
 
 .ctaFinal {
+  padding: clamp(20px, 3vw, 32px);
+  background: var(--lv-surface-soft);
+}
+
+.ctaFinalTarjeta {
   position: relative;
-  padding: 100px 48px;
-  background: var(--wb-color-primary);
+  max-width: 1376px;
+  margin: 0 auto;
+  background: var(--lv-navy);
+  border-radius: clamp(24px, 3vw, 40px);
   overflow: hidden;
+  padding: clamp(72px, 10vw, 150px) clamp(24px, 6vw, 96px);
   text-align: center;
 }
 
-.ctaFinalInner {
+.ctaFinalCuadricula {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, #000, transparent 75%);
+  mask-image: radial-gradient(ellipse 60% 70% at 50% 50%, #000, transparent 75%);
+}
+
+.ctaFinalMancha {
+  position: absolute;
+  width: 640px;
+  height: 640px;
+  left: 50%;
+  top: 50%;
+  margin: -320px 0 0 -320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(91, 70, 248, 0.5), transparent 62%);
+}
+
+.ctaFinalContenido {
   position: relative;
-  max-width: 620px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
 }
 
 .ctaFinalTitle {
-  font-family: var(--font-fredoka), sans-serif;
-  font-size: 36px;
-  font-weight: 600;
-  color: var(--wb-color-surface);
-  line-height: 1.2;
-  margin: 0;
+  margin: 0 auto 24px;
+  font: 800 clamp(38px, 6vw, 80px) / 1.02 var(--font-montserrat), sans-serif;
+  letter-spacing: -0.045em;
+  color: #ffffff;
+  max-width: 14ch;
+  text-wrap: balance;
+}
+
+.ctaFinalDestacado {
+  color: var(--lv-cyan);
 }
 
 .ctaFinalSubtitle {
-  font-size: 16px;
-  color: var(--wb-color-accent);
-  font-weight: 600;
-  margin: 0;
+  margin: 0 auto 44px;
+  font: 400 clamp(16px, 1.5vw, 19px) / 1.7 var(--font-montserrat), sans-serif;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 40ch;
 }
 
-/* ── FOOTER ── */
+.ctaFinalBoton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 16px var(--font-montserrat), sans-serif;
+  color: var(--lv-navy);
+  background: var(--lv-cyan);
+  padding: 21px 36px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 8px rgba(21, 222, 250, 0.14);
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    box-shadow 0.3s;
+}
+
+.ctaFinalBoton:hover {
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 14px rgba(21, 222, 250, 0.12);
+}
+
+/* ── FOOTER (README del handoff §10) ── */
 
 .footer {
-  padding: 48px;
-  background: #060042;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  text-align: center;
+  background: var(--lv-surface-soft);
+  padding: clamp(56px, 7vw, 96px) var(--lv-gutter) 32px;
+}
+
+.footerInner {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Tres columnas que envuelven solas: sin breakpoint, el mínimo de 240 px decide. */
+.footerColumnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 40px;
+  padding: 0 0 48px;
+  border-bottom: 1px solid var(--lv-line);
 }
 
 .footerLogo {
-  height: 28px;
+  height: 44px;
   width: auto;
-  filter: brightness(0) invert(1);
-  opacity: 0.85;
+  display: block;
+  margin: 0 0 20px;
 }
 
-.footerText {
-  font-size: 13px;
-  color: #9295cf;
+.footerGlosa {
+  margin: 0;
+  font: 400 14px / 1.7 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+  max-width: 30ch;
 }
 
-.footerLegal {
-  font-size: 12px;
-  color: #7679b3;
+.footerRotulo {
+  margin: 0 0 18px;
+  font: 700 11px var(--font-montserrat), sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lv-navy);
+}
+
+.footerLista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font: 400 14px / 1.6 var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
+}
+
+.footerEnlace {
+  color: var(--lv-ink-muted);
+  transition: color 0.2s;
+}
+
+.footerEnlace:hover {
+  color: var(--lv-purple);
+}
+
+/* Teléfono y correo no se parten a mitad de valor. */
+.footerSinCorte {
+  white-space: nowrap;
+}
+
+.footerInferior {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 28px 0 0;
+  font: 400 13px var(--font-montserrat), sans-serif;
+  color: var(--lv-ink-muted);
 }
 
 .footerLinks {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+/* ── BOTÓN FIJO EN MÓVIL (README del handoff §11) ── */
+
+.ctaMovil {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 60;
+  animation: wbUp 0.4s var(--lv-ease) both;
+}
+
+.ctaMovilBoton {
+  display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  font: 700 15px var(--font-montserrat), sans-serif;
+  color: #ffffff;
+  background: var(--lv-purple);
+  border-radius: 999px;
+  box-shadow: 0 14px 30px rgba(8, 0, 86, 0.35);
 }
 
-.footerLink {
-  font-size: 12px;
-  font-weight: 600;
-  color: #15defa;
-}
-
-.footerLink:hover {
-  text-decoration: underline;
-}
-
-.footerCopy {
-  font-size: 12px;
-  color: #565a91;
+@media (min-width: 640px) {
+  .ctaMovil {
+    display: none;
+  }
 }
 
 /* ── RESPONSIVE ── */
@@ -1701,21 +1799,10 @@
     padding: 0 0 120px;
   }
 
+  /* El botón fijo (56 px + 12 px de margen) no debe tapar los enlaces legales
+     al llegar al final: el footer reserva ese alto más aire. */
   .footer {
-    padding: 32px 20px;
-  }
-
-  .footerLinks {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .ctaFinal {
-    padding: 64px 20px;
-  }
-
-  .ctaFinalTitle {
-    font-size: 28px;
+    padding-bottom: 104px;
   }
 }
 

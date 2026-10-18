@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import styles from './page.module.css'
+import { CtaMovil } from './_landing/CtaMovil'
 import { FaqAcordeon } from './_landing/FaqAcordeon'
 import { HeroVisual } from './_landing/HeroVisual'
 import { MaquetaSitio } from './_landing/MaquetaSitio'
@@ -14,6 +15,7 @@ import {
   CTA_FINAL,
   EJEMPLOS_INTRO,
   FAQ,
+  FOOTER,
   HERO,
   HERO_MAQUETAS,
   POR_QUE_DEVALPO,
@@ -273,32 +275,72 @@ function Faq() {
 }
 
 function CtaFinal() {
+  const { antes, destacado } = CTA_FINAL.tituloPartes
+
   return (
-    <section className={styles.ctaFinal}>
-      <div className={styles.ctaFinalInner}>
-        <h2 className={styles.ctaFinalTitle}>{CTA_FINAL.titulo}</h2>
-        <p className={styles.ctaFinalSubtitle}>{CTA_FINAL.subtitulo}</p>
-        <Link href={CTA_FINAL.cta.href} className={styles.ctaPrimary}>{CTA_FINAL.cta.label}</Link>
+    <Reveal className={styles.ctaFinal}>
+      <div className={styles.ctaFinalTarjeta}>
+        <div className={styles.ctaFinalCuadricula} aria-hidden="true" />
+        <div className={styles.ctaFinalMancha} aria-hidden="true" />
+        <div className={styles.ctaFinalContenido}>
+          <h2 className={styles.ctaFinalTitle} data-r>
+            {antes} <span className={styles.ctaFinalDestacado}>{destacado}</span>
+          </h2>
+          <p className={styles.ctaFinalSubtitle} data-r>{CTA_FINAL.subtitulo}</p>
+          <Link href={CTA_FINAL.cta.href} className={styles.ctaFinalBoton} data-r>
+            {CTA_FINAL.cta.label}
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
       </div>
-    </section>
+    </Reveal>
   )
 }
 
 function Footer() {
+  const { contacto, empresa } = FOOTER
+
   return (
     <footer className={styles.footer}>
-      <Image src="/devalpo-logo.png" alt="Devalpo" width={100} height={37} className={styles.footerLogo} />
-      <div className={styles.footerText}>
-        Agustín Nicolás Romero Salazar · CEO &amp; Co-Founder · agustin.romero@devalpo.cl · +56 9 7642 4587
+      <div className={styles.footerInner}>
+        <div className={styles.footerColumnas}>
+          <div>
+            <Image src="/devalpo-logo.png" alt="Devalpo" width={120} height={44} className={styles.footerLogo} />
+            <p className={styles.footerGlosa}>{FOOTER.glosa}</p>
+          </div>
+          <div>
+            <h2 className={styles.footerRotulo}>{contacto.titulo}</h2>
+            <div className={styles.footerLista}>
+              <span>{contacto.nombre}</span>
+              <span>{contacto.cargo}</span>
+              <a href={contacto.correo.href} className={`${styles.footerEnlace} ${styles.footerSinCorte}`}>
+                {contacto.correo.label}
+              </a>
+              <a href={contacto.telefono.href} className={`${styles.footerEnlace} ${styles.footerSinCorte}`}>
+                {contacto.telefono.label}
+              </a>
+            </div>
+          </div>
+          <div>
+            <h2 className={styles.footerRotulo}>{empresa.titulo}</h2>
+            <div className={styles.footerLista}>
+              {empresa.lineas.map((linea) => (
+                <span key={linea}>{linea}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className={styles.footerInferior}>
+          <span>{FOOTER.copyright}</span>
+          <div className={styles.footerLinks}>
+            {FOOTER.enlaces.map((enlace) => (
+              <Link key={enlace.href} href={enlace.href} className={styles.footerEnlace}>
+                {enlace.label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className={styles.footerLegal}>
-        Devalpo Soluciones Tecnológicas SpA · RUT 77.119.936-4 · Reñaca Norte 265, of. 510, Viña del Mar
-      </div>
-      <div className={styles.footerLinks}>
-        <Link href="/terminos" className={styles.footerLink}>Términos y condiciones</Link>
-        <Link href="/privacidad" className={styles.footerLink}>Privacidad</Link>
-      </div>
-      <div className={styles.footerCopy}>© 2026 Devalpo · Soluciones Tecnológicas</div>
     </footer>
   )
 }
@@ -316,6 +358,7 @@ export default function LandingPage() {
       <Faq />
       <CtaFinal />
       <Footer />
+      <CtaMovil />
     </div>
   )
 }

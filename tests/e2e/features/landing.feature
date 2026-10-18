@@ -36,8 +36,9 @@ Feature: Landing pública de la fábrica de sitios
     And el estado de cupos promocionales muestra cupos disponibles o cupos agotados
     And la letra chica del precio menciona "$249.990" y "$39.990"
 
-  Scenario: "Por qué Devalpo" incluye el gancho legal
-    Then la sección "Por qué trabajar con nosotros" menciona "ley chilena"
+  Scenario: "Por qué Devalpo" describe lo que se entrega sin prometer cumplimiento legal
+    Then la sección "Por qué trabajar con nosotros" menciona "Webpay o Mercado Pago"
+    And la sección "Por qué trabajar con nosotros" menciona "el dominio, el hosting y el certificado"
 
   Scenario: Las preguntas frecuentes cubren los 6 temas requeridos
     Then la sección "Preguntas frecuentes" tiene exactamente 6 preguntas
