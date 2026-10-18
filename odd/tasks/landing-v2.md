@@ -111,5 +111,6 @@ explicit request.
 
 ## Progress
 
-All four tasks done locally. _Next step:_ Agustín's OK to push the four stacked branches and
-open their PRs to `develop`; after merge, release to `main` only on his explicit request.
+Done. PRs #84–#87 merged to `develop` (`9aa8830`) and released to `main` in `4e0cc08` on
+Agustín's request (2026-10-18). Production smoke over HTTP: `/`, `/chat`, legal pages and the
+three demo sites return 200; the landing serves the real demo names.

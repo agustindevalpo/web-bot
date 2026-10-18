@@ -6,7 +6,7 @@
 > La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`); si se
 > contradicen, gana Engram.
 >
-> **Última regeneración:** 2026-10-17 · `main` = `develop` = release `9d2a742`
+> **Última regeneración:** 2026-10-18 · `main` = `develop` = release `4e0cc08`
 
 ## 1. Qué es el producto
 
@@ -61,7 +61,9 @@ auth, claude, demo, email, cloudflare, storage, routing…) · `app/` (rutas, ca
 
 ## 4. Producción y develop
 
-**En producción** (`main`, release 2026-10-17): chat demo de 6 preguntas, paso de
+**En producción** (`main`, release 2026-10-18): landing v2 en `/` (handoff
+`docs/design_handoff_landing_v2/`, hero con los tres sitios demo reales, D-47; código en
+`src/app/_landing/`), chat demo de 6 preguntas, paso de
 datos, recuperación del chat sin terminar al recargar `/chat`, reveal con avance, momento 2 en `/chat/completar`, `/gracias`, 5 templates por rubro,
 **Bloques en `LANDING`, `SERVICIOS` y `RESTAURANTE`**, dirección opcional (`contacto.direccion`, máx. 60) en el paso de datos, carta PDF opcional desde `/admin`, dominios propios, panel `/admin` (pausar, dominio,
 editar `configJson`, confirmar pago, razón social/RUT, subir logo y fotos a R2), metadata y
@@ -101,7 +103,7 @@ npm run dev                  # http://localhost:3000
 ```
 
 `npm run dev:sandbox` arma lo mismo con el link de pruebas de Mercado Pago (puerto 5435).
-Tests: `npm run test:unit` (99 suites / 1558 tests en verde), `test:coverage` (70/80/80/80),
+Tests: `npm run test:unit` (106 suites / 1598 tests en verde), `test:coverage` (70/80/80/80),
 `test:e2e` (necesita `npm run dev`), `npx tsc --noEmit`, `npx eslint src tests`. No hay
 script `test` a secas.
 
@@ -109,6 +111,10 @@ script `test` a secas.
 
 - Railway **no corre migraciones**: `npx prisma migrate deploy` a mano. Nunca `migrate dev`
   (no hay staging); previsualizar con `migrate diff --script`. Prisma 7 exige driver adapter.
+- El `.env` local suele apuntar a la Postgres de **producción**. `cucumber-js <archivo>` corre
+  igual todas las features (`paths` de `cucumber.js`), y varias crean y borran filas: revisar
+  el host antes de cualquier e2e que escriba; para una sola feature, un config temporal con
+  `--config`.
 - `db:seed-demo` es precondición: sin el `Cliente` demo, `POST /api/chat/lead` cae con `P2003`.
 - `https://devalpo.cl` es el WordPress de Bluehost, no WebBot; la app vive en
   `webbot.devalpo.cl`. Cualquier otro host se enruta como sitio de cliente.
