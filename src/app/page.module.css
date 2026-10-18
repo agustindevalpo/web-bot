@@ -960,16 +960,24 @@
   font: 600 16px var(--font-montserrat), sans-serif;
 }
 
+/* Breakpoint explícito en vez de auto-fit: la columna izquierda solo puede ser
+   sticky cuando hay dos columnas; apilada, taparía los pasos al hacer scroll. */
 .comoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(48px, 7vw, 120px);
   align-items: start;
 }
 
-.comoIzquierda {
-  position: sticky;
-  top: 120px;
+@media (min-width: 1000px) {
+  .comoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .comoIzquierda {
+    position: sticky;
+    top: 120px;
+  }
 }
 
 .comoTitulo {
