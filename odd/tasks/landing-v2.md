@@ -61,7 +61,15 @@ explicit request.
   900 px, hero (pill, H1 with animated cyan underline, CTAs, ticks, browser window with the
   three real demos rotating every 4.2 s, floating chat card), navy marquee strip. Also commits
   the handoff folder and this document. Route: delegated writer (2+ non-trivial files).
-- [ ] **L2 — Ejemplos and Cómo funciona.** Example cards with hover, sticky left column,
+- [x] **L2 — Ejemplos and Cómo funciona.** Done in `9b169ed` (+610/−157) and `204a729`.
+  Example previews reuse the real demo mockups (`MaquetaSitio`). Checks: tsc 0 errors, eslint
+  0 errors, test:unit 104 suites / 1587 tests, build OK. Chrome at 390, 768 and 1024 px
+  (L1 + L2): no horizontal overflow at any width, nav hidden under 900 px, H1 42→65 px.
+  Found and fixed: the sticky left column of Cómo funciona stayed sticky when the grid
+  stacked, covering steps 2–3 on mobile; now two columns and sticky only from 1000 px
+  (`204a729`, tsc/eslint/build re-run). Known, matches prototype: at 768 px the example grid
+  is 2 + 1 cards.
+  Original scope: Example cards with hover, sticky left column,
   vertical rail filled by scroll progress, step circles and their UI illustrations.
   Route: delegated writer.
 - [ ] **L3 — Precio, Por qué Devalpo, FAQ.** Navy price block driven by `precios.ts`
@@ -81,5 +89,4 @@ explicit request.
 
 ## Progress
 
-_Next step:_ L2 (branch `feat/landing-v2-02-ejemplos-pasos`, cut from L1). Push and PR of L1
-pending Agustín's OK.
+_Next step:_ L3. Push and PRs of L1 and L2 pending Agustín's OK.
