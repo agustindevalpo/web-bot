@@ -1508,6 +1508,7 @@
 
 .faqEnlace {
   font-weight: 600;
+  white-space: nowrap;
   color: var(--lv-purple);
   border-bottom: 1.5px solid #c9c2fb;
 }
