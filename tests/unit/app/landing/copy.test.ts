@@ -147,13 +147,13 @@ describe('PRECIO', () => {
     expect(PRECIO.cta).toEqual({ label: 'Ver mi sitio gratis', href: '/chat' })
   })
 
-  it('la letra chica menciona el sitio multipágina ($249.990) y la renovación anual ($39.990)', () => {
-    expect(PRECIO.letraChica).toContain('$249.990')
-    expect(PRECIO.letraChica).toContain('$39.990')
+  it('nombra las tarjetas del sitio multipágina y de la renovación anual (los montos salen de precios.ts)', () => {
+    expect(PRECIO.extras.multipagina).toBe('Sitio de varias páginas')
+    expect(PRECIO.extras.renovacion).toContain('desde el segundo año')
   })
 
-  it('expone la etiqueta de lanzamiento "primeros 10" y el texto dinámico de cupos restantes', () => {
-    expect(PRECIO.lanzamiento.primeros).toContain('primeros 10')
+  it('expone la etiqueta de lanzamiento con el total de cupos y el texto dinámico de cupos restantes', () => {
+    expect(PRECIO.lanzamiento.primeros(10)).toBe('para los primeros 10')
     expect(PRECIO.lanzamiento.cupos(3)).toBe('quedan 3 cupos')
   })
 
