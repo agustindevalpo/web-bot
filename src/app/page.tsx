@@ -3,6 +3,8 @@ import Link from 'next/link'
 import styles from './page.module.css'
 import { LandingFAQ } from './LandingFAQ'
 import { HeroVisual } from './_landing/HeroVisual'
+import { MaquetaSitio } from './_landing/MaquetaSitio'
+import { PasosRiel } from './_landing/PasosRiel'
 import { Reveal } from './_landing/Reveal'
 import { SiteHeader } from './_landing/SiteHeader'
 import {
@@ -13,6 +15,7 @@ import {
   EJEMPLOS_INTRO,
   FAQ,
   HERO,
+  HERO_MAQUETAS,
   POR_QUE_DEVALPO,
   PRECIO,
 } from './_landing/copy'
@@ -90,46 +93,63 @@ function FranjaBeneficios() {
 
 function EjemplosReales() {
   return (
-    <section id="ejemplos" className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{EJEMPLOS_INTRO.titulo}</h2>
-        <p className={styles.sectionSubtitle}>{EJEMPLOS_INTRO.subtitulo}</p>
+    <Reveal id="ejemplos" className={styles.ejemplos}>
+      <div className={styles.seccionInner}>
+        <div className={styles.ejemplosCabecera}>
+          <div>
+            <div className={styles.eyebrow} data-r>{EJEMPLOS_INTRO.eyebrow}</div>
+            <h2 className={`${styles.titulo2} ${styles.ejemplosTitulo}`} data-r>{EJEMPLOS_INTRO.titulo}</h2>
+          </div>
+          <p className={styles.ejemplosIntro} data-r>{EJEMPLOS_INTRO.subtitulo}</p>
+        </div>
+        <div className={styles.ejemplosGrid}>
+          {EJEMPLOS.map((ejemplo) => {
+            const maqueta = HERO_MAQUETAS.find((m) => m.subdominio === ejemplo.subdominio)
+            return (
+              <a
+                key={ejemplo.subdominio}
+                href={ejemplo.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.ejemploCard}
+                data-r
+              >
+                <div className={styles.ejemploPrevia} aria-hidden="true">
+                  {maqueta && <MaquetaSitio m={maqueta} />}
+                </div>
+                <div className={styles.ejemploPie}>
+                  <div>
+                    <div className={styles.ejemploRubro}>{ejemplo.rubro}</div>
+                    <p className={styles.ejemploDescripcion}>{ejemplo.descripcion}</p>
+                  </div>
+                  <span className={styles.ejemploFlecha} aria-hidden="true">↗</span>
+                  <span className={styles.soloLectores}>{EJEMPLOS_INTRO.linkTarjeta}</span>
+                </div>
+              </a>
+            )
+          })}
+        </div>
       </div>
-      <div className={styles.ejemplosGrid}>
-        {EJEMPLOS.map((ejemplo) => (
-          <a
-            key={ejemplo.subdominio}
-            href={ejemplo.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.ejemploCard}
-          >
-            <div className={styles.ejemploRubro}>{ejemplo.rubro}</div>
-            <p className={styles.ejemploDescripcion}>{ejemplo.descripcion}</p>
-            <span className={styles.ejemploLink}>{EJEMPLOS_INTRO.linkTarjeta}</span>
-          </a>
-        ))}
-      </div>
-    </section>
+    </Reveal>
   )
 }
 
 function ComoFunciona() {
   return (
-    <section id="como-funciona" className={`${styles.section} ${styles.sectionMuted}`}>
-      <div className={styles.sectionHeader}>
-        <h2 className={styles.sectionTitle}>{COMO_FUNCIONA.titulo}</h2>
+    <Reveal id="como-funciona" className={styles.comoFunciona}>
+      <div className={`${styles.seccionInner} ${styles.comoGrid}`}>
+        <div className={styles.comoIzquierda}>
+          <div className={styles.eyebrow} data-r>{COMO_FUNCIONA.eyebrow}</div>
+          <h2 className={`${styles.titulo2} ${styles.comoTitulo}`} data-r>{COMO_FUNCIONA.titulo}</h2>
+          <p className={styles.comoTexto} data-r>{COMO_FUNCIONA.texto}</p>
+          <Link href={COMO_FUNCIONA.cta.href} className={styles.comoCta} data-r>
+            {COMO_FUNCIONA.cta.label}
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+        <PasosRiel />
       </div>
-      <div className={styles.pasosGrid}>
-        {COMO_FUNCIONA.pasos.map((paso) => (
-          <div key={paso.n} className={styles.pasoCard}>
-            <div className={styles.pasoNumero}>{paso.n}</div>
-            <h3 className={styles.cardTitleSmall}>{paso.titulo}</h3>
-            <p className={styles.cardTextSmall}>{paso.desc}</p>
-          </div>
-        ))}
-      </div>
-    </section>
+    </Reveal>
   )
 }
 

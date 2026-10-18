@@ -5,7 +5,7 @@
 // slides y de chat, en hero.ts.
 import { useEffect, useState } from 'react'
 import styles from '../page.module.css'
-import { HERO_CHAT, HERO_MAQUETAS, type Maqueta } from './copy'
+import { HERO_CHAT, HERO_MAQUETAS } from './copy'
 import { EJEMPLOS } from './ejemplos'
 import {
   INTERVALO_CHAT_MS,
@@ -15,79 +15,11 @@ import {
   siguientePasoChat,
   siguienteSlide,
 } from './hero'
+import { MaquetaSitio } from './MaquetaSitio'
 import { useMovimientoReducido } from './useMovimientoReducido'
 
 function hostDe(subdominio: string): string {
   return EJEMPLOS.find((ejemplo) => ejemplo.subdominio === subdominio)?.host ?? subdominio
-}
-
-function MaquetaSitio({ m }: { m: Maqueta }) {
-  return (
-    <div className={styles.maqueta} style={{ '--acento': m.acento, '--texto-acento': m.textoAcento } as React.CSSProperties}>
-      <div className={styles.maquetaBarra}>
-        <span className={styles.maquetaMarca}>
-          <span className={styles.maquetaLogo}>{m.iniciales}</span>
-          <span className={styles.maquetaNombre}>{m.nombre}</span>
-        </span>
-        <span className={styles.maquetaCta}>{m.cta}</span>
-      </div>
-      <div className={styles.maquetaTitulo}>
-        {m.titulo.map((linea, i) => (
-          <span key={linea}>
-            {i > 0 && <br />}
-            {linea}
-          </span>
-        ))}
-      </div>
-      {m.tipo === 'carta' && (
-        <>
-          <p className={styles.maquetaDescripcion}>{m.descripcion}</p>
-          <div className={styles.maquetaCarta}>
-            <div className={styles.maquetaEtiqueta}>{m.etiqueta}</div>
-            {m.filas.map((fila) => (
-              <div key={fila.texto} className={styles.maquetaFila}>
-                <span>{fila.texto}</span>
-                {fila.valor && (
-                  <>
-                    <span className={styles.maquetaPuntos} />
-                    <strong>{fila.valor}</strong>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-      {m.tipo === 'catalogo' && (
-        <>
-          <p className={styles.maquetaDescripcion}>{m.descripcion}</p>
-          <div className={styles.maquetaProductos}>
-            {m.productos.map((producto) => (
-              <div key={producto}>
-                <div className={styles.maquetaFoto} />
-                <div className={styles.maquetaProducto}>{producto}</div>
-              </div>
-            ))}
-          </div>
-          <div className={styles.maquetaPie}>{m.pie}</div>
-        </>
-      )}
-      {m.tipo === 'servicios' && (
-        <>
-          {m.servicios.map((servicio, i) => (
-            <div key={servicio} className={styles.maquetaServicio}>
-              <span className={styles.maquetaNumero}>{String(i + 1).padStart(2, '0')}</span>
-              <span>{servicio}</span>
-            </div>
-          ))}
-          <div className={styles.maquetaFranja}>
-            <span>{m.franja.etiqueta}</span>
-            <strong>{m.franja.valor}</strong>
-          </div>
-        </>
-      )}
-    </div>
-  )
 }
 
 export function HeroVisual() {

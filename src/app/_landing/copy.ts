@@ -159,13 +159,26 @@ export const HERO_MAQUETAS: Maqueta[] = [
 ]
 
 export const EJEMPLOS_INTRO = {
+  eyebrow: 'Ejemplos',
   titulo: 'Sitios que ya están publicados',
   subtitulo: 'Son sitios reales en línea, no maquetas. Ábrelos y revísalos.',
   linkTarjeta: 'Ver sitio →',
 }
 
 export const COMO_FUNCIONA = {
+  eyebrow: 'Cómo funciona',
   titulo: 'Tres pasos, sin vueltas',
+  texto: 'No pagas nada hasta ver tu sitio armado con los datos de tu negocio.',
+  cta: { label: 'Empezar el chat', href: '/chat' } satisfies EnlaceCta,
+  // Ilustraciones de interfaz de cada paso (decorativas).
+  ilustraciones: {
+    chat: [
+      { quien: 'bot', texto: '¿Qué servicios ofreces?' },
+      { quien: 'persona', texto: 'Limpieza, ortodoncia y blanqueamiento' },
+    ] satisfies MensajeChat[],
+    sitioListo: { titulo: 'Tu sitio está listo', texto: 'Revísalo antes de pagar' },
+    enLinea: { dominio: 'tunegocio.cl', etiqueta: 'En línea' },
+  },
   pasos: [
     {
       n: 1,
