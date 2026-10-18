@@ -48,7 +48,15 @@ explicit request.
 
 ## Tasks
 
-- [ ] **L1 — Foundation, header, hero, benefits strip.** Design tokens, reveal-on-scroll
+- [x] **L1 — Foundation, header, hero, benefits strip.** Done in `97cbe04`
+  (+2215/−316 incl. ~730 lines of handoff files). Real demos: El Rincón del Sabor, Boutique
+  Luna Nueva, Clínica Dental Sonrisas (`prisma/seed-demo.ts`). Checks: tsc 0 errors, eslint
+  0 errors (22 pre-existing warnings), test:unit 103 suites / 1580 tests, build OK; Chrome
+  1280 px and 390 px: URL bar and active slide switch together, header compacts at scroll,
+  no horizontal scroll at 390 px, no console errors. Exceeds the ~400-line heuristic because
+  the hero visual (window, three mini-sites, chat card) is mostly CSS. Left for L4: unused
+  `public/demo-restaurante-poster.png` and `scripts/capturar-posters.ts`.
+  Original scope: Design tokens, reveal-on-scroll
   hook, reduced motion, sticky header that shrinks at `scrollY > 12` and hides the nav under
   900 px, hero (pill, H1 with animated cyan underline, CTAs, ticks, browser window with the
   three real demos rotating every 4.2 s, floating chat card), navy marquee strip. Also commits
@@ -73,4 +81,5 @@ explicit request.
 
 ## Progress
 
-_Next step:_ L1.
+_Next step:_ L2 (branch `feat/landing-v2-02-ejemplos-pasos`, cut from L1). Push and PR of L1
+pending Agustín's OK.
