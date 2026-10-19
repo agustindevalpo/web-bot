@@ -6,7 +6,7 @@
 > La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`); si se
 > contradicen, gana Engram.
 >
-> **Última regeneración:** 2026-10-18 · `main` = `develop` = release `4e0cc08`
+> **Última regeneración:** 2026-10-18 · `main` = `develop` = release `f34b003`
 
 ## 1. Qué es el producto
 
