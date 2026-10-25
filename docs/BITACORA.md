@@ -1708,6 +1708,33 @@ navegar la página de afuera.
 
 ---
 
+## Recorrido completo en el sandbox de pagos (2026-10-24/25)
+
+Agustín recorrió el embudo entero en local con `npm run dev:sandbox` (Postgres propio en
+el puerto 5435, sin tocar producción) y un pago de prueba de Mercado Pago.
+
+- **Verificado:** chat de 6 preguntas, recuperación al recargar, sitio demo al 35 %,
+  `/chat/completar` hasta 80 %, pago aprobado en el sandbox (operación 184848672915),
+  confirmar pago y activar desde `/admin`, pausar (404) y reactivar, editar `configJson`
+  (con JSON inválido rechazado) y razón social/RUT.
+- **La preferencia de prueba del 2026-09-12 caducó:** el link caía a
+  `/payment/redirect/exception` con el comprador logueado. Se creó una nueva por API con el
+  token del vendedor de prueba y se reemplazó en `scripts/dev-sandbox.mjs`. El
+  procedimiento quedó en `COMANDOS.md`.
+- **Chrome incógnito no deja pagar:** el botón **Pagar** queda gris aun con cookies de
+  terceros permitidas. En Edge InPrivate funcionó al primer intento. La Visa de prueba
+  vigente es `4998 4704 7065 8262`; la `4168…` que tenía `COMANDOS.md` ya no corresponde.
+- **`ESTADO.md` estaba mal en dos puntos:** decía que el guion demo tenía 8 preguntas (son
+  6, `DemoChatService.ts:31`) y que el magic link bloqueaba algo. Ningún camino del embudo
+  lleva a `/login`, y Agustín decidió que no hace falta por ahora: se deja inerte.
+- **Sin probar:** R2 (en local no está configurado y Agustín no quiere usar las variables
+  de Railway aquí) y la revisión legal.
+- **Hallazgos para el momento 2:** la tarea de servicios solo muestra los que vienen del
+  chat y no deja agregar más (falta un "+ Agregar servicio"), y "¿Qué hacen distinto?" es
+  una línea de 80 caracteres (`LIMITES_MOMENTO2.microPregunta`), poco para explayarse.
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |

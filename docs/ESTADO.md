@@ -6,7 +6,7 @@
 > La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`); si se
 > contradicen, gana Engram.
 >
-> **Última regeneración:** 2026-10-18 · `main` = `develop` = release `f34b003`
+> **Última regeneración:** 2026-10-25 · `main` = `develop` = `6d8f003`
 
 ## 1. Qué es el producto
 
@@ -73,8 +73,10 @@ Open Graph por sitio, páginas legales `/terminos` y `/privacidad`.
 
 **Inerte o sin construir:**
 - Chat real con Claude: sin `ANTHROPIC_API_KEY` en Railway `/api/chat` responde 503; todo
-  va por `DemoChatService` (guionado). Su guion sigue siendo el de 8 preguntas, no el de 6.
-- Magic link: requiere `RESEND_API_KEY` y dominio verificado; si no, cae a `DevEmailService`.
+  va por `DemoChatService` (guionado, 6 preguntas).
+- Magic link (`/login`): ningún camino del embudo lleva ahí (el CTA va al link de Mercado
+  Pago; `/login` es solo el fallback sin link) y la sesión solo activa el chat con Claude.
+  Sin `RESEND_API_KEY` ni Gmail, el link se imprime en la consola (`DevEmailService`).
 - `PaymentEngineService`, `RailwayDeployService`, `WhatsAppNotificacionService` son stubs que
   tiran; el motor de pagos es un microservicio aparte, no desplegado.
 - `pausarSitioUC`, `reactivarSitioUC`, `verificarDominioUC` no los consume ninguna ruta.
@@ -86,9 +88,8 @@ Open Graph por sitio, páginas legales `/terminos` y `/privacidad`.
 |---|---|
 | Vender a tráfico frío | Revisión legal de `/terminos` y `/privacidad` (borrador, leyes 19.496 y 19.628). |
 | Chat real con Claude | `ANTHROPIC_API_KEY` en Railway. |
-| Magic link en producción | Cuenta de Resend con dominio verificado. |
 | Activación automática por pago | Deploy del motor de pagos. |
-| Foto de hero, "El local" y PDF de RESTAURANTE | Probarlos con R2 configurado (no verificado en local). |
+| Foto de hero, "El local" y PDF de RESTAURANTE | Probarlos en producción con un sitio que no salga en la landing (en local no hay R2). |
 
 ## 6. Cómo correrlo
 

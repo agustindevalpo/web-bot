@@ -19,11 +19,12 @@ const BASE_DATOS_PG = 'webbot'
 const DATABASE_URL_SANDBOX = `postgresql://${USUARIO_PG}:${PASSWORD_PG}@localhost:${PUERTO_PG}/${BASE_DATOS_PG}`
 
 // Preferencia de pruebas de Mercado Pago (checkout v1 / sandbox), verificada
-// viva el 2026-09-12. No es una credencial: es un link público al checkout de
-// pruebas del developer dashboard de Mercado Pago. Si deja de responder, hay
-// que crear una preferencia de prueba nueva ahí y reemplazar esta constante.
+// creada el 2026-10-24 (la anterior, del 2026-09-12, caducó). No es una
+// credencial: es un link público al checkout de pruebas. Si deja de responder,
+// hay que crear una preferencia nueva con POST /checkout/preferences usando el
+// Access Token del vendedor de prueba y reemplazar esta constante.
 const LINK_PAGO_SANDBOX =
-  'https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3665799261-3c442711-625e-4c66-8c26-f31b3e980801'
+  'https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3665799261-10670b6a-6a3e-4f69-97d1-1fc3ed576f0f'
 
 const EN_WINDOWS = process.platform === 'win32'
 const args = process.argv.slice(2)
