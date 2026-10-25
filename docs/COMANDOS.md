@@ -62,7 +62,9 @@ C2. `npm run dev:sandbox -- --down` baja y elimina el contenedor.
 > necesariamente se comporta igual.
 >
 > Lo que **sí** está verificado: `APRO` aprueba, y todo el flujo sandbox funciona de punta
-> a punta hasta `/congrats/approved/`.
+> a punta hasta `/congrats/approved/`. Última verificación: 2026-10-24, con la Visa de
+> abajo, en **Edge InPrivate**. En Chrome incógnito el botón **Pagar** quedó deshabilitado
+> aunque se permitieran las cookies de terceros; si pasa, usar otro navegador.
 
 Método histórico (el resultado lo decidía el nombre del titular, no el número de tarjeta):
 
@@ -77,11 +79,33 @@ Datos de la tarjeta, iguales en todos los casos:
 | Campo | Valor |
 |---|---|
 | Mastercard | `5416 7526 0258 2580` |
-| Visa | `4168 8188 4444 7115` |
+| Visa | `4998 4704 7065 8262` (verificada el 2026-10-24) |
 | CVV | `123` |
 | Vencimiento | `11/30` |
-| RUT | cualquiera, por ejemplo `12345678` |
+| RUT | uno con dígito verificador válido, por ejemplo `12345678-5` |
 | Correo | el del comprador de prueba |
+
+Fuente: la tabla oficial de tarjetas de prueba de Mercado Pago Chile
+(`/developers/es/docs/qr-code/resources/test-cards`; la de Checkout Pro devuelve "no
+existe"). Ahí el documento `123456789` es para el tipo "Otro": con tipo RUT lo rechaza por
+el dígito verificador. Con una Mastercard, el checkout puede mostrar "UNDEFINED SOURCE"
+en vez del banco y no ofrecer cuotas; la Visa sí resuelve el emisor.
+
+Si el link sandbox cae a `/payment/redirect/exception` aun con el comprador de prueba
+logueado, la preferencia caducó. Se crea una nueva con el Access Token (`APP_USR-…`) de
+las credenciales de producción de la aplicación del **vendedor de prueba** —que siguen
+siendo de prueba—, corriendo el comando en tu propia terminal para que el token no quede
+en ningún registro:
+
+```powershell
+$token = "TU_TOKEN"
+$body = '{"items":[{"title":"Sitio web WebBot (prueba)","quantity":1,"currency_id":"CLP","unit_price":149990}]}'
+(Invoke-RestMethod -Method Post -Uri "https://api.mercadopago.com/checkout/preferences" -Headers @{Authorization="Bearer $token"} -ContentType "application/json" -Body $body).init_point
+```
+
+El `init_point` que devuelve reemplaza la constante `LINK_PAGO_SANDBOX` de
+`scripts/dev-sandbox.mjs`. Esa preferencia no tiene `back_urls`: al aprobar, Mercado Pago
+no vuelve a `/gracias`.
 
 Ver los rechazos seguiría valiendo la pena cuando se pueda: muestran lo que ve un cliente
 cuando la tarjeta rebota, que con pymes pasa seguido (tope, débito sin fondos), y eso
