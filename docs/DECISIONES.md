@@ -1376,3 +1376,25 @@ sitio publicado de verdad. Si cambia un demo, se actualizan `HERO_MAQUETAS` y la
 juntos.
 **Evidencia:** `src/app/_landing/copy.ts:115` (`HERO_MAQUETAS`); commit `97cbe04` (L1 de la
 landing v2); `odd/tasks/landing-v2.md` (sección Decisions); `prisma/seed-demo.ts:67,87`.
+
+## D-49 — El chat ofrece 16 categorías y deja describir el rubro con palabras propias
+
+**Fecha:** 2026-10-25 · **Estado:** vigente
+**Contexto:** probando la demo como Devalpo (TI), la categoría más cercana era "consultora",
+cuyas sugerencias son solo legales y tributarias. No había categorías para tecnología,
+investigación ni medioambiente, y "Ninguno de estos" descartaba lo que el cliente era.
+**Decisión (Agustín):** seis familias nuevas sobre las plantillas existentes: tecnología e
+ingeniería/medioambiente/investigación → `LANDING`; salud/terapias y educación → `SERVICIOS`;
+construcción/oficios y fotografía/diseño/eventos → `PORTFOLIO`. Cada una con sugerencias,
+acento y fotos propias. La última opción pasa a "Otro (escríbelo con tus palabras)": si el
+texto no calza con ningún rubro, cae en `otro` y se guarda en `configJson.rubroDescrito`
+(máx. 60), que se ve en `/admin`.
+**Por qué:** familias amplias cubren más PyMEs sin crear plantillas ni alargar el guion, y
+el texto libre le dice a Devalpo qué es el negocio aunque no calce.
+**Consecuencia:** "construcción" y "gasfitería" dejaron de detectar ferretería (ahora
+`construccion`). Nombres ambiguos ("Para Ti Boutique", "Diseño web") ya no se deducen del
+nombre: el chat muestra la lista. "Ninguno de estos" se sigue aceptando por chats en curso.
+`prompts/extractor.prompt.ts` (sin uso) conserva una lista de rubros vieja.
+**Evidencia:** `src/infrastructure/templates/rubroTemplates.ts:18`;
+`src/infrastructure/demo/guionChat.ts:80`; `src/application/dtos/SiteConfigDTO.ts:37`;
+commits `3ab60e3` y `3b9037c`; `odd/tasks/rubros-ampliados.md`.
