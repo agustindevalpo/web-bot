@@ -5,6 +5,9 @@ import {
   RUBRO_DEFAULTS,
   RUBRO_OTRO,
 } from '@/infrastructure/demo/rubroDefaults'
+import { RUBRO_LABELS, RUBRO_FRASE, SUGERENCIAS_SERVICIOS } from '@/infrastructure/demo/guionChat'
+import { RUBROS_CONOCIDOS } from '@/infrastructure/demo/rubroDefaults'
+import { RUBRO_TEMPLATES } from '@/infrastructure/templates/rubroTemplates'
 import { Estilo } from '@/domain/value-objects/Estilo'
 import { razonContraste } from '@/domain/color/contraste'
 
@@ -201,5 +204,58 @@ describe('resolverColores — acento neutro exclusivo de "otro"', () => {
     const resultado = resolverColores(RUBRO_OTRO, coloresConCamposExtra, Estilo.MODERNO)
 
     expect(Object.keys(resultado)).toEqual(['acento'])
+  })
+})
+
+describe('rubros ampliados — datos completos y sin colisiones', () => {
+  it('cada rubro conocido tiene etiqueta, frase, sugerencias, template y defaults visuales', () => {
+    expect(RUBROS_CONOCIDOS).toHaveLength(16)
+    for (const rubro of RUBROS_CONOCIDOS) {
+      expect(RUBRO_LABELS[rubro]).toBeDefined()
+      expect(RUBRO_FRASE[rubro]).toBeDefined()
+      expect(SUGERENCIAS_SERVICIOS[rubro]).toHaveLength(5)
+      expect(RUBRO_TEMPLATES[rubro]).toBeDefined()
+      expect(RUBRO_DEFAULTS[rubro].imagenes.length).toBeGreaterThanOrEqual(2)
+    }
+  })
+
+  it('ninguna etiqueta de categoría empata con otro rubro: cada una se resuelve sola a su propio rubro', () => {
+    for (const rubro of RUBROS_CONOCIDOS) {
+      const resultado = detectarRubroDetallado(RUBRO_LABELS[rubro])
+      expect(resultado.rubro).toBe(rubro)
+      expect(resultado.candidatosEmpatados).toEqual([])
+    }
+  })
+
+  it('los acentos de los rubros no se repiten', () => {
+    const acentos = Object.values(RUBRO_DEFAULTS).map((d) => d.colores.acento.toLowerCase())
+    expect(new Set(acentos).size).toBe(acentos.length)
+  })
+
+  // "construcción" vive en dos rubros por significado: la ferretería vende
+  // "materiales de construcción" y la constructora hace obras. Gana el que
+  // reúne más pistas.
+  it.each([
+    ['Constructora Pérez', 'construccion'],
+    ['Construcciones y Remodelaciones Sur', 'construccion'],
+    ['Gasfitería y electricista a domicilio', 'construccion'],
+    ['Ferretería Pérez', 'ferreteria'],
+    ['Ferretería y materiales de construcción', 'ferreteria'],
+    ['Devalpo Soluciones TI', 'tecnologia'],
+    ['Desarrollo de software y soporte informático', 'tecnologia'],
+    ['Consultoría ambiental e investigación aplicada', 'ingenieria'],
+    ['Consulta de psicología y nutrición', 'salud'],
+    ['Clases particulares y preuniversitario', 'educacion'],
+    ['Fotografía de eventos', 'creativo'],
+    ['Estudio contable y tributario', 'consultora'],
+    ['Clínica dental Sonrisas', 'dentista'],
+    ['Centro de yoga y bienestar', 'yoga'],
+  ])('"%s" → %s', (texto, esperado) => {
+    expect(detectarRubro(texto)).toBe(esperado)
+  })
+
+  it('"ti" solo cuenta como palabra entera, no dentro de otras palabras', () => {
+    expect(detectarRubro('Tienda de tipos raros')).not.toBe('tecnologia')
+    expect(detectarRubro('Soluciones TI')).toBe('tecnologia')
   })
 })

@@ -15,6 +15,12 @@ export const RUBRO_TEMPLATES: Record<string, Template> = {
   tienda: Template.TIENDA,
   consultora: Template.LANDING,
   taller: Template.PORTFOLIO,
+  tecnologia: Template.LANDING,
+  ingenieria: Template.LANDING,
+  salud: Template.SERVICIOS,
+  educacion: Template.SERVICIOS,
+  construccion: Template.PORTFOLIO,
+  creativo: Template.PORTFOLIO,
 }
 
 // Rubro desconocido, vacío o ausente cae acá — nunca se lanza un error por

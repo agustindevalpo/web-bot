@@ -95,6 +95,48 @@ export const RUBRO_DEFAULTS: Record<string, RubroVisualDefaults> = {
       'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800',
     ],
   },
+  tecnologia: {
+    colores: { acento: '#5B46F8' },
+    imagenes: [
+      'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800',
+    ],
+  },
+  ingenieria: {
+    colores: { acento: '#2E9E5B' },
+    imagenes: [
+      'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1200',
+      'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800',
+    ],
+  },
+  salud: {
+    colores: { acento: '#14B8A6' },
+    imagenes: [
+      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
+      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800',
+    ],
+  },
+  educacion: {
+    colores: { acento: '#2F80ED' },
+    imagenes: [
+      'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200',
+      'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800',
+    ],
+  },
+  construccion: {
+    colores: { acento: '#B45F2B' },
+    imagenes: [
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200',
+      'https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=800',
+    ],
+  },
+  creativo: {
+    colores: { acento: '#C026D3' },
+    imagenes: [
+      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=1200',
+      'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800',
+    ],
+  },
   // Catch-all cuando `detectarRubro` no reconoce nada (ver RUBRO_OTRO más
   // abajo): antes un negocio no reconocido se reportaba como "panaderia" con
   // total confianza y heredaba colores y template de panadería sin tener
@@ -190,12 +232,22 @@ const DETECCION_RUBRO: Array<{ keywords: string[]; rubro: string }> = [
   { keywords: ['contab', 'tributar', 'impuesto', 'renta', 'sii', 'asesor', 'consultor', 'contador'], rubro: 'consultora' },
   { keywords: ['auto', 'mecánic', 'taller', 'motor', 'freno', 'aceite', 'vehículo', 'camion'], rubro: 'taller' },
   { keywords: ['yoga', 'meditación', 'pilates', 'bienestar', 'mindfulness', 'zen', 'relajación'], rubro: 'yoga' },
-  { keywords: ['ferretería', 'herramienta', 'construcción', 'pintura', 'gasfiter', 'electricidad'], rubro: 'ferreteria' },
+  { keywords: ['ferretería', 'herramienta', 'materiales de construcción', 'pintura', 'electricidad'], rubro: 'ferreteria' },
   { keywords: ['veterinar', 'mascota', 'perro', 'gato', 'animal', 'clínica animal', 'veterinaria'], rubro: 'veterinaria' },
   { keywords: ['ropa', 'boutique', 'moda', 'vestido', 'tienda', 'indumentaria', 'calzado', 'accesorio'], rubro: 'tienda' },
+  // Los seis rubros siguientes se declaran DESPUÉS de los diez originales: el
+  // orden decide los empates, y un empate con un rubro viejo sigue resolviéndose
+  // a favor del que ya existía. "ti" es corto a propósito (soporte TI): se
+  // compara como palabra entera, así que "tienda" o "tipo" no lo activan.
+  { keywords: ['software', 'tecnolog', 'informátic', 'ciberseguridad', 'sistemas', 'web', 'cloud', 'ti', 'programación'], rubro: 'tecnologia' },
+  { keywords: ['ingenier', 'ambiental', 'medioambient', 'medio ambiente', 'investigación', 'laboratorio', 'consultoría ambiental'], rubro: 'ingenieria' },
+  { keywords: ['salud', 'kinesi', 'psicolog', 'nutrici', 'terapi', 'terapeut', 'fonoaudiolog', 'podolog'], rubro: 'salud' },
+  { keywords: ['educaci', 'clases', 'capacitaci', 'colegio', 'escuela', 'academia', 'profesor', 'preuniversit'], rubro: 'educacion' },
+  { keywords: ['construcción', 'constructor', 'remodelaci', 'gasfiter', 'electricista', 'oficios', 'albañil', 'carpinter'], rubro: 'construccion' },
+  { keywords: ['fotograf', 'diseño', 'evento', 'estudio creativo', 'creativ', 'audiovisual', 'branding', 'video'], rubro: 'creativo' },
 ]
 
-// Las 10 categorías reconocidas por el matcher local, en el mismo orden de
+// Las 16 categorías reconocidas por el matcher local, en el mismo orden de
 // declaración de arriba — lo usa DemoChatService para ofrecer la lista
 // completa como opciones cuando la detección da 0 puntaje (ver Pieza 4).
 export const RUBROS_CONOCIDOS: readonly string[] = DETECCION_RUBRO.map((entrada) => entrada.rubro)

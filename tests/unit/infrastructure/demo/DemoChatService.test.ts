@@ -42,19 +42,19 @@ describe('DemoChatService', () => {
       expect(respuesta).toBe('¿A qué se dedica tu negocio? Cuéntalo en una o dos frases.')
     })
 
-    it('tras rechazar el rubro, ofrece las 10 categorías más "Ninguno de estos" (2b)', async () => {
+    it('tras rechazar el rubro, ofrece las 16 categorías más "Ninguno de estos" (2b)', async () => {
       const { texto, opciones } = extraerOpciones(await preguntaTras([nombre], 'No, es otra cosa'))
 
       expect(texto).toBe('¿Cuál de estas categorías describe mejor tu negocio?')
       expect(opciones).toEqual([...RUBROS_CONOCIDOS.map((r) => RUBRO_LABELS[r]), 'Ninguno de estos'])
-      expect(opciones).toHaveLength(11)
+      expect(opciones).toHaveLength(17)
     })
 
     it('si el rubro no se deduce del nombre, pasa directo a las categorías (2b) sin pedir confirmación', async () => {
       const { texto, opciones } = extraerOpciones(await preguntaTras([], 'Servicios Generales del Sur'))
 
       expect(texto).toBe('¿Cuál de estas categorías describe mejor tu negocio?')
-      expect(opciones).toHaveLength(11)
+      expect(opciones).toHaveLength(17)
     })
 
     it('si el nombre empata entre rubros, también pregunta las categorías', async () => {
@@ -173,6 +173,23 @@ describe('DemoChatService', () => {
       expect(SUGERENCIAS_SERVICIOS.otro).toBeUndefined()
     })
 
+    it('los seis rubros ampliados traen su template y su acento propios', async () => {
+      const casos = [
+        ['Devalpo Soluciones TI', 'tecnologia', 'LANDING'],
+        ['Ingeniería Ambiental Austral', 'ingenieria', 'LANDING'],
+        ['Centro de Kinesiología Movimiento', 'salud', 'SERVICIOS'],
+        ['Colegio Los Alerces', 'educacion', 'SERVICIOS'],
+        ['Constructora Pérez', 'construccion', 'PORTFOLIO'],
+        ['Estudio de Fotografía Lumen', 'creativo', 'PORTFOLIO'],
+      ] as const
+      for (const [nombre, rubro, template] of casos) {
+        const datos = await service.extraerDatos(historialDeUsuario([nombre]))
+        expect(datos.rubro).toBe(rubro)
+        expect(datos.template).toBe(template)
+        expect(datos.imagenes?.length).toBeGreaterThan(0)
+      }
+    })
+
     it('ninguna sugerencia lleva "y": parseServicios la partiría en dos servicios', () => {
       for (const rubro of RUBROS_CONOCIDOS) {
         for (const sugerencia of SUGERENCIAS_SERVICIOS[rubro]) {
@@ -229,6 +246,12 @@ describe('DemoChatService', () => {
       { texto: 'Ferretería Los Maestros', esperado: 'ferreteria' },
       { texto: 'Clínica Veterinaria Huellitas', esperado: 'veterinaria' },
       { texto: 'Boutique de Ropa Luna', esperado: 'tienda' },
+      { texto: 'Devalpo Soluciones TI', esperado: 'tecnologia' },
+      { texto: 'Ingeniería Ambiental Austral', esperado: 'ingenieria' },
+      { texto: 'Centro de Kinesiología Movimiento', esperado: 'salud' },
+      { texto: 'Colegio Los Alerces', esperado: 'educacion' },
+      { texto: 'Constructora Pérez', esperado: 'construccion' },
+      { texto: 'Estudio de Fotografía Lumen', esperado: 'creativo' },
     ]
 
     casos.forEach(({ texto, esperado }) => {
