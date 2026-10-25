@@ -30,6 +30,11 @@ export interface SobreNosotrosPartesDTO {
 export interface SiteConfigDTO {
   nombre: string
   rubro: string
+  // Lo que el visitante escribió cuando ninguna categoría le calzó (pregunta 2b
+  // del chat demo): texto en una línea, hasta 60 caracteres. Solo existe con
+  // rubro "otro"; informa a quien arma el sitio y no cambia plantilla ni
+  // colores. Aditivo-opcional: `configJson` es Json, no requiere migración.
+  rubroDescrito?: string
   descripcion: string
   sobreNosotros?: string
   servicios: ServicioDTO[]

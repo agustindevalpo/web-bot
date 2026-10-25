@@ -9,7 +9,7 @@ import { ClaudeServiceError } from './claudeErrors'
 
 const templateService = new TemplateService()
 
-// Las 10 categorías de negocio soportadas por RUBRO_DEFAULTS (ver
+// Las 16 categorías de negocio soportadas por RUBRO_DEFAULTS (ver
 // rubroDefaults.ts) más "otro" como catch-all cuando Claude devuelve un
 // rubro que no reconocemos — nunca dejamos pasar un rubro arbitrario porque
 // determina el template/colores/fotos por defecto del sitio.
@@ -24,6 +24,12 @@ const RUBROS_VALIDOS = [
   'ferreteria',
   'veterinaria',
   'tienda',
+  'tecnologia',
+  'ingenieria',
+  'salud',
+  'educacion',
+  'construccion',
+  'creativo',
   'otro',
 ] as const
 
@@ -192,7 +198,7 @@ TONO: amigable, directo, chileno. Nada de formalidades. Tutea al cliente.
 Cuando hayas recibido las 8 respuestas, confirma con un mensaje de que ya tienes todo y que vas a crear su sitio.
 NO hagas más de 8 preguntas. NO combines preguntas. NO des explicaciones largas.`
 
-// Basado en docs/WEBBOT_ROADMAP.md:550-570 — 10 rubros + "otro" como
+// Basado en docs/WEBBOT_ROADMAP.md:550-570 — 16 rubros + "otro" como
 // catch-all (ver RUBROS_VALIDOS arriba). Extendido en WB-22 (Tarea 3.1) con
 // "sobreNosotros" y "contacto.formulario" — ambos opcionales, tolerados
 // ausentes por parseSiteConfig (ver Requirement "Optional About and
@@ -203,7 +209,7 @@ Devuelve SOLO el JSON, sin texto adicional, sin markdown, sin explicaciones.
 FORMATO REQUERIDO:
 {
   "nombre": "nombre exacto del negocio",
-  "rubro": "categoría del negocio (panaderia|peluqueria|dentista|restaurante|consultora|taller|yoga|ferreteria|veterinaria|tienda|otro)",
+  "rubro": "categoría del negocio (panaderia|peluqueria|dentista|restaurante|consultora|taller|yoga|ferreteria|veterinaria|tienda|tecnologia|ingenieria|salud|educacion|construccion|creativo|otro)",
   "descripcion": "descripción corta de 1-2 frases del negocio",
   "sobreNosotros": "1-2 frases sobre la historia, misión o valores del negocio si se mencionaron, o null",
   "servicios": ["servicio 1", "servicio 2", "servicio 3"],

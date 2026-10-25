@@ -2,6 +2,8 @@ import Anthropic from '@anthropic-ai/sdk'
 import { ClaudeChatService, parseSiteConfig } from '@/infrastructure/claude/ClaudeChatService'
 import { ClaudeServiceError } from '@/infrastructure/claude/claudeErrors'
 import { MensajeDTO } from '@/application/dtos/MensajeDTO'
+import { RUBRO_DEFAULTS } from '@/infrastructure/demo/rubroDefaults'
+import { RUBRO_TEMPLATES } from '@/infrastructure/templates/rubroTemplates'
 import { RUBRO_FIXTURES } from './fixtures/rubros'
 
 function fakeAnthropicClient(create: jest.Mock) {
@@ -179,6 +181,16 @@ describe('parseSiteConfig — normalización', () => {
     const datos = parseSiteConfig(jsonBase({ rubro: 'PANADERIA' }))
     expect(datos.rubro).toBe('panaderia')
   })
+
+  it.each(['tecnologia', 'ingenieria', 'salud', 'educacion', 'construccion', 'creativo'])(
+    'conserva el rubro ampliado "%s" con su template y colores propios',
+    (rubro) => {
+      const datos = parseSiteConfig(jsonBase({ rubro: rubro.toUpperCase() }))
+      expect(datos.rubro).toBe(rubro)
+      expect(datos.template).toBe(RUBRO_TEMPLATES[rubro])
+      expect(datos.imagenes).toEqual(RUBRO_DEFAULTS[rubro].imagenes)
+    },
+  )
 
   it('clampa un rubro desconocido a "otro"', () => {
     const datos = parseSiteConfig(jsonBase({ rubro: 'astronauta-espacial' }))

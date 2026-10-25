@@ -6,6 +6,7 @@ import { sitioRepo, clienteRepo } from '@/infrastructure/container'
 import { CLIENTE_DEMO_ID } from '@/infrastructure/demo/rubroDefaults'
 import { estadoPromo, PRECIO_PROMO, PRECIO_SITIO } from '@/app/_landing/precios'
 import { esSitioDemo } from './formularioPago'
+import { rubroDescritoDe } from './rubroDescrito'
 import {
   cambiarEstadoSitioAction,
   guardarDominioAction,
@@ -90,6 +91,8 @@ export default async function AdminSitioPage({
   const razonSocialActual = typeof legalActual.razonSocial === 'string' ? legalActual.razonSocial : ''
   const rutActual = typeof legalActual.rut === 'string' ? legalActual.rut : ''
 
+  const rubroDescrito = rubroDescritoDe(sitio.configJson)
+
   const configBonito = JSON.stringify(sitio.configJson, null, 2)
 
   const logoActual = typeof sitio.configJson.logo === 'string' ? sitio.configJson.logo : null
@@ -130,6 +133,9 @@ export default async function AdminSitioPage({
                 {sitio.activo ? 'Activo' : 'Pausado'}
               </span>
             </p>
+            {rubroDescrito && (
+              <p className={styles.subtitulo}>Rubro descrito por el cliente: {rubroDescrito}</p>
+            )}
           </div>
         </header>
 

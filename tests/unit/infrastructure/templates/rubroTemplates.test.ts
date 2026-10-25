@@ -13,13 +13,19 @@ describe('RUBRO_TEMPLATES', () => {
     ['tienda', Template.TIENDA],
     ['consultora', Template.LANDING],
     ['taller', Template.PORTFOLIO],
+    ['tecnologia', Template.LANDING],
+    ['ingenieria', Template.LANDING],
+    ['salud', Template.SERVICIOS],
+    ['educacion', Template.SERVICIOS],
+    ['construccion', Template.PORTFOLIO],
+    ['creativo', Template.PORTFOLIO],
   ]
 
   it.each(casosEsperados)('mapea el rubro "%s" a Template.%s', (rubro, templateEsperado) => {
     expect(RUBRO_TEMPLATES[rubro]).toBe(templateEsperado)
   })
 
-  it('define exactamente los 10 rubros conocidos, ninguno de más ni de menos', () => {
+  it('define exactamente los 16 rubros conocidos, ninguno de más ni de menos', () => {
     expect(Object.keys(RUBRO_TEMPLATES).sort()).toEqual(casosEsperados.map(([rubro]) => rubro).sort())
   })
 })

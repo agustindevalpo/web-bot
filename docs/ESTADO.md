@@ -42,7 +42,8 @@ auth, claude, demo, email, cloudflare, storage, routing…) · `app/` (rutas, ca
 - **Composition root:** `src/infrastructure/container.ts`, DI manual (los servicios que leen
   env son perezosos). **Enrutado:** `proxy.ts` + `resolverDestino()` clasifican el host
   (`app` / `subdominio` / `dominioPropio`) y reescriben a `/sites/[subdominio]` o `/sites/custom/[host]`.
-- **Templates:** `rubroTemplates.ts` mapea 10 rubros a 5 `Template`; fallback a `LANDING`
+- **Templates:** `rubroTemplates.ts` mapea 16 rubros a 5 `Template`; fallback a `LANDING`
+  (rubro `otro`; si el cliente lo escribe, queda en `configJson.rubroDescrito`, D-49)
   (D-28). El rediseño **Bloques** (D-38) vive en `components/templates/shared/` (`SeccionesSPA`,
   `HeroBloques`, `BandaDatos`, `BloqueNosotros`, `SeccionContacto`, `FooterBloques`…; spec en
   `docs/design_handoff_plantillas_webbot/handoff_bloques_v2/`). En Bloques: **`LANDING`,

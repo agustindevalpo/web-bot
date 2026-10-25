@@ -14,6 +14,12 @@ const RUBROS: Record<string, string> = {
   ferreteria: 'Ferretería',
   veterinaria: 'Veterinaria',
   tienda: 'Tienda',
+  tecnologia: 'Tecnología',
+  ingenieria: 'Ingeniería',
+  salud: 'Salud',
+  educacion: 'Educación',
+  construccion: 'Construcción',
+  creativo: 'Diseño y fotografía',
 }
 
 export function rubroVisible(rubro: string): string {
