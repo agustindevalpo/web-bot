@@ -10,7 +10,7 @@ import { RUBRO_DEFAULTS } from '@/infrastructure/demo/rubroDefaults'
 
 const HEX_VALIDO = /^#[0-9a-f]{6}$/i
 
-// Los 11 acentos reales de RUBRO_DEFAULTS (10 rubros + "otro"), tal cual están
+// Los 17 acentos reales de RUBRO_DEFAULTS (16 rubros + "otro"), tal cual están
 // en la tabla — no se inventan valores nuevos.
 const ACENTOS_RUBRO = Object.entries(RUBRO_DEFAULTS).map(([rubro, valores]) => [rubro, valores.colores.acento] as const)
 
@@ -358,6 +358,12 @@ const PALETA_ESPERADA_POR_RUBRO: Record<string, { primario: string; secundario: 
   ferreteria: { primario: '#291600', secundario: '#784900', texto: '#ffffff', acento: '#ffaf4d' },
   veterinaria: { primario: '#380019', secundario: '#971752', texto: '#ffffff', acento: '#fd79a8' },
   tienda: { primario: '#291600', secundario: '#774a00', texto: '#ffffff', acento: '#f39c12' },
+  tecnologia: { primario: '#160056', secundario: '#4820d9', texto: '#ffffff', acento: '#5b46f8' },
+  ingenieria: { primario: '#00220d', secundario: '#006734', texto: '#ffffff', acento: '#2e9e5b' },
+  salud: { primario: '#00201c', secundario: '#006359', texto: '#ffffff', acento: '#14b8a6' },
+  educacion: { primario: '#00193e', secundario: '#0051ac', texto: '#ffffff', acento: '#2f80ed' },
+  construccion: { primario: '#2f1000', secundario: '#883c00', texto: '#ffffff', acento: '#b45f2b' },
+  creativo: { primario: '#2f0035', secundario: '#880097', texto: '#ffffff', acento: '#c026d3' },
   otro: { primario: '#111c27', secundario: '#4a5764', texto: '#ffffff', acento: '#556270' },
 }
 

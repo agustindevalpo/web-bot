@@ -47,6 +47,9 @@ describe('Momento2: pantalla de tarea (móvil)', () => {
     expect(servicios).toContain('placeholder="Precio desde"')
     expect(servicios).toContain('maxLength="90"')
     expect(servicios).toContain('maxLength="20"')
+    // Se pueden agregar servicios; sin ninguno agregado no hay nada que quitar.
+    expect(servicios).toMatch(/<button[^>]*>Agregar servicio<\/button>/)
+    expect(servicios).not.toContain('Quitar')
   })
 
   it('Guardar queda deshabilitado sin respuestas y Omitir está disponible', () => {

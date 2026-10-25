@@ -163,6 +163,11 @@
   overflow-wrap: anywhere;
 }
 
+.campoNombreNuevo {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
 .filaCampos {
   display: flex;
   flex-direction: column;

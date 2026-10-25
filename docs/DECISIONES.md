@@ -1376,3 +1376,50 @@ sitio publicado de verdad. Si cambia un demo, se actualizan `HERO_MAQUETAS` y la
 juntos.
 **Evidencia:** `src/app/_landing/copy.ts:115` (`HERO_MAQUETAS`); commit `97cbe04` (L1 de la
 landing v2); `odd/tasks/landing-v2.md` (sección Decisions); `prisma/seed-demo.ts:67,87`.
+
+## D-48 — El momento 2 deja agregar servicios y explayarse en "¿Qué hacen distinto?"
+
+**Fecha:** 2026-10-25 · **Estado:** vigente
+**Contexto:** en el recorrido del sandbox (2026-10-24) la tarea de servicios solo mostraba
+los que venían del chat y descartaba en silencio las filas de más, y "¿Qué hacen distinto?"
+era una línea de 80 caracteres.
+**Decisión (Agustín):** se pueden agregar servicios hasta **8 en total**, contando los del
+chat. Cada servicio nuevo lleva nombre (obligatorio, máx. 40), descripción y precio (este
+solo en `SERVICIOS`). Solo se pueden quitar los agregados: los del chat no se borran ni se
+reordenan. `distinto` pasa a un área de texto de **240** caracteres con contador; `desde` y
+`quien` siguen en 80. Una parte de "Nosotros" de más de 80 caracteres se muestra como texto,
+no como título en negrita.
+**Por qué:** 8 coincide con lo que muestra la carta de RESTAURANTE (`MAX_PLATOS_CARTA`).
+PORTFOLIO y TIENDA emparejan `servicios[i]` con `imagenes[i]` por posición, así que mover o
+borrar un servicio del chat descuadraría las leyendas. Un párrafo de 240 caracteres en negrita
+de 17 px pesa demasiado frente a las otras dos tarjetas.
+**Consecuencia:** el servidor rechaza el guardado si la cantidad de servicios del chat que
+declara el formulario no coincide con la guardada. Los sitios guardados antes de este cambio
+se ven igual: ninguna parte supera 80. El handoff
+`handoff_bloques_v2/00-DECISIONES-TRANSVERSALES.md` ("una línea cada uno") ya no vale para
+`distinto`. PORTFOLIO y TIENDA siguen sin mostrar los servicios agregados que no tengan foto.
+**Evidencia:** `src/application/shared/momento2.ts:28,37`;
+`src/components/templates/shared/contenido.ts:40`; commits `c3d955e` y `f3c7a11`;
+`odd/tasks/momento2-servicios-y-distinto.md`.
+
+## D-49 — El chat ofrece 16 categorías y deja describir el rubro con palabras propias
+
+**Fecha:** 2026-10-25 · **Estado:** vigente
+**Contexto:** probando la demo como Devalpo (TI), la categoría más cercana era "consultora",
+cuyas sugerencias son solo legales y tributarias. No había categorías para tecnología,
+investigación ni medioambiente, y "Ninguno de estos" descartaba lo que el cliente era.
+**Decisión (Agustín):** seis familias nuevas sobre las plantillas existentes: tecnología e
+ingeniería/medioambiente/investigación → `LANDING`; salud/terapias y educación → `SERVICIOS`;
+construcción/oficios y fotografía/diseño/eventos → `PORTFOLIO`. Cada una con sugerencias,
+acento y fotos propias. La última opción pasa a "Otro (escríbelo con tus palabras)": si el
+texto no calza con ningún rubro, cae en `otro` y se guarda en `configJson.rubroDescrito`
+(máx. 60), que se ve en `/admin`.
+**Por qué:** familias amplias cubren más PyMEs sin crear plantillas ni alargar el guion, y
+el texto libre le dice a Devalpo qué es el negocio aunque no calce.
+**Consecuencia:** "construcción" y "gasfitería" dejaron de detectar ferretería (ahora
+`construccion`). Nombres ambiguos ("Para Ti Boutique", "Diseño web") ya no se deducen del
+nombre: el chat muestra la lista. "Ninguno de estos" se sigue aceptando por chats en curso.
+`prompts/extractor.prompt.ts` (sin uso) conserva una lista de rubros vieja.
+**Evidencia:** `src/infrastructure/templates/rubroTemplates.ts:18`;
+`src/infrastructure/demo/guionChat.ts:80`; `src/application/dtos/SiteConfigDTO.ts:37`;
+commits `3ab60e3` y `3b9037c`; `odd/tasks/rubros-ampliados.md`.

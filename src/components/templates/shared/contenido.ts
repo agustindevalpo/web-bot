@@ -34,6 +34,15 @@ export function comoPartesNosotros(valor: unknown): ParteNosotros[] {
   return partes
 }
 
+// Hasta 80 caracteres (el tope que tenía `distinto` antes de crecer a 240) la
+// parte se dibuja como título de tarjeta; más allá, como texto corrido. Así los
+// sitios guardados antes de ese cambio se ven exactamente igual.
+export const MAX_PARTE_TITULO = 80
+
+export function esParteLarga(parte: ParteNosotros): boolean {
+  return parte.texto.length > MAX_PARTE_TITULO
+}
+
 export type AutorHighlight = { nombre: string; cargo: string | null }
 
 // Requiere `nombre` no vacío; `cargo` es opcional (null si falta o vacío).

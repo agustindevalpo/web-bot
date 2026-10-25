@@ -6,6 +6,12 @@ describe('rubroVisible', () => {
     ['ferreteria', 'Ferretería'],
     ['taller', 'Taller mecánico'],
     ['  Dentista ', 'Dentista'],
+    ['tecnologia', 'Tecnología'],
+    ['ingenieria', 'Ingeniería'],
+    ['salud', 'Salud'],
+    ['educacion', 'Educación'],
+    ['construccion', 'Construcción'],
+    ['creativo', 'Diseño y fotografía'],
   ])('escribe el rubro conocido %s como %s', (entrada, esperado) => {
     expect(rubroVisible(entrada)).toBe(esperado)
   })

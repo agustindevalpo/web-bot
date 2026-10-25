@@ -57,6 +57,33 @@ describe('Momento 2: casos de uso', () => {
       expect(guardado.nombre).toBe('Peluquería Ana')
     })
 
+    it('agrega servicios nuevos al final y rechaza pasar de ocho en total', async () => {
+      await guardar.execute(SESSION_ID, {
+        tipo: 'guardar',
+        tarea: 'servicios',
+        valores: { existentes: 2, filas: [{}, {}, { nombre: 'Masaje', descripcion: 'Relajante' }] },
+      })
+      const guardado = (await sitioRepo.findBySubdominio(SUBDOMINIO))!.configJson
+      expect(guardado.servicios).toEqual(['Corte', 'Color', { nombre: 'Masaje', descripcion: 'Relajante' }])
+
+      const demasiadas = Array.from({ length: 7 }, (_, i) => ({ nombre: `S${i}`, descripcion: 'x' }))
+      await expect(
+        guardar.execute(SESSION_ID, { tipo: 'guardar', tarea: 'servicios', valores: { existentes: 3, filas: [{}, {}, {}, ...demasiadas] } }),
+      ).rejects.toMatchObject({ codigo: 'valores_invalidos' })
+      expect((await sitioRepo.findBySubdominio(SUBDOMINIO))!.configJson.servicios).toHaveLength(3)
+    })
+
+    it('rechaza un guardado hecho sobre una lista de servicios que ya cambió', async () => {
+      await expect(
+        guardar.execute(SESSION_ID, {
+          tipo: 'guardar',
+          tarea: 'servicios',
+          valores: { existentes: 1, filas: [{ descripcion: 'a' }, { nombre: 'Masaje' }] },
+        }),
+      ).rejects.toMatchObject({ codigo: 'valores_invalidos' })
+      expect((await sitioRepo.findBySubdominio(SUBDOMINIO))!.configJson.servicios).toEqual(['Corte', 'Color'])
+    })
+
     it('rechaza el guardado de una tarea inválida sin escribir', async () => {
       await expect(
         guardar.execute(SESSION_ID, { tipo: 'guardar', tarea: 'frase', valores: { frase: 'x'.repeat(161) } }),

@@ -4,6 +4,7 @@ import { RUBROS_CONOCIDOS, detectarRubro } from '@/infrastructure/demo/rubroDefa
 import {
   MENSAJE_FINAL,
   OPCIONES_ESTILO,
+  OPCION_OTRO,
   RUBRO_FRASE,
   RUBRO_LABELS,
   SUGERENCIAS_SERVICIOS,
@@ -42,19 +43,20 @@ describe('DemoChatService', () => {
       expect(respuesta).toBe('¿A qué se dedica tu negocio? Cuéntalo en una o dos frases.')
     })
 
-    it('tras rechazar el rubro, ofrece las 10 categorías más "Ninguno de estos" (2b)', async () => {
+    it('tras rechazar el rubro, ofrece las 16 categorías más "Otro (escríbelo con tus palabras)" (2b)', async () => {
       const { texto, opciones } = extraerOpciones(await preguntaTras([nombre], 'No, es otra cosa'))
 
       expect(texto).toBe('¿Cuál de estas categorías describe mejor tu negocio?')
-      expect(opciones).toEqual([...RUBROS_CONOCIDOS.map((r) => RUBRO_LABELS[r]), 'Ninguno de estos'])
-      expect(opciones).toHaveLength(11)
+      expect(opciones).toEqual([...RUBROS_CONOCIDOS.map((r) => RUBRO_LABELS[r]), OPCION_OTRO])
+      expect(opciones.at(-1)).toBe('Otro (escríbelo con tus palabras)')
+      expect(opciones).toHaveLength(17)
     })
 
     it('si el rubro no se deduce del nombre, pasa directo a las categorías (2b) sin pedir confirmación', async () => {
       const { texto, opciones } = extraerOpciones(await preguntaTras([], 'Servicios Generales del Sur'))
 
       expect(texto).toBe('¿Cuál de estas categorías describe mejor tu negocio?')
-      expect(opciones).toHaveLength(11)
+      expect(opciones).toHaveLength(17)
     })
 
     it('si el nombre empata entre rubros, también pregunta las categorías', async () => {
@@ -64,7 +66,7 @@ describe('DemoChatService', () => {
     })
 
     it('tras elegir una categoría pregunta la descripción, y el resto del guion sigue en orden', async () => {
-      const base = ['Servicios Generales del Sur', 'Ninguno de estos']
+      const base = ['Servicios Generales del Sur', OPCION_OTRO]
       expect(await preguntaTras(base.slice(0, 1), base[1])).toBe(
         '¿A qué se dedica tu negocio? Cuéntalo en una o dos frases.',
       )
@@ -127,7 +129,7 @@ describe('DemoChatService', () => {
       const respuestas = [
         'Panadería El Trigal',
         'No, es otra cosa',
-        'Ninguno de estos',
+        OPCION_OTRO,
         'Pan',
         'Pan, tortas',
         'Viña',
@@ -138,7 +140,7 @@ describe('DemoChatService', () => {
     })
 
     it('sin rubro deducible del nombre exige nombre, 2b, descripción, servicios, ciudad y estilo', () => {
-      const respuestas = ['Servicios del Sur', 'Ninguno de estos', 'Pan', 'Pan, tortas', 'Viña']
+      const respuestas = ['Servicios del Sur', OPCION_OTRO, 'Pan', 'Pan, tortas', 'Viña']
 
       expect(service.conversacionCompleta(historialDeUsuario(respuestas))).toBe(false)
       expect(service.conversacionCompleta(historialDeUsuario([...respuestas, 'Moderno']))).toBe(true)
@@ -149,7 +151,7 @@ describe('DemoChatService', () => {
     })
 
     it('concuerda con procesarMensaje: la última respuesta devuelve el cierre justo cuando queda completo', async () => {
-      const respuestas = ['Servicios del Sur', 'Ninguno de estos', 'Pan', 'Pan, tortas', 'Viña', 'Moderno']
+      const respuestas = ['Servicios del Sur', OPCION_OTRO, 'Pan', 'Pan, tortas', 'Viña', 'Moderno']
       for (let i = 1; i <= respuestas.length; i++) {
         const respuesta = await preguntaTras(respuestas.slice(0, i - 1), respuestas[i - 1])
         const completa = service.conversacionCompleta(historialDeUsuario(respuestas.slice(0, i)))
@@ -171,6 +173,23 @@ describe('DemoChatService', () => {
         expect(SUGERENCIAS_SERVICIOS[rubro]).toHaveLength(5)
       }
       expect(SUGERENCIAS_SERVICIOS.otro).toBeUndefined()
+    })
+
+    it('los seis rubros ampliados traen su template y su acento propios', async () => {
+      const casos = [
+        ['Devalpo Soluciones TI', 'tecnologia', 'LANDING'],
+        ['Ingeniería Ambiental Austral', 'ingenieria', 'LANDING'],
+        ['Centro de Kinesiología Movimiento', 'salud', 'SERVICIOS'],
+        ['Colegio Los Alerces', 'educacion', 'SERVICIOS'],
+        ['Constructora Pérez', 'construccion', 'PORTFOLIO'],
+        ['Estudio de Fotografía Lumen', 'creativo', 'PORTFOLIO'],
+      ] as const
+      for (const [nombre, rubro, template] of casos) {
+        const datos = await service.extraerDatos(historialDeUsuario([nombre]))
+        expect(datos.rubro).toBe(rubro)
+        expect(datos.template).toBe(template)
+        expect(datos.imagenes?.length).toBeGreaterThan(0)
+      }
     })
 
     it('ninguna sugerencia lleva "y": parseServicios la partiría en dos servicios', () => {
@@ -213,7 +232,7 @@ describe('DemoChatService', () => {
     it('es vacío mientras el rubro no está resuelto o si es "otro"', () => {
       expect(sugerenciasServicios([])).toEqual([])
       expect(sugerenciasServicios(historialDeUsuario(['Panadería El Trigal']))).toEqual([])
-      expect(sugerenciasServicios(historialDeUsuario(['Servicios', 'Ninguno de estos']))).toEqual([])
+      expect(sugerenciasServicios(historialDeUsuario(['Servicios', OPCION_OTRO]))).toEqual([])
     })
   })
 
@@ -229,6 +248,12 @@ describe('DemoChatService', () => {
       { texto: 'Ferretería Los Maestros', esperado: 'ferreteria' },
       { texto: 'Clínica Veterinaria Huellitas', esperado: 'veterinaria' },
       { texto: 'Boutique de Ropa Luna', esperado: 'tienda' },
+      { texto: 'Devalpo Soluciones TI', esperado: 'tecnologia' },
+      { texto: 'Ingeniería Ambiental Austral', esperado: 'ingenieria' },
+      { texto: 'Centro de Kinesiología Movimiento', esperado: 'salud' },
+      { texto: 'Colegio Los Alerces', esperado: 'educacion' },
+      { texto: 'Constructora Pérez', esperado: 'construccion' },
+      { texto: 'Estudio de Fotografía Lumen', esperado: 'creativo' },
     ]
 
     casos.forEach(({ texto, esperado }) => {
@@ -288,13 +313,72 @@ describe('DemoChatService', () => {
       expect(datos.estilo).toBe('moderno')
     })
 
-    it('"Ninguno de estos" deja el rubro en "otro" con template LANDING', async () => {
+    it('la opción "Otro" deja el rubro en "otro" con template LANDING y sin descripción propia', async () => {
       const datos = await service.extraerDatos(
-        historialDeUsuario(['Servicios Generales del Sur', 'Ninguno de estos', 'Trámites', 'Gestión', 'Rancagua', 'Moderno']),
+        historialDeUsuario(['Servicios Generales del Sur', OPCION_OTRO, 'Trámites', 'Gestión', 'Rancagua', 'Moderno']),
       )
 
       expect(datos.rubro).toBe('otro')
       expect(datos.template).toBe('LANDING')
+    })
+
+    it('texto libre que no matchea ningún rubro cae en "otro" y guarda lo que escribió el cliente', async () => {
+      const datos = await service.extraerDatos(
+        historialDeUsuario([
+          'Servicios Generales del Sur',
+          '  Tatuajes   y\nperforaciones  ',
+          'Tatuamos',
+          'Tatuajes, piercing',
+          'Rancagua',
+          'Moderno',
+        ]),
+      )
+
+      expect(datos.rubro).toBe('otro')
+      expect(datos.template).toBe('LANDING')
+      expect(datos.rubroDescrito).toBe('Tatuajes y perforaciones')
+      expect(datos.descripcion).toBe('Tatuamos')
+      expect(datos.ciudad).toBe('Rancagua')
+    })
+
+    it('el texto libre se corta a 60 caracteres', async () => {
+      const largo = 'x'.repeat(200)
+      const datos = await service.extraerDatos(
+        historialDeUsuario(['Sur', largo, 'a', 'b', 'c', 'Moderno']),
+      )
+
+      expect(datos.rubroDescrito).toHaveLength(60)
+    })
+
+    it('texto libre con palabras clave de un rubro usa ese rubro y no guarda descripción', async () => {
+      const datos = await service.extraerDatos(
+        historialDeUsuario(['Servicios Generales del Sur', 'Hacemos páginas web', 'a', 'b', 'c', 'Moderno']),
+      )
+
+      expect(datos.rubro).toBe('tecnologia')
+      expect(datos).not.toHaveProperty('rubroDescrito')
+    })
+
+    it('la opción "Otro" y las etiquetas de categoría no guardan rubroDescrito', async () => {
+      for (const respuesta of [OPCION_OTRO, RUBRO_LABELS.peluqueria, 'Ninguno de estos']) {
+        const datos = await service.extraerDatos(
+          historialDeUsuario(['Servicios Generales del Sur', respuesta, 'a', 'b', 'c', 'Moderno']),
+        )
+        expect(datos).not.toHaveProperty('rubroDescrito')
+      }
+    })
+
+    it('"Ninguno de estos" (texto anterior del botón) sigue entendiéndose como la opción "Otro"', async () => {
+      const datos = await service.extraerDatos(
+        historialDeUsuario(['Servicios Generales del Sur', 'Ninguno de estos', 'a', 'b', 'c', 'Moderno']),
+      )
+      expect(datos.rubro).toBe('otro')
+      expect(datos).not.toHaveProperty('rubroDescrito')
+    })
+
+    it('el texto libre cuenta como la respuesta de categoría: el guion sigue con la descripción', async () => {
+      const respuesta = await preguntaTras(['Servicios Generales del Sur'], 'Tatuajes y perforaciones')
+      expect(respuesta).toBe('¿A qué se dedica tu negocio? Cuéntalo en una o dos frases.')
     })
 
     it('aplica el template, colores y fotos por defecto del rubro detectado', async () => {

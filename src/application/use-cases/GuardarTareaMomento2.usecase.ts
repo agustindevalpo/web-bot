@@ -47,7 +47,9 @@ export class GuardarTareaMomento2UseCase {
       if (!tareaPerteneceAPlantilla(accion.tarea, template)) throw new TareaMomento2InvalidaException('tarea_invalida')
       nuevo = omitirTarea(config, accion.tarea)
     } else {
-      const validacion = validarTarea(accion.tarea, accion.valores, template)
+      const validacion = validarTarea(accion.tarea, accion.valores, template, {
+        serviciosExistentes: Array.isArray(config.servicios) ? config.servicios.length : 0,
+      })
       if (!validacion.ok) throw new TareaMomento2InvalidaException(validacion.error)
       nuevo = aplicarTarea(config, validacion.datos)
     }

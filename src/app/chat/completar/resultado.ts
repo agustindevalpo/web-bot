@@ -10,6 +10,7 @@ export type ErrorGuardado =
   | 'vacia'
   | 'demasiado_largo'
   | 'horario_incompleto'
+  | 'servicio_sin_nombre'
   | 'error'
 
 export type ResultadoGuardado =
@@ -22,6 +23,7 @@ const ERRORES_DE_VALIDACION: readonly ErrorGuardado[] = [
   'vacia',
   'demasiado_largo',
   'horario_incompleto',
+  'servicio_sin_nombre',
 ]
 
 export function errorDeValidacion(codigo: string): ErrorGuardado {

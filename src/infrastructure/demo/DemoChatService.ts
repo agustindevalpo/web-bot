@@ -14,7 +14,8 @@ import {
   MENSAJE_FINAL,
   OPCIONES_ESTILO,
   OPCION_CONFIRMAR_RUBRO,
-  OPCION_NINGUNO,
+  OPCION_OTRO,
+  OPCION_OTRO_LEGADA,
   OPCION_RECHAZAR_RUBRO,
   PREGUNTA_CATEGORIAS,
   PREGUNTA_CIUDAD,
@@ -50,14 +51,43 @@ function construirPreguntaConfirmacionRubro(rubro: string): string {
 
 function construirPreguntaCategorias(): string {
   const etiquetas = RUBROS_CONOCIDOS.map((rubro) => RUBRO_LABELS[rubro])
-  return `${PREGUNTA_CATEGORIAS}\n\n${listaDeOpciones([...etiquetas, OPCION_NINGUNO])}`
+  return `${PREGUNTA_CATEGORIAS}\n\n${listaDeOpciones([...etiquetas, OPCION_OTRO])}`
 }
 
 function esConfirmacion(texto: string): boolean {
   return /^s[ií](?![\p{L}])/iu.test(texto.trim())
 }
 
-type FaseRubro = { pregunta: string } | { rubro: string; respuestasConsumidas: number }
+type FaseRubro = { pregunta: string } | { rubro: string; respuestasConsumidas: number; rubroDescrito?: string }
+
+const LARGO_MAXIMO_RUBRO_DESCRITO = 60
+
+function esOpcionOtro(texto: string): boolean {
+  const limpio = texto.trim().toLowerCase()
+  return limpio === OPCION_OTRO.toLowerCase() || limpio === OPCION_OTRO_LEGADA.toLowerCase()
+}
+
+// El texto libre va a /admin y a la config guardada: una línea, espacios
+// colapsados y un tope de largo, para que un pegado enorme no ensucie nada.
+function normalizarRubroDescrito(texto: string): string {
+  const colapsado = texto.replace(/\s+/g, ' ').trim()
+  // Array.from corta por caracteres, no por unidades UTF-16: un emoji no queda partido.
+  return Array.from(colapsado).slice(0, LARGO_MAXIMO_RUBRO_DESCRITO).join('').trim()
+}
+
+/**
+ * Rubro a partir de la respuesta a la pregunta 2b. Una etiqueta o un texto con
+ * palabras clave resuelve su rubro; la opción "Otro" resuelve "otro" sin más;
+ * un texto libre que no matchea nada también cae en "otro", pero conserva lo
+ * que escribió el cliente.
+ */
+function resolverRespuestaCategoria(respuesta: string): { rubro: string; rubroDescrito?: string } {
+  if (esOpcionOtro(respuesta)) return { rubro: RUBRO_OTRO }
+  const rubro = detectarRubro(respuesta)
+  if (rubro !== RUBRO_OTRO) return { rubro }
+  const rubroDescrito = normalizarRubroDescrito(respuesta)
+  return rubroDescrito ? { rubro, rubroDescrito } : { rubro }
+}
 
 /**
  * Resuelve el rubro a partir de las respuestas dadas hasta ahora. Solo mira
@@ -78,9 +108,9 @@ function resolverFaseRubro(respuestas: string[]): FaseRubro {
   }
 
   if (respuestas.length <= indiceCategoria) return { pregunta: construirPreguntaCategorias() }
-  // La etiqueta elegida pasa por el mismo matcher: "Ninguno de estos" no
-  // matchea nada y cae a RUBRO_OTRO, igual que un rubro no reconocido.
-  return { rubro: detectarRubro(respuestas[indiceCategoria]), respuestasConsumidas: indiceCategoria + 1 }
+  // La etiqueta elegida pasa por el mismo matcher; lo que no matchea cae a
+  // RUBRO_OTRO y guarda el texto del cliente (ver resolverRespuestaCategoria).
+  return { ...resolverRespuestaCategoria(respuestas[indiceCategoria]), respuestasConsumidas: indiceCategoria + 1 }
 }
 
 /**
@@ -167,6 +197,7 @@ export class DemoChatService implements IChatService {
     // se deduce del nombre; sin match cae a RUBRO_OTRO.
     const rubro = 'rubro' in fase ? fase.rubro : detectarRubro(respuestas[0] ?? '')
     const consumidas = 'rubro' in fase ? fase.respuestasConsumidas : respuestas.length
+    const rubroDescrito = 'rubro' in fase ? fase.rubroDescrito : undefined
     const [descripcion, serviciosTexto, ciudad, estiloTexto] = respuestas.slice(consumidas)
 
     const defaults = RUBRO_DEFAULTS[rubro] ?? RUBRO_DEFAULTS[RUBRO_OTRO]
@@ -175,6 +206,7 @@ export class DemoChatService implements IChatService {
     return {
       nombre: respuestas[0] ?? '',
       rubro,
+      ...(rubroDescrito ? { rubroDescrito } : {}),
       descripcion: descripcion ?? '',
       servicios: parseServicios(serviciosTexto ?? ''),
       ciudad: ciudad ?? '',

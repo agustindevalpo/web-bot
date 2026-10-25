@@ -1,4 +1,5 @@
 import { estiloCascada } from './navegacion'
+import { esParteLarga } from './contenido'
 import { layoutNosotros, type NosotrosProps } from './nosotros'
 import styles from './BloqueNosotros.module.css'
 
@@ -42,7 +43,7 @@ export default function BloqueNosotros({ titulo, texto, tarjetas, frase, autor }
         <div className={styles.tarjetas}>
           {tarjetas.map((tarjeta, indice) => (
             <div key={tarjeta.clave} className={styles.tarjeta} data-dv-anim="up" style={estiloCascada(paso + indice)}>
-              <p className={styles.tarjetaTitulo}>{tarjeta.texto}</p>
+              <p className={esParteLarga(tarjeta) ? styles.tarjetaTexto : styles.tarjetaTitulo}>{tarjeta.texto}</p>
             </div>
           ))}
         </div>

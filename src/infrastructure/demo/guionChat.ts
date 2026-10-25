@@ -18,6 +18,12 @@ export const RUBRO_LABELS: Record<string, string> = {
   ferreteria: 'Ferretería o materiales de construcción',
   veterinaria: 'Veterinaria o cuidado de mascotas',
   tienda: 'Tienda de ropa o accesorios',
+  tecnologia: 'Tecnología, software o soporte TI',
+  ingenieria: 'Ingeniería, medioambiente o investigación',
+  salud: 'Salud o terapias (kinesiología, psicología, nutrición)',
+  educacion: 'Educación, clases o capacitación',
+  construccion: 'Construcción, remodelación u oficios',
+  creativo: 'Fotografía, diseño o eventos',
 }
 
 // Frase con artículo para la pregunta 2a: "Por el nombre, parece que es …".
@@ -32,6 +38,12 @@ export const RUBRO_FRASE: Record<string, string> = {
   ferreteria: 'una ferretería',
   veterinaria: 'una veterinaria',
   tienda: 'una tienda de ropa o accesorios',
+  tecnologia: 'una empresa de tecnología',
+  ingenieria: 'una empresa de ingeniería o medioambiente',
+  salud: 'un centro de salud o terapias',
+  educacion: 'un negocio de educación o capacitación',
+  construccion: 'una empresa de construcción u oficios',
+  creativo: 'un estudio de fotografía, diseño o eventos',
 }
 
 // Solo texto de interfaz (chips de la pregunta de servicios). El parser de
@@ -49,9 +61,26 @@ export const SUGERENCIAS_SERVICIOS: Record<string, readonly string[]> = {
   ferreteria: ['Herramientas', 'Pinturas', 'Materiales de construcción', 'Artículos de gasfitería', 'Materiales eléctricos'],
   veterinaria: ['Consulta veterinaria', 'Vacunación', 'Peluquería canina', 'Cirugías', 'Urgencias'],
   tienda: ['Ropa de mujer', 'Ropa de hombre', 'Accesorios', 'Calzado', 'Ropa de niños'],
+  tecnologia: ['Desarrollo de software', 'Soporte TI', 'Desarrollo web', 'Ciberseguridad', 'Servicios cloud'],
+  ingenieria: [
+    'Consultoría ambiental',
+    'Estudios de impacto',
+    'Proyectos de ingeniería',
+    'Investigación aplicada',
+    'Capacitaciones',
+  ],
+  salud: ['Consulta', 'Evaluación inicial', 'Sesiones de terapia', 'Atención a domicilio', 'Planes de tratamiento'],
+  educacion: ['Clases particulares', 'Cursos', 'Talleres', 'Preuniversitario', 'Capacitación para empresas'],
+  construccion: ['Remodelaciones', 'Gasfitería', 'Electricidad', 'Pintura', 'Instalaciones'],
+  creativo: ['Sesiones de fotos', 'Diseño gráfico', 'Producción de eventos', 'Video', 'Branding'],
 }
 
-export const OPCION_NINGUNO = 'Ninguno de estos'
+// Última opción de la pregunta 2b: el cliente la elige o escribe con sus propias
+// palabras a qué se dedica. Contrato del parser: el texto exacto importa.
+export const OPCION_OTRO = 'Otro (escríbelo con tus palabras)'
+// Texto que ofrecía este botón antes de ampliar las categorías: una sesión en
+// curso puede traerlo en su historial, así que se sigue entendiendo.
+export const OPCION_OTRO_LEGADA = 'Ninguno de estos'
 
 // Botones de la pregunta 2a. Contrato del parser: el texto exacto importa.
 export const OPCION_CONFIRMAR_RUBRO = 'Sí, es correcto'

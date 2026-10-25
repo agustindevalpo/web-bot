@@ -4,10 +4,18 @@ import { useId } from 'react'
 import styles from './completar.module.css'
 import type { IdTareaMomento2 } from '@/application/shared/avanceSitio'
 import { LIMITES_MOMENTO2 } from '@/application/shared/momento2'
-import { agregarHorario, puedeAgregarHorario, type ValoresFormulario } from './formulario'
+import {
+  agregarHorario,
+  agregarServicio,
+  puedeAgregarHorario,
+  puedeAgregarServicio,
+  quitarServicioNuevo,
+  type ValoresFormulario,
+} from './formulario'
 
 const DIAS_SUGERIDOS = ['Lunes a viernes', 'Sábado', 'Domingo'] as const
 const UMBRAL_CONTADOR_FRASE = 120
+const UMBRAL_CONTADOR_DISTINTO = 180
 
 interface Props {
   id: IdTareaMomento2
@@ -48,6 +56,12 @@ function CamposServicios({
       servicios: valores.servicios.map((fila, i) => (i === indice ? { ...fila, [campo]: valor } : fila)),
     })
 
+  const cambiarNuevo = (indice: number, campo: 'nombre' | 'descripcion' | 'precioDesde', valor: string) =>
+    onCambio({
+      ...valores,
+      serviciosNuevos: valores.serviciosNuevos.map((fila, i) => (i === indice ? { ...fila, [campo]: valor } : fila)),
+    })
+
   return (
     <div>
       {valores.servicios.map((fila, indice) => {
@@ -80,6 +94,63 @@ function CamposServicios({
           </div>
         )
       })}
+
+      {valores.serviciosNuevos.map((fila, indice) => {
+        const numero = valores.servicios.length + indice + 1
+        return (
+          <div key={`nuevo-${indice}`} className={styles.grupo}>
+            <input
+              type="text"
+              className={`${styles.campo} ${styles.campoNombreNuevo}`}
+              value={fila.nombre}
+              maxLength={LIMITES_MOMENTO2.nombreServicio}
+              placeholder="Nombre del servicio"
+              aria-label={`Nombre del servicio ${numero}`}
+              onChange={(e) => cambiarNuevo(indice, 'nombre', e.target.value)}
+            />
+            <div className={`${styles.filaCampos} ${conPrecio ? '' : styles.filaCamposSolo}`}>
+              <input
+                type="text"
+                className={styles.campo}
+                value={fila.descripcion}
+                maxLength={LIMITES_MOMENTO2.descripcion}
+                placeholder="Qué incluye, en una línea"
+                aria-label={`Qué incluye, en una línea: servicio ${numero}`}
+                onChange={(e) => cambiarNuevo(indice, 'descripcion', e.target.value)}
+              />
+              {conPrecio && (
+                <input
+                  type="text"
+                  className={`${styles.campo} ${styles.campoPrecio}`}
+                  value={fila.precioDesde}
+                  maxLength={LIMITES_MOMENTO2.precioDesde}
+                  placeholder="Precio desde"
+                  aria-label={`Precio desde: servicio ${numero}`}
+                  onChange={(e) => cambiarNuevo(indice, 'precioDesde', e.target.value)}
+                />
+              )}
+            </div>
+            <button
+              type="button"
+              className={`${styles.enlaceAccion} ${styles.enlaceInline}`}
+              aria-label={`Quitar servicio ${numero}`}
+              onClick={() => onCambio(quitarServicioNuevo(valores, indice))}
+            >
+              Quitar
+            </button>
+          </div>
+        )
+      })}
+
+      {puedeAgregarServicio(valores) && (
+        <button
+          type="button"
+          className={`${styles.enlaceAccion} ${styles.enlaceInline}`}
+          onClick={() => onCambio(agregarServicio(valores))}
+        >
+          Agregar servicio
+        </button>
+      )}
     </div>
   )
 }
@@ -156,6 +227,8 @@ const PREGUNTAS_NOSOTROS = [
 
 function CamposNosotros({ valores, onCambio }: Pick<Props, 'valores' | 'onCambio'>) {
   const base = useId()
+  const cambiar = (clave: (typeof PREGUNTAS_NOSOTROS)[number]['clave'], valor: string) =>
+    onCambio({ ...valores, nosotros: { ...valores.nosotros, [clave]: valor } })
 
   return (
     <div>
@@ -164,14 +237,32 @@ function CamposNosotros({ valores, onCambio }: Pick<Props, 'valores' | 'onCambio
           <label htmlFor={`${base}-${clave}`} className={styles.etiqueta}>
             {pregunta}
           </label>
-          <input
-            id={`${base}-${clave}`}
-            type="text"
-            className={styles.campo}
-            value={valores.nosotros[clave]}
-            maxLength={LIMITES_MOMENTO2.microPregunta}
-            onChange={(e) => onCambio({ ...valores, nosotros: { ...valores.nosotros, [clave]: e.target.value } })}
-          />
+          {clave === 'distinto' ? (
+            <>
+              <textarea
+                id={`${base}-${clave}`}
+                rows={4}
+                className={`${styles.campo} ${styles.areaTexto}`}
+                value={valores.nosotros.distinto}
+                maxLength={LIMITES_MOMENTO2.distinto}
+                onChange={(e) => cambiar(clave, e.target.value)}
+              />
+              {valores.nosotros.distinto.length > UMBRAL_CONTADOR_DISTINTO && (
+                <p className={styles.contador}>
+                  {valores.nosotros.distinto.length} de {LIMITES_MOMENTO2.distinto}
+                </p>
+              )}
+            </>
+          ) : (
+            <input
+              id={`${base}-${clave}`}
+              type="text"
+              className={styles.campo}
+              value={valores.nosotros[clave]}
+              maxLength={LIMITES_MOMENTO2.microPregunta}
+              onChange={(e) => cambiar(clave, e.target.value)}
+            />
+          )}
         </div>
       ))}
       <p className={styles.nota}>Si respondes solo una o dos, tu sitio muestra solo esas. Nada queda en blanco.</p>
