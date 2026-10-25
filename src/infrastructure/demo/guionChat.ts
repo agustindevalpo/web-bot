@@ -75,7 +75,12 @@ export const SUGERENCIAS_SERVICIOS: Record<string, readonly string[]> = {
   creativo: ['Sesiones de fotos', 'Diseño gráfico', 'Producción de eventos', 'Video', 'Branding'],
 }
 
-export const OPCION_NINGUNO = 'Ninguno de estos'
+// Última opción de la pregunta 2b: el cliente la elige o escribe con sus propias
+// palabras a qué se dedica. Contrato del parser: el texto exacto importa.
+export const OPCION_OTRO = 'Otro (escríbelo con tus palabras)'
+// Texto que ofrecía este botón antes de ampliar las categorías: una sesión en
+// curso puede traerlo en su historial, así que se sigue entendiendo.
+export const OPCION_OTRO_LEGADA = 'Ninguno de estos'
 
 // Botones de la pregunta 2a. Contrato del parser: el texto exacto importa.
 export const OPCION_CONFIRMAR_RUBRO = 'Sí, es correcto'
