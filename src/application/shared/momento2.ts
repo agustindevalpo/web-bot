@@ -18,6 +18,7 @@ import {
 // formulario deja de aceptar texto al llegar al máximo; el servidor rechaza
 // lo que llegue más largo (un cliente que no sea el formulario).
 export const LIMITES_MOMENTO2 = {
+  nombreServicio: 40,
   descripcion: 90,
   precioDesde: 20,
   dia: 30,
@@ -30,17 +31,26 @@ export const LIMITES_MOMENTO2 = {
 
 export const HORARIOS_MAX = 3
 
+// Tope de servicios del sitio, contando los que vienen del chat.
+export const SERVICIOS_MAX = 8
+
 export type ErrorTareaMomento2 =
   | 'tarea_invalida'
   | 'valores_invalidos'
   | 'vacia'
   | 'demasiado_largo'
   | 'horario_incompleto'
+  | 'servicio_sin_nombre'
 
 export interface FilaServicio {
   descripcion: string
   // null: la plantilla no pide precio (LANDING); esa clave no se toca.
   precioDesde: string | null
+}
+
+// Un servicio que agregó el visitante: a diferencia de los del chat, trae nombre.
+export interface ServicioNuevo extends FilaServicio {
+  nombre: string
 }
 
 export interface FilaHorario {
@@ -49,7 +59,7 @@ export interface FilaHorario {
 }
 
 export type DatosTarea =
-  | { tarea: 'servicios'; filas: FilaServicio[] }
+  | { tarea: 'servicios'; filas: FilaServicio[]; nuevos: ServicioNuevo[] }
   | { tarea: 'horarios'; filas: FilaHorario[] }
   | { tarea: 'nosotros'; desde: string; quien: string; distinto: string }
   | { tarea: 'frase'; frase: string; autor: string; relacion: string }
@@ -91,20 +101,51 @@ function texto(valor: unknown, maximo: number): string {
   return limpio
 }
 
-function validarServicios(valores: Record<string, unknown>, plantilla: string | null | undefined): DatosTarea {
+// Lo que el servidor sabe del sitio y el cliente no puede dictar.
+export interface ContextoValidacion {
+  // Cuántos servicios hay hoy en `config.servicios`.
+  serviciosExistentes: number
+}
+
+// Las primeras `existentes` filas son los servicios del sitio, por posición; las
+// siguientes son servicios nuevos y traen nombre. `existentes` lo declara el
+// formulario (lo que vio al cargar) y el servidor lo contrasta con lo guardado:
+// si el sitio cambió entremedio, las posiciones ya no coinciden y se rechaza.
+function validarServicios(
+  valores: Record<string, unknown>,
+  plantilla: string | null | undefined,
+  contexto?: ContextoValidacion,
+): DatosTarea {
   if (!Array.isArray(valores.filas) || valores.filas.length > MAX_FILAS_SERVICIOS) {
     throw new ValoresInvalidos('valores_invalidos')
   }
+  const declaradas = valores.existentes ?? contexto?.serviciosExistentes ?? valores.filas.length
+  if (!Number.isInteger(declaradas) || (declaradas as number) < 0) throw new ValoresInvalidos('valores_invalidos')
+  const existentes = declaradas as number
+  if (contexto && existentes !== contexto.serviciosExistentes) throw new ValoresInvalidos('valores_invalidos')
+  if (valores.filas.length > Math.max(existentes, SERVICIOS_MAX)) throw new ValoresInvalidos('valores_invalidos')
+
   const conPrecio = plantilla === 'SERVICIOS'
-  const filas = valores.filas.map((fila): FilaServicio => {
+  const filas: FilaServicio[] = []
+  const nuevos: ServicioNuevo[] = []
+  valores.filas.forEach((fila, indice) => {
     const objeto = comoObjeto(fila)
     if (!objeto) throw new ValoresInvalidos('valores_invalidos')
-    return {
+    const datos: FilaServicio = {
       descripcion: texto(objeto.descripcion, LIMITES_MOMENTO2.descripcion),
       precioDesde: conPrecio ? texto(objeto.precioDesde, LIMITES_MOMENTO2.precioDesde) : null,
     }
+    if (indice < existentes) {
+      filas.push(datos)
+      return
+    }
+    const nombre = texto(objeto.nombre, LIMITES_MOMENTO2.nombreServicio)
+    // Una fila nueva que quedó vacía se descarta; con algo escrito exige nombre.
+    if (!nombre && !datos.descripcion && !datos.precioDesde) return
+    if (!nombre) throw new ValoresInvalidos('servicio_sin_nombre')
+    nuevos.push({ nombre, ...datos })
   })
-  return { tarea: 'servicios', filas }
+  return { tarea: 'servicios', filas, nuevos }
 }
 
 function validarHorarios(valores: Record<string, unknown>): DatosTarea {
@@ -148,7 +189,7 @@ function validarFrase(valores: Record<string, unknown>): DatosTarea {
 export function tieneRespuesta(datos: DatosTarea): boolean {
   switch (datos.tarea) {
     case 'servicios':
-      return datos.filas.some((fila) => fila.descripcion !== '' || (fila.precioDesde ?? '') !== '')
+      return datos.nuevos.length > 0 || datos.filas.some((fila) => fila.descripcion !== '' || (fila.precioDesde ?? '') !== '')
     case 'horarios':
       return datos.filas.length > 0
     case 'nosotros':
@@ -163,7 +204,12 @@ export function tieneRespuesta(datos: DatosTarea): boolean {
  * `unknown` a propósito: viene de una acción de servidor, alcanzable con
  * cualquier POST.
  */
-export function validarTarea(tarea: unknown, valores: unknown, plantilla: string | null | undefined): ResultadoValidacion {
+export function validarTarea(
+  tarea: unknown,
+  valores: unknown,
+  plantilla: string | null | undefined,
+  contexto?: ContextoValidacion,
+): ResultadoValidacion {
   if (!tareaPerteneceAPlantilla(tarea, plantilla)) return { ok: false, error: 'tarea_invalida' }
   const objeto = comoObjeto(valores)
   if (!objeto) return { ok: false, error: 'valores_invalidos' }
@@ -172,7 +218,7 @@ export function validarTarea(tarea: unknown, valores: unknown, plantilla: string
     let datos: DatosTarea
     switch (tarea) {
       case 'servicios':
-        datos = validarServicios(objeto, plantilla)
+        datos = validarServicios(objeto, plantilla, contexto)
         break
       case 'horarios':
         datos = validarHorarios(objeto)
@@ -201,12 +247,19 @@ function conClave(objeto: Record<string, unknown>, clave: string, valor: string)
   return resto
 }
 
-// Las filas se emparejan con `config.servicios` por posición: el nombre no es
-// editable, así que la fila i es siempre el servicio i.
-function aplicarServicios(config: Record<string, unknown>, filas: FilaServicio[]): Record<string, unknown> {
-  if (!Array.isArray(config.servicios)) return config
+// Las filas se emparejan con `config.servicios` por posición: el nombre de los
+// existentes no es editable, así que la fila i es siempre el servicio i. Los
+// nuevos van al final, para no mover los índices (PORTFOLIO y TIENDA emparejan
+// `servicios[i]` con `imagenes[i]`).
+function aplicarServicios(
+  config: Record<string, unknown>,
+  filas: FilaServicio[],
+  nuevos: ServicioNuevo[],
+): Record<string, unknown> {
+  if (!Array.isArray(config.servicios) && nuevos.length === 0) return config
+  const actuales: unknown[] = Array.isArray(config.servicios) ? config.servicios : []
 
-  const servicios = config.servicios.map((servicio: unknown, indice) => {
+  const servicios = actuales.map((servicio: unknown, indice) => {
     const fila = filas[indice]
     if (!fila) return servicio
     const original = comoObjeto(servicio)
@@ -220,6 +273,13 @@ function aplicarServicios(config: Record<string, unknown>, filas: FilaServicio[]
     // legada, sin dejar un objeto de más.
     return typeof servicio === 'string' && Object.keys(objeto).length === 1 ? servicio : objeto
   })
+
+  for (const nuevo of nuevos) {
+    let objeto: Record<string, unknown> = { nombre: nuevo.nombre }
+    objeto = conClave(objeto, 'descripcion', nuevo.descripcion)
+    if (nuevo.precioDesde !== null) objeto = conClave(objeto, 'precioDesde', nuevo.precioDesde)
+    servicios.push(objeto)
+  }
   return { ...config, servicios }
 }
 
@@ -252,7 +312,7 @@ function aplicarFrase(config: Record<string, unknown>, datos: Extract<DatosTarea
 export function aplicarTarea(config: Record<string, unknown>, datos: DatosTarea): Record<string, unknown> {
   switch (datos.tarea) {
     case 'servicios':
-      return aplicarServicios(config, datos.filas)
+      return aplicarServicios(config, datos.filas, datos.nuevos)
     case 'horarios':
       return { ...config, horarios: datos.filas }
     case 'nosotros':

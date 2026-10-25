@@ -17,6 +17,7 @@ import {
   HREF_VOLVER_AL_SITIO,
   MENSAJE_ERROR_GUARDADO,
   MENSAJE_HORARIO_INCOMPLETO,
+  MENSAJE_SERVICIO_SIN_NOMBRE,
   TITULO_HEADER,
   TITULO_TAREA,
   ayudaDeTarea,
@@ -157,6 +158,7 @@ export function Momento2({ template, urlSitio, vistaInicial, iniciales }: Props)
   const urlVista = `${urlSitio}?v=${version}${ancla ? `#${ancla}` : ''}`
   const tarea = pantalla.tipo === 'resumen' ? null : vista.tareas[pantalla.indice]
   const guardable = tarea ? estadoDeGuardado(tarea.id, valores, template) : null
+  const servicioSinNombre = guardable !== null && !guardable.puede && guardable.error === 'servicio_sin_nombre'
   const horarioIncompleto = guardable !== null && !guardable.puede && guardable.error === 'horario_incompleto'
 
   return (
@@ -209,6 +211,7 @@ export function Momento2({ template, urlSitio, vistaInicial, iniciales }: Props)
                   valores={valores}
                   onCambio={setValores}
                 />
+                {tarea.id === 'servicios' && servicioSinNombre && <p className={styles.nota}>{MENSAJE_SERVICIO_SIN_NOMBRE}</p>}
                 {tarea.id === 'horarios' && horarioIncompleto && <p className={styles.nota}>{MENSAJE_HORARIO_INCOMPLETO}</p>}
                 {error && (
                   <p className={styles.error} role="alert">

@@ -4,7 +4,14 @@ import { useId } from 'react'
 import styles from './completar.module.css'
 import type { IdTareaMomento2 } from '@/application/shared/avanceSitio'
 import { LIMITES_MOMENTO2 } from '@/application/shared/momento2'
-import { agregarHorario, puedeAgregarHorario, type ValoresFormulario } from './formulario'
+import {
+  agregarHorario,
+  agregarServicio,
+  puedeAgregarHorario,
+  puedeAgregarServicio,
+  quitarServicioNuevo,
+  type ValoresFormulario,
+} from './formulario'
 
 const DIAS_SUGERIDOS = ['Lunes a viernes', 'Sábado', 'Domingo'] as const
 const UMBRAL_CONTADOR_FRASE = 120
@@ -48,6 +55,12 @@ function CamposServicios({
       servicios: valores.servicios.map((fila, i) => (i === indice ? { ...fila, [campo]: valor } : fila)),
     })
 
+  const cambiarNuevo = (indice: number, campo: 'nombre' | 'descripcion' | 'precioDesde', valor: string) =>
+    onCambio({
+      ...valores,
+      serviciosNuevos: valores.serviciosNuevos.map((fila, i) => (i === indice ? { ...fila, [campo]: valor } : fila)),
+    })
+
   return (
     <div>
       {valores.servicios.map((fila, indice) => {
@@ -80,6 +93,63 @@ function CamposServicios({
           </div>
         )
       })}
+
+      {valores.serviciosNuevos.map((fila, indice) => {
+        const numero = valores.servicios.length + indice + 1
+        return (
+          <div key={`nuevo-${indice}`} className={styles.grupo}>
+            <input
+              type="text"
+              className={`${styles.campo} ${styles.campoNombreNuevo}`}
+              value={fila.nombre}
+              maxLength={LIMITES_MOMENTO2.nombreServicio}
+              placeholder="Nombre del servicio"
+              aria-label={`Nombre del servicio ${numero}`}
+              onChange={(e) => cambiarNuevo(indice, 'nombre', e.target.value)}
+            />
+            <div className={`${styles.filaCampos} ${conPrecio ? '' : styles.filaCamposSolo}`}>
+              <input
+                type="text"
+                className={styles.campo}
+                value={fila.descripcion}
+                maxLength={LIMITES_MOMENTO2.descripcion}
+                placeholder="Qué incluye, en una línea"
+                aria-label={`Qué incluye, en una línea: servicio ${numero}`}
+                onChange={(e) => cambiarNuevo(indice, 'descripcion', e.target.value)}
+              />
+              {conPrecio && (
+                <input
+                  type="text"
+                  className={`${styles.campo} ${styles.campoPrecio}`}
+                  value={fila.precioDesde}
+                  maxLength={LIMITES_MOMENTO2.precioDesde}
+                  placeholder="Precio desde"
+                  aria-label={`Precio desde: servicio ${numero}`}
+                  onChange={(e) => cambiarNuevo(indice, 'precioDesde', e.target.value)}
+                />
+              )}
+            </div>
+            <button
+              type="button"
+              className={`${styles.enlaceAccion} ${styles.enlaceInline}`}
+              aria-label={`Quitar servicio ${numero}`}
+              onClick={() => onCambio(quitarServicioNuevo(valores, indice))}
+            >
+              Quitar
+            </button>
+          </div>
+        )
+      })}
+
+      {puedeAgregarServicio(valores) && (
+        <button
+          type="button"
+          className={`${styles.enlaceAccion} ${styles.enlaceInline}`}
+          onClick={() => onCambio(agregarServicio(valores))}
+        >
+          Agregar servicio
+        </button>
+      )}
     </div>
   )
 }

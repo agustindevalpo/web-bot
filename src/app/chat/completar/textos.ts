@@ -44,6 +44,8 @@ export const ANCLA_TAREA: Record<IdTareaMomento2, string> = {
 export const MENSAJE_ERROR_GUARDADO = 'No pudimos guardar tus datos. Revisa tu conexión e inténtalo de nuevo.'
 export const MENSAJE_HORARIO_INCOMPLETO = 'Completa los días y el horario, o deja la fila vacía.'
 
+export const MENSAJE_SERVICIO_SIN_NOMBRE = 'Ponle nombre a cada servicio nuevo, o quítalo.'
+
 export function avisoGuardado(avance: number, subio: boolean): string {
   return subio ? `Guardado · tu sitio subió a ${avance} %` : `Guardado · tu sitio está al ${avance} %`
 }
