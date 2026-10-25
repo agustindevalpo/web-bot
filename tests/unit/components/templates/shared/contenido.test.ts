@@ -1,4 +1,11 @@
-import { comoPartesNosotros, comoAutorHighlight, comoLegal, comoHorarios } from '@/components/templates/shared/contenido'
+import {
+  comoPartesNosotros,
+  esParteLarga,
+  MAX_PARTE_TITULO,
+  comoAutorHighlight,
+  comoLegal,
+  comoHorarios,
+} from '@/components/templates/shared/contenido'
 import { fotoDeServicio, precioDeServicio } from '@/components/templates/shared/servicios'
 
 const NO_OBJETOS: [string, unknown][] = [
@@ -35,6 +42,17 @@ describe('fotoDeServicio / precioDeServicio', () => {
   it('cada campo es independiente del otro', () => {
     expect(fotoDeServicio({ nombre: 'a', foto: 'f.jpg' })).toBe('f.jpg')
     expect(precioDeServicio({ nombre: 'a', foto: 'f.jpg' })).toBeNull()
+  })
+})
+
+describe('esParteLarga', () => {
+  it('hasta 80 caracteres es título de tarjeta, como antes del tope de 240', () => {
+    expect(MAX_PARTE_TITULO).toBe(80)
+    expect(esParteLarga({ clave: 'distinto', texto: 'x'.repeat(80) })).toBe(false)
+  })
+
+  it('desde 81 caracteres es texto corrido', () => {
+    expect(esParteLarga({ clave: 'distinto', texto: 'x'.repeat(81) })).toBe(true)
   })
 })
 

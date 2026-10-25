@@ -24,6 +24,8 @@ export const LIMITES_MOMENTO2 = {
   dia: 30,
   rango: 30,
   microPregunta: 80,
+  // "¿Qué hacen distinto?" necesita espacio para explicarse; desde y quien no.
+  distinto: 240,
   frase: 160,
   autor: 40,
   relacion: 40,
@@ -171,7 +173,7 @@ function validarNosotros(valores: Record<string, unknown>): DatosTarea {
     tarea: 'nosotros',
     desde: texto(valores.desde, LIMITES_MOMENTO2.microPregunta),
     quien: texto(valores.quien, LIMITES_MOMENTO2.microPregunta),
-    distinto: texto(valores.distinto, LIMITES_MOMENTO2.microPregunta),
+    distinto: texto(valores.distinto, LIMITES_MOMENTO2.distinto),
   }
 }
 

@@ -195,7 +195,7 @@ describe('validarTarea', () => {
     })
   })
 
-  it('nosotros: basta una parte y cada una admite 80 caracteres', () => {
+  it('nosotros: basta una parte; desde y quien admiten 80 caracteres y distinto 240', () => {
     expect(datosValidos('nosotros', { quien: ' Ana ' }, 'LANDING')).toEqual({
       tarea: 'nosotros',
       desde: '',
@@ -203,7 +203,11 @@ describe('validarTarea', () => {
       distinto: '',
     })
     expect(validarTarea('nosotros', { desde: largo(80) }, 'LANDING').ok).toBe(true)
-    expect(validarTarea('nosotros', { distinto: largo(81) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
+    expect(validarTarea('nosotros', { desde: largo(81) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
+    expect(validarTarea('nosotros', { quien: largo(81) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
+    expect(validarTarea('nosotros', { distinto: largo(81) }, 'LANDING').ok).toBe(true)
+    expect(validarTarea('nosotros', { distinto: largo(240) }, 'LANDING').ok).toBe(true)
+    expect(validarTarea('nosotros', { distinto: largo(241) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
   })
 
   it('frase: 160 caracteres, autor 40 y relación 40; para sumar basta la frase', () => {

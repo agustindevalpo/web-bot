@@ -15,6 +15,7 @@ import {
 
 const DIAS_SUGERIDOS = ['Lunes a viernes', 'Sábado', 'Domingo'] as const
 const UMBRAL_CONTADOR_FRASE = 120
+const UMBRAL_CONTADOR_DISTINTO = 180
 
 interface Props {
   id: IdTareaMomento2
@@ -226,6 +227,8 @@ const PREGUNTAS_NOSOTROS = [
 
 function CamposNosotros({ valores, onCambio }: Pick<Props, 'valores' | 'onCambio'>) {
   const base = useId()
+  const cambiar = (clave: (typeof PREGUNTAS_NOSOTROS)[number]['clave'], valor: string) =>
+    onCambio({ ...valores, nosotros: { ...valores.nosotros, [clave]: valor } })
 
   return (
     <div>
@@ -234,14 +237,32 @@ function CamposNosotros({ valores, onCambio }: Pick<Props, 'valores' | 'onCambio
           <label htmlFor={`${base}-${clave}`} className={styles.etiqueta}>
             {pregunta}
           </label>
-          <input
-            id={`${base}-${clave}`}
-            type="text"
-            className={styles.campo}
-            value={valores.nosotros[clave]}
-            maxLength={LIMITES_MOMENTO2.microPregunta}
-            onChange={(e) => onCambio({ ...valores, nosotros: { ...valores.nosotros, [clave]: e.target.value } })}
-          />
+          {clave === 'distinto' ? (
+            <>
+              <textarea
+                id={`${base}-${clave}`}
+                rows={4}
+                className={`${styles.campo} ${styles.areaTexto}`}
+                value={valores.nosotros.distinto}
+                maxLength={LIMITES_MOMENTO2.distinto}
+                onChange={(e) => cambiar(clave, e.target.value)}
+              />
+              {valores.nosotros.distinto.length > UMBRAL_CONTADOR_DISTINTO && (
+                <p className={styles.contador}>
+                  {valores.nosotros.distinto.length} de {LIMITES_MOMENTO2.distinto}
+                </p>
+              )}
+            </>
+          ) : (
+            <input
+              id={`${base}-${clave}`}
+              type="text"
+              className={styles.campo}
+              value={valores.nosotros[clave]}
+              maxLength={LIMITES_MOMENTO2.microPregunta}
+              onChange={(e) => cambiar(clave, e.target.value)}
+            />
+          )}
         </div>
       ))}
       <p className={styles.nota}>Si respondes solo una o dos, tu sitio muestra solo esas. Nada queda en blanco.</p>
