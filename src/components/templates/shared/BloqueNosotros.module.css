@@ -135,6 +135,14 @@
   color: #fff;
 }
 
+/* Una parte larga (`esParteLarga`) es una explicación, no un título: texto
+ * corrido en el peso del párrafo del bloque, no el 700 de `.tarjetaTitulo`. */
+.tarjetaTexto {
+  font: 300 15px/1.8 var(--font-montserrat), sans-serif;
+  margin: 0;
+  color: #fff;
+}
+
 @media (max-width: 767px) {
   .bloque,
   .dos {
@@ -172,6 +180,10 @@
 
   .tarjeta {
     padding: 24px 24px;
+  }
+
+  .tarjetaTexto {
+    font-size: 13.5px;
   }
 
   .dos {
