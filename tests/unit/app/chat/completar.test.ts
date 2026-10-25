@@ -1,10 +1,13 @@
 import {
   HORARIO_VACIO,
   agregarHorario,
+  agregarServicio,
   cargaDeTarea,
   estadoDeGuardado,
   formularioInicial,
   puedeAgregarHorario,
+  puedeAgregarServicio,
+  quitarServicioNuevo,
 } from '@/app/chat/completar/formulario'
 import {
   accionDeTarea,
@@ -44,6 +47,51 @@ describe('formulario del momento 2', () => {
     expect(agregarHorario(horarios)).toHaveLength(3)
   })
 
+  it('agrega servicios nuevos hasta ocho en total, contando los del sitio', () => {
+    let formulario = formularioInicial(valoresIniciales(CONFIG_SERVICIOS))
+    for (let i = 0; i < 10; i++) formulario = agregarServicio(formulario)
+    expect(formulario.serviciosNuevos).toHaveLength(5)
+    expect(puedeAgregarServicio(formulario)).toBe(false)
+    expect(agregarServicio(formulario)).toBe(formulario)
+  })
+
+  it('solo se quitan los servicios nuevos, y los del sitio conservan su posición', () => {
+    let formulario = formularioInicial(valoresIniciales(CONFIG_SERVICIOS))
+    formulario = agregarServicio(agregarServicio(formulario))
+    formulario.serviciosNuevos[0].nombre = 'Masaje'
+    formulario.serviciosNuevos[1].nombre = 'Manicure'
+
+    const sinPrimero = quitarServicioNuevo(formulario, 0)
+    expect(sinPrimero.serviciosNuevos.map((fila) => fila.nombre)).toEqual(['Manicure'])
+    expect(sinPrimero.servicios).toEqual(formulario.servicios)
+    expect(puedeAgregarServicio(sinPrimero)).toBe(true)
+  })
+
+  it('la carga lleva los servicios del sitio primero, los nuevos detrás y cuántos eran del sitio', () => {
+    let formulario = formularioInicial(valoresIniciales({ servicios: ['a'] }))
+    formulario = agregarServicio(formulario)
+    formulario.serviciosNuevos[0] = { nombre: 'Masaje', descripcion: 'x', precioDesde: '' }
+    expect(cargaDeTarea('servicios', formulario)).toEqual({
+      existentes: 1,
+      filas: [
+        { descripcion: '', precioDesde: '' },
+        { nombre: 'Masaje', descripcion: 'x', precioDesde: '' },
+      ],
+    })
+  })
+
+  it('un servicio nuevo con contenido y sin nombre no se puede guardar', () => {
+    let formulario = formularioInicial(valoresIniciales({ template: 'LANDING', servicios: ['Corte'] }))
+    formulario = agregarServicio(formulario)
+    // Una fila nueva vacía no estorba, pero tampoco cuenta como respuesta.
+    expect(estadoDeGuardado('servicios', formulario, 'LANDING')).toEqual({ puede: false, error: 'vacia' })
+
+    formulario.serviciosNuevos[0].descripcion = 'Algo'
+    expect(estadoDeGuardado('servicios', formulario, 'LANDING')).toEqual({ puede: false, error: 'servicio_sin_nombre' })
+    formulario.serviciosNuevos[0].nombre = 'Masaje'
+    expect(estadoDeGuardado('servicios', formulario, 'LANDING')).toEqual({ puede: true })
+  })
+
   it('"Guardar" está deshabilitado sin respuestas y se habilita con una', () => {
     const formulario = formularioInicial(valoresIniciales({ template: 'LANDING', servicios: ['Corte'] }))
     expect(estadoDeGuardado('servicios', formulario, 'LANDING')).toEqual({ puede: false, error: 'vacia' })
@@ -62,7 +110,7 @@ describe('formulario del momento 2', () => {
 
   it('la carga que viaja a la acción es la de la tarea', () => {
     const formulario = formularioInicial(valoresIniciales({ servicios: ['a'] }))
-    expect(cargaDeTarea('servicios', formulario)).toEqual({ filas: [{ descripcion: '', precioDesde: '' }] })
+    expect(cargaDeTarea('servicios', formulario)).toEqual({ existentes: 1, filas: [{ descripcion: '', precioDesde: '' }] })
     expect(cargaDeTarea('horarios', formulario)).toEqual({ filas: [HORARIO_VACIO] })
     expect(cargaDeTarea('nosotros', formulario)).toEqual({ desde: '', quien: '', distinto: '' })
     expect(cargaDeTarea('frase', formulario)).toEqual({ frase: '', autor: '', relacion: '' })

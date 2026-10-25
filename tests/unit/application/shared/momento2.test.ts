@@ -1,6 +1,7 @@
 import {
   HORARIOS_MAX,
   LIMITES_MOMENTO2,
+  SERVICIOS_MAX,
   aplicarTarea,
   construirVistaMomento2,
   omitirTarea,
@@ -42,12 +43,12 @@ describe('validarTarea', () => {
     const datos = datosValidos('servicios', {
       filas: [{ descripcion: '  Corte \n  y   peinado\u0000 ', precioDesde: ' Desde $25.000 ' }],
     })
-    expect(datos).toEqual({ tarea: 'servicios', filas: [{ descripcion: 'Corte y peinado', precioDesde: 'Desde $25.000' }] })
+    expect(datos).toEqual({ tarea: 'servicios', filas: [{ descripcion: 'Corte y peinado', precioDesde: 'Desde $25.000' }], nuevos: [] })
   })
 
   it('servicios en LANDING ignora el precio (null: no se toca la clave)', () => {
     const datos = datosValidos('servicios', { filas: [{ descripcion: 'Algo', precioDesde: '$1' }] }, 'LANDING')
-    expect(datos).toEqual({ tarea: 'servicios', filas: [{ descripcion: 'Algo', precioDesde: null }] })
+    expect(datos).toEqual({ tarea: 'servicios', filas: [{ descripcion: 'Algo', precioDesde: null }], nuevos: [] })
   })
 
   it('servicios: un precio sin descripción cuenta como respuesta en SERVICIOS pero no en LANDING', () => {
@@ -73,6 +74,78 @@ describe('validarTarea', () => {
     expect(validarTarea('servicios', { filas: [{ descripcion: 5 }] }, 'SERVICIOS')).toEqual({
       ok: false,
       error: 'valores_invalidos',
+    })
+  })
+
+  describe('servicios nuevos', () => {
+    const nuevo = { nombre: 'Masaje', descripcion: 'Relajante', precioDesde: '$20.000' }
+
+    it('las filas después de las existentes son servicios nuevos con nombre', () => {
+      const datos = datosValidos('servicios', { existentes: 1, filas: [{ descripcion: 'Corte' }, { ...nuevo, nombre: '  Masaje  ' }] })
+      expect(datos).toEqual({
+        tarea: 'servicios',
+        filas: [{ descripcion: 'Corte', precioDesde: '' }],
+        nuevos: [nuevo],
+      })
+    })
+
+    it('una fila nueva vacía se descarta sin error, y un nuevo con solo nombre cuenta como respuesta', () => {
+      expect(validarTarea('servicios', { existentes: 1, filas: [{}, { nombre: ' ', descripcion: '' }] }, 'SERVICIOS')).toEqual({
+        ok: false,
+        error: 'vacia',
+      })
+      expect(datosValidos('servicios', { existentes: 0, filas: [{ nombre: 'Masaje' }, {}] })).toMatchObject({
+        nuevos: [{ nombre: 'Masaje', descripcion: '', precioDesde: '' }],
+      })
+    })
+
+    it('una fila nueva con contenido pero sin nombre se rechaza', () => {
+      expect(validarTarea('servicios', { existentes: 0, filas: [{ descripcion: 'Algo' }] }, 'SERVICIOS')).toEqual({
+        ok: false,
+        error: 'servicio_sin_nombre',
+      })
+      expect(validarTarea('servicios', { existentes: 0, filas: [{ precioDesde: '$1' }] }, 'SERVICIOS')).toEqual({
+        ok: false,
+        error: 'servicio_sin_nombre',
+      })
+      // En LANDING el precio no se guarda, así que no cuenta como contenido.
+      expect(validarTarea('servicios', { existentes: 0, filas: [{ precioDesde: '$1' }] }, 'LANDING')).toEqual({
+        ok: false,
+        error: 'vacia',
+      })
+    })
+
+    it('el nombre admite 40 caracteres', () => {
+      expect(validarTarea('servicios', { existentes: 0, filas: [{ nombre: largo(40) }] }, 'SERVICIOS').ok).toBe(true)
+      expect(validarTarea('servicios', { existentes: 0, filas: [{ nombre: largo(41) }] }, 'SERVICIOS')).toEqual({
+        ok: false,
+        error: 'demasiado_largo',
+      })
+    })
+
+    it('en total no pasan de ocho, contando los existentes', () => {
+      const filas = (n: number) => Array.from({ length: n }, (_, i) => ({ nombre: `S${i}`, descripcion: 'x' }))
+      expect(SERVICIOS_MAX).toBe(8)
+      expect(validarTarea('servicios', { existentes: 3, filas: filas(8) }, 'SERVICIOS').ok).toBe(true)
+      expect(validarTarea('servicios', { existentes: 3, filas: filas(9) }, 'SERVICIOS')).toEqual({
+        ok: false,
+        error: 'valores_invalidos',
+      })
+    })
+
+    it('el servidor contrasta lo que el formulario vio con lo guardado', () => {
+      const valores = { existentes: 2, filas: [{ descripcion: 'a' }, { descripcion: 'b' }, nuevo] }
+      expect(validarTarea('servicios', valores, 'SERVICIOS', { serviciosExistentes: 2 }).ok).toBe(true)
+      // El sitio cambió entre la carga y el guardado: las posiciones ya no coinciden.
+      expect(validarTarea('servicios', valores, 'SERVICIOS', { serviciosExistentes: 3 })).toEqual({
+        ok: false,
+        error: 'valores_invalidos',
+      })
+      // Sin `existentes`, manda el servidor: lo que sobra son nuevos.
+      const sinDeclarar = validarTarea('servicios', { filas: [{ descripcion: 'a' }, nuevo] }, 'SERVICIOS', { serviciosExistentes: 1 })
+      expect(sinDeclarar).toMatchObject({ ok: true, datos: { filas: [{ descripcion: 'a' }], nuevos: [{ nombre: 'Masaje' }] } })
+      expect(validarTarea('servicios', { existentes: -1, filas: [] }, 'SERVICIOS')).toEqual({ ok: false, error: 'valores_invalidos' })
+      expect(validarTarea('servicios', { existentes: 'x', filas: [] }, 'SERVICIOS')).toEqual({ ok: false, error: 'valores_invalidos' })
     })
   })
 
@@ -122,7 +195,7 @@ describe('validarTarea', () => {
     })
   })
 
-  it('nosotros: basta una parte y cada una admite 80 caracteres', () => {
+  it('nosotros: basta una parte; desde y quien admiten 80 caracteres y distinto 240', () => {
     expect(datosValidos('nosotros', { quien: ' Ana ' }, 'LANDING')).toEqual({
       tarea: 'nosotros',
       desde: '',
@@ -130,7 +203,11 @@ describe('validarTarea', () => {
       distinto: '',
     })
     expect(validarTarea('nosotros', { desde: largo(80) }, 'LANDING').ok).toBe(true)
-    expect(validarTarea('nosotros', { distinto: largo(81) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
+    expect(validarTarea('nosotros', { desde: largo(81) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
+    expect(validarTarea('nosotros', { quien: largo(81) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
+    expect(validarTarea('nosotros', { distinto: largo(81) }, 'LANDING').ok).toBe(true)
+    expect(validarTarea('nosotros', { distinto: largo(240) }, 'LANDING').ok).toBe(true)
+    expect(validarTarea('nosotros', { distinto: largo(241) }, 'LANDING')).toEqual({ ok: false, error: 'demasiado_largo' })
   })
 
   it('frase: 160 caracteres, autor 40 y relación 40; para sumar basta la frase', () => {
@@ -195,13 +272,51 @@ describe('aplicarTarea: merge defensivo', () => {
     expect((resultado.servicios as Record<string, unknown>[])[1]).toMatchObject({ precioDesde: '$1', descripcion: 'b' })
   })
 
-  it('servicios: filas de más se ignoran, filas de menos dejan el resto como está, entradas raras se respetan', () => {
+  it('servicios: filas de menos dejan el resto como está y las entradas raras se respetan', () => {
     const config = { ...base(), servicios: ['Corte', 42, null, 'Color'] }
+    const resultado = aplicarTarea(config, datosValidos('servicios', { existentes: 4, filas: [{ descripcion: 'a' }] }))
+    expect(resultado.servicios).toEqual([{ nombre: 'Corte', descripcion: 'a' }, 42, null, 'Color'])
+  })
+
+  it('servicios: los nuevos se agregan al final sin mover los existentes', () => {
+    const config = base()
     const resultado = aplicarTarea(
       config,
-      datosValidos('servicios', { filas: [{ descripcion: 'a' }, { descripcion: 'b' }, { descripcion: 'c' }] }),
+      datosValidos('servicios', {
+        existentes: 2,
+        filas: [
+          { descripcion: 'Corte de pelo' },
+          { descripcion: 'Color' },
+          { nombre: 'Masaje', descripcion: 'Relajante', precioDesde: '$20.000' },
+          { nombre: 'Manicure' },
+        ],
+      }),
     )
-    expect(resultado.servicios).toEqual([{ nombre: 'Corte', descripcion: 'a' }, 42, null, 'Color'])
+    expect(resultado.servicios).toEqual([
+      { nombre: 'Corte', descripcion: 'Corte de pelo' },
+      { nombre: 'Color', foto: 'https://x/foto.jpg', descripcion: 'Color' },
+      { nombre: 'Masaje', descripcion: 'Relajante', precioDesde: '$20.000' },
+      { nombre: 'Manicure' },
+    ])
+    expect(config.servicios).toEqual(base().servicios)
+  })
+
+  it('servicios nuevos en LANDING no guardan precio, y sin lista previa se crea la lista', () => {
+    const resultado = aplicarTarea(
+      { nombre: 'X' },
+      datosValidos('servicios', { existentes: 0, filas: [{ nombre: 'Masaje', descripcion: 'a', precioDesde: '$9' }] }, 'LANDING'),
+    )
+    expect(resultado.servicios).toEqual([{ nombre: 'Masaje', descripcion: 'a' }])
+  })
+
+  it('el avance cuenta un servicio agregado con descripción como uno del chat', () => {
+    const sinDescribir = { ...base(), servicios: ['Corte'] }
+    expect(calcularAvance(sinDescribir, 'LANDING')).toBe(35)
+    const agregado = aplicarTarea(
+      sinDescribir,
+      datosValidos('servicios', { existentes: 1, filas: [{}, { nombre: 'Masaje', descripcion: 'Relajante' }] }, 'LANDING'),
+    )
+    expect(calcularAvance(agregado, 'LANDING')).toBe(55)
   })
 
   it('servicios sin lista de servicios en la config no inventa nada', () => {
