@@ -1735,6 +1735,24 @@ el puerto 5435, sin tocar producción) y un pago de prueba de Mercado Pago.
 
 ---
 
+## Momento 2 más flexible y 16 categorías en el chat (2026-10-25)
+
+- **Momento 2 (PR #90, D-48):** "Agregar servicio" hasta 8 en total, con nombre
+  obligatorio; solo se quitan los agregados. "¿Qué hacen distinto?" pasa a 240 caracteres
+  con contador, y una respuesta larga se muestra como texto y no como título.
+- **Categorías (PR #91, D-49):** probando la demo como Devalpo (TI), la única opción cercana
+  era "consultora", con sugerencias legales. Se agregaron seis familias (tecnología,
+  ingeniería/medioambiente/investigación, salud, educación, construcción, creativo) sobre las
+  plantillas existentes, y "Otro (escríbelo con tus palabras)" guarda el texto en
+  `configJson.rubroDescrito`, visible en `/admin`.
+- Agustín probó las dos cosas en el navegador antes de mergear. #91 chocó con #90 en el final
+  de `DECISIONES.md` (D-48 y D-49 en el mismo lugar): se dejaron las dos en orden. Con el
+  código combinado: `tsc` limpio, 107 suites / 1717 tests, `build` OK.
+- **Release:** PRs #89–#91 a `develop`, release `7425696` a `main`. Sin migraciones:
+  `rubroDescrito` vive dentro de `configJson`.
+
+---
+
 ## Decisiones que se apartan del roadmap original
 
 | Tema | Roadmap dice | Se hizo | Por qué |

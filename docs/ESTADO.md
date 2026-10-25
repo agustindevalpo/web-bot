@@ -6,7 +6,7 @@
 > La fuente de verdad son los artefactos SDD en Engram (proyecto `web-bot`); si se
 > contradicen, gana Engram.
 >
-> **Última regeneración:** 2026-10-25 · `main` = `develop` = `6d8f003`
+> **Última regeneración:** 2026-10-25 · `main` = `develop` = release `7425696`
 
 ## 1. Qué es el producto
 
@@ -62,10 +62,13 @@ auth, claude, demo, email, cloudflare, storage, routing…) · `app/` (rutas, ca
 
 ## 4. Producción y develop
 
-**En producción** (`main`, release 2026-10-18): landing v2 en `/` (handoff
+**En producción** (`main`, release 2026-10-25): landing v2 en `/` (handoff
 `docs/design_handoff_landing_v2/`, hero con los tres sitios demo reales, D-47; código en
-`src/app/_landing/`), chat demo de 6 preguntas, paso de
-datos, recuperación del chat sin terminar al recargar `/chat`, reveal con avance, momento 2 en `/chat/completar`, `/gracias`, 5 templates por rubro,
+`src/app/_landing/`), chat demo de 6 preguntas con 16 categorías y "Otro (escríbelo con tus
+palabras)" (D-49), paso de
+datos, recuperación del chat sin terminar al recargar `/chat`, reveal con avance, momento 2 en
+`/chat/completar` (servicios agregables hasta 8 y "¿Qué hacen distinto?" de 240, D-48),
+`/gracias`, 5 templates por rubro,
 **Bloques en `LANDING`, `SERVICIOS` y `RESTAURANTE`**, dirección opcional (`contacto.direccion`, máx. 60) en el paso de datos, carta PDF opcional desde `/admin`, dominios propios, panel `/admin` (pausar, dominio,
 editar `configJson`, confirmar pago, razón social/RUT, subir logo y fotos a R2), metadata y
 Open Graph por sitio, páginas legales `/terminos` y `/privacidad`.
